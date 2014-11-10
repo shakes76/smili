@@ -1,0 +1,10 @@
+ 
+ - Use QPointer over other Qt smart pointers whereever possible for Qt 5
+ - Use QList over QVector whereever possible because its more light weight
+ - Use hierarchical deletion for non-milxQt objects
+ - Hierarchical deletion will not work for delete on close feature
+ - Use KWStyle with ITK/VTK code and SMILI
+ - Use Hungarian style for Qt derived work
+ - Use smart pointers for all ITK/VTK work
+ - 
+  

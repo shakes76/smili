@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>SMILI Assistant - milxModelApp</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/index.html"><img style="border: 0px solid ; width: 202px; height: 106px;" alt="" src="qrc:/resources/smili_logo.png" align="left"></a>SMILI
+Assistant</h1>
+
+
+<h2 style="text-align: center;">milxModelApp</h2>
+
+
+<hr style="width: 100%; height: 2px;">The model application can run
+common surface/model processing algorithms over a number of models at once. This includes:<br>
+
+<ul>
+<li>Thresholding (using scalars to clip meshes) - Above and Below</li><li>Decimating</li><li>Flipping along Axes</li><li>Smoothing - Windowed Sinc, Laplacian</li><li>Concatenating models<br>
+</li><li>Scalar Operations - Statistics, Difference, Remove, Copy</li>
+  <li>Registration - Iterative Closest Points (ICP), Procrustes</li>
+</ul>
+<h4>Example Uses</h4>
+Concatenate surfaces<br>
+<pre>&nbsp; milxModelApp *.vtk --cat -o initial.vtk</pre>
+Split surfaces based on knowledge of known components of that surface<br>
+<pre>&nbsp; milxModelApp --split combined_new_weights.vtk --component Atlas_MRI_surface_R_ace.vtk --component Atlas_MRI_surface_R_fem.vtk -p split_ </pre>
+
+
+
+  
+
+</body></html>

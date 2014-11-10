@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=@SMILX_VERSION_STRING@
+Type=Application
+Terminal=false
+Name=sMILX Viewer
+Comment=sMILX is a lightweight 3D viewer and graphical frontend for medical image processing
+TryExec=smilx
+Exec=smilx %F
+Icon=@SMILX_ICON_FILE@
+Categories=Mathematics;Science
+MimeType=text/plain;text/uri-list

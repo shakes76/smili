@@ -1,0 +1,11 @@
+Copyright: (c) 2009 CSIRO, Australia.
+
+This software is protected by international copyright laws.
+Any unauthorised copying, distribution or reverse engineering is prohibited.
+
+Licence:
+All rights in this Software are reserved to CSIRO. You are only permitted
+to have this Software in your possession and to make use of it if you have
+agreed to a Software License with CSIRO.
+
+BioMedIA Lab: http://www.ict.csiro.au/BioMedIA/

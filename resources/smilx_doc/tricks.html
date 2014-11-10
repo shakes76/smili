@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>sMILX Help - Tricks N Tips</title>
+
+  
+</head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/smilx_doc/home.html"><img style="border: 0px solid ; width: 159px; height: 106px;" alt="" src="qrc:/resources/smilx_logo.png" align="left"></a>sMILX
+Help</h1>
+
+<h2 style="text-align: center;">Tricks N Tips<br>
+</h2>
+
+<hr style="width: 100%; height: 2px;">In this page, we will show you
+how to get the most off sMILX's capabilities. The page is divided into
+two main parts:<br>
+
+<ol>
+
+  <li>Imaging <br>
+  </li>
+  <li>Surfaces/Models</li>
+</ol>
+
+<h3>Imaging</h3>
+
+<ol>
+
+  <li>How do I get the <span style="font-weight: bold;">image
+information</span> (such as origin, spacing etc.) from an image?<br>
+Simply Right Click-&gt;Image Information and view the output in the log
+window. This information and more is provided in the log and terminal
+output upon loading of the image.</li>
+  <li>How do I open a <span style="font-weight: bold;">DICOM series</span>?<br>
+Use the File-&gt;Open Collection/Series, then select the files that
+correspond to the series and lick Open.<br>
+  </li>
+</ol>
+
+<h3>Surfaces/Models</h3>
+
+<ol>
+
+  <li>How do I <span style="font-weight: bold;">overlay a transparent
+version of one mesh</span> with another?<br>
+Set the alpha channel in the Right Click-&gt;Change Mesh
+Colour/Transparency
+to less than 255. To overlay another mesh, simply place mouse cursor
+inside th mesh view area of the window, double click and hold and drag
+n drop into the other models view area.<br>
+  </li>
+  <li>How do I generate a <span style="font-weight: bold;">vector field</span>
+whose magnitude is based on the mesh scalars and in the direction of
+the mesh normals?<br>
+This is easy, by default if the mesh has no arrays which are vector
+data, it uses the normals and the scalars to do this. Simply do Right
+Click-&gt;Generate-&gt;Vector Field.</li>
+  <li>How do I <span style="font-weight: bold;">remove scalars</span>
+from my model?<br>
+Use the Right Click-&gt;Scalar Operations-&gt;Remove Scalars option.<br>
+  </li>
+  <li>How do I overlay a <span style="font-weight: bold;">clipped
+version of a mesh</span> with a transparent version of the original
+mesh? Maybe even show a vector field like the previous question...<br>
+We first need masking scalars, use Right Click-&gt;Scalar
+Operations-&gt;Load Scalars from ... to load these and add them into
+the model when asked. Use the Right Click-&gt;Scalar
+Operations-&gt;Binary Threshold Scalar Values to threshold the scalar
+field if needed. Use Right Click-&gt;Show-&gt;Load Array as
+Scalars/Vectors-&gt;ArrayName to switch to these scalars or back to the
+previous ones. When the mask scalars are as desired, use the Right
+Click-&gt;Scalar Operations-&gt;Clip Mesh based on Scalars and enter
+the appropriate values. Then use the instructions from Question 1. You
+should get something like below:<br>
+    <img style="width: 256px; height: 245px;" alt="Clipped Mesh" src="qrc:/resources/screenies/tricks/clip.png">&nbsp; <img style="width: 256px; height: 245px;" alt="Clipped Mesh with Vectors" src="qrc:/resources/screenies/tricks/clip_vectors.png">&nbsp; <img style="width: 256px; height: 256px;" alt="Overlay" src="qrc:/resources/screenies/tricks/clip_overlay.png"><br>
+  </li>
+</ol>
+
+</body></html>

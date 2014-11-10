@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>sMILX Help - SSM Plugin</title>
+</head>
+<body>
+<h1 style="text-align: center;"><a
+ href="qrc:/resources/smilx_doc/home.html"><img
+ style="border: 0px solid ; width: 159px; height: 106px;" alt=""
+ src="qrc:/resources/smilx_logo.png" align="left"></a>sMILX Help</h1>
+<h2 style="text-align: center;">SSM Plugin</h2>
+<hr style="width: 100%; height: 2px;">This page describes how to use
+the sMILX SSM plugin. <br>
+<h3>Opening SSM files</h3>
+There are three ways to SSM files, so long as the SSMPlugin has been
+built.<br>
+1. Simply drag and drop the SSM file into the viewer, the plugin will
+automatically load it.<br>
+OR<br>
+2. use smilx in the command line as 'smilx myshapefile.ssm', the plugin
+will automatically load it.<br>
+OR<br>
+3. click 'Open' and from the filter combo box, select Shape Model Files
+(*.ssm). Then select your file in the browser.<span
+ style="font-weight: bold;"><br>
+</span>
+<h3>Creating SSM files</h3>
+You can use SMILX to create SSMs from meshes with the same number of
+points and point correspondence.<br>
+<ul>
+  <li>Click 'Open Collection' from the file menu, you will be asked if
+you want to open the collection with a plugin, click no until you get
+asked if you want to open the collection with the Shape Model plugin,
+click yes.</li>
+  <li>You will be asked the precision, and perhaps other things, the
+defaults are fine. Just keep pressing enter.<br>
+  </li>
+  <li>Use the features below to view the resulting model.</li>
+  <li>Save the model by Clicking 'Save' from the file menu.</li>
+</ul>
+<h3>Features for SSMs</h3>
+When the model is loaded, the two windows show the model and the mean
+shape respectively. Scalars on the meshes are normally transferred to
+the mean mesh so that you can save the result from the mean mesh window.<br>
+<ul>
+  <li>Display any mode of variation, Right Click-&gt;Modes as Vectors</li>
+  <li>Generate the meshes for a mode that can then be loaded into the
+animate plugin, Right Click-&gt;Modes as Surface Collection.</li>
+  <li>View the constituents of the model, Right Click-&gt;Aligned
+Points or Right Click-&gt;Original Points.</li>
+  <li>Output images to show alignment and point ID distributions, Right
+Click-&gt;Output * as Images.</li>
+</ul>
+<h3>Troubleshooting</h3>
+When click on 'Open' from the file menu, the Shape Model Files (*.ssm)
+option is not in the filter combo box. The solution is to ensure you
+have built the SSMPlugin. Check the terminal output to check if it has
+been loaded.<br>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>SMILI Assistant - milxSMILI</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/index.html"><img style="border: 0px solid ; width: 202px; height: 106px;" alt="" src="qrc:/resources/smili_logo.png" align="left"></a>SMILI
+Assistant</h1>
+
+<h2 style="text-align: center;">milxSMILI</h2>
+
+<hr style="width: 100%; height: 2px;">The milxSMILI sub-library is a
+user interface independent library that directly interfaces with ITK
+and VTK libraries. It has three main classes that encapsulate most of
+its functionality. These are the <span style="font-style: italic;">milxImage</span>, <span style="font-style: italic;">milxModel</span> and <span style="font-style: italic;">milxFile</span>
+objects. Each of the image and model classes have collection members to
+allow iteration through a number of images or models easily with a
+single function call. Since it is a library that essentially wraps ITK
+and VTK, its coding style matches these libraries via KWStyle.<br>
+<h3>milxImage</h3>
+This class is built to interact with ITK only (with vtkImageData
+interaction if VTK is available) and is a simple templated interface to
+complete a number of frequently encountered tasks in image processing.
+It has been templated as ITK is templated and designed in a similar
+manner, allowing it to be utilised directly by replacing chunks of ITK
+code or strung together in a pipeline. Example usages include:<br>
+<pre>  ///Compute distance map of a VTK image data<br>  vtkSmartPointer&lt;vtkImageData&gt; imgData = GetImageDataFromSomeWhere();<br>  LabelImageType::Pointer image = milx::Image&lt;LabelImageType&gt;::ConvertVTKImageToITKImage(imgData);<br>  FloatImageType::Pointer distanceImage1 = milx::Image&lt;LabelImageType&gt;::DistanceMap&lt;FloatImageType&gt;(image, binary, signedDistance, insideDistance, squaredDistance);<br></pre>
+or<br>
+<pre>  ///Convert a vector to image then write to file<br>  VectorType eigenVector = GetEigenVectorFromSomeWhere();<br>  FloatImageType::Pointer tmpEigenImage = milx::Image&lt;FloatImageType&gt;::ImportVectorToImage&lt;PrecisionType&gt;(eigenVector, m_Images[0]-&gt;GetLargestPossibleRegion().GetSize(), m_Images[0]);<br>  FloatImageType::Pointer eigenImage = milx::Image&lt;FloatImageType&gt;::DuplicateImage(tmpEigenImage); //force copy to unlock vnl vector<br><br>  if(!milx::File::SaveImage&lt;FloatImageType&gt;(formatString + milx::NumberToString(j) + ".nii.gz", eigenImage))<br>  {<br>    std::cout &lt;&lt; "ExceptionObject caught while writing one of the model images!" &lt;&lt; std::endl;<br>    itk::ExceptionObject exception(__FILE__, __LINE__, "ExceptionObject caught while writing one of the model images!", "GenerateAAMData");<br>    throw exception;<br>  }<br></pre>
+This means it is easy to accomplish supported tasks easily and
+adaptable to your data or image type. The application designed to use
+this class is the <a href="qrc:/resources/apps_doc/milxImageApp.html"><span style="font-style: italic;">milxImageApp</span>.</a><br>
+<br>
+<h3>milxModel</h3>
+This class is built to interact with VTK only and specifically
+encapsulates vtkPolyData and its operations. It maintains its own
+status through the use of current and previous states to allow easy
+processing such as:<br>
+<pre>PreProcessSurface(vtkSmartPointer&lt;vtkPolyData&gt; surface)<br>{<br>  milx::Model model;<br><br>  model.SetInput(surface);<br>  model.ClusterDecimate();<br>  model.WindowedSincSmoothing(20); //Preserve features<br>  model.Clean();<br>  model.Update();<br><br>  return model.GetOutput();<br>}<br></pre>
+The application designed to use this class is the <a href="qrc:/resources/apps_doc/milxModelApp.html"><span style="font-style: italic;">milxModelApp</span>.</a>
+  
+
+</body></html>

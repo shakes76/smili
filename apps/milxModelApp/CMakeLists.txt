@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 2.6)
+
+PROJECT(milxModelApp)
+
+FIND_PACKAGE(VTK REQUIRED)
+INCLUDE(${VTK_USE_FILE})
+
+INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
+
+link_directories(${VTK_LIBRARY_DIRS} ${SMILI_BINARY_DIR}/lib)
+
+#~ ADD_DEFINITIONS(-DSMILI_DLL)
+
+ADD_EXECUTABLE(milxModelApp MACOSX_BUNDLE milxModelApp.cxx)
+TARGET_LINK_LIBRARIES(milxModelApp ${VTK_LIBRARIES} milx-SMILI)
+
+IF(UNIX)
+  configure_file(milxModelApp.in "milxModelApp" @ONLY)
+  
+  install(FILES "${PROJECT_BINARY_DIR}/milxModelApp" DESTINATION "../../bin" 
+    PERMISSIONS WORLD_READ WORLD_EXECUTE)
+ENDIF(UNIX)
+
+# expand the command line wild-cards in msvc
+IF(MSVC)
+  SET_TARGET_PROPERTIES(milxModelApp PROPERTIES LINK_FLAGS "setargv.obj")
+ENDIF(MSVC)
+
+INSTALL(TARGETS milxModelApp 
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
+)

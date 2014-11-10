@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>SMILI Assistant - milxOverlay</title>
+</head>
+<body>
+<h1 style="text-align: center;"><a href="qrc:/resources/index.html"><img
+ style="border: 0px solid ; width: 202px; height: 106px;" alt=""
+ src="qrc:/resources/smili_logo.png" align="left"></a>SMILI
+Assistant</h1>
+<h2 style="text-align: center;">milxOverlay</h2>
+<hr style="width: 100%; height: 2px;">The SMILI milxOverlay application
+is especially designed to take (off screen rendered) screenshots of
+overlays between meshes/models/surfaces and images with most common
+options that you would expect from sMILX.<br>
+<h3>Features</h3>
+<ul>
+  <li>Display arbitrary number of models, you can 'autocolour' them to
+have a colour based on order provided.</li>
+  <li>Provide vector models and scalar masks to overlay</li>
+  <li>Overlay image slices (with or without labels). You can choose
+which views to show.</li>
+  <li>Off screen rendering and specify window/image size via command
+line</li>
+  <li>You can overlay an image converted to a surface with the
+'isosurface' option</li>
+  <li>Display outline boxes, colourmaps, scalar bars and control
+opacity of the models.</li>
+  <li>Transform all objects via an affine or rigid transform with ITK
+transform file via command line</li>
+  <li>Handles image orientation correctly</li>
+</ul>
+<h3>Tips</h3>
+<ul>
+  <li>Use the --onscreen to preview your settings. This will display
+the window and you can adjust and save the view. Then use --loadview to
+recover the view.</li>
+  <li>You can turn off slices you don't want, or turn them all off with
+--noslices</li>
+  <li>The window being displayed with --onscreen is a SMILX Model
+window, so all the right click options are available.</li>
+</ul>
+<h3>FAQ's</h3>
+<span style="font-weight: bold;">Can I set the view to a preset view?</span><br>
+Yes. There are two ways you can (only need to do either of the below
+once). Either<br>
+1. Globally via SMILX. Load image or surface or whatever into SMILX,
+set the camera/view, right click View-&gt;Save View.<br>
+Or<br>
+2. Use "--onscreen" mode in milxOverlay, set the camera/view in window,
+right click View-&gt;Save View. Then give the "--loadview" option in
+command line. You can recover this view in SMILX by right click
+View-&gt;Load View.<br>
+<span style="font-weight: bold;">Can I set the background to white?</span><br>
+Yes. use the --white option.<br>
+<h3>Examples</h3>
+<h5>Hip Example</h5>
+<img style="width: 200px; height: 200px;" alt="hip example"
+ src="qrc:/resources/screenies/smili_overlay_example1.png"><br>
+The bone surface (with unwanted scalars) is transformed overlaid with a
+image that is converted to a surface and a box is created from an image
+(which is not displayed) to show the bounding box of the image data.<br>
+<span style="font-style: italic;">Options: </span>&lt;models&gt;
+--image &lt;name&gt; --white --loadview --label --transform
+&lt;name&gt; --opacity 0.3 --outline --removescalars --noslices
+--autocolour --height 1024 --width 1024 --isovalue 100 --isosurface
+&lt;name&gt;<br>
+<h5>Knee Example</h5>
+<img style="width: 200px; height: 120px;" alt="Knee example"
+ src="qrc:/resources/screenies/smili_overlay_example2.png"><br>
+<span style="font-style: italic;">Options:</span> --vectors
+&lt;name&gt; --image &lt;name&gt; --scalarmask &lt;name&gt; --loadview
+</body>
+</html>

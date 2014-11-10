@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>sMILX Help - Models</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/smilx_doc/home.html"><img style="border: 0px solid ; width: 159px; height: 106px;" alt="" src="qrc:/resources/smilx_logo.png" align="left"></a>sMILX
+Help</h1>
+
+
+<h2 style="text-align: center;">Models<br>
+</h2>
+
+
+<hr style="width: 100%; height: 2px;">This page describes the
+model/surface processing capabilities of sMILX. A model in sMILX is
+defined as a polydata structure that can contain meshes/surfaces (with
+or without scalars) or vector/tensor fields or streamlines etc. <br>
+<br>
+The options are mostly available through the right click menu and are described below:<br>
+<ul>
+  <li>Compare - Click on this for every model that your want to compute the Hausdorff distance for or to overlay together.</li>
+  <li>Link Windows - Link all the windows so that the camera of the
+view is always oriented exactly the same in real space in all windows
+of the tab.<br>
+  </li>
+
+  <li>Switch to - Switch to window given in the open windows list.</li>
+  <li>Import
+View from - Import the 'actors' (i.e. the display elements, such as the
+slice or surface or field) to this current display. This can be used
+for overlaying surfaces on slices etc. Note that the imported actor
+will be 'in front' of the current actors, useful to know when the
+actors exactly overlap and one cannot be seen, i.e. the order makes a
+difference when the objects are in exactly the same space.<br>
+</li>
+  <li>Generate - Generate various displays from the underlying model data:</li>
+  <ul>
+    <li>Vertices - put glyphs for every point in the model.</li>
+    <li>Normals - create a array in the model that contains vector data that represents the point normals.</li>
+    <li>Vector Field - from the vector data in the model, create arrows with the size and magnitude given by the length.</li>
+    <li>Tensor Field - from the tensor data in the model, create ellipsoids that represents the tensors.</li>
+    <li>Hedgehog - from the vector data in the model, create lines with the size and magnitude given by the length.</li>
+    <li>Point Model - for every point in the model, create a low resolution sphere (auto scaled) to show each point.</li>
+    <li>Vertex Labels - create a model where each point is labelled by their point ID. The label text replaces the vertex glyphs.</li>
+    <li>Point IDs - Set the scalar field of the model to that of the point ID value.</li>
+    <li>K-Means Points Clustering - Cluster the model points (by position) by the given number of clusters.</li>
+    <li>Cap
+Boundaries - cover the 'ends' of a surface by computing the boundry
+edges of the surface and creating triangles to cover them.</li>
+    <li>Label Unconnected Regions - Colour each unconnected region.<br>
+    </li>
+  </ul>
+  <li>Operations - process the geometry and topology of the model:</li>
+  <ul>
+    <li>Clean - remove redundant points and cells from the model.</li>
+    <li>Triangulate - convert the polygons representing the model to triangles.</li>
+    <li>Decimate - Surface simpliciation. Reduce the number of points in the model using a very simply algorithm.</li>
+    <li>Quadric Decimate - Surface simpliciation. Reduce the number of points in the model using quadric errors. Recommended.<br>
+    </li>
+    <li>Quadric Clustering - Surface simpliciation. Reduce the number of points in the model using quadric clustering algorithm.</li>
+    <li>Smooth - mesh fairing by using the Laplace-Beltrami operator.</li>
+    <li>Smooth Windowed Sinc - Optimal mesh fairing using the Taubin filtering algorithm. Recommended.<br>
+    </li>
+    <li>Mean curvature - show the mean curvature of the model as a scalar field.</li>
+  </ul>
+  <li>Transforms - Transform the model in vairous ways:</li>
+  <ul>
+    <li>Transform (via File) - Use an ITK transform file to apply either an affine or rigid transform to the model.</li>
+    <li>Match Info to - Match the centroid and centroid scale (optional) of the current model to the model provided.</li>
+    <li>Register (ICP) to - Apply iterative closest points registration between the current model and the provided model.</li>
+    <li>Register (Landmark) to - Apply the landmark transform registration between
+the current model and the provided model. Note that this requires the
+models have correspondence and the same number of points.</li>
+    <li>Voxelise - Convert a surface into a voxel representation so that it can be saved as a binary image.</li>
+
+  </ul>
+  <li>Scalar Operations - Applu operations to the scalar field on the model:</li>
+  <ul>
+    <li>Rename Scalars - rename the array of the current active
+scalars. This is used for the scalar bar etc. and sometimes used by
+other programs automatically to generate figures.</li>
+    <li>Clip
+mesh based on scalar threshold - remove the parts of the mesh that
+doesn't not coincide with a scalar field value threshold, say removing
+all parts of a mesh with a scalar value of less than 1.0.</li>
+    <li>Scalar Gradient - compute the gradient of the scalar field, a
+vector field array is generated and stored. Use Generate-&gt;Vector
+Field to see it.</li>
+    <li>Load Scalars... - Load a scalar field from another model, must have the same number of points as the current model.</li>
+    <li>Output Scalars as CSV - output the scalar field of the current
+model to a field with values separated by commas and all present in the
+first row.</li>
+  </ul>
+  <li>Undo/Redo Last Operation - Rollback the last change</li>
+  <li>Model Information - Print the number of points etc. to the log window</li>
+  <li>Flip Model - flip the model depending on the axis specified.</li>
+  <li>Change
+Mesh Colour/Transparency - Change the model colour and transparency.
+Transparency is controlled via the alpha channel and this feature only
+works for models with no scalars.</li>
+  <li>Phong Shading - Improve the cell interpolation by utilising the normals. Results in a smoother polygonal model.</li>
+  <li>Scalar Bar - Show the scalar bar for the scalar field, this
+ensures that the scalar field display range is correct. The scalar bar
+is adjustable.</li>
+  <li>Contouring - contour a polygonal surface:</li>
+  <ul>
+    <li>Select points within contour - Compute the signed distance map of the contour, inside is negative.<br>
+    </li>
+  </ul>
+
+</ul>
+
+  
+
+</body></html>

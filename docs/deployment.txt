@@ -1,0 +1,42 @@
+Mac OSX Deployment Notes
+----------------------------------
+Understanding SDKROOT and MACOSX_DEPLOYMENT_TARGET variables.
+From http://www.clarkcox.com/blog/2009/06/23/sdks-and-deployment-targets/
+"Using these two build settings you can easily build a single binary of your application that supports the latest and the greatest, yet gracefully degrades when running on older OSes. 
+The basic rules of thumb:
+Set the Base SDK to the lowest value that will still support all of the features that you use
+Set the deployment target to the lowest OS version on which you plan to run.
+Check, at runtime, for any features that you use that don’t exist in the version of the OS that matches your deployment target."
+
+Via http://stackoverflow.com/questions/10165335/can-cmake-specify-the-base-sdk-on-mac-os-x
+At the command-line:
+MACOSX_DEPLOYMENT_TARGET=10.6
+
+cmake -G "Unix Makefiles" -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.7.sdk/ -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 ../..
+
+CMakeLists.txt:
+
+set(CMAKE_CXX_FLAGS "--sysroot ${CMAKE_OSX_SYSROOT} ${CMAKE_CXX_FLAGS}")
+
+Note that for XCode, the SDK is in /Applications/XCode.app/Contents/...
+
+Compatibility ----
+For deployment into 10.6 upto 10.9 I used:
+ccmake -G "Unix Makefiles" -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/ -DCMAKE_OSX_DEPLOYMENT_TARGET=10.6 ..
+
+Get the 10.6 SDK
+Download XCode 4.3.3, mount then 'Package Contents' and copy the SDK folder to above path where the other SDKs are.
+
+Packaging ----
+Easy for Qt libraries to conflict (SQLite or other plugins), i.e. the error:
+"On Mac OS X, you might be loading two sets of Qt binaries into the same process"
+so use the CMake DeplotQt4 module
+http://cmake.org/cmake/help/v2.8.8/cmake.html#module:DeployQt4
+With guide from its author 
+http://mikemcquaid.com/2012/01/04/deploying-qt-applications-with-deployqt4/
+
+Plugins ----
+FFMPEG
+
+Build with the fgollowing to get universal library
+./configure --sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk --extra-cflags="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -DMACOSX_DEPLOYMENT_TARGET=10.6 -mmacosx-version-min=10.6" --enable-shared --prefix=/Users/uqscha22/Dev/Install

@@ -1,0 +1,56 @@
+# ZLIB Find module
+
+# Configure ZLIB.
+OPTION(USE_SYSTEM_ZLIB "Use System Zlib" OFF)
+IF(USE_SYSTEM_ZLIB)
+    SET(ZLIB_DIR $ENV{ZLIB_DIR})
+    IF(NOT ZLIB_DIR)
+      IF(WIN32)
+        SET(ZLIB_DIR "C:/Program Files/zlib")
+      ENDIF(WIN32)
+
+      IF(UNIX)
+        SET(ZLIB_DIR "/usr/local/include;/usr/include;/usr/lib;/usr/local/lib")
+      ENDIF(UNIX)
+    ENDIF(NOT ZLIB_DIR)
+
+    FIND_PATH(ZLIB_INCLUDE_DIR zlib.h ${ZLIB_DIR}/include)
+    IF(WIN32)
+        FIND_LIBRARY(ZLIB_LIBRARY zdll ${ZLIB_DIR}/lib DOC "Set the variable ZLIB_DIR, to the location of the zlib library for this platform")
+    ELSE(WIN32)
+        FIND_LIBRARY(ZLIB_LIBRARY NAMES zlib z PATHS ${ZLIB_DIR}/lib DOC "Set the variable ZLIB_DIR, to the location of the zlib library for this platform")
+    ENDIF(WIN32)
+ELSE(USE_SYSTEM_ZLIB)
+    SET(ZLIB_DIR "")
+    SET(ZLIB_DIR ${ITK_DIR})
+
+    IF(NOT SMILI_FIND_MESSAGE)
+        MESSAGE("Using zlib from ITK at ${ITK_SOURCE_DIR}/Utilities/itkzlib")
+    ENDIF(NOT SMILI_FIND_MESSAGE)
+    FIND_PATH(ZLIB_INCLUDE_DIR zlib.h ${ITK_SOURCE_DIR}/Utilities/itkzlib)
+    FIND_LIBRARY(ZLIB_LIBRARY itkzlib z PATHS ${ZLIB_DIR} DOC "Set the variable ZLIB_DIR, to the location of the zlib library for this platform")
+ENDIF(USE_SYSTEM_ZLIB)
+
+IF (ZLIB_LIBRARY AND ZLIB_INCLUDE_DIR)
+    SET(ZLIB_INCLUDES "${ZLIB_INCLUDE_DIR}")
+    SET(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
+    SET(ZLIB_FOUND 1)
+ELSE(ZLIB_LIBRARY AND ZLIB_INCLUDE_DIR)
+    SET(ZLIB_FOUND 0)
+    SET(ZLIB_DIR "")
+ENDIF (ZLIB_LIBRARY AND ZLIB_INCLUDE_DIR)
+
+IF(WIN32)
+  IF(ZLIB_BUILD_SHARED)
+    SET(ZLIB_DLL 1)
+  ENDIF(ZLIB_BUILD_SHARED)
+ENDIF(WIN32)
+
+IF(ZLIB_DLL)
+  ADD_DEFINITION(-DZLIB_DLL)
+ENDIF(ZLIB_DLL)
+
+MARK_AS_ADVANCED(ZLIB_LIBRARIES)
+MARK_AS_ADVANCED(ZLIB_LIBRARY)
+MARK_AS_ADVANCED(ZLIB_INCLUDE_DIR)
+MARK_AS_ADVANCED(ZLIB_INCLUDES)

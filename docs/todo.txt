@@ -1,0 +1,21 @@
+TODO:
+- Proper multi-threading
+- Drag and Drop python scripts
+- QuadEdge Plugin (ITK Quad Edge Mesh plugin)
+- Text Editor Plugin?
+
+Features:
+- Autolevel all images
+- Cursor mode, show in all images
+- Blending of images with slider
+
+BUGS:
+- Drag n Drop between windows doesn't use processed/modified results
+- Image arithmetic only outputs error message but produces result for images not having same type
+- It gets slow with label images (although it didn't happen on MacOS :O )
+- Sometime the RGB features get disabled "for performance" when overlaying augmentations with images
+- Display of images with "oblique" orientations is a bit flaky sometimes with smilx
+- When you overlay a label to an image in smilx, the contrast of the image goes back to the initial one even if you adjusted it beforehand. And if you try to adjust it again, the RGB gets disabled for the label
+- Multi-view drag and drop segmentation overlay support
+- (minor) when I drag and drop into the GUI and drop onto a panel with an image or mesh (and not in area of the GUI where there is nothing opened), it doesn't open the element.
+- (minor) contrast adjustment of all 3 views linked

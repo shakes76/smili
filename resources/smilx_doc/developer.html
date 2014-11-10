@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>sMILX Help - Developer Guide</title>
+
+  
+</head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/smilx_doc/home.html"><img style="border: 0px solid ; width: 159px; height: 106px;" alt="" src="qrc:/resources/smilx_logo.png" align="left"></a>sMILX
+Help</h1>
+
+<h2 style="text-align: center;">Devloper Guide<br>
+</h2>
+
+<hr style="width: 100%; height: 2px;">sMILX has a very simple and
+lightweight Application Programming Interface (API) and plugin system,
+which are both easy to use and extend.<br>
+
+<h2>Extending sMILX</h2>
+
+<h3>Plugins</h3>
+
+sMILX can be extended using separately licensed and distributed custom
+plugins. The plugins can be classed into three types and their
+combinations (ordered by the amount of work required to setup):<br>
+
+<ol>
+
+  <li>An extension - a very simple plugin which implements just a few
+features accessible from the right click menu. The features are
+implemented as overloaded or new members of sub-classed versions of the
+milxQtImage or milxQtModel classes. The denoise plugin is an example of
+this type.<br>
+  </li>
+  <li>A docked window - a plugin which had docked display. The Python
+plugin is an example of this type.<br>
+  </li>
+  <li>An integrated plugin - a plugin which provides file I/O support
+and a new display window typically by sub-classing milxQtRenderWindow.
+The shape model plugin is an example of this type.</li>
+</ol>
+
+<h4>Introduction</h4>
+
+The plugins are sub-classes of the milxQtPluginInterface class. sMILX
+loads all shared object files (or dynamic libraries) as
+milxQtPluginInterface objects found in the 'plugins' folder. Therefore,
+your plugin simply needs to 'look' like this class. This is achieved by
+sub-classing milxQtPluginInterface and ensuring all members are
+defined, but not necessarily implemented. Then its just a case of
+having a consistent name for the class, setting the Boolean flags to
+tell sMILX what the plugin has available and subclassing either
+milxQtModel or milxQtImage. The next section illustrates this
+proceedure by creating a Diffusion Tensor Imaging (DTI) extension.<br>
+
+<h4>Adding a new extension for sMILX</h4>
+
+The fastest way to setup an extension is to modify some existing code.
+You can modify the denoise plugin (found in plugin/deNoise), use the <a href="qrc:/resources/smilx_doc/plugin_guide.html">plugin guide</a> or the
+plugin interface class directly to ensure getting the latest and most
+well documented interface. In all cases, try supplementing your method
+with the following:<br>
+
+<ol>
+
+  <li>Create a directory called 'dti' (or the name of your plugin) in
+the 'plugin' directory, copy the milxQtPluginInterface and rename it to
+'milxQtDiffusionTensorPlugin' or equivalent.</li>
+  <li>Open the file in you favourite editor and find/replace
+'PluginInterface' with 'DiffusionTensorPlugin'. You may want to deal
+with the guard block separately ensuring the use of capitals. Make sure
+to add the include for milxQtPluginInterface
+and remove the empty constructor and destructor (including the QThread
+reference) with milxQtPluginInterface.<br>
+  </li>
+  <li>Change the sub-classing to inherit from
+milxQtPluginInterface,
+something like changing from 'milxQtPluginInterface : public QThread'
+to 'milxQtDiffusionTensorPlugin : public milxQtPluginInterface'. Also,
+remove the '= 0' of all members except the ones in the 'public slots',
+which can be replaced with empty {}. Lastly, remove all the non-virtual
+members, signals and the private members as they are inheritted now.<br>
+  </li>
+  <li>Change the plugin factory code near the bottom of the header to
+something like (ensuring the removal of the Q_DECLARE_INTERFACE line):<br>
+    <pre>class MILXQT_PLUGIN_EXPORT milxQtDiffusionTensorPluginFactory: public QObject,<br>public milxQtPluginFactory<br>{<br>&nbsp;&nbsp;&nbsp; Q_OBJECT<br>&nbsp;&nbsp;&nbsp; Q_INTERFACES(milxQtPluginFactory)<br>public:<br>&nbsp;&nbsp;&nbsp; milxQtPluginInterface* newPlugin(QObject *theParent = 0)<br>&nbsp;&nbsp;&nbsp; {&nbsp;&nbsp; return new milxQtDiffusionTensorPlugin(theParent);&nbsp; }<br>};<br></pre>
+Only two places required changing the 'DeNoise' string with
+DiffusionTensor. That concludes the header changes.<br>
+  </li>
+  <li>Copy the CMakeLists.txt from the denoise plugin and replace
+'deNoise' with 'DTI' or equivalent. Remember that the plugin header and
+source files are called 'milxQtDiffusionTensorPlugin'.
+The name is important here as it must match the name you will give
+later in the plugin source file. Remove references to other headers and
+source files, you will eventually add your own here. We can also remove
+the VTK or ITK references here until we need them later. However, Qt
+references are required so don't remove them.<br>
+  </li>
+  <li>Lastly, we need the plugin source file. You can copy and modify
+the denoise version or create your own. The former is less error prone
+and when doing the latter ensure that all virtual members are
+implemented even if their stubs. To modify the denoise source, rename
+and find/replace as we did before for the header file. <br>
+  </li>
+  <li>Ensure that the export plugin (last) line looks like:<br>
+    <pre>Q_EXPORT_PLUGIN2(DTIPlugin, milxQtDiffusionTensorPluginFactory);<br></pre>
+Notice that the first argument is the same name as the plugin in the
+CMakeLists.txt file. The second argument is the plugin factory class
+found in the header. For the moment, we will comment out the
+'createConnections', 'run()' and 'milxQtDeNoisePlugin::pluginWindow'
+members fully, and comment the code inside the constructor,
+'modelResult()' member, 'isPluginWindow()' member and the
+'milxQtDiffusionTensorPlugin::loadExtension()' member.</li>
+  <li>Ensure that all virtual members have an implementation in either
+the source file or the header file. You may need to copy some inline
+implementations from the denoise plugin header file too, such as
+the'hasOpenSupport()' member etc. <br>
+  </li>
+  <li>Finally, add the build sub-directory directive in the plugin
+CMakeLists.txt file as<br>
+    <pre>if(BUILD_DTI_PLUGIN)<br>    add_subdirectory(dti)<br>endif(BUILD_DTI_PLUGIN)<br></pre>
+Enable the option in the SMILI CMakeLists.txt file as<br>
+    <pre>OPTION(BUILD_DTI_PLUGIN "Build the Diffusion Tensor plugin for MILX Qt Viewer" OFF)<br></pre>
+  </li>
+  <li>The plugin should now compile and build. The plugin will be
+loaded by sMILX upon startup. It should output something like the
+following in the Log window:<br>
+    <pre>Attempting to Load libDTIPlugin.so<br>Instanced ...</pre>
+  </li>
+  <li>Now simply sub-class milxQtImage and/or milxQtModel and implement
+functions commented in step 7 as in the denoise plugin to complete your
+plugin.<br>
+  </li>
+</ol>
+
+<h4>Troubleshooting</h4>
+
+<ul>
+
+  <li>I get the "milxQtDiffusionTensorPlugin.h:277: Error: Undefined
+interface" build error - You forgot the include for
+milxQtPluginInterface in the header file (see step 2 above).</li>
+  <li>I got the "error: cannot allocate an object of abstract type
+&#8216;milxQtDiffusionTensorPlugin' ... because the following virtual
+functions are pure within &#8216;milxQtDiffusionTensorPlugin&#8217; - You forgot to
+remove the '= 0' of all members in the plugin header except the ones in
+the 'public slots', which can be replaced with empty {} (see step 3
+above).</li>
+  <li>I got the "Attempting to Load libDTIPlugin.so... Failed to load
+plugin: Cannot load library
+/home/shakes/smili/build/plugins/libDTIPlugin.so:
+(/home/shakes/smili/build/plugins/libDTIPlugin.so: undefined symbol:
+_ZN27milxQtDiffusionTensorPlugin14hasOpenSupportEv)" - Turned out that
+I forgot to implement one of the virtual functions in the plugin class,
+'hasOpenSupport' is this case (see step 8).<br>
+  </li>
+</ul>
+
+<h3>API</h3>
+
+sMILX
+has two lightweight API layers, one for GUI-independent functions and
+one for GUI-dependent functions. The GUI-independent layer is called
+SMILI and the GUI-dependent is called milxQt. To build into sMILX a new
+functionality, you can follow the following example:<br>
+
+<h4>Adding a new model/surface processing filter</h4>
+
+In
+this example, we will add the functionality in the milxQtModel class
+(this handles the surface/model display) that colours the surface
+points based on their point IDs.
+<ol>
+
+  <li>Add the relevant member to the SMILI milx::Model class.
+In this case, since the new member is vertex based we place the new
+member close to the GenerateVertices() member. We copy and paste this
+member, call it GenerateVertexScalars() and change the
+vtkVertexGlyphFilter to the vtkIdFilter and add the
+SetIdsArrayName("Point IDs") and&nbsp;PointIdsOn() lines too. Then
+change the line for updating the model state with either
+UpdateModelState() or UpdateModelStateFromModel depending on the filter.</li>
+  <li>We add the include for vtkIdFilter in the source file and the
+member prototype definition in the milx::Model header file
+underneath&nbsp;GenerateVertices().
+We also amend the documentation to "Generate vertex scalars for display
+from point data. This colours the mesh by point ids."</li>
+  <li>Build to test the changes. If successful, this functionality is
+now available to be called from all non-GUI related applications.</li>
+  <li>Next
+we add the necessary hooks to use the filter in the sMILX GUI by
+appending a member in milxQtModel. Add the action for the new filter,
+in this case we add the genPointIDsAct action underneath genLabelsAct
+and duplicate the relevant entries in createActions(),
+createConnections() and in generationMenu() or equivalent.</li>
+  <li>Lastly, we clone the generateLabels() in milxQtModel
+and change the name to generatePointIDsScalars() or equivalent. We then
+add the entry
+model.GenerateVertexScalars() and replace the generate labels code.
+This new member will actually look more like generateTensorField()
+member. Make sure to update the header file also and ensure the connect
+line in createConnections() matches the name of the new member
+otherwise your context menu entry will not call the member when clicked.</li>
+  <li>Build and if successful, the context menu entry will be available
+in the Generate menu.</li>
+</ol>
+
+</body></html>

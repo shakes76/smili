@@ -1,0 +1,6 @@
+ 
+dicom_menus
+  \   Contains the initial development stage of the DICOM plugin when only working menus (as stubs) was in place.
+  
+dicom_wizard
+  \   Contains the initial development stage of the DICOM plugin when only working wizard is in place. Comes one stage after 'dicom_menus'

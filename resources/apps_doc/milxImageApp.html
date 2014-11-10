@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>SMILI Assistant - milxImageApp</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/index.html"><img style="border: 0px solid ; width: 202px; height: 106px;" alt="" src="qrc:/resources/smili_logo.png" align="left"></a>SMILI
+Assistant</h1>
+
+<h2 style="text-align: center;">milxImageApp</h2>
+
+<hr style="width: 100%; height: 2px;">The image application can run
+common image processing algorithms over a number of 3D volumes (vector
+images partially supported) at once. This includes:<br>
+<ul>
+  <li>Thresholding - Binary, Otsu, Multiple Otsu, Banded, Above and Below</li>
+  <li>Checkerboarding</li>
+  <li>Flipping Axes</li>
+  <li>Smoothing - Median, Gradient Anisotropic</li>
+  <li>Mask and Crop using Mask</li>
+  <li>Padding</li>
+  <li>Information (Direction, Origin etc.)<br>
+  </li>
+  <li>Label info</li>
+  <li>Resampling</li>
+  <li>Arithmetic (add, minus, difference, mean)</li>
+</ul>
+<h4>
+Example Uses</h4>
+
+Otsu multiple threshold:<br>
+<pre>&nbsp; milxImageApp --Otsu 128 features/median/*.nii.gz --labels 4 -p features/Otsu/Otsu_128bins_</pre>
+
+Checkerboards Atlas_MRI_Mean2_R_Preprocessed_x2.nii.gz to all Nifti
+images in current directory and writes to files with prefix check_:<br>
+<pre>&nbsp; milxImageApp --checkerboard SyngoHipData/Atlas_MRI_Mean2_R_Preprocessed_x2.nii.gz *.nii.gz -p check_<br></pre>
+Rescale image intensities:<br>
+<pre>&nbsp; milxImageApp --rescale MRIs/*.nii.gz --above 255 --below 0 -p features/rescale/rescale_</pre>
+
+
+  
+
+</body></html>

@@ -1,0 +1,30 @@
+Q: I get the "missing vtkEventQt*.h file" error when I try to build SMILI. What's wrong?
+
+A: Ensure VTK is built with USE_QT to ON, or if using packages, ensure the libvtk*-qt*-dev* package is installed.
+
+Q: Can I automate/script up screenshot taking in SMILI?
+
+A: The scripts are already in the SMILI repository in 'scripts/'.
+
+You have two options:
+python multi-threaded script for milxOverlay as batch_overlay.py
+or have the sMILX do it via the python console (python plugin) as smilx_screenshot*.py
+The latter is more powerful as you can access all of the SMILI API via python, whereas only what is implemented in the app in the former.
+
+To build python plugin install libpythonqt and python2.7-dev packages from repository. The package I will give you should have it.
+
+Q: Is it possible to save the screenshots at double the resolution?
+
+A: The screenshot resolution is the same as window size, which can be controlled in five ways:
+Set the magnification factor in the sMILX preferences if using sMILX
+milxOverlay has width and height command line options (--width and --height)
+In the SMILI API (via python console), the window size can be set directly
+There is the default window size option in the sMILX preferences.
+Maximise the window when taking the screenshot.
+
+Q: What library versions do I use?
+
+A: I use ITK 3.20.1 for SSM plugin, but ITK 4 also works but need ITK 4 build of milx-msk (which will be broken so use make -k).
+I use ITK 4.5 and VTK 6.1 (with Qt 4, Qt 5 not supported as yet) for ‘full proper’ version. VTK 5 has a number of bugs related to image display.
+You can use ITK with or without review, but with review has more labelling related features.
+Use vtkFFMPEGIO for the animate plugin, note that VTK 5 requires ffmpeg v1.0, but VTK 6 will build with newer v2.0 (Ubuntu repository version of VTK has everything built you will need, so I never build Qt, ITK or VTK myself only ITK 3 these days).

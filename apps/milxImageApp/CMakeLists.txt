@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 2.6)
+
+PROJECT(milxImageApp)
+
+FIND_PACKAGE(ITK REQUIRED)
+INCLUDE(${ITK_USE_FILE})
+
+INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
+
+link_directories(${ITK_LIBRARY_DIRS} ${SMILI_BINARY_DIR}/lib)
+
+#~ ADD_DEFINITIONS(-DSMILI_DLL)
+
+ADD_EXECUTABLE(milxImageApp MACOSX_BUNDLE milxImageApp.cxx)
+TARGET_LINK_LIBRARIES(milxImageApp ${ITK_LIBRARIES} ${ZLIB_LIBRARIES} milx-SMILI)
+
+IF(UNIX)
+  configure_file(milxImageApp.in "milxImageApp" @ONLY)
+  
+  install(FILES "${PROJECT_BINARY_DIR}/milxImageApp" DESTINATION "../../bin" 
+    PERMISSIONS WORLD_READ WORLD_EXECUTE)
+ENDIF(UNIX)
+
+# expand the command line wild-cards in msvc
+IF(MSVC)
+  SET_TARGET_PROPERTIES(milxImageApp PROPERTIES LINK_FLAGS "setargv.obj")
+ENDIF(MSVC)
+
+INSTALL(TARGETS milxImageApp 
+    BUNDLE DESTINATION . COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
+)

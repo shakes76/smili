@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>sMILX Help - Imaging</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/smilx_doc/home.html"><img style="border: 0px solid ; width: 159px; height: 106px;" alt="" src="qrc:/resources/smilx_logo.png" align="left"></a>sMILX
+Help</h1>
+
+
+<h2 style="text-align: center;">Imaging<br>
+</h2>
+
+
+<hr style="width: 100%; height: 2px;">This page describes the image
+processing capabilities of sMILX. A image in sMILX is
+defined as a set of voxels/pixels arranged as a rectangular volume that
+has an origin, spacing of each axis and orientation of the volume. An
+important consideration of the image window is that the original volume
+is maintained as an ITK image. All processing is applied to the ITK
+image unless otherwise stated. This is to ensure stability and
+correctness of the processing as much as possible. Visualisation is
+done directly with VTK.<br>
+<br>
+There are a few batch operations available in the Image menu, where the
+images are processed by the order in which they were opened:
+
+<ul>
+  <li>Add Images - Sum all (open, unminimised) images in the current tab together to create a single summation image.</li>
+  <li>Average Images - Sum all (open, unminimised) images in the
+current tab together and divide by the number of these images to create
+a single average image.</li>
+  <li>Difference Images - Subtract all (open, unminimised) images from the first opened image and create a single difference image. <br>
+  </li>
+  <li>Convolve Images - Convolve all (open, unminimised) images to the first opened image and create a single convolution image.</li>
+</ul><span style="font-weight: bold;">Note:</span> The above also applies to vector images if ITK 4 was used to build
+sMILX. Convolution is done in nlogn complexity, if ITK 4 was
+used to build sMILX.<br>
+<br>
+
+
+
+The remaining options are mostly available through the right click menu and are described below:<br>
+
+<ul>
+<li>Compare - Click on this for every image that your want to show the ckecboard for or to overlay together. (Work in Progress)</li>
+  <li>Link Windows - Link all the windows so that the camera of the
+view is always oriented exactly the same in real space in all windows
+of the tab.<br>
+  </li>
+  <li>Switch to - Switch to window given in the open windows list.</li>
+  <li>Import
+View from - Import the 'actors' (i.e. the display elements, such as the
+slice or surface or field) to this current display. This can be used
+for overlaying surfaces on slices etc. Note that the imported actor
+will be 'in front' of the current actors, useful to know when the
+actors exactly overlap and one cannot be seen, i.e. the order makes a
+difference when the objects are in exactly the same space.</li>
+  <li>Operations - process the voxel/pixel values of the image:</li>
+  <ul>
+    <li>Rescale Inensities - rescale the pixel values to a new provided range.</li>
+    <li>Smooth (Anisotropic Diffusion) - Smooth the voxels using the Gradient Anistropic Diffusion (parameters in log window).<br>
+    </li>
+    <li>Smooth (Gaussian Convolution) - Gaussian blur the image.</li>
+    <li>Smooth (Median) - Median filter the image.</li>
+    <li>Gradient Magnitude - Show the edges within the image using the Gradient magnitude of the image.</li>
+    <li>Sobel Edges - Use the three Sobel edge convolution kernels to show the edges in the image.</li>
+    <li>Normalize - Statistically normalise the image to unit variance and zero mean.</li>
+    <li>Math Histogram to - match the histogram of the current image to the one provided.</li>
+  </ul>
+  <li>Thresholds - Apply thresholds to the voxel values in various ways:</li>
+  <ul>
+    <li>Otsu Multiple Threshold - Use histgoram based method to label the image in the number of labels + background provided.</li>
+  </ul>
+  <li>Transforms - Transform the image in vairous ways:</li>
+  <ul>
+    <li>Match Info to - match the origin, spacing and orientation of the current image to the one provided.</li>
+    <li>Resample - place the current image into the image that was
+provided (as origin, spacing and orientation etc.). Uses B-spline
+interpolator.<br>
+    </li>
+    <li>Resample as Labelled Image - same as 'Resample' but with the nearest neighbour interpolator.</li>
+    <li>Mask Image - mask the image with the mask image provided.</li>
+    <li>Mask and Crop Image - mask the image with the mask image provided then crop to the bounds of the mask as well.</li>
+  </ul>
+  <li>Display as Volume Rendering - show the image as a volume plot using ray-casting</li>
+  <li>Display Slice as Surface Plot - show the slice voxel values as a surface plot. The height of the plot is the voxel values.</li>
+  <li>Display Iso-surface - Create a iso-contour of the image voxels and show it as a polygonal surface (generates a model window).</li>
+  <li>Image Information - output the origin, spcaing etc. of the image to the log window.</li>
+  <li>Interpolation - Interpolate the image display</li>
+  <li>Orientation - Apply the orientation as a transform matrix to the image volume</li>
+  <li>Contouring - (Work in Progress).<br>
+  </li>
+</ul>
+
+  
+
+</body></html>

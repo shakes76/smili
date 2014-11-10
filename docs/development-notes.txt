@@ -1,0 +1,9 @@
+Subclassed Constructors ------
+Ensure that the contextSystem variable is passed to the base class from your derived class to enable the context menu.
+
+Context/File Menus for Data Windows -------
+When subclassing windows such as models or images, you should 
+ - add a createMenu member with the context menu being created
+ - an entry to the conextMenuEvent member to show this as a context menu
+ - ensure the contextMenu variable is allocated especially if the class does not have a basicContextMenu member
+ 

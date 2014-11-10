@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>SMILI Assistant - milxQt</title></head><body>
+<h1 style="text-align: center;"><a href="qrc:/resources/index.html"><img style="border: 0px solid ; width: 202px; height: 106px;" alt="" src="qrc:/resources/smili_logo.png" align="left"></a>SMILI
+Assistant</h1>
+
+<h2 style="text-align: center;">milxQt</h2>
+
+<hr style="width: 100%; height: 2px;">The milxQt sub-library was
+developed primarily with display and processing capabilities of images
+and surfaces in mind with two easy to use classes, milxQtImage (based
+on milxImage requiring only ITK) and milxQtModel (based on milxModel
+requiring only VTK) respectively. Both objects are self-capable of
+display and processing and manifest as windows when displayed (using
+the show() member). For more information, please see the SMILI journal
+paper. Since the library uses Qt for the GUI related elements, its
+coding style is that of Qt also.<br>
+<br>
+The milxQtModel class utilises a polydata structure (called vtkPolyData
+from VTK), which allows displaying of a number of model types including
+fields and surfaces. Visualisation of shape models was done by
+displaying milxQtModel objects within a unified render window allowing
+the display of multiple actors from either milxQtImage or milxQtModel
+classes.<br>
+<br>
+The milxQtImage class utilises a milxImage object (via itk::Image from
+ITK) for processing and structured grid object (called vtkImageData
+from VTK) for display. The<br>
+images are always displayed in the correct patient space and have been
+thoroughly tested to ensure correctness. Although using both ITK and
+VTK objects to represent<br>
+images at the same time creates some redundancy, it ensures processing
+is done promptly using more stable and well accepted ITK image filters
+and displayed efficiently via VTK rendering. We believe this is an
+acceptable trade-off to ensure milxQt remains lightweight in terms of
+processing rather than memory because the latter is far cheaper than
+the former.<br>
+<br>
+The following listing gives an example of the Application Programming
+Interface (API) for the milxQtModel object, where in order to
+triangulate, decimate, smooth and clean a polygonal surface and display
+it in coronal view, one simply issues:<br>
+<pre>    model-&gt;clean ( ) ;<br>    model-&gt;smoothSinc ( 20 ) ; // windowed sinc 20 iterations<br>    model-&gt;decimate ( 0.5 ) ; // 50% decimation<br>    model-&gt;colourMapToJet ( ) ;<br>    model-&gt;viewToCoronal ( ) ;<br></pre>
+either as C++ code (as above) in ones custom application or in Python
+syntax to script (or interactively run) the sMILX GUI application. This
+additional higher-level Python layer is provided via a application
+level Python interface, which is based on the open-source PythonQt
+library (pythonqt.sourceforge.net). PythonQt automatically wraps Qt
+classes, and thus all the &#8216;milxQt&#8217; classes, using decorators and makes
+them available as Python classes. This feature is available as a
+console plugin to the sMILX<br>
+application.<br>
+<br>
+The remaining milxQtFile class provides ease of reading and writing
+various file formats and other commonly needed file-system
+capabilities. This includes wrapping the number of supported file
+formats of both ITK and VTK for both milxQtImage and milxQtModel
+objects.<br>
+
+  
+
+</body></html>
