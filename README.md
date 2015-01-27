@@ -1,6 +1,6 @@
-﻿![SMILI Logo](browse/resources/smili_logo.png?raw=true)
+﻿![SMILI Logo](resources/smili_logo.png)
 
-![sMILX Screenshot](browse/resources/screenies/smili3.png?raw=true)
+![sMILX Screenshot](resources/screenies/smili3.png)
 
 ## Introduction
 The Simple Medical Imaging Library Interface (SMILI) is a light weight medical imaging library for image and model/surface processing and visualisation.
