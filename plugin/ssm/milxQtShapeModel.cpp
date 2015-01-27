@@ -248,6 +248,7 @@ void milxQtShapeModel::generateSSM()
 {
     if(!m_loaded)
         return;
+    printDebug("Generating SSM");
 
     bool ok;
     float precision = QInputDialog::getDouble(this, tr("Please Provide the precision of the model"),
@@ -909,6 +910,7 @@ void milxQtShapeModel::compactness()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
     vtkSmartPointer<vtkFloatArray> values = m_StandardSSM->GetPCA()->GetEvals();
@@ -965,6 +967,7 @@ void milxQtShapeModel::specificity()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     srand(time(NULL));
 
@@ -1040,6 +1043,7 @@ void milxQtShapeModel::generalisability()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
 
@@ -1106,6 +1110,7 @@ void milxQtShapeModel::eigenvalues()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
     vtkSmartPointer<vtkFloatArray> values = m_StandardSSM->GetPCA()->GetEvals();
@@ -1162,6 +1167,7 @@ void milxQtShapeModel::eigenmodes()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
 
@@ -1208,6 +1214,7 @@ void milxQtShapeModel::parameters()
 {
     if(!m_modelled)
         generateSSM();
+    printDebug("Generating Plot");
 
     vtkSmartPointer<vtkTable> table = vtkSmartPointer<vtkTable>::New();
 

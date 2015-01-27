@@ -1512,6 +1512,72 @@ QActionGroup* milxQtMain::updateImportFromMenu(bool applyMapper)
     return grp;
 }
 
+void milxQtMain::updateWindowsWithValue(int value)
+{
+    initialiseWindowTraversal();
+
+    while(currentWindow())
+    {
+        milxQtWindow *win = currentWindow();
+        if(isImage(win))
+        {
+          milxQtImage *img = qobject_cast<milxQtImage *>(win);
+          img->setLevel(100-value);
+        }
+        nextWindow();
+    }
+
+    imageLevelSlider->setStatusTip("Image Contrast at "+QString::number(value)+"%");
+    imageLevelSlider->setToolTip(QString::number(value)+"%");
+}
+
+void milxQtMain::updateWindowsWithView(int value)
+{
+    initialiseWindowTraversal();
+
+    while(currentWindow())
+    {
+        milxQtWindow *win = currentWindow();
+        milxQtRenderWindow *rndWin = qobject_cast<milxQtRenderWindow *>(win);
+        rndWin->setView(value);
+        nextWindow();
+    }
+}
+
+void milxQtMain::updateWindowsWithViewType(int value)
+{
+    QWidgetList windows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
+
+    if(windows.isEmpty())
+        return;
+
+    QMessageBox msgBox;
+    if(value == 0)
+        msgBox.setText("Window View type changed to Single");
+    else
+        msgBox.setText("Window View type changed to Multiple");
+    msgBox.setInformativeText("This will take effect once you reload your data.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
+void milxQtMain::updateWindowsWithViewOrientation(int value)
+{
+    QWidgetList windows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
+
+    if(windows.isEmpty())
+        return;
+
+    QMessageBox msgBox;
+    if(value == 0)
+        msgBox.setText("View Orientation Convention changed to Radiological");
+    else
+        msgBox.setText("View Orientation Convention changed to Neurological");
+    msgBox.setInformativeText("This will take effect once you reload your data.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
 QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogether, bool applyMapper)
 {
     QWidgetList windows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
@@ -1553,18 +1619,29 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
     return winGp;
 }
 
-milxQtWindow* milxQtMain::nextWindow()
+milxQtWindow* milxQtMain::currentWindow()
 {
     QWidgetList windows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
     milxQtWindow *win = NULL;
 
     if(windowIterator < windows.size())
-    {
         win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
-        windowIterator ++;
-    }
 
     return win;
+}
+
+milxQtWindow* milxQtMain::nextWindow()
+{
+  QWidgetList windows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
+  milxQtWindow *win = NULL;
+
+  if(windowIterator < windows.size())
+    {
+      win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
+      windowIterator ++;
+    }
+
+  return win;
 }
 
 milxQtRenderWindow* milxQtMain::nextRenderWindow()
@@ -2439,6 +2516,11 @@ void milxQtMain::createMenu()
     actionMergeLabels->setDisabled(true);
 #endif
 
+    ///Image Toolbar actions
+    actionImageText = new QAction(this);
+    actionImageText->setText(QApplication::translate("MainWindow", "Text", 0, QApplication::UnicodeUTF8));
+    actionImageText->setShortcut(tr("Ctrl+Alt+t"));
+
     statusBar()->showMessage(tr("Ready"));
     setMenuBar(menuBar);
 }
@@ -2450,16 +2532,19 @@ void milxQtMain::createComboBoxes()
     defaultViewBox->insertItem(CORONAL, "View: Coronal");
     defaultViewBox->insertItem(SAGITTAL, "View: Sagittal"); ///Assigned is deliberately reversed, \todo Why need to reverse?
     defaultViewBox->setEditable(false);
+    QObject::connect(defaultViewBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateWindowsWithView(int)));
 
     defaultViewTypeBox = new QComboBox(this);
     defaultViewTypeBox->insertItem(SINGLE, "View Type: Single");
     defaultViewTypeBox->insertItem(SCANNER, "View Type: Multiple");
     defaultViewTypeBox->setEditable(false);
+    QObject::connect(defaultViewTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateWindowsWithViewType(int)));
 
     defaultOrientationTypeBox = new QComboBox(this);
     defaultOrientationTypeBox->insertItem(RADIOLOGICAL, "Orient. Type: Radiological");
     defaultOrientationTypeBox->insertItem(NEUROLOGICAL, "Orient. Type: Neurological");
     defaultOrientationTypeBox->setEditable(false);
+    QObject::connect(defaultOrientationTypeBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateWindowsWithViewOrientation(int)));
 }
 
 void milxQtMain::createToolBars()
@@ -2492,12 +2577,34 @@ void milxQtMain::createToolBars()
 
     defaultToolBar = addToolBar(tr("Default"));
     QLabel *defaultBarLabel = new QLabel(this);
-    defaultBarLabel->setText("Load As: ");
+//    defaultBarLabel->setText("View: ");
     defaultToolBar->addWidget(defaultBarLabel);
     defaultToolBar->addWidget(defaultViewBox);
     defaultToolBar->addWidget(defaultViewTypeBox);
     defaultToolBar->addWidget(defaultOrientationTypeBox);
     defaultToolBar->setObjectName("DefaultToolBar");
+
+    //Sliders etc.
+    imageToolBar = new QToolBar(tr("Image"), this);
+    imageToolBar->setObjectName("Image");
+    imageLevelSlider = new QSlider(Qt::Vertical, this);
+    imageLevelSlider->setMinimum(0);
+    imageLevelSlider->setMaximum(100);
+    imageLevelSlider->setSingleStep(1);
+    imageLevelSlider->setValue(50);
+    imageLevelSlider->setTickPosition(QSlider::TicksRight);
+    imageLevelSlider->setTickInterval(1);
+    QObject::connect(imageLevelSlider, SIGNAL(valueChanged(int)), this, SLOT(updateWindowsWithValue(int)));
+    /*imageLevelDial = new QDial(this);
+//    imageLevelDial->setFloatable(true);
+    imageLevelDial->setMinimum(0);
+    imageLevelDial->setMaximum(100);
+    imageLevelDial->setSingleStep(1);
+    imageLevelDial->setValue(50);*/
+    addToolBar(Qt::LeftToolBarArea, imageToolBar);
+//    imageToolBar->addAction(actionImageText);
+    imageToolBar->addWidget(imageLevelSlider);
+//    imageToolBar->addWidget(imageLevelDial);
 }
 
 void milxQtMain::createConnections()

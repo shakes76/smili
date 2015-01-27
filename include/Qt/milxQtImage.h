@@ -587,6 +587,11 @@ public slots:
         \brief Auto window level the display. Uses Otsu threshold value.
     */
     void autoLevel();
+    /**
+        \fn milxQtImage::setLevel(int level)
+        \brief Set window level the display to proportion of maxValue.
+    */
+    void setLevel(int level);
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
     /**
         \fn milxQtImage::overlayContour(QString filename = "")

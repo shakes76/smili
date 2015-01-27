@@ -112,6 +112,8 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStr
         currentModel = shapes.last();
         shapes.last()->setConsole(console);
         shapes.last()->SetInputCollection(collection, filenames);
+        connect(shapes.last(), SIGNAL(resultAvailable(milxQtRenderWindow*)), MainWindow, SLOT(display(milxQtRenderWindow*)));
+        connect(shapes.last(), SIGNAL(resultAvailable(milxQtModel*)), MainWindow, SLOT(display(milxQtModel*)));
         connect(shapes.last(), SIGNAL(collectionAvailable(vtkPolyDataCollection*, QStringList&)), this, SLOT(passOnCollection(vtkPolyDataCollection*, QStringList&)));
         cout << "Loaded Collection as a Normal SSM." << endl;
 
@@ -149,6 +151,8 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, vtkP
       currentModel = robustShapes.last();
       robustShapes.last()->setConsole(console);
       robustShapes.last()->SetInputCollection(collection, atlasSurface, filenames);
+      connect(robustShapes.last(), SIGNAL(resultAvailable(milxQtRenderWindow*)), MainWindow, SLOT(display(milxQtRenderWindow*)));
+      connect(robustShapes.last(), SIGNAL(resultAvailable(milxQtModel*)), MainWindow, SLOT(display(milxQtModel*)));
       connect(robustShapes.last(), SIGNAL(collectionAvailable(vtkPolyDataCollection*, QStringList&)), this, SLOT(passOnCollection(vtkPolyDataCollection*, QStringList&)));
       cout << "Loaded Collection as a Robust SSM." << endl;
 

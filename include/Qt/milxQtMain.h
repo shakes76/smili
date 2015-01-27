@@ -344,6 +344,26 @@ public slots:
     */
     QActionGroup* updateImportFromMenu(bool applyMapper = false);
     /*!
+        \fn milxQtMain::updateWindowsWithValue(int value)
+        \brief Updates the windows based on single value (in percent), such as from a slider etc.
+    */
+    void updateWindowsWithValue(int value);
+    /*!
+        \fn milxQtMain::updateWindowsWithView(int value)
+        \brief Updates the windows view, such as from a combo box etc.
+    */
+    void updateWindowsWithView(int value);
+    /*!
+        \fn milxQtMain::updateWindowsWithViewType(int value)
+        \brief Updates the windows view type based on type set, such as from a combo box etc.
+    */
+    void updateWindowsWithViewType(int value);
+    /*!
+        \fn milxQtMain::updateWindowsWithViewOrientation(int value)
+        \brief Updates the windows view orientation based on orientation set, such as from a combo box etc.
+    */
+    void updateWindowsWithViewOrientation(int value);
+    /*!
         \fn milxQtMain::windowActionList(QMenu *menuForList, bool groupTogether = true, bool applyMapper = false)
         \brief Creates an action list of windows currently opened to the menu provided.
 
@@ -576,23 +596,38 @@ public slots:
         windowIterator = 0;
     }
     /**
+        \fn milxQtMain::currentWindow()
+        \brief Get the current window opened in the current tab.
+
+        Use initialiseWindowTraversal() is reset to the first window.
+    */
+    milxQtWindow* currentWindow();
+    /**
         \fn milxQtMain::nextWindow()
-        \brief Get the next window opened in the current tab
+        \brief Get the next window opened in the current tab.
+
+        Use initialiseWindowTraversal() is reset to the first window.
     */
     milxQtWindow* nextWindow();
     /**
         \fn milxQtMain::nextRenderWindow()
         \brief Get the next render window opened in the current tab
+
+        Use initialiseWindowTraversal() is reset to the first window.
     */
     milxQtRenderWindow* nextRenderWindow();
     /**
         \fn milxQtMain::nextModel()
         \brief Get the next model opened in the current tab
+
+        Use initialiseWindowTraversal() is reset to the first window.
     */
     milxQtModel* nextModel();
     /**
         \fn milxQtMain::nextImage()
         \brief Get the next image opened in the current tab
+
+        Use initialiseWindowTraversal() is reset to the first window.
     */
     milxQtImage* nextImage();
 
@@ -902,10 +937,16 @@ protected:
     QMenu* importFromMenu; //!< Menu import from data menu
 
     //Toolbars
-    QToolBar *fileToolBar; //!< Some actions from file menu
-//    QToolBar *editToolBar; //!< Some actions from edit menu, like copy, paste etc.
-    QToolBar *windowToolBar; //!< Some actions from window menu, like tile, cascade etc.
-    QToolBar *defaultToolBar; //!< Some actions from default stuff menu, like view etc.
+    QToolBar* fileToolBar; //!< Some actions from file menu
+//    QToolBar* editToolBar; //!< Some actions from edit menu, like copy, paste etc.
+    QToolBar* windowToolBar; //!< Some actions from window menu, like tile, cascade etc.
+    QToolBar* defaultToolBar; //!< Some actions from default stuff menu, like view etc.
+    QToolBar* imageToolBar; //!< Some actions for images, like view etc.
+
+    //Image toolbar actions
+    QAction* actionImageText; //!< toggle text annotate mode
+    QSlider* imageLevelSlider; //!< adjust window level of image display
+    QDial* imageLevelDial; //!< adjust window level of image display via a dial
 
     //Workspaces (hierarchical deletion)
     QTabWidget* workspaces; //!< Pointer to the Workspace environment for the user.

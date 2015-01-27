@@ -45,7 +45,7 @@ void milxQtAboutForm::setupVersion()
     ui.aboutEdit->insertPlainText("SMILI Version: " + QString::number(milx::Version) + "\n");
     ui.aboutEdit->insertPlainText("Qt Version: " + QString(QT_VERSION_STR) + "\n");
     ui.aboutEdit->insertPlainText("milxQt Version: " + QString::number(milxQtVersion));
-    ui.aboutEdit->setDisabled(true);
+    ui.aboutEdit->setReadOnly(true);
 }
 
 void milxQtAboutForm::createConnections()

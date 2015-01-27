@@ -1691,6 +1691,7 @@ void milxQtRenderWindow::createActions()
     refreshAct->setShortcut(tr("F5"));
     resetAct = new QAction(this);
     resetAct->setText(QApplication::translate("Render", "Reset", 0, QApplication::UnicodeUTF8));
+    resetAct->setIcon(QIcon(":/resources/toolbar/refresh.png"));
     resetAct->setShortcut(tr("F7"));
 }
 

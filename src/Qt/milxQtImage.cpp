@@ -1089,9 +1089,10 @@ void milxQtImage::setupEvents()
 
 void milxQtImage::autoLevel()
 {
-    printInfo("Updating Window Level");
+    printInfo("Auto Updating Window Level");
 
-    histogram(256, 0, 255, false);
+    if(maxValue == minValue)
+        histogram(256, 0, 255, false);
 
     emit working(-1);
     float lvl = 0;
@@ -1103,8 +1104,26 @@ void milxQtImage::autoLevel()
         lvl = milx::Image<floatImageType>::OtsuThreshold(imageFloat, 128);
     emit done(-1);
 
-    viewer->SetColorWindow((maxValue-minValue)/maxValue*255);
-    viewer->SetColorLevel( (lvl-minValue)/viewer->GetColorWindow()*255 );
+    viewer->SetColorWindow(maxValue-lvl);
+    viewer->SetColorLevel(lvl);
+}
+
+void milxQtImage::setLevel(int level)
+{
+//    printInfo("Updating Window Level to "+QString::number(level)+"%");
+
+    double range[2];
+    imageData->GetScalarRange(range);
+    double belowValue = range[0];
+    double aboveValue = range[1];
+
+    float lvl = (aboveValue-belowValue)*level/100 + belowValue;
+    printDebug("Contrast Level is "+QString::number(lvl));
+
+    viewer->SetColorWindow(aboveValue-lvl);
+    viewer->SetColorLevel(lvl);
+
+    refresh();
 }
 
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
