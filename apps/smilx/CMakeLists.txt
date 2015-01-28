@@ -31,34 +31,6 @@ FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
 # a CMake script that sets up this directory for building with Qt4
 INCLUDE( ${QT_USE_FILE} )
 
-IF(BUILD_PLUGINS)
-  #Python Qt
-  IF(BUILD_PYTHON_PLUGIN)
-    #Python Qt variables
-    IF(WIN32)
-      set(PYTHONQT_DIR "C:/PythonQt")
-    ELSE(WIN32)
-      set(PYTHONQT_DIR /usr/local)
-    ENDIF(WIN32)
-    file(GLOB PYTHONQT_LIBS ${PYTHONQT_DIR}/lib/*PythonQt*${CMAKE_SHARED_LIBRARY_SUFFIX}*)
-  ENDIF(BUILD_PYTHON_PLUGIN)
-
-  #MILX-MSK Options
-  IF(BUILD_SSM_PLUGIN)
-    IF(NOT SSM_USE_LOCAL_FILE)
-        IF(WIN32 AND NOT MILX-MSK_DIR)
-          set(MILX-MSK_DIR $ENV{PROGRAMFILES}/MILX_MSK)
-        ENDIF(WIN32 AND NOT MILX-MSK_DIR)
-        IF(UNIX AND NOT MILX-MSK_DIR)
-          set(MILX-MSK_DIR /usr/local)
-        ENDIF(UNIX AND NOT MILX-MSK_DIR)
-        file(GLOB MSK_LIBS ${MILX-MSK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*)
-        SET(MILXQT_INSTALL_BINARY_DIR "${MILX-MSK_DIR}/lib")
-        message("MILX-MSK being used from ${MILX-MSK_DIR}")
-    ENDIF(NOT SSM_USE_LOCAL_FILE)
-  ENDIF(BUILD_SSM_PLUGIN)
-ENDIF(BUILD_PLUGINS)
-
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
@@ -236,6 +208,7 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
 
     #Install Python QT libraries if built
     IF(BUILD_PYTHON_PLUGIN)
+      file(GLOB PYTHONQT_LIBS "${PYTHONQT_DIR}/lib/*PythonQt*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
       install(FILES ${PYTHONQT_LIBS} DESTINATION lib
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
     ENDIF(BUILD_PYTHON_PLUGIN)
@@ -246,6 +219,13 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
       install(FILES ${MSKFiles} DESTINATION lib
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
     ENDIF(BUILD_SSM_PLUGIN)
+    
+    #Install MSK libraries if built
+    IF(BUILD_FTL_PLUGIN)
+      FILE(GLOB FTLFiles "${NTTW_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      install(FILES ${FTLFiles} DESTINATION lib
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+    ENDIF(BUILD_FTL_PLUGIN)
     
     #Install ITK libraries
     IF(ITK_VERSION_MAJOR GREATER 3)
@@ -265,17 +245,17 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4") #11.10
 
     #RPM
-    SET(CPACK_RPM_PACKAGE_LICENSE "CSIRO Binary Distribution License")
-    SET(CPACK_RPM_PACKAGE_REQUIRES "libqt4, vtk, vtk-qt") #opensuse 12.3
+    SET(CPACK_RPM_PACKAGE_LICENSE "CSIRO BSD License")
+    SET(CPACK_RPM_PACKAGE_REQUIRES "libqt4, vtk, vtk-qt, libfftw3-3") #opensuse 12.3 and 13.1
     
     # Install VTK files 
     #USING PACKAGE MANAGER VERSION
     
     #Install startup scripts
     install(FILES "${PROJECT_BINARY_DIR}/smilx" DESTINATION "../../bin" 
-    PERMISSIONS WORLD_READ WORLD_EXECUTE)
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     install(FILES "${PROJECT_BINARY_DIR}/smilx.sh" DESTINATION . 
-    PERMISSIONS WORLD_READ WORLD_EXECUTE)
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     
     #desktop file for menus
     SET(SMILX_DESKTOP_DIR "/usr/share/applications/")
