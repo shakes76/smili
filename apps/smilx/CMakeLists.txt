@@ -222,8 +222,11 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
     
     #Install MSK libraries if built
     IF(BUILD_FTL_PLUGIN)
-      FILE(GLOB FTLFiles "${NTTW_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-      install(FILES ${FTLFiles} DESTINATION lib
+      FILE(GLOB FTLFiles1 "${NTTW_DIR}/lib/*frtw*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      FILE(GLOB FTLFiles2 "${NTTW_DIR}/lib/*nttw*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      install(FILES ${FTLFiles1} DESTINATION lib
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+      install(FILES ${FTLFiles2} DESTINATION lib
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
     ENDIF(BUILD_FTL_PLUGIN)
     
