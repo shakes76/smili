@@ -40,3 +40,29 @@ FFMPEG
 
 Build with the fgollowing to get universal library
 ./configure --sysroot=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk --extra-cflags="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -DMACOSX_DEPLOYMENT_TARGET=10.6 -mmacosx-version-min=10.6" --enable-shared --prefix=/Users/uqscha22/Dev/Install
+
+Fedora Deployment Notes
+----------------------------------
+I found the resolution of dependencies to be buggy in Fedora 21. I had to manuall install jsoncpp-devel, netcdf-cxx-devel, gdcm-devel
+
+Note also the CPACK_RPM_PACKAGE_REQUIRES is different for different RPM based systems like OpenSUSE and Fedora.
+
+and the permissions for INSTALL directives need to include execute:
+"
+I found the culprit:
+INSTALL(TARGETS visp-2
+  DESTINATION lib
+  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE
+  COMPONENT libraries
+  )
+
+you install the lib without execute permission which seems to break
+the automatic provides machinery of rpmbuild.
+
+could you try with:
+INSTALL(TARGETS visp-2
+  DESTINATION lib
+  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+  COMPONENT libraries
+  )
+"
