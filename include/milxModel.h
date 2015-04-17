@@ -719,6 +719,13 @@ public:
 	*/
   void ScalarThresholdCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const coordinateType aboveVal, const coordinateType belowVal);
   /*!
+    \fn Model::ClipCollection(vtkSmartPointer<vtkPolyDataCollection> collection)
+    \brief Computes the Clipping of models via the Threshold of scalar values in place over the collection.
+
+  The collection is modified in place.
+        */
+  void ClipCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const coordinateType aboveVal, const coordinateType belowVal);
+  /*!
     \fn Model::ScalarStatisticsCollection(vtkSmartPointer<vtkPolyDataCollection> collection)
     \brief Computes the statistics (min, max, variance etc.) of the scalars over the collection assuming the meshes have the same number of points.
 

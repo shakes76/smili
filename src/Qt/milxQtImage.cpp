@@ -64,6 +64,7 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
     viewerSetup = false;
     volume = false;
     flipped = true;
+    track = false;
 
     meanValue = 0;
     minValue = 0;
@@ -757,6 +758,19 @@ void milxQtImage::scaleDisplay(const bool forceDisplay)
     Render();
 }
 
+void milxQtImage::trackView(milxQtImage *windowToTrack, ViewType viewTo)
+{
+    printDebug("Tracking View");
+    track = true;
+    viewToTrack = viewTo;
+    enableCrosshair();
+    milxQtRenderWindow::Connector->Connect(windowToTrack->GetVTKInteractor(),
+                                  vtkCommand::LeftButtonPressEvent,
+                                  this,
+                                  SLOT( updateTrackedView(vtkObject*) ),
+                                  NULL, 1.0); //High Priority
+}
+
 void milxQtImage::userEvent(QMouseEvent *event)
 {
     emit milxQtRenderWindow::modified(GetImageActor());
@@ -856,6 +870,9 @@ void milxQtImage::updateCoords(vtkObject *obj)
             //~ printDebug("Actual: " + QString::number(actual[0]) + ", " + QString::number(actual[1]) + ", " + QString::number(actual[2]));
             if(isInside)
             {
+                if(track)
+                    enableCrosshair();
+
                 //~ printDebug("Relative: " + QString::number(relative[0]) + ", " + QString::number(relative[1]) + ", " + QString::number(relative[2]));
                 ///We have to handle different number of scalar components.
                 switch (pImageData->GetNumberOfScalarComponents())
@@ -897,6 +914,9 @@ void milxQtImage::updateCoords(vtkObject *obj)
                     message = "Unsupported number of scalar components";
                     break;
                 }
+
+//                if(track)
+//                    emit coordinateChanged(actual[0], actual[1], actual[2]);
             }
         //~ }
     }
@@ -931,6 +951,56 @@ void milxQtImage::updateSlice(vtkObject *obj)
 
     viewer->GetRenderWindow()->InvokeEvent(vtkCommand::ModifiedEvent, NULL);
     updateCoords(iren);
+}
+
+void milxQtImage::updateTrackedView(vtkObject *obj)
+{
+    vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+    vtkRenderer* irenderer = iren->FindPokedRenderer(0,0);
+    printDebug("Update Tracked View");
+
+    // Get a shortcut to the pixel data.
+    vtkImageData* pImageData = viewer->GetInput();
+
+    if (dataPicker->Pick(iren->GetEventPosition()[0],
+                         iren->GetEventPosition()[1],
+                         0, //always zero
+                         irenderer))
+    {
+        double ptMapped[3];
+        dataPicker->GetMapperPosition(ptMapped);
+
+        coordinate current( ptMapped ), cell(0.0); ///Get the pixel in real space
+        const int zAxis = viewer->GetSliceOrientation();
+        int actual[3];
+
+//        printDebug("Prev. Current: " + QString::number(current[0]) + ", " + QString::number(current[1]) + ", " + QString::number(current[2]));
+
+        ///Compute the actual coordinate for pixel access
+        const bool isInside = pImageData->ComputeStructuredCoordinates(current.data_block(), actual, cell.data_block());
+
+        if(isInside)
+        {
+            if(zAxis == vtkImageViewer2::SLICE_ORIENTATION_XY) //z-axis is z-axis
+            {
+                viewer->SetSlice(actual[2]);
+                printDebug("Axial");
+            }
+            else if(zAxis == vtkImageViewer2::SLICE_ORIENTATION_XZ) //y-axis is z-axis
+            {
+                viewer->SetSlice(actual[1]);
+                printDebug("Coronal");
+            }
+            else if(zAxis == vtkImageViewer2::SLICE_ORIENTATION_YZ) //x-axis is z-axis
+            {
+                viewer->SetSlice(actual[0]);
+                printDebug("Sagittal");
+            }
+        }
+    }
+
+    viewer->GetRenderWindow()->InvokeEvent(vtkCommand::ModifiedEvent, NULL);
+    emit milxQtRenderWindow::modified(GetImageActor());
 }
 
 void milxQtImage::contour()
@@ -1020,53 +1090,36 @@ void milxQtImage::updateData(const bool orient)
     if(!usingVTKImage)
     {
         printDebug("Updating Data");
-
-        floatImageType::DirectionType direction;
-        floatImageType::PointType origin;
-        floatImageType::SpacingType spacing;
         vtkSmartPointer<vtkImageData> newImageData = vtkSmartPointer<vtkImageData>::New();
         if(eightbit)
         {
             /// ITK to VTK image (unsigned char)
-            newImageData->DeepCopy( milx::Image<charImageType>::ConvertITKImageToVTKImage(imageChar) );
-            direction = imageChar->GetDirection();
-            origin = imageChar->GetOrigin();
-            spacing = imageChar->GetSpacing();
-            if(orient)
-                imageData = milx::Image<charImageType>::ApplyOrientationToVTKImage(newImageData, imageChar, transformMatrix, true, flipped);
-            else
-                imageData = newImageData;
+            charImageType::Pointer orientChar = milx::Image<charImageType>::ApplyOrientationToITKImage<double>(imageChar, imageChar, true, flipped, !orient);
+            printDebug("Reoriented Char ITK Image Data Info");
+            milx::Image<charImageType>::Information(orientChar);
+            newImageData->DeepCopy( milx::Image<charImageType>::ConvertITKImageToVTKImage(orientChar) );
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
             printDebug("Updated Internal Char Image Data");
         }
-        else if(rgb)
-        {
-            /// ITK to VTK image (RGB)
-            newImageData->DeepCopy( milx::Image<rgbImageType>::ConvertITKImageToVTKImage(imageRGB) );
-            direction = imageRGB->GetDirection();
-            origin = imageRGB->GetOrigin();
-            spacing = imageRGB->GetSpacing();
-            if(orient)
-                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, true, flipped);
-            else
-                imageData = newImageData;
-            //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
-            printDebug("Updated Internal RGB Image Data");
-        }
+//        else if(rgb)
+//        {
+//            /// ITK to VTK image (RGB)
+//            rgbImageType::Pointer orientRGB = milx::Image<rgbImageType>::ApplyOrientationToITKImage<double>(imageRGB, imageRGB, true, flipped, !orient);
+//            newImageData->DeepCopy( milx::Image<rgbImageType>::ConvertITKImageToVTKImage(orientRGB) );
+//            //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
+//            printDebug("Updated Internal RGB Image Data");
+//        }
         else //if float and/or vector (which also generates float magnitude image)
         {
             /// ITK to VTK image (Float)
-            newImageData->DeepCopy( milx::Image<floatImageType>::ConvertITKImageToVTKImage(imageFloat) );
-            direction = imageFloat->GetDirection();
-            origin = imageFloat->GetOrigin();
-            spacing = imageFloat->GetSpacing();
-            if(orient)
-                imageData = milx::Image<floatImageType>::ApplyOrientationToVTKImage(newImageData, imageFloat, transformMatrix, true, flipped);
-            else
-                imageData = newImageData;
+            floatImageType::Pointer orientFloat = milx::Image<floatImageType>::ApplyOrientationToITKImage<double>(imageFloat, imageFloat, false, flipped, !orient);
+            printDebug("Reoriented Float ITK Image Data Info");
+            milx::Image<floatImageType>::Information(orientFloat);
+            newImageData->DeepCopy( milx::Image<floatImageType>::ConvertITKImageToVTKImage(orientFloat) );
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
             printDebug("Updated Internal Float Image Data");
         }
+        imageData = newImageData;
     }
 
     imageData->Modified();

@@ -1109,6 +1109,14 @@ void milxQtMain::predisplay(milxQtImage* newImage)
       slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
       slicesView->generateRender();
 
+      //crosshairs for tracking
+      newImage->trackView(imgSagittal, AXIAL);
+      newImage->trackView(imgCoronal, AXIAL);
+      imgSagittal->trackView(newImage, SAGITTAL);
+      imgSagittal->trackView(imgCoronal, SAGITTAL);
+      imgCoronal->trackView(newImage, CORONAL);
+      imgCoronal->trackView(imgSagittal, CORONAL);
+
       ///Here we use the Qt signals and slots directly as it was found that the VTK-Qt connector caused problems
       ///with the image actors.
       connect(newImage, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));

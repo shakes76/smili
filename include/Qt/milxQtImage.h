@@ -416,6 +416,13 @@ public:
     {
         return imageData;
     }
+    /*!
+      \brief Get the interactor associated with the view rendering
+    */
+    inline virtual vtkRenderWindowInteractor* GetVTKInteractor()
+    {
+        return viewer->GetRenderWindow()->GetInteractor();
+    }
 
     //Flags
     /*!
@@ -543,6 +550,27 @@ public:
         forceDisplay Boolean is to overide possible previous settings and display bar.
     */
     virtual void scaleDisplay(const bool forceDisplay = false);
+    /*!
+        \fn milxQtImage::enableCrosshair()
+        \brief Enables the mouse pointer as a crosshair instead. Scene must be rendered before calling.
+    */
+    virtual inline void enableCrosshair()
+    {
+        if(rendered)
+        {
+            viewer->GetRenderWindow()->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
+            crosshairAct->setChecked(true);
+        }
+    }
+    /*!
+        \fn milxQtImage::disableCrosshair()
+        \brief Restores the mouse pointer to default.
+    */
+    virtual inline void disableCrosshair()
+    {
+        viewer->GetRenderWindow()->SetCurrentCursor(0);
+        crosshairAct->setChecked(false);
+    }
 
     /*!
         \fn milxQtImage::setActualNumberOfDimensions(const size_t dims)
@@ -558,6 +586,15 @@ public:
     {
         return actualNumberOfDimensions;
     }
+
+    /*!
+        \fn milxQtImage::trackView(milxQtImage *windowToTrack, ViewType viewTo)
+        \brief Enables tracking of the view (axial etc.) to imgToTrack provided.
+
+        View tracking is linking the position of cursors in other milxQtImage objects to this one.
+        This is useful for multi-view display where each window tracks different views (axial etc.) of the same data
+    */
+    void trackView(milxQtImage *windowToTrack, ViewType viewTo);
 
     //VTK Filters
     vtkSmartPointer<vtkImageData> butterWorthHighPass(vtkSmartPointer<vtkImageData> img);
@@ -576,6 +613,11 @@ public slots:
         \brief Updates the display of the slice in the window.
     */
     void updateSlice(vtkObject *obj);
+    /*!
+        \fn milxQtImage::updateTrackedView(vtkObject *obj)
+        \brief Updates the display of the slice in the window according to view tracking.
+    */
+    void updateTrackedView(vtkObject *obj);
     /*!
         \fn milxQtImage::contour()
         \brief Draw contour interactively on images
@@ -1101,6 +1143,11 @@ signals:
         \brief Emit signal to send updated image data. Used for updating dependent displays
     */
     void modified(QPointer<milxQtImage> );
+    /*!
+        \fn milxQtImage::coordinateChanged(int, int, int)
+        \brief Emit signal with the coordinate user is changed pointing to.
+    */
+    void coordinateChanged(int, int, int);
 
 protected:
     //Flags
@@ -1113,6 +1160,7 @@ protected:
     bool viewerSetup; //!< has the viewer/window been setup (only done initial so is to not disturb users settings)
     bool volume; //!< is the image a volume?
     bool flipped; //!< Flip for display?
+    bool track; //!< track the coordinates during user interaction
 
     //Image Related
     //ITK
@@ -1122,6 +1170,7 @@ protected:
     vectorImageType::Pointer imageVector; //!< Up to date vector image data
 
     size_t actualNumberOfDimensions; //!< All images loaded as 3D images or 3D vector images, this shows actual dimension
+    ViewType viewToTrack; //!< In tracking mode, what slice to show
 
     //VTK
     vtkSmartPointer<vtkImageViewer3> viewer; //!< VTK Viewer handler, Smart Pointer
@@ -1205,7 +1254,9 @@ protected:
     void updateData(const bool orient = true);
     /*!
     	\fn milxQtImage::setupEvents()
-    	\brief Executes common events setup code.
+        \brief Executes common events setup and connections code for image viewing.
+
+        This includes keys pressed for window.
     */
     void setupEvents();
     //Internal Members

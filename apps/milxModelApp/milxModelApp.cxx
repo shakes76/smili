@@ -32,7 +32,7 @@ using namespace TCLAP;
 typedef std::vector< std::string >::iterator stringiterator;
 
 //Supported operations
-enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smooth, laplacian, thresholdscalars, flip, diffscalars, copyscalars, diffscalarspairs, statscalars, removescalars, mse, procrustes, icp};
+enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smooth, laplacian, thresholdscalars, clip, flip, diffscalars, copyscalars, diffscalarspairs, statscalars, removescalars, mse, procrustes, icp};
 
 /**
   \file milxModelApp.cxx
@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
   ValueArg<float> scaleArg("s", "scale", "Scale the coordinates of the point", false, 0.9, "Scale");
   ValueArg<float> thresholdAboveArg("", "thresholdabove", "Thresold scalars above value", false, 0.0, "Above");
   ValueArg<float> thresholdBelowArg("", "thresholdbelow", "Thresold scalars below value", false, 0.0, "Below");
+  ValueArg<float> clipArg("", "clip", "Clip model based on scalars value", false, 1.0, "Clip");
   MultiArg<std::string> componentsArg("", "component", "Surface is a component of the surfaces", false, "Component");
   ///Clamped Optional
   std::vector<size_t> axesAllowed;
@@ -139,6 +140,7 @@ int main(int argc, char *argv[])
   xorlist.push_back(&icpArg);
   xorlist.push_back(&thresholdAboveArg);
   xorlist.push_back(&thresholdBelowArg);
+  xorlist.push_back(&clipArg);
   xorlist.push_back(&flipArg);
   cmd.xorAdd(xorlist);
 
@@ -157,6 +159,7 @@ int main(int argc, char *argv[])
   const float laplacianIterations = laplacianArg.getValue();
   float thresholdAbove = thresholdAboveArg.getValue();
   float thresholdBelow = thresholdBelowArg.getValue();
+  float clipValue = clipArg.getValue();
   size_t flipAxis = flipArg.getValue();
   std::vector<std::string> componentNames = componentsArg.getValue();
 
@@ -299,12 +302,18 @@ int main(int argc, char *argv[])
     milx::PrintInfo("Thresholding Scalars of surfaces: ");
     operation = thresholdscalars;
   }
-  if(diffScalarArg.isSet())
+  if(clipArg.isSet())
   {
     //Scale
-    milx::PrintInfo("Differencing Scalars of surfaces: ");
-    operation = diffscalars;
+    milx::PrintInfo("Clipping surfaces: ");
+    operation = clip;
   }
+  if(diffScalarArg.isSet())
+    {
+      //Scale
+      milx::PrintInfo("Differencing Scalars of surfaces: ");
+      operation = diffscalars;
+    }
   if(flipArg.isSet())
   {
     //Scale
@@ -569,6 +578,15 @@ int main(int argc, char *argv[])
 
       outputRequired = false;
       multiOutputRequired = true;
+      break;
+
+    case clip:
+      if (collection->GetNumberOfItems() == 1) {
+        Model.ClipCollection(collection, clipValue, clipValue);
+      } else {
+      outputRequired = false;
+      multiOutputRequired = true;
+      }
       break;
 
     case flip:

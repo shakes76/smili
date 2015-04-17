@@ -1781,6 +1781,22 @@ void Model::ScalarThresholdCollection(vtkSmartPointer<vtkPolyDataCollection> col
   }
 }
 
+void Model::ClipCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const coordinateType aboveVal, const coordinateType belowVal)
+{
+  const size_t n = collection->GetNumberOfItems();
+
+  collection->InitTraversal();
+  for(size_t j = 0; j < n; j ++)
+  {
+    vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
+    SetInput(mesh);
+    Clip(aboveVal, belowVal); //!< scale the model inplace
+    mesh->DeepCopy(Result());
+  }
+
+  InternalInPlaceOperation = false;
+}
+
 void Model::ScalarDifferenceCollection(vtkSmartPointer<vtkPolyDataCollection> collection1, vtkSmartPointer<vtkPolyDataCollection> collection2, vtkSmartPointer<vtkPolyDataCollection> &results)
 {
   const size_t n = collection1->GetNumberOfItems();

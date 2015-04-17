@@ -302,6 +302,13 @@ public:
     {
         return renderer;
     }
+    /*!
+      \brief Get the interactor associated with the view rendering
+    */
+    inline virtual vtkRenderWindowInteractor* GetVTKInteractor()
+    {
+        return QVTKWidget::GetRenderWindow()->GetInteractor();
+    }
 
     /*!
         \fn milxQtRenderWindow::SetupWidgets(vtkRenderWindowInteractor *interactor)
@@ -478,6 +485,11 @@ public slots:
         \brief Toggles text in display.
     */
     void textDisplay();
+    /*!
+        \fn milxQtRenderWindow::crosshair()
+        \brief Toggles corsshair.
+    */
+    void crosshair();
 
     //Viewing
     /*!
@@ -590,6 +602,28 @@ public slots:
         \brief Disables the scale bar display.
     */
     virtual void disableScale();
+    /*!
+        \fn milxQtRenderWindow::enableCrosshair()
+        \brief Enables the mouse pointer as a crosshair instead. Scene must be rendered before calling.
+    */
+    virtual inline void enableCrosshair()
+    {
+        if(rendered)
+        {
+            renderWindow->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
+            crosshairAct->setChecked(true);
+        }
+    }
+    /*!
+        \fn milxQtRenderWindow::disableCrosshair()
+        \brief Restores the mouse pointer to default.
+    */
+    virtual inline void disableCrosshair()
+    {
+        renderWindow->SetCurrentCursor(0);
+        crosshairAct->setChecked(false);
+    }
+
     /*!
         \fn milxQtRenderWindow::scaleDisplay(const bool forceDisplay = false)
         \brief Toggles the scale bar display.
@@ -787,6 +821,7 @@ protected:
     QAction* sphereAct; //!< Action for sphere annotate display
     QAction* humanAct; //!< Show human view orientation glyph?
     QAction* textAct; //!< Action for angle measuring display
+    QAction* crosshairAct; //!< Action for crosshair
 
     //Contouring Menu
     QMenu* contourMenu; //!< Contour Menu

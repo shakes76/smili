@@ -373,6 +373,17 @@ void milxQtRenderWindow::textDisplay()
     Render();
 }
 
+void milxQtRenderWindow::crosshair()
+{
+    printDebug("Toggling Crosshair.");
+    Render();
+
+    if(crosshairAct->isChecked())
+        enableCrosshair();
+    else
+        disableCrosshair();
+}
+
 void milxQtRenderWindow::viewToXYPlane()
 {
     if(rendered)
@@ -1539,6 +1550,11 @@ void milxQtRenderWindow::createActions()
     textAct = new QAction(this);
     textAct->setText(QApplication::translate("Render", "&Insert Text", 0, QApplication::UnicodeUTF8));
 
+    crosshairAct = new QAction(this);
+    crosshairAct->setText(QApplication::translate("Render", "&Crosshair", 0, QApplication::UnicodeUTF8));
+    crosshairAct->setCheckable(true);
+    crosshairAct->setChecked(false);
+
     windowPropertiesMenu = new QMenu(this);
     windowPropertiesMenu->setTitle(QApplication::translate("Render", "Window Properties", 0, QApplication::UnicodeUTF8));
     windowPropertiesMenu->addAction(backgroundAct);
@@ -1548,6 +1564,7 @@ void milxQtRenderWindow::createActions()
     windowPropertiesMenu->addAction(angleAct);
     windowPropertiesMenu->addAction(sphereAct);
     windowPropertiesMenu->addAction(textAct);
+    windowPropertiesMenu->addAction(crosshairAct);
 
     viewMenu = new QMenu(this);
     viewMenu->setTitle("View");
@@ -1725,6 +1742,7 @@ void milxQtRenderWindow::createConnections()
     connect(sphereAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(humanAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(textAct, SIGNAL(triggered()), this, SLOT(textDisplay()));
+    connect(crosshairAct, SIGNAL(triggered()), this, SLOT(crosshair()));
     connect(viewXY, SIGNAL(triggered()), this, SLOT(viewToXYPlane()));
     connect(viewZX, SIGNAL(triggered()), this, SLOT(viewToZXPlane()));
     connect(viewZY, SIGNAL(triggered()), this, SLOT(viewToZYPlane()));
