@@ -1,4 +1,7 @@
 TODO:
+- Image annotation tools properly placed to begin with.
+
+Wishlist:
 - Proper multi-threading
 - Drag and Drop python scripts
 - QuadEdge Plugin (ITK Quad Edge Mesh plugin)
@@ -18,4 +21,4 @@ BUGS:
 - When you overlay a label to an image in smilx, the contrast of the image goes back to the initial one even if you adjusted it beforehand. And if you try to adjust it again, the RGB gets disabled for the label
 - Multi-view drag and drop segmentation overlay support
 - (minor) when I drag and drop into the GUI and drop onto a panel with an image or mesh (and not in area of the GUI where there is nothing opened), it doesn't open the element.
-- (minor) contrast adjustment of all 3 views linked
+- The contrast slider: it works great with MRIs, but not so much with CTs. With the later, the behaviour is more like changing the global intensity than changing the contrast... It probably related to the minimal intensity of -1000 in CT. Fix: hummm... can we have a dual slider that allows for min/max values adjustment?

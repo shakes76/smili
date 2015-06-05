@@ -1764,7 +1764,7 @@ void Model::ScalarDifferenceCollection(vtkSmartPointer<vtkPolyDataCollection> co
   {
     vtkSmartPointer<vtkPolyData> surface2 = collection->GetNextItem();
 
-    ScalarDifference(surface1, surface2, CurrentModel); //!< scale the model inplace
+    ScalarDifference(surface1, surface2, CurrentModel); //!< threshold the model inplace
   }
 }
 
@@ -1777,7 +1777,7 @@ void Model::ScalarThresholdCollection(vtkSmartPointer<vtkPolyDataCollection> col
   {
     vtkSmartPointer<vtkPolyData> surface = collection->GetNextItem();
 
-    ThresholdScalars(surface, aboveVal, belowVal, 0.0); //!< scale the model inplace
+    ThresholdScalars(surface, aboveVal, belowVal, 0.0); //!< threshold the model inplace
   }
 }
 
@@ -1790,7 +1790,7 @@ void Model::ClipCollection(vtkSmartPointer<vtkPolyDataCollection> collection, co
   {
     vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
     SetInput(mesh);
-    Clip(aboveVal, belowVal); //!< scale the model inplace
+    Clip(aboveVal, belowVal); //!< clip the model inplace
     mesh->DeepCopy(Result());
   }
 
@@ -1857,11 +1857,17 @@ void Model::ScalarStatisticsCollection(vtkSmartPointer<vtkPolyDataCollection> co
     varScalars->SetNumberOfComponents(1);
     varScalars->FillComponent(0, 0.0);
 
+  size_t count = 0;
   collection->InitTraversal();
   for(size_t j = 0; j < s; j ++)
   {
+    vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
+
+    if(!mesh->GetPointData()->GetScalars())
+      continue; //ignore meshes with no scalars
+
     //safe casting requires double array
-    vtkSmartPointer<vtkDataArray> scalars = collection->GetNextItem()->GetPointData()->GetScalars();
+    vtkSmartPointer<vtkDataArray> scalars = mesh->GetPointData()->GetScalars();
 
     for(size_t k = 0; k < n; k ++)
     {
@@ -1870,13 +1876,31 @@ void Model::ScalarStatisticsCollection(vtkSmartPointer<vtkPolyDataCollection> co
       if(scalars->GetTuple1(k) > maxScalars->GetTuple1(k)) //max
         maxScalars->SetTuple1(k, scalars->GetTuple1(k));
 
-      meanScalars->SetTuple1( k, meanScalars->GetTuple1(k) + scalars->GetTuple1(k)/s ); //mean
+      meanScalars->SetTuple1( k, meanScalars->GetTuple1(k) + scalars->GetTuple1(k) ); //mean
     }
+
+    count ++;
+  }
+  PrintDebug("Found "+NumberToString(count)+" Models with Scalars");
+
+  for(size_t k = 0; k < n; k ++)
+    meanScalars->SetTuple1( k, meanScalars->GetTuple1(k)/count ); //mean
+
+  collection->InitTraversal();
+  for(size_t j = 0; j < s; j ++)
+  {
+    vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
+
+    if(!mesh->GetPointData()->GetScalars())
+      continue; //ignore meshes with no scalars
+
+    //safe casting requires double array
+    vtkSmartPointer<vtkDataArray> scalars = mesh->GetPointData()->GetScalars();
 
     for(size_t k = 0; k < n; k ++)
     {
       const coordinateType diffValue = scalars->GetTuple1(k) - meanScalars->GetTuple1(k);
-      varScalars->SetTuple1( k, varScalars->GetTuple1(k) + (diffValue*diffValue)/s ); //variance
+      varScalars->SetTuple1( k, varScalars->GetTuple1(k) + (diffValue*diffValue)/count ); //variance
     }
   }
 

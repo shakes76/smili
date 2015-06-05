@@ -37,8 +37,12 @@
 //Widgets
 #include <vtkScalarBarWidget.h>
 #include <vtkContourWidget.h>
+#include <vtkLineWidget2.h>
 #include <vtkDistanceWidget.h>
+#include <vtkBiDimensionalWidget.h>
 #include <vtkAngleWidget.h>
+#include <vtkPlaneWidget.h>
+#include <vtkBoxWidget2.h>
 #include <vtkSphereRepresentation.h>
 #include <vtkSphereWidget2.h>
 #include <vtkOrientationMarkerWidget.h>
@@ -309,12 +313,6 @@ public:
     {
         return QVTKWidget::GetRenderWindow()->GetInteractor();
     }
-
-    /*!
-        \fn milxQtRenderWindow::SetupWidgets(vtkRenderWindowInteractor *interactor)
-        \brief Update the interactor so that the widgets are usable. Call this if you change the render window or interator manually.
-    */
-    void SetupWidgets(vtkRenderWindowInteractor *interactor);
 
     /*!
         \fn milxQtRenderWindow::OffScreenRenderingOn()
@@ -816,8 +814,12 @@ protected:
     QAction* backgroundAct; //!< Action for axes of the display
     QAction* axesAct; //!< Action for axes of the display
     QAction* lightingAct; //!< Action for two-sided lighting of the display
+    QAction* lineAct; //!< Action for distance measuring display
     QAction* distanceAct; //!< Action for distance measuring display
+    QAction* biDirectionAct; //!< Action for cross distance measuring display
     QAction* angleAct; //!< Action for angle measuring display
+    QAction* planeAct; //!< Action for drawing planes
+    QAction* boxAct; //!< Action for box drawing display
     QAction* sphereAct; //!< Action for sphere annotate display
     QAction* humanAct; //!< Show human view orientation glyph?
     QAction* textAct; //!< Action for angle measuring display
@@ -886,8 +888,12 @@ protected:
 
     //Widgets
     vtkSmartPointer<vtkContourWidget> contourWidget; //!< contour interaction
+    vtkSmartPointer<vtkLineWidget2> lineWidget; //!< Used for drawing lines
     vtkSmartPointer<vtkDistanceWidget> distanceWidget; //!< Used for measuring distances
+    vtkSmartPointer<vtkBiDimensionalWidget> biDirectionWidget; //!< Used for measuring cross distances
     vtkSmartPointer<vtkAngleWidget> angleWidget; //!< Used for measuring angles
+    vtkSmartPointer<vtkPlaneWidget> planeWidget; //!< Used for drawing planes
+    vtkSmartPointer<vtkBoxWidget2> boxWidget; //!< Used for measuring angles
     vtkSmartPointer<vtkSphereRepresentation> sphereRep; //!< Sphere for widgets
     vtkSmartPointer<vtkSphereWidget2> sphereWidget; //!< Used for measuring angles
     vtkSmartPointer<vtkOrientationMarkerWidget> humanGlyph; //!< Glyph for showing equivalent view on human
@@ -944,6 +950,12 @@ protected:
         \brief Part of the Drag and Drop feature members. Opens the dropped files.
     */
     void dropEvent(QDropEvent *event);
+
+    /*!
+        \fn milxQtRenderWindow::SetupWidgets(vtkRenderWindowInteractor *interactor)
+        \brief Update the interactor so that the widgets are usable. Call this if you change the render window or interator manually.
+    */
+    virtual void SetupWidgets(vtkRenderWindowInteractor *interactor);
 
     /*!
         \fn milxQtRenderWindow::setupHumanGlyph(vtkSmartPointer<vtkMatrix4x4> mat = NULL)

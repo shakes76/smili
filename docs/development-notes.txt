@@ -7,3 +7,13 @@ When subclassing windows such as models or images, you should
  - an entry to the conextMenuEvent member to show this as a context menu
  - ensure the contextMenu variable is allocated especially if the class does not have a basicContextMenu member
  
+Linked Views -------
+milxQtMain::transferViewToWindows holds the implementation of link windows.
+All windows make connection to this member and executed if actionLinkWindows->isChecked()
+
+Image Slices (Changing) -------
+Slices are changed using mouse wheel in vtkInteractorStyleImage2.
+The arrow keys change slices in updateSlice of milxQtImage
+
+Tracking Views in Images -------
+This mode is for linking images in multi-view

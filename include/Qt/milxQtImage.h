@@ -1305,6 +1305,12 @@ protected:
         \brief Part of the Drag and Drop feature members. Opens the dropped files.
     */
     void dropEvent(QDropEvent *event);
+
+    /*!
+        \fn milxQtImage::SetupWidgets(vtkRenderWindowInteractor *interactor)
+        \brief Update the interactor so that the widgets are usable. Resizing widges for image objects.
+    */
+    virtual void SetupWidgets(vtkRenderWindowInteractor *interactor);
     /*!
         \fn milxQtImage::updateViewer(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
         \brief Update the viewer image data to reflect changes.

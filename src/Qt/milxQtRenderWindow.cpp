@@ -28,6 +28,7 @@
 #include <vtkProperty.h>
 #include <vtkWidgetEventTranslator.h>
 #include <vtkOrientedGlyphContourRepresentation.h>
+#include <vtkBoxRepresentation.h>
 #include <vtkWidgetEvent.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkPolyDataNormals.h>
@@ -122,15 +123,37 @@ void milxQtRenderWindow::linkProgressEventOf(vtkObject * obj)
 void milxQtRenderWindow::SetupWidgets(vtkRenderWindowInteractor *interactor)
 {
     //distance widget setup
+    lineWidget = vtkSmartPointer<vtkLineWidget2>::New();
+        lineWidget->SetInteractor(interactor);
+        lineWidget->CreateDefaultRepresentation();
+
+    //distance widget setup
     distanceWidget = vtkSmartPointer<vtkDistanceWidget>::New();
         distanceWidget->SetInteractor(interactor);
         distanceWidget->CreateDefaultRepresentation();
         vtkDistanceRepresentation::SafeDownCast(distanceWidget->GetRepresentation())->SetLabelFormat("%-#6.3g mm");
 
+    //cross distance widget setup
+    biDirectionWidget = vtkSmartPointer<vtkBiDimensionalWidget>::New();
+        biDirectionWidget->SetInteractor(interactor);
+        biDirectionWidget->CreateDefaultRepresentation();
+
     //angle widget setup
     angleWidget = vtkSmartPointer<vtkAngleWidget>::New();
         angleWidget->SetInteractor(interactor);
         angleWidget->CreateDefaultRepresentation();
+
+    //plane widget setup
+    planeWidget = vtkSmartPointer<vtkPlaneWidget>::New();
+          planeWidget->SetInteractor(interactor);
+
+    //box widget
+    boxWidget = vtkSmartPointer<vtkBoxWidget2>::New();
+      boxWidget->SetInteractor(interactor);
+      //boxWidget->CreateDefaultRepresentation();
+
+    vtkSmartPointer<vtkBoxRepresentation> boxRepresentation = vtkSmartPointer<vtkBoxRepresentation>::New();
+    boxWidget->SetRepresentation(boxRepresentation);
 
     //sphere widget setup
     sphereRep = vtkSmartPointer<vtkSphereRepresentation>::New();
@@ -721,14 +744,30 @@ void milxQtRenderWindow::userEvent(QWheelEvent *event)
 void milxQtRenderWindow::refresh()
 {
     //Check widgets
-    if(distanceAct->isChecked())
-        distanceWidget->On(); //enable distance measuring
+    if(lineAct->isChecked())
+        lineWidget->On(); //enable lines
     else
-        distanceWidget->Off();
+        lineWidget->Off();
+    if(distanceAct->isChecked())
+      distanceWidget->On(); //enable distance measuring
+    else
+      distanceWidget->Off();
+    if(biDirectionAct->isChecked())
+        biDirectionWidget->On(); //enable cross distance measuring
+    else
+        biDirectionWidget->Off();
     if(angleAct->isChecked())
         angleWidget->On(); //enable angle measuring
     else
         angleWidget->Off();
+    if(planeAct->isChecked())
+        planeWidget->On(); //enable plane drawing
+    else
+        planeWidget->Off();
+    if(boxAct->isChecked())
+      boxWidget->On(); //enable box drawing
+    else
+      boxWidget->Off();
     if(sphereAct->isChecked())
         sphereWidget->On(); //enable sphere drawing
     else
@@ -1352,8 +1391,12 @@ void milxQtRenderWindow::createMenu(QMenu *menu)
     menu->addAction(backgroundAct);
     menu->addAction(axesAct);
     menu->addAction(lightingAct);
+    menu->addAction(lineAct);
     menu->addAction(distanceAct);
+    menu->addAction(biDirectionAct);
     menu->addAction(angleAct);
+    menu->addAction(planeAct);
+    menu->addAction(boxAct);
     menu->addAction(sphereAct);
     menu->addAction(humanAct);
     menu->addAction(textAct);
@@ -1527,15 +1570,35 @@ void milxQtRenderWindow::createActions()
     lightingAct->setCheckable(true);
     lightingAct->setChecked(true);
 
+    lineAct = new QAction(this);
+    lineAct->setText(QApplication::translate("Render", "&Draw Line", 0, QApplication::UnicodeUTF8));
+    lineAct->setCheckable(true);
+    lineAct->setChecked(false);
+
     distanceAct = new QAction(this);
     distanceAct->setText(QApplication::translate("Render", "&Measure Distance", 0, QApplication::UnicodeUTF8));
     distanceAct->setCheckable(true);
     distanceAct->setChecked(false);
 
+    biDirectionAct = new QAction(this);
+    biDirectionAct->setText(QApplication::translate("Render", "&Measure Cross Distance", 0, QApplication::UnicodeUTF8));
+    biDirectionAct->setCheckable(true);
+    biDirectionAct->setChecked(false);
+
     angleAct = new QAction(this);
     angleAct->setText(QApplication::translate("Render", "&Measure Angle", 0, QApplication::UnicodeUTF8));
     angleAct->setCheckable(true);
     angleAct->setChecked(false);
+
+    planeAct = new QAction(this);
+    planeAct->setText(QApplication::translate("Render", "&Draw Plane", 0, QApplication::UnicodeUTF8));
+    planeAct->setCheckable(true);
+    planeAct->setChecked(false);
+
+    boxAct = new QAction(this);
+    boxAct->setText(QApplication::translate("Render", "&Draw Box/Cuboid", 0, QApplication::UnicodeUTF8));
+    boxAct->setCheckable(true);
+    boxAct->setChecked(false);
 
     sphereAct = new QAction(this);
     sphereAct->setText(QApplication::translate("Render", "&Draw Sphere/Circle", 0, QApplication::UnicodeUTF8));
@@ -1560,8 +1623,12 @@ void milxQtRenderWindow::createActions()
     windowPropertiesMenu->addAction(backgroundAct);
     windowPropertiesMenu->addAction(axesAct);
     windowPropertiesMenu->addAction(lightingAct);
+    windowPropertiesMenu->addAction(lineAct);
     windowPropertiesMenu->addAction(distanceAct);
+    windowPropertiesMenu->addAction(biDirectionAct);
     windowPropertiesMenu->addAction(angleAct);
+    windowPropertiesMenu->addAction(planeAct);
+    windowPropertiesMenu->addAction(boxAct);
     windowPropertiesMenu->addAction(sphereAct);
     windowPropertiesMenu->addAction(textAct);
     windowPropertiesMenu->addAction(crosshairAct);
@@ -1737,8 +1804,12 @@ void milxQtRenderWindow::createConnections()
     connect(backgroundAct, SIGNAL(triggered()), this, SLOT(background()));
     connect(axesAct, SIGNAL(triggered()), this, SLOT(axesDisplay()));
     connect(lightingAct, SIGNAL(triggered()), this, SLOT(lighting()));
+    connect(lineAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(distanceAct, SIGNAL(triggered()), this, SLOT(refresh()));
+    connect(biDirectionAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(angleAct, SIGNAL(triggered()), this, SLOT(refresh()));
+    connect(planeAct, SIGNAL(triggered()), this, SLOT(refresh()));
+    connect(boxAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(sphereAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(humanAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(textAct, SIGNAL(triggered()), this, SLOT(textDisplay()));

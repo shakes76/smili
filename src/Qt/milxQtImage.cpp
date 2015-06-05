@@ -41,6 +41,7 @@
 #include <vtkImageReslice.h>
 #include <vtkImageBlend.h>
 #include <vtkOrientedGlyphContourRepresentation.h>
+#include <vtkBoxRepresentation.h>
 #include <vtkImageActorPointPlacer.h>
 #include <vtkDijkstraImageContourLineInterpolator.h>
 #include <vtkDijkstraImageGeodesicPath.h>
@@ -765,7 +766,8 @@ void milxQtImage::trackView(milxQtImage *windowToTrack, ViewType viewTo)
     viewToTrack = viewTo;
     enableCrosshair();
     milxQtRenderWindow::Connector->Connect(windowToTrack->GetVTKInteractor(),
-                                  vtkCommand::LeftButtonPressEvent,
+                                  vtkCommand::MiddleButtonPressEvent,
+//                                  vtkCommand::LeftButtonPressEvent,
                                   this,
                                   SLOT( updateTrackedView(vtkObject*) ),
                                   NULL, 1.0); //High Priority
@@ -1090,36 +1092,53 @@ void milxQtImage::updateData(const bool orient)
     if(!usingVTKImage)
     {
         printDebug("Updating Data");
+
+        floatImageType::DirectionType direction;
+        floatImageType::PointType origin;
+        floatImageType::SpacingType spacing;
         vtkSmartPointer<vtkImageData> newImageData = vtkSmartPointer<vtkImageData>::New();
         if(eightbit)
         {
             /// ITK to VTK image (unsigned char)
-            charImageType::Pointer orientChar = milx::Image<charImageType>::ApplyOrientationToITKImage<double>(imageChar, imageChar, true, flipped, !orient);
-            printDebug("Reoriented Char ITK Image Data Info");
-            milx::Image<charImageType>::Information(orientChar);
-            newImageData->DeepCopy( milx::Image<charImageType>::ConvertITKImageToVTKImage(orientChar) );
+            newImageData->DeepCopy( milx::Image<charImageType>::ConvertITKImageToVTKImage(imageChar) );
+            direction = imageChar->GetDirection();
+            origin = imageChar->GetOrigin();
+            spacing = imageChar->GetSpacing();
+            if(orient)
+                imageData = milx::Image<charImageType>::ApplyOrientationToVTKImage(newImageData, imageChar, transformMatrix, true, flipped);
+            else
+                imageData = newImageData;
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
             printDebug("Updated Internal Char Image Data");
         }
-//        else if(rgb)
-//        {
-//            /// ITK to VTK image (RGB)
-//            rgbImageType::Pointer orientRGB = milx::Image<rgbImageType>::ApplyOrientationToITKImage<double>(imageRGB, imageRGB, true, flipped, !orient);
-//            newImageData->DeepCopy( milx::Image<rgbImageType>::ConvertITKImageToVTKImage(orientRGB) );
-//            //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
-//            printDebug("Updated Internal RGB Image Data");
-//        }
+        else if(rgb)
+        {
+            /// ITK to VTK image (RGB)
+            newImageData->DeepCopy( milx::Image<rgbImageType>::ConvertITKImageToVTKImage(imageRGB) );
+            direction = imageRGB->GetDirection();
+            origin = imageRGB->GetOrigin();
+            spacing = imageRGB->GetSpacing();
+            if(orient)
+                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, true, flipped);
+            else
+                imageData = newImageData;
+            //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
+            printDebug("Updated Internal RGB Image Data");
+        }
         else //if float and/or vector (which also generates float magnitude image)
         {
             /// ITK to VTK image (Float)
-            floatImageType::Pointer orientFloat = milx::Image<floatImageType>::ApplyOrientationToITKImage<double>(imageFloat, imageFloat, false, flipped, !orient);
-            printDebug("Reoriented Float ITK Image Data Info");
-            milx::Image<floatImageType>::Information(orientFloat);
-            newImageData->DeepCopy( milx::Image<floatImageType>::ConvertITKImageToVTKImage(orientFloat) );
+            newImageData->DeepCopy( milx::Image<floatImageType>::ConvertITKImageToVTKImage(imageFloat) );
+            direction = imageFloat->GetDirection();
+            origin = imageFloat->GetOrigin();
+            spacing = imageFloat->GetSpacing();
+            if(orient)
+                imageData = milx::Image<floatImageType>::ApplyOrientationToVTKImage(newImageData, imageFloat, transformMatrix, true, flipped);
+            else
+                imageData = newImageData;
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
             printDebug("Updated Internal Float Image Data");
         }
-        imageData = newImageData;
     }
 
     imageData->Modified();
@@ -4082,6 +4101,89 @@ void milxQtImage::dropEvent(QDropEvent *currentEvent)
             Render();
         }
     }
+}
+
+void milxQtImage::SetupWidgets(vtkRenderWindowInteractor *interactor)
+{
+    printInfo("Setting up image for Annotation");
+    interactor->Initialize();
+
+    double imageBounds[6], imgCenter[3];
+    imageData->GetBounds(imageBounds);
+    imageData->GetOrigin(imgCenter);
+    double length = imageBounds[1]-imageBounds[0]/10;
+
+    //line widget setup
+    lineWidget = vtkSmartPointer<vtkLineWidget2>::New();
+        lineWidget->SetInteractor(interactor);
+        lineWidget->CreateDefaultRepresentation();
+
+    //sphere widget setup
+    sphereRep = vtkSmartPointer<vtkSphereRepresentation>::New();
+        sphereRep->SetRepresentationToWireframe();
+        sphereRep->SetThetaResolution(16);
+        sphereRep->SetPhiResolution(16);
+        sphereRep->SetRadius(length);
+        sphereRep->SetCenter(imgCenter);
+        sphereRep->HandleTextOn();
+        sphereRep->RadialLineOn();
+        sphereRep->HandleVisibilityOn();
+    sphereWidget = vtkSmartPointer<vtkSphereWidget2>::New();
+        sphereWidget->SetInteractor(interactor);
+//        sphereWidget->CreateDefaultRepresentation();
+        sphereWidget->SetRepresentation(sphereRep);
+        sphereWidget->ScalingEnabledOn();
+
+    //Change colour
+    sphereRep->GetSphereProperty()->SetColor(0.9, 0.9, 1.0);
+
+    vtkSmartPointer<vtkPolyData> sphere = vtkSmartPointer<vtkPolyData>::New();
+        sphereRep->GetPolyData(sphere);
+
+    //box widget
+    boxWidget = vtkSmartPointer<vtkBoxWidget2>::New();
+        boxWidget->SetInteractor(interactor);
+        boxWidget->RotationEnabledOn();
+        //boxWidget->CreateDefaultRepresentation();
+
+    vtkSmartPointer<vtkBoxRepresentation> boxRepresentation = vtkSmartPointer<vtkBoxRepresentation>::New();
+        boxRepresentation->SetPlaceFactor( 1 );
+        boxRepresentation->PlaceWidget(sphere->GetBounds());
+        boxWidget->SetRepresentation(boxRepresentation);
+
+    //plane widget setup
+    double actorBounds[6], center[3];
+//    viewer->GetImageActor()->GetBounds(actorBounds);
+    sphere->GetBounds(actorBounds);
+    center[0] = (actorBounds[0] + actorBounds[1])/2.0;
+    center[1] = (actorBounds[2] + actorBounds[3])/2.0;
+    center[2] = (actorBounds[4] + actorBounds[5])/2.0;
+    planeWidget = vtkSmartPointer<vtkPlaneWidget>::New();
+          planeWidget->SetInteractor(interactor);
+          planeWidget->SetPlaceFactor( 1 );
+//          planeWidget->SetRepresentationToOutline();
+//          planeWidget->SetHandleSize(planeWidget->GetHandleSize()*4);
+//          planeWidget->SetHandleSize((actorBounds[1]-actorBounds[0])/10.0);
+//          planeWidget->NormalToXAxisOn();
+//          planeWidget->NormalToYAxisOn();
+          planeWidget->NormalToZAxisOn();
+//          planeWidget->PlaceWidget(actorBounds[0], actorBounds[1], actorBounds[2], actorBounds[3], actorBounds[4], actorBounds[5]);
+//          planeWidget->PlaceWidget(viewer->GetImageActor()->GetBounds());
+//          planeWidget->PlaceWidget(sphere->GetBounds());
+          //X
+//          planeWidget->SetOrigin(center[0],actorBounds[2],actorBounds[4]);
+//          planeWidget->SetPoint1(center[0],actorBounds[3],actorBounds[4]);
+//          planeWidget->SetPoint2(center[0],actorBounds[2],actorBounds[5]);
+          //Y
+//          planeWidget->SetOrigin(actorBounds[0],center[1],actorBounds[4]);
+//          planeWidget->SetPoint1(actorBounds[1],center[1],actorBounds[4]);
+//          planeWidget->SetPoint2(actorBounds[0],center[1],actorBounds[5]);
+          //Z
+          planeWidget->SetOrigin(actorBounds[0],actorBounds[2],center[2]);
+          planeWidget->SetPoint1(actorBounds[1],actorBounds[2],center[2]);
+          planeWidget->SetPoint2(actorBounds[0],actorBounds[3],center[2]);
+          planeWidget->SetResolution(2);
+//          planeWidget->UpdatePlacement();
 }
 
 QString milxQtImage::getOpenFilename(const QString labelForDialog, QString exts)

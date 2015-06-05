@@ -1,3 +1,18 @@
+# SMILI Release v1.0 Beta 1
+Fixed recent change to track view for multi-view. Replaced tracking with MMB instead of LMB.
+Made the Setup Widgets member virtual for derived classes to redefine widgets.
+Updated the widget default placement for images. 
+Updated dev notes and todo list.
+Added plane widget to interaction and annotation.
+Added box widget for render windows.
+Added bi directional and line widgets to render windows.
+Added screenshot that shows updated multi-view and website.
+Fixed recent changes of scalarstats breaking variance computation.
+Improved scalar stats to ignore meshes with no scalars
+Added more documentation for model app Updated Hausdorff script.
+Fixed clipping of meshes in app and added more python scripts.
+Fixed issues introduced by incorrect merging. This broke image orientation display and was confined to only the experimental branch.
+
 # SMILI Release v1.0 Alpha
 Added Save support for FTL PGMs image files. Reworked the patch scripts. Untested.
 Added messages for view types boxes etc. Added refresh icon to reset action.
@@ -11,7 +26,7 @@ Another fix to the script to fix output name.
 Fixed Python Qt not being installed in packages properly. Fixed Python Qt paths settings.
 Fix to script for executing custom module and Improved script case ID retrieval.
 
-# SMILI Release v0.99 (Beta)
+# SMILI Release v0.99 (Initial)
 
 This is the first version of SMILI released to the public. A number of operating systems are supported including:
 * Windows 8/7/Vista/XP 64/32-bit
