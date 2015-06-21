@@ -50,6 +50,7 @@ IF(BUILD_PLUGINS)
     OPTION(BUILD_ANIMATE_PLUGIN "Build the Animate plugin for MILX Qt Viewer" OFF)
     OPTION(BUILD_DTI_PLUGIN "Build the Diffusion Tensor plugin for MILX Qt Viewer" OFF)
     OPTION(BUILD_FTL_PLUGIN "Build the Finite Transform Library plugin for MILX Qt Viewer" OFF)
+    OPTION(BUILD_REGISTRATION_PLUGIN "Build the Image Registration Plugin for MILX Qt " OFF)
 ENDIF(BUILD_PLUGINS)
 
 #Check ITK/VTK statuses

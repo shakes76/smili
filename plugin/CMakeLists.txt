@@ -32,3 +32,7 @@ endif(BUILD_DTI_PLUGIN)
 if(BUILD_FTL_PLUGIN)
     add_subdirectory(finitetransform)
 endif(BUILD_FTL_PLUGIN)
+
+if(BUILD_REGISTRATION_PLUGIN)
+    add_subdirectory(registration)
+endif(BUILD_REGISTRATION_PLUGIN)
