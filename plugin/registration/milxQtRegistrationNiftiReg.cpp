@@ -92,7 +92,7 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	char *floatingName = params.floatingName;
 	char * outputControlPointGridName = params.outputControlPointGridName;
 	char * outputWarpedName = params.outputWarpedName;
-	int maxiterationNumber = params.maxiterationNumber;
+	int maxiterationNumber = params.maxit;
 
 	
 	PrecisionTYPE spacing[3];
@@ -100,16 +100,14 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	spacing[1] = params.spacing[1];
 	spacing[2] = params.spacing[2];
 
-	unsigned int levelNumber = params.levelNumber;
-	unsigned int levelToPerform = params.levelToPerform;
-	bool noPyramid = params.noPyramid;
+	unsigned int levelNumber = params.ln;
+	unsigned int levelToPerform = params.lp;
+	bool noPyramid = params.nopy;
 	bool useSym = params.useSym;
 
-	/*
 	char *referenceMaskName = NULL;
 	char *inputControlPointGridName = NULL;
 	char *affineTransformationName = NULL;
-	*/
 	bool flirtAffine = false;
 	PrecisionTYPE bendingEnergyWeight = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
 	PrecisionTYPE linearEnergyWeight0 = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
@@ -135,19 +133,17 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	}
 	bool parzenWindowApproximation = true;
 	PrecisionTYPE warpedPaddingValue = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
-	spacing[0] = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
-	spacing[1] = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
-	spacing[2] = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
 	PrecisionTYPE gradientSmoothingSigma = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
-	bool verbose = false;
-	bool useConjugate = true;
-	bool useSSD = false;
+	bool verbose=true;
+	bool useConjugate=true;
+	bool useSSD=false;
 	bool useKLD = false;
-	int interpolation = 1;
-	bool xOptimisation = true;
-	bool yOptimisation = true;
-	bool zOptimisation = true;
+	int interpolation=1;
+	bool xOptimisation=true;
+	bool yOptimisation=true;
+	bool zOptimisation=true;
 	bool gridRefinement = true;
+
 	bool additiveNMI = false;
 	char *floatingMaskName = NULL;
 	float inverseConsistencyWeight = std::numeric_limits<PrecisionTYPE>::quiet_NaN();
@@ -163,106 +159,113 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	int cardNumber = -1;
 #endif
 
+
 	if (referenceName == NULL || floatingName == NULL){
-		//MainWindow->printError("Err:\tThe reference and the floating image have to be defined.");
-		emit registrationFinished();
+		//fprintf(stderr, "Err:\tThe reference and the floating image have to be defined.\n");
 		return 1;
 	}
 
 #ifndef NDEBUG
-	//MainWindow->printDebug("[NiftyReg DEBUG] *******************************************");
-	//MainWindow->printDebug("[NiftyReg DEBUG] *******************************************");
-	//MainWindow->printDebug("[NiftyReg DEBUG] NiftyReg has been compiled in DEBUG mode");
-	//MainWindow->printDebug("[NiftyReg DEBUG] Please rerun cmake to set the variable");
-	//MainWindow->printDebug("[NiftyReg DEBUG] CMAKE_BUILD_TYPE to \"Release\" if required");
-	//MainWindow->printDebug("[NiftyReg DEBUG] *******************************************");
-	//MainWindow->printDebug("[NiftyReg DEBUG] *******************************************");
+	/*
+	printf("[NiftyReg DEBUG] *******************************************\n");
+	printf("[NiftyReg DEBUG] *******************************************\n");
+	printf("[NiftyReg DEBUG] NiftyReg has been compiled in DEBUG mode\n");
+	printf("[NiftyReg DEBUG] Please rerun cmake to set the variable\n");
+	printf("[NiftyReg DEBUG] CMAKE_BUILD_TYPE to \"Release\" if required\n");
+	printf("[NiftyReg DEBUG] *******************************************\n");
+	printf("[NiftyReg DEBUG] *******************************************\n");
+	*/
+#endif
+
+	// Output the command line
+#ifdef NDEBUG
+	if (verbose == true){
+#endif
+		/*
+		printf("\n[NiftyReg F3D] Command line:\n\t");
+		for (int i = 0; i<argc; i++)
+			printf(" %s", argv[i]);
+		printf("\n\n");
+		*/
+#ifdef NDEBUG
+	}
 #endif
 
 	// Read the reference image
 	if (referenceName == NULL){
-		//MainWindow->printError("Error.No reference image has been defined");
-		emit registrationFinished();
+		//fprintf(stderr, "Error. No reference image has been defined\n");
 		return 1;
 	}
 	nifti_image *referenceImage = reg_io_ReadImageFile(referenceName);
 	if (referenceImage == NULL){
-		//MainWindow->printError("Error when reading the reference image " + QString(referenceName));
-		emit registrationFinished();
+		//fprintf(stderr, "Error when reading the reference image %s\n", referenceName);
 		return 1;
 	}
 
 	// Read the floating image
 	if (floatingName == NULL){
-		//MainWindow->printError("Error. No floating image has been defined");
-		emit registrationFinished();
+		//fprintf(stderr, "Error. No floating image has been defined\n");
 		return 1;
 	}
 	nifti_image *floatingImage = reg_io_ReadImageFile(floatingName);
 	if (floatingImage == NULL){
-		//MainWindow->printError("Error when reading the floating image " + QString(floatingName));
-		emit registrationFinished();
+		//fprintf(stderr, "Error when reading the floating image %s\n", floatingName);
 		return 1;
 	}
 
-	/*
 	// Read the mask images
 	nifti_image *referenceMaskImage = NULL;
 	if (referenceMaskName != NULL){
-	referenceMaskImage = reg_io_ReadImageFile(referenceMaskName);
-	if (referenceMaskImage == NULL){
-	//MainWindow->printError("Error when reading the reference mask image " + QString(referenceMaskName));
-	emit registrationFinished();
-	return 1;
-	}
+		referenceMaskImage = reg_io_ReadImageFile(referenceMaskName);
+		if (referenceMaskImage == NULL){
+			//fprintf(stderr, "Error when reading the reference mask image %s\n", referenceMaskName);
+			return 1;
+		}
 	}
 	nifti_image *floatingMaskImage = NULL;
 	if (floatingMaskName != NULL){
-	floatingMaskImage = reg_io_ReadImageFile(floatingMaskName);
-	if (floatingMaskImage == NULL){
-	//MainWindow->printError("Error when reading the reference mask image " + QString(floatingMaskName));
-	emit registrationFinished();
-	return 1;
-	}
+		floatingMaskImage = reg_io_ReadImageFile(floatingMaskName);
+		if (floatingMaskImage == NULL){
+			//fprintf(stderr, "Error when reading the reference mask image %s\n", floatingMaskName);
+			return 1;
+		}
 	}
 
 	// Read the input control point grid image
 	nifti_image *controlPointGridImage = NULL;
 	if (inputControlPointGridName != NULL){
-	controlPointGridImage = reg_io_ReadImageFile(inputControlPointGridName);
-	if (controlPointGridImage == NULL){
-	//MainWindow->printError("Error when reading the input control point grid image " + QString(inputControlPointGridName));
-	emit registrationFinished();
-	return 1;
-	}
-	#ifdef _BUILD_NR_DEV
-	if (controlPointGridImage->intent_code == NIFTI_INTENT_VECTOR &&
-	strcmp(controlPointGridImage->intent_name, "NREG_VEL_STEP") == 0 &&
-	fabs(controlPointGridImage->intent_p1)>1)
-	useVel = true;
-	#endif
+		controlPointGridImage = reg_io_ReadImageFile(inputControlPointGridName);
+		if (controlPointGridImage == NULL){
+			//fprintf(stderr, "Error when reading the input control point grid image %s\n", inputControlPointGridName);
+			return 1;
+		}
+#ifdef _BUILD_NR_DEV
+		if (controlPointGridImage->intent_code == NIFTI_INTENT_VECTOR &&
+			strcmp(controlPointGridImage->intent_name, "NREG_VEL_STEP") == 0 &&
+			fabs(controlPointGridImage->intent_p1)>1)
+			useVel = true;
+#endif
 	}
 
 	// Read the affine transformation
 	mat44 *affineTransformation = NULL;
 	if (affineTransformationName != NULL){
-	affineTransformation = (mat44 *)malloc(sizeof(mat44));
-	// Check first if the specified affine file exist
-	if (FILE *aff = fopen(affineTransformationName, "r")){
-	fclose(aff);
+		affineTransformation = (mat44 *)malloc(sizeof(mat44));
+		// Check first if the specified affine file exist
+		if (FILE *aff = fopen(affineTransformationName, "r")){
+			fclose(aff);
+		}
+		else{
+			//fprintf(stderr, "The specified input affine file (%s) can not be read\n", affineTransformationName);
+			return 1;
+		}
+		reg_tool_ReadAffineFile(affineTransformation,
+			referenceImage,
+			floatingImage,
+			affineTransformationName,
+			flirtAffine);
 	}
-	else{
-	//MainWindow->printError("The specified input affine file ("+ QString(affineTransformationName) +") can not be read");
-	emit registrationFinished();
-	return 1;
-	}
-	reg_tool_ReadAffineFile(affineTransformation,
-	referenceImage,
-	floatingImage,
-	affineTransformationName,
-	flirtAffine);
-	}
-	*/
+
 	// Create the reg_f3d object
 	reg_f3d<PrecisionTYPE> *REG = NULL;
 #ifdef _USE_CUDA
@@ -273,17 +276,17 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 		if (linearEnergyWeight0 == linearEnergyWeight0 ||
 			linearEnergyWeight1 == linearEnergyWeight1 ||
 			L2NormWeight == L2NormWeight){
-			//MainWindow->printError("NiftyReg ERROR CUDA] The linear elasticity has not been implemented with CUDA yet. Exit.");
+			//fprintf(stderr, "NiftyReg ERROR CUDA] The linear elasticity has not been implemented with CUDA yet. Exit.\n");
 			exit(0);
 		}
 
 		if (useSym){
-			//MainWindow->printError("[NiftyReg ERROR CUDA] GPU implementation of the symmetric registration is not available yet. Exit");
+			//fprintf(stderr, "\n[NiftyReg ERROR CUDA] GPU implementation of the symmetric registration is not available yet. Exit\n");
 			exit(0);
 		}
 #ifdef _BUILD_NR_DEV
 		if (useVel){
-			//MainWindow->printError("[NiftyReg ERROR CUDA] GPU implementation of velocity field parametrisartion is not available yet. Exit");
+			//fprintf(stderr, "\n[NiftyReg ERROR CUDA] GPU implementation of velocity field parametrisartion is not available yet. Exit\n");
 			exit(0);
 		}
 #endif
@@ -296,67 +299,66 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 			int device_count = 0;
 			cudaGetDeviceCount(&device_count);
 			int device = cardNumber;
-			if (cardNumber == -1){
+			if(cardNumber==-1){
 				// following code is from cutGetMaxGflopsDeviceId()
 				int max_gflops_device = 0;
 				int max_gflops = 0;
 				int current_device = 0;
-				while (current_device < device_count){
-					cudaGetDeviceProperties(&deviceProp, current_device);
+				while( current_device < device_count ){
+					cudaGetDeviceProperties( &deviceProp, current_device );
 					int gflops = deviceProp.multiProcessorCount * deviceProp.clockRate;
 					if (gflops > max_gflops){
 						max_gflops = gflops;
 						max_gflops_device = current_device;
 					}
 					++current_device;
-				}
+		}
 				device = max_gflops_device;
-			}
-			NR_CUDA_SAFE_CALL(cudaSetDevice(device));
-			NR_CUDA_SAFE_CALL(cudaGetDeviceProperties(&deviceProp, device));
-			cuDeviceGet(&dev, device);
+	}
+			NR_CUDA_SAFE_CALL(cudaSetDevice( device ));
+			NR_CUDA_SAFE_CALL(cudaGetDeviceProperties(&deviceProp, device ));
+			cuDeviceGet(&dev,device);
 			cuCtxCreate(&ctx, 0, dev);
 			if (deviceProp.major < 1){
-				//MainWindow->printError("[NiftyReg ERROR CUDA] The specified graphical card does not exist.");
-				emit registrationFinished();
+				//printf("[NiftyReg ERROR CUDA] The specified graphical card does not exist.\n");
 				return 1;
 			}
 			REG = new reg_f3d_gpu<PrecisionTYPE>(referenceImage->nt, floatingImage->nt);
 #ifdef NDEBUG
 			if (verbose == true){
 #endif
-				//MainWindow->printInfo("[NiftyReg F3D] GPU implementation is used");
+				//printf("\n[NiftyReg F3D] GPU implementation is used\n");
 #ifdef NDEBUG
 			}
 #endif
-		}
+}
 		else{
-			//MainWindow->printError("[NiftyReg ERROR] The GPU implementation only handle 1 to 1 or 2 to 2 image(s) registration");
+			//fprintf(stderr, "[NiftyReg ERROR] The GPU implementation only handle 1 to 1 or 2 to 2 image(s) registration\n");
 			exit(1);
 		}
 	}
 	else
 #endif
 	{
-		if (useSym){
+		if(useSym){
 			REG = new reg_f3d_sym<PrecisionTYPE>(referenceImage->nt, floatingImage->nt);
 #ifdef NDEBUG
 			if (verbose == true){
 #endif // NDEBUG
-				//MainWindow->printInfo("\n[NiftyReg F3D SYM] CPU implementation is used");
+				//printf("\n[NiftyReg F3D SYM] CPU implementation is used\n");
 #ifdef NDEBUG
 			}
 #endif // NDEBUG
-		}
+	}
 #ifdef _BUILD_NR_DEV
 		else if (useVel){
 			REG = new reg_f3d2<PrecisionTYPE>(referenceImage->nt, floatingImage->nt);
 #ifdef NDEBUG
-			if (verbose == true){
+			if(verbose==true){
 #endif
-				//MainWindow->printInfo("\n[NiftyReg F3D2] CPU implementation is used");
+				//printf("\n[NiftyReg F3D2] CPU implementation is used\n");
 #ifdef NDEBUG
-			}
+		}
 #endif
 		}
 #endif // _BUILD_NR_DEV
@@ -365,7 +367,7 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 #ifdef NDEBUG
 			if (verbose == true){
 #endif // NDEBUG
-				//MainWindow->printInfo("[NiftyReg F3D] CPU implementation is used");
+				//printf("\n[NiftyReg F3D] CPU implementation is used\n");
 #ifdef NDEBUG
 			}
 #endif // NDEBUG
@@ -374,34 +376,33 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 #ifdef _OPENMP
 	int maxThreadNumber = omp_get_max_threads();
 #ifdef NDEBUG
-	if (verbose == true){
+	if(verbose==true){
 #endif // NDEBUG
-		//MainWindow->printInfo("[NiftyReg F3D] OpenMP is used with "+ QString::number(maxThreadNumber) +" thread(s)");
+		printf("[NiftyReg F3D] OpenMP is used with %i thread(s)\n", maxThreadNumber);
 #ifdef NDEBUG
-	}
+		}
 #endif // NDEBUG
 #endif // _OPENMP
 
 	// Set the reg_f3d parameters
+
 	REG->SetReferenceImage(referenceImage);
 
 	REG->SetFloatingImage(floatingImage);
 
-	if (verbose == false) REG->DoNotPrintOutInformation();
+	if(verbose==false) REG->DoNotPrintOutInformation();
 	else REG->PrintOutInformation();
 
-	/*
 	if (referenceMaskImage != NULL)
-	REG->SetReferenceMask(referenceMaskImage);
+		REG->SetReferenceMask(referenceMaskImage);
 
-	if (controlPointGridImage != NULL)
-	REG->SetControlPointGridImage(controlPointGridImage);
+	if(controlPointGridImage!=NULL)
+		REG->SetControlPointGridImage(controlPointGridImage);
 
 	if (affineTransformation != NULL)
-	REG->SetAffineTransformation(affineTransformation);
-	*/
+		REG->SetAffineTransformation(affineTransformation);
 
-	if (bendingEnergyWeight == bendingEnergyWeight)
+	if(bendingEnergyWeight==bendingEnergyWeight)
 		REG->SetBendingEnergyWeight(bendingEnergyWeight);
 
 	if (linearEnergyWeight0 == linearEnergyWeight0 || linearEnergyWeight1 == linearEnergyWeight1){
@@ -412,7 +413,7 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	if (L2NormWeight == L2NormWeight)
 		REG->SetL2NormDisplacementWeight(L2NormWeight);
 
-	if (jacobianLogWeight == jacobianLogWeight)
+	if(jacobianLogWeight==jacobianLogWeight)
 		REG->SetJacobianLogWeight(jacobianLogWeight);
 
 	if (jacobianLogApproximation)
@@ -429,22 +430,22 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	if (referenceSmoothingSigma == referenceSmoothingSigma)
 		REG->SetReferenceSmoothingSigma(referenceSmoothingSigma);
 
-	if (floatingSmoothingSigma == floatingSmoothingSigma)
+	if(floatingSmoothingSigma==floatingSmoothingSigma)
 		REG->SetFloatingSmoothingSigma(floatingSmoothingSigma);
 
 	for (unsigned int t = 0; t<(unsigned int)referenceImage->nt; t++)
 		if (referenceThresholdUp[t] == referenceThresholdUp[t])
 			REG->SetReferenceThresholdUp(t, referenceThresholdUp[t]);
 
-	for (unsigned int t = 0; t<(unsigned int)referenceImage->nt; t++)
+	for(unsigned int t=0;t<(unsigned int)referenceImage->nt;t++)
 		if (referenceThresholdLow[t] == referenceThresholdLow[t])
 			REG->SetReferenceThresholdLow(t, referenceThresholdLow[t]);
 
-	for (unsigned int t = 0; t<(unsigned int)floatingImage->nt; t++)
-		if (floatingThresholdUp[t] == floatingThresholdUp[t])
+	for(unsigned int t=0;t<(unsigned int)floatingImage->nt;t++)
+		if(floatingThresholdUp[t]==floatingThresholdUp[t])
 			REG->SetFloatingThresholdUp(t, floatingThresholdUp[t]);
 
-	for (unsigned int t = 0; t<(unsigned int)floatingImage->nt; t++)
+	for(unsigned int t=0;t<(unsigned int)floatingImage->nt;t++)
 		if (floatingThresholdLow[t] == floatingThresholdLow[t])
 			REG->SetFloatingThresholdLow(t, floatingThresholdLow[t]);
 
@@ -513,20 +514,18 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	if (additiveNMI) REG->SetAdditiveMC();
 
 	// F3D SYM arguments
-	/*
 	if (floatingMaskImage != NULL){
-	if (useSym)
-	REG->SetFloatingMask(floatingMaskImage);
-	#ifdef _BUILD_NR_DEV
-	else if (useVel)
-	REG->SetFloatingMask(floatingMaskImage);
-	#endif
-	else{
-	//MainWindow->printError("[NiftyReg WARNING] The floating mask image is only used for symmetric or velocity field parametrisation");
-	//MainWindow->printError("[NiftyReg WARNING] The floating mask image is ignored");
+		if (useSym)
+			REG->SetFloatingMask(floatingMaskImage);
+#ifdef _BUILD_NR_DEV
+		else if (useVel)
+			REG->SetFloatingMask(floatingMaskImage);
+#endif
+		else{
+			//fprintf(stderr, "[NiftyReg WARNING] The floating mask image is only used for symmetric or velocity field parametrisation\n");
+			//fprintf(stderr, "[NiftyReg WARNING] The floating mask image is ignored\n");
+		}
 	}
-	}
-	*/
 
 	if (inverseConsistencyWeight == inverseConsistencyWeight)
 		REG->SetInverseConsistencyWeight(inverseConsistencyWeight);
@@ -542,8 +541,10 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	if (useGPU && checkMem){
 		size_t free, total, requiredMemory = REG->CheckMemoryMB_f3d();
 		cuMemGetInfo(&free, &total);
-		//MainWindow->printInfo("[NiftyReg CUDA] The required memory to run the registration is "+ QString::number((unsigned long int)requiredMemory) +" Mb");
-		//MainWindow->printInfo("[NiftyReg CUDA] The GPU card has "+ QString::number((unsigned long int)total / (1024 * 1024)) +" Mb from which "+ QString::number((unsigned long int)free / (1024 * 1024)) +" Mb are currenlty free");
+		//printf("[NiftyReg CUDA] The required memory to run the registration is %lu Mb\n",
+			(unsigned long int)requiredMemory);
+		//printf("[NiftyReg CUDA] The GPU card has %lu Mb from which %lu Mb are currenlty free\n",
+			(unsigned long int)total / (1024 * 1024), (unsigned long int)free / (1024 * 1024));
 	}
 	else{
 #endif
@@ -661,12 +662,10 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	// Clean the allocated images
 	if (referenceImage != NULL) nifti_image_free(referenceImage);
 	if (floatingImage != NULL) nifti_image_free(floatingImage);
-	/*
 	if (controlPointGridImage != NULL) nifti_image_free(controlPointGridImage);
 	if (affineTransformation != NULL) free(affineTransformation);
 	if (referenceMaskImage != NULL) nifti_image_free(referenceMaskImage);
 	if (floatingMaskImage != NULL) nifti_image_free(floatingMaskImage);
-	*/
 
 #ifdef NDEBUG
 	if (verbose){
@@ -678,8 +677,8 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 #ifdef _USE_CUDA
 		if (!checkMem){
 #endif
-			//MainWindow->printInfo("[NiftyReg F3D] Registration Performed in " + QString::number(minutes) + " min " + QString::number(seconds) + " sec");
-			//MainWindow->printInfo("[NiftyReg F3D] Have a good day !");
+			//printf("[NiftyReg F3D] Registration Performed in %i min %i sec\n", minutes, seconds);
+			//printf("[NiftyReg F3D] Have a good day !\n");
 #ifdef _USE_CUDA
 		}
 #endif
@@ -687,9 +686,9 @@ int milxQtRegistrationNifti::f3d(PARAMSF3D params)
 	}
 #endif
 
-	emit registrationFinished();
-	return 0;
-	}
+emit registrationFinished();
+return 0;
+}
 
 int milxQtRegistrationNifti::aladin(PARAMSALADIN params)
 {
@@ -701,10 +700,28 @@ int milxQtRegistrationNifti::aladin(PARAMSALADIN params)
 	char *floatingImageName = params.floatingName;
 	int floatingImageFlag = 1;
 
+	char *outputResultName = params.outputResultName;
+	int outputResultFlag = 1;
 
-	int maxiterationNumber = params.maxiterationNumber;
-
+	int maxIter = params.maxit;
 	int symFlag = params.useSym;
+	int nLevels =  params.ln;
+	int levelsToPerform = params.lp;
+	float blockPercentage = params.percentBlock;
+	int affineFlag = 1;
+	int rigidFlag = 1;
+
+	if (params.rigOnly)
+	{
+		rigidFlag = 1;
+		affineFlag = 0;
+	}
+
+	if (params.aF3Direct)
+	{
+		rigidFlag = 0;
+		affineFlag = 1;
+	}
 
 	char *outputAffineName = NULL;
 	int outputAffineFlag = 0;
@@ -719,32 +736,11 @@ int milxQtRegistrationNifti::aladin(PARAMSALADIN params)
 	char *floatingMaskName = NULL;
 	int floatingMaskFlag = 0;
 
-	char *outputResultName = NULL;
-	int outputResultFlag = 0;
-
-	int maxIter = params.maxiterationNumber;
-	int nLevels =  params.levelNumber;
-	int levelsToPerform = params.levelToPerform;
-	int affineFlag = 1;
-	int rigidFlag = 1;
-	float blockPercentage = params.percentBlock;
-	float inlierLts = 50.0f;
-	int alignCentre = 1;
+	float inlierLts=50.0f;
+	int alignCentre=1;
 	int interpolation = 1;
 	float floatingSigma = 0.0;
-	float referenceSigma = 0.0;
-
-	if (params.rigOnly)
-	{
-		rigidFlag = 1;
-		affineFlag = 0;
-	}
-
-	if (params.affDirect)
-	{
-		rigidFlag = 0;
-		affineFlag = 1;
-	}
+	float referenceSigma=0.0;
 
 	if (!referenceImageFlag || !floatingImageFlag){
 		//fprintf(stderr, "Err:\tThe reference and the floating image have to be defined.\n");
@@ -854,11 +850,10 @@ int milxQtRegistrationNifti::aladin(PARAMSALADIN params)
 	nifti_image_free(outputResultImage);
 
 	/* The affine transformation is saved */
-	/*
 	if (outputAffineFlag)
 		reg_tool_WriteAffineFile(REG->GetTransformationMatrix(), outputAffineName);
 	else reg_tool_WriteAffineFile(REG->GetTransformationMatrix(), (char *)"outputAffine.txt");
-	*/
+
 	nifti_image_free(referenceHeader);
 	nifti_image_free(floatingHeader);
 
@@ -866,7 +861,7 @@ int milxQtRegistrationNifti::aladin(PARAMSALADIN params)
 	time_t end; time(&end);
 	int minutes = (int)floorf((end - start) / 60.0f);
 	int seconds = (int)(end - start - 60 * minutes);
-	//printf("Registration Performed in %i min %i sec\n", minutes, seconds);
+
 
 	emit registrationFinished();
 	return 0;

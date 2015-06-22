@@ -139,19 +139,19 @@ void milxQtRegistrationPlugin::loadExtension()
 
 void milxQtRegistrationPlugin::createActions()
 {
-    actionFFD = new QAction(MainWindow);
-	actionFFD->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation", 0, QApplication::UnicodeUTF8));
+    actionF3D = new QAction(MainWindow);
+	actionF3D->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation", 0, QApplication::UnicodeUTF8));
 
-	actionAffine = new QAction(MainWindow);
-	actionAffine->setText(QApplication::translate("RegistrationPlugin", "Affine (Aladin)"));
+	actionAladin = new QAction(MainWindow);
+	actionAladin->setText(QApplication::translate("RegistrationPlugin", "Aladin (Aladin)"));
 }
 
 void milxQtRegistrationPlugin::createMenu()
 {
     menu = new QMenu(MainWindow);
     menu->setTitle(QApplication::translate("RegistrationPlugin", "Image Registration", 0, QApplication::UnicodeUTF8));
-	menu->addAction(actionFFD);
-	menu->addAction(actionAffine);
+	menu->addAction(actionF3D);
+	menu->addAction(actionAladin);
 
     menuToAdd.append(menu);
 }
@@ -159,22 +159,22 @@ void milxQtRegistrationPlugin::createMenu()
 
 void milxQtRegistrationPlugin::createConnections()
 {
-	connect(actionFFD, SIGNAL(activated()), this, SLOT(ffdRegistrationSlot()));
-	connect(actionAffine, SIGNAL(activated()), this, SLOT(affineRegistrationSlot()));
+	connect(actionF3D, SIGNAL(activated()), this, SLOT(F3DRegistrationSlot()));
+	connect(actionAladin, SIGNAL(activated()), this, SLOT(AladinRegistrationSlot()));
 }
 
 
-// FFD Registration slot
-void milxQtRegistrationPlugin::ffdRegistrationSlot()
+// F3D Registration slot
+void milxQtRegistrationPlugin::F3DRegistrationSlot()
 {
-	regWindow->setup(FFD);
+	regWindow->setup(F3D);
 	regWindow->show();
 }
 
-// Affine Registration slot
-void milxQtRegistrationPlugin::affineRegistrationSlot()
+// Aladin Registration slot
+void milxQtRegistrationPlugin::AladinRegistrationSlot()
 {
-	regWindow->setup(Affine);
+	regWindow->setup(Aladin);
 	regWindow->show();
 }
 

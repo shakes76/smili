@@ -1,15 +1,3 @@
-#ifndef MILXQTRegistrationRegType
-#define MILXQTRegistrationRegType
-
-// Type of the registration FFD or Affine
-typedef enum
-{
-	FFD,
-	Affine
-} RegType;
-
-#endif
-
 #ifndef MILXQTRegistrationWindow_H
 #define MILXQTRegistrationWindow_H
 
@@ -19,6 +7,7 @@ typedef enum
 #include "milxQtImage.h"
 #include "milxQtFile.h"
 #include "milxQtRegistrationNiftiReg.h"
+#include "milxQtRegistrationStructures.h"
 
 // Structure containing all the informations about a registration
 struct RegistrationParams {
@@ -43,6 +32,7 @@ public:
 	milxQtRegistrationWindow(milxQtMain *theParent = 0);
 	virtual ~milxQtRegistrationWindow();
 	void setup(RegType regType);
+	void removeFiles(RegistrationParams reg); // Remove files created during a registration
 
 public slots:
 	void accept(); // Click on button Ok
@@ -89,6 +79,9 @@ protected:
 
     // Current registration in progress
 	RegistrationParams currentReg;
+
+	// Is there any work in process
+	bool workInProcess;
 };
 
 #endif // MILXQTRegistrationWindow_H

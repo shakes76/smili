@@ -34,8 +34,13 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include "milxQtRegistrationStructures.h"
 
-
+#ifdef _USE_NR_DOUBLE
+#define PrecisionTYPE double
+#else
+#define PrecisionTYPE float
+#endif
 
 #ifdef _USE_CUDA
 #include "_reg_f3d_gpu.h"
@@ -47,43 +52,6 @@
 #include <time.h>
 #endif
 
-#ifdef _USE_NR_DOUBLE
-#define PrecisionTYPE double
-#else
-#define PrecisionTYPE float
-#endif
-
-typedef struct{
-	char referenceImageName[FILENAME_MAX + 1];
-	char cpp2defInputName[FILENAME_MAX + 1];
-	char cpp2defOutputName[FILENAME_MAX + 1];
-} PARAMSCPP2DEF;
-
-typedef struct{
-	char referenceName[FILENAME_MAX + 1];
-	char floatingName[FILENAME_MAX + 1];
-	char outputControlPointGridName[FILENAME_MAX + 1];
-	char outputWarpedName[FILENAME_MAX + 1];
-	int maxiterationNumber;  /* maxiterationNumber should be -1 by default*/
-	PrecisionTYPE spacing[3]; /* spacing[0] = sx, spacing[1] = sy, spacing[2] = sz */
-	unsigned int levelNumber;
-	unsigned int levelToPerform;
-	bool noPyramid;
-	bool useSym;
-} PARAMSF3D;
-
-typedef struct{
-	char referenceName[FILENAME_MAX + 1];
-	char floatingName[FILENAME_MAX + 1];
-	char outputWarpedName[FILENAME_MAX + 1];
-	bool rigOnly; /* false by default (rigid + affine) */
-	bool affDirect; /* false by default (default is rigid then affine) */
-	int maxiterationNumber;  /* maxiterationNumber should be -1 by default*/
-	unsigned int levelNumber;
-	unsigned int levelToPerform;
-	bool useSym;
-	float percentBlock; /* Percentage of block to use, default 50 */
-} PARAMSALADIN;
 
 /**
     \class milxQtRegistrationNifti

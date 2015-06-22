@@ -14,7 +14,7 @@ milxQtRegistrationWindow::milxQtRegistrationWindow(milxQtMain *theParent) : QDia
 	niftiReg = new milxQtRegistrationNifti(MainWindow);
 	setWindowModality(Qt::ApplicationModal);
 	setWindowTitle(tr("Registration option"));
-
+	workInProcess = false;
 	createConnections();
 }
 
@@ -26,6 +26,14 @@ milxQtRegistrationWindow::~milxQtRegistrationWindow()
 
 void milxQtRegistrationWindow::setup(RegType regType)
 {
+	// If the work is in process, the interface stays disable
+	if (workInProcess) { return; }
+
+	// Reset interface
+	this->ui.comboBoxAlgo->clear();
+	this->ui.comboBoxRef->clear();
+	this->ui.listWidget->clear();
+
 	// Get the list of opened images
 	getListOfHandledImages();
 	if (imageList.size() < 2)
@@ -36,11 +44,10 @@ void milxQtRegistrationWindow::setup(RegType regType)
 
 	// Set up the list of algorithms
 	QStringList algoList;
-    algoList << "FFD" << "Affine";
+    algoList << "F3D" << "Aladin";
 	this->ui.comboBoxAlgo->addItems(algoList);
 	this->ui.comboBoxAlgo->setCurrentIndex(regType);
     algoComboChange(regType);
-
 
 	// Set up the combo lists
 	for (int i = 0; i < imageList.size(); i++)
@@ -67,8 +74,16 @@ void milxQtRegistrationWindow::setup(RegType regType)
 	// Set default selected items
 	this->ui.comboBoxRef->setCurrentIndex(0);
 
-	// By default we show the deformation field
-	this->ui.checkBoxDeformationF->setChecked(true);
+	if (regType == F3D)
+	{
+		// By default we show the deformation field for F3D
+		this->ui.checkBoxDeformationF->setChecked(true);
+	}
+	else
+	{
+		this->ui.checkBoxDeformationF->setChecked(false);
+	}
+
 }
 
 // Create connections with the user interface
@@ -93,14 +108,17 @@ void milxQtRegistrationWindow::advancedOptionsClicked()
 // Algo combo box changed
 void milxQtRegistrationWindow::algoComboChange(int newIndex)
 {
-    if (newIndex == Affine)
+    if (newIndex == Aladin)
     {
         this->ui.checkBoxDeformationF->setChecked(false);
         this->ui.checkBoxDeformationF->setDisabled(true);
     }
     else
     {
-        this->ui.checkBoxDeformationF->setDisabled(false);
+		if (!workInProcess)
+		{
+			this->ui.checkBoxDeformationF->setDisabled(false);
+		}
     }
 }
 
@@ -209,8 +227,10 @@ void milxQtRegistrationWindow::accept()
 		params.algo = algo;
 		params.useCpp2Def = deformationField;
 		
-		if (algo == FFD)
+		if (algo == F3D)
 		{
+			params.F3D = advancedOptionsWindow->getParamsF3D();
+
 			strncpy(params.F3D.referenceName, refPath, FILENAME_MAX);
 			strncpy(params.F3D.floatingName, imgPath, FILENAME_MAX);
 			strncpy(params.F3D.outputWarpedName, outPath, FILENAME_MAX);
@@ -220,26 +240,7 @@ void milxQtRegistrationWindow::accept()
 			if (!createTmpFile(cppPath)) { this->reject(); return; }
 			strncpy(params.F3D.outputControlPointGridName, cppPath, FILENAME_MAX);
 
-			params.F3D.maxiterationNumber = -1; 
-			params.F3D.spacing[0] = 5;
-			params.F3D.spacing[1] = 5;
-			params.F3D.spacing[2] = 5;
-			params.F3D.levelNumber = 3;
-			params.F3D.levelToPerform = 3;
-			params.F3D.noPyramid = false;
-			params.F3D.useSym = false;
-
-			/*
-			params.F3D.maxiterationNumber = advancedOptionsWindow->getMaxItLevel();
-			params.F3D.spacing[0] = advancedOptionsWindow->getSx();
-			params.F3D.spacing[1] = advancedOptionsWindow->getSy();
-			params.F3D.spacing[2] = advancedOptionsWindow->getSz();
-			params.F3D.levelNumber = advancedOptionsWindow->getNbLevel();
-			params.F3D.levelToPerform = advancedOptionsWindow->getFirstLevels();
-			params.F3D.noPyramid = advancedOptionsWindow->getUsePyramidalApproach();
-			params.F3D.useSym = advancedOptionsWindow->getUseSymmetricApproach();
-			*/
-
+			// Create file if deformation field
 			if (deformationField)
 			{
 				// Create the deformation field path
@@ -252,19 +253,13 @@ void milxQtRegistrationWindow::accept()
 				params.F3D.outputControlPointGridName[0] = '\0';
 			}
 		}
-		else if (algo == Affine)
+		else if (algo == Aladin)
 		{
+			params.Aladin = advancedOptionsWindow->getParamsAladin();
+
 			strncpy(params.Aladin.referenceName, refPath, FILENAME_MAX);
 			strncpy(params.Aladin.floatingName, imgPath, FILENAME_MAX);
-			strncpy(params.Aladin.outputWarpedName, outPath, FILENAME_MAX);
-
-			params.Aladin.rigOnly = false;
-			params.Aladin.affDirect = false;
-			params.Aladin.maxiterationNumber = 5;
-			params.Aladin.levelNumber = 3;
-			params.Aladin.levelToPerform = 3;
-			params.Aladin.useSym = false;
-			params.Aladin.percentBlock = 50.0f;
+			strncpy(params.Aladin.outputResultName, outPath, FILENAME_MAX);
 		}
 
 		regQueue.push_front(params);
@@ -304,6 +299,42 @@ QList<int> milxQtRegistrationWindow::getSelectedImages()
 }
 
 
+// Remove files created during a registration
+void milxQtRegistrationWindow::removeFiles(RegistrationParams reg)
+{
+	QStringList filenames;
+
+	// Create the list of file to delete depending on the algorithm
+	if (reg.algo == F3D)
+	{
+		filenames.push_back(QString(reg.F3D.referenceName));
+		filenames.push_back(QString(reg.F3D.floatingName));
+		filenames.push_back(QString(reg.F3D.outputWarpedName));
+		filenames.push_back(QString(reg.F3D.outputControlPointGridName));
+
+		if (reg.useCpp2Def)
+		{
+			filenames.push_back(QString(reg.cpp2Def.cpp2defOutputName));
+		}
+	}
+	else if (reg.algo == Aladin)
+	{
+		filenames.push_back(QString(reg.Aladin.referenceName));
+		filenames.push_back(QString(reg.Aladin.floatingName));
+		filenames.push_back(QString(reg.Aladin.outputResultName));
+	}
+
+
+	// Remove all files in the list
+	for (int i = 0; i < filenames.size(); i++)
+	{
+		if (!QFile::remove(filenames[i]))
+		{
+			MainWindow->printError("Unable to remove temporary file: " + filenames[i]);
+		}
+	}
+}
+
 // Btn Cancel clicked
 void milxQtRegistrationWindow::reject()
 {
@@ -311,32 +342,7 @@ void milxQtRegistrationWindow::reject()
 	QStringList filenames;
 	for (int i = 0; i < regQueue.size(); i++)
 	{
-		if (regQueue[i].algo == FFD)
-		{
-			filenames.push_back(QString(regQueue[i].F3D.referenceName));
-			filenames.push_back(QString(regQueue[i].F3D.floatingName));
-			filenames.push_back(QString(regQueue[i].F3D.outputWarpedName));
-			filenames.push_back(QString(regQueue[i].F3D.outputControlPointGridName));
-
-			if (regQueue[i].useCpp2Def)
-			{
-				filenames.push_back(QString(regQueue[i].cpp2Def.cpp2defOutputName));
-			}
-		}
-		else if (regQueue[i].algo == Affine)
-		{
-			filenames.push_back(QString(regQueue[i].Aladin.referenceName));
-			filenames.push_back(QString(regQueue[i].Aladin.floatingName));
-			filenames.push_back(QString(regQueue[i].Aladin.outputWarpedName));
-		}
-	}
-
-	for (int i = 0; i < filenames.size(); i++)
-	{
-		if (!QFile::remove(filenames[i]))
-		{
-			MainWindow->printError("Unable to remove temporary file: " + filenames[i]);
-		}
+		removeFiles(regQueue[i]);
 	}
 
 	// Clean all variables
@@ -362,14 +368,8 @@ void milxQtRegistrationWindow::cpp2defFinished()
 	window->vectorField();
 	window->close();
 
-	// Remove the temporary files once loaded
-	QString cppPath = QString(currentReg.cpp2Def.cpp2defInputName);
-	QString refPath = QString(currentReg.cpp2Def.referenceImageName);
-	if (!QFile::remove(refPath) || !QFile::remove(defPath) || !QFile::remove(cppPath))
-	{
-		MainWindow->printError("Unable to remove temporary deformation field files");
-		this->reject();
-	}
+	// Remove the temporary files
+	removeFiles(currentReg);
 
 	// Perform the next registration
 	registration();
@@ -381,29 +381,16 @@ void milxQtRegistrationWindow::registrationFinished()
     MainWindow->printInfo("Registration completed");
 
 	// Retrieve the path of the temporary files
-	QString refPath, imgPath, outPath, cppPath;
-	if (currentReg.algo == FFD) {
-		refPath = QString(currentReg.F3D.referenceName);
-		imgPath = QString(currentReg.F3D.floatingName);
+	QString outPath;
+	if (currentReg.algo == F3D) {
 		outPath = QString(currentReg.F3D.outputWarpedName);
-		cppPath = QString(currentReg.F3D.outputControlPointGridName);
 	}
 	else {
-		refPath = QString(currentReg.Aladin.referenceName);
-		imgPath = QString(currentReg.Aladin.floatingName);
-		outPath = QString(currentReg.Aladin.outputWarpedName);
-		cppPath = "";
+		outPath = QString(currentReg.Aladin.outputResultName);
 	}
 
 	// Open the result of the registration
 	MainWindow->loadFile(outPath);
-
-	// Remove the temporary files once loaded (image and output path
-	if (!QFile::remove(imgPath) || !QFile::remove(outPath))
-	{
-		MainWindow->printError("Unable to remove thes temporary files");
-		this->reject();
-	}
 
     // Calculate the deformation field is required
 	if (currentReg.useCpp2Def)
@@ -413,22 +400,8 @@ void milxQtRegistrationWindow::registrationFinished()
     }
 	else
 	{
-		// Remove the reference image, and the cpp file
-		if (!QFile::remove(refPath))
-		{
-			MainWindow->printError("Unable to remove the reference path");
-			this->reject();
-		}
-
-		// Remove the cpp file if F3D 
-		if (currentReg.algo = FFD)
-		{
-			if (!QFile::remove(cppPath))
-			{
-				MainWindow->printError("Unable to remove the reference path");
-				this->reject();
-			}
-		}
+		// Remove the temporary files
+		removeFiles(currentReg);
 
 		// Perform the next registration
 		registration();
@@ -441,6 +414,7 @@ void milxQtRegistrationWindow::getListOfHandledImages()
 {
 	QWidgetList windows;
 	MainWindow->printInfo("Get the list of all handled images for the registration");
+	imageList.clear();
 	windows = MainWindow->getListOfWindows();
 
 	for (int i = 0; i < windows.size(); i++)
@@ -472,6 +446,9 @@ void milxQtRegistrationWindow::registration()
 		this->ui.listWidget->setDisabled(false);
 		this->ui.btnAdvancedOptions->setDisabled(false);
 
+		// Work in process
+		workInProcess = false;
+
 		return;
 	}
 
@@ -481,13 +458,14 @@ void milxQtRegistrationWindow::registration()
 
     // Display information
     MainWindow->printInfo("REGISTRATION STARTED");
+	workInProcess = true;
 
     // We call the right program depending on the algorithm
-    if(currentReg.algo == FFD)
+    if(currentReg.algo == F3D)
 	{ 
 		niftiReg->f3d_async(currentReg.F3D);
 	}
-    else if(currentReg.algo == Affine)
+    else if(currentReg.algo == Aladin)
 	{
 		niftiReg->aladin_async(currentReg.Aladin);
 	}

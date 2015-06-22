@@ -21,16 +21,16 @@ file(GLOB SMILI_HEADERS ${SMILI_DIR}/include/*.h)
 # Nifti reg
 IF(WIN32)
     IF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS $ENV{ProgramW6432}) #Win64 environment
-        set(NIFTI_REG_DIR $ENV{ProgramW6432}/NiftyReg CACHE STRING "NIFTI REG Base Directory")
+        set(NIFTI_REG_DIR $ENV{ProgramW6432}/NiftyReg CACHE STRING "NIFTI REG - v1.3.9 - Base Directory")
     ELSE(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS $ENV{ProgramW6432}) # else use Win32 environment
-        set(NIFTI_REG_DIR $ENV{PROGRAMFILES}/NiftyReg CACHE STRING "NIFTI REG Base Directory")
+        set(NIFTI_REG_DIR $ENV{PROGRAMFILES}/NiftyReg CACHE STRING "NIFTI REG - v1.3.9 - Base Directory")
     ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS $ENV{ProgramW6432})
 ENDIF(WIN32)
 IF(UNIX)
-    set(NIFTI_REG_DIR /usr/local CACHE PATH "NIFTI REG Base Directory")
+    set(NIFTI_REG_DIR /usr/local CACHE PATH "NIFTI REG - v1.3.9 - Base Directory")
 ENDIF(UNIX)
 MARK_AS_ADVANCED(NIFTI_REG_DIR)
-message("Using NIFTI REG from ${NIFTI_REG_DIR}")
+message("Using NIFTI REG 1.3.9 from ${NIFTI_REG_DIR}")
 set(NIFTI_REG_LIBS _reg_aladin _reg_blockMatching _reg_f3d _reg_femTransformation _reg_globalTransformation _reg_KLdivergence _reg_localTransformation _reg_maths _reg_mutualinformation _reg_ReadWriteImage _reg_resampling _reg_ssd _reg_thinPlateSpline _reg_tools reg_nifti reg_nrrd reg_png z png)
 
 include_directories (${MILXQT_INCLUDE_DIRS} ${NIFTI_REG_DIR}/include)

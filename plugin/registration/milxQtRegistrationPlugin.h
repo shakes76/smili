@@ -163,24 +163,24 @@ public slots:
     virtual void postStartTasks() {}
 
 	/**
-		\fn ffdRegistrationSlot()
-		\brief Slot for the ffd registration button
+		\fn F3DRegistrationSlot()
+		\brief Slot for the F3D registration button
 	*/
-	void ffdRegistrationSlot();
+	void F3DRegistrationSlot();
 
 	/**
-		\fn affineRegistrationSlot()
-		\brief Slot for the affine registration button
+		\fn AladinRegistrationSlot()
+		\brief Slot for the Aladin registration button
 	*/
-	void affineRegistrationSlot();
+	void AladinRegistrationSlot();
 
 protected:
     
     QPointer<milxQtMain> MainWindow;
 
     QMenu* menu; //!< Registration menu
-    QAction* actionFFD; //!< FFD registration action
-	QAction* actionAffine; // Affine registration action
+    QAction* actionF3D; //!< F3D registration action
+	QAction* actionAladin; // Aladin registration action
 	milxQtRegistrationWindow * regWindow; // registration window
 
     void createActions();

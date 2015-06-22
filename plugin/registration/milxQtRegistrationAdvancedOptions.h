@@ -1,18 +1,7 @@
-#ifndef MILXQTRegistrationRegType
-#define MILXQTRegistrationRegType
-
-// Type of the registration FFD or Affine
-typedef enum
-{
-	FFD,
-	Affine
-} RegType;
-
-#endif
-
 #ifndef MILXQTRegistrationAdvancedOptions_H
 #define MILXQTRegistrationAdvancedOptions_H
 
+#include "milxQtRegistrationStructures.h"
 #include "ui_registrationAdvancedOptions.h"
 #include "milxQtMain.h"
 
@@ -28,15 +17,8 @@ class milxQtRegistrationAdvancedOptions : public QDialog
 public:
 	milxQtRegistrationAdvancedOptions(milxQtMain *theParent = 0);
 	virtual ~milxQtRegistrationAdvancedOptions();
-
-	double getSx();
-	double getSy();
-	double getSz();
-	int getMaxItLevel();
-	int getNbLevel();
-	int getFirstLevels();
-	bool getUsePyramidalApproach();
-	bool getUseSymmetricApproach();
+	PARAMSF3D getParamsF3D();
+	PARAMSALADIN getParamsAladin();
 
 	void reset(RegType algo);
 
@@ -51,6 +33,9 @@ protected:
 
 	// Main window of SMILIX
     milxQtMain *MainWindow;
+
+	// Current algo
+	RegType currentAlgo;
 
 	// Create connections with UI
     void createConnections();
