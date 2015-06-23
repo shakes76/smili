@@ -36,6 +36,7 @@
 #include <iostream>
 #include "milxQtRegistrationStructures.h"
 
+
 #ifdef _USE_NR_DOUBLE
 #define PrecisionTYPE double
 #else
@@ -63,7 +64,8 @@ class milxQtRegistrationNifti : public QObject
 	Q_OBJECT
 
 public:
-	milxQtRegistrationNifti(QObject *theParent);
+    milxQtRegistrationNifti();
+    virtual ~milxQtRegistrationNifti();
 	int cpp2def(PARAMSCPP2DEF params);
 	int f3d(PARAMSF3D params);
 	int aladin(PARAMSALADIN params);
@@ -78,7 +80,6 @@ signals:
 
 
 protected:
-	QPointer<milxQtMain> MainWindow;
 	QFuture<int> future;
 };
 

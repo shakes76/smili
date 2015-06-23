@@ -11,7 +11,7 @@ milxQtRegistrationWindow::milxQtRegistrationWindow(milxQtMain *theParent) : QDia
 	ui.setupUi(this);
 	MainWindow = theParent;
 	advancedOptionsWindow = new milxQtRegistrationAdvancedOptions(MainWindow);
-	niftiReg = new milxQtRegistrationNifti(MainWindow);
+    niftiReg = new milxQtRegistrationNifti();
 	setWindowModality(Qt::ApplicationModal);
 	setWindowTitle(tr("Registration option"));
 	workInProcess = false;
@@ -20,6 +20,12 @@ milxQtRegistrationWindow::milxQtRegistrationWindow(milxQtMain *theParent) : QDia
 
 milxQtRegistrationWindow::~milxQtRegistrationWindow()
 {
+    imageList.clear();
+    for(int i = 0; i<regQueue.count(); i++)
+    {
+        removeFiles(regQueue[i]);
+    }
+    regQueue.clear();
 	delete advancedOptionsWindow;
 	delete niftiReg;
 }

@@ -1,11 +1,15 @@
 #include "milxQtRegistrationNiftiReg.h"
 
 
-milxQtRegistrationNifti::milxQtRegistrationNifti(QObject *theParent)
+milxQtRegistrationNifti::milxQtRegistrationNifti()
 {
-	MainWindow = qobject_cast<milxQtMain *>(theParent);
+
 }
 
+milxQtRegistrationNifti::~milxQtRegistrationNifti()
+{
+
+}
 
 void milxQtRegistrationNifti::cpp2def_async(PARAMSCPP2DEF params)
 {
@@ -27,7 +31,6 @@ int milxQtRegistrationNifti::cpp2def(PARAMSCPP2DEF params)
 	/* Read the reference image */
 	nifti_image *referenceImage = reg_io_ReadImageHeader(params.referenceImageName);
 	if (referenceImage == NULL){
-		//MainWindow->printError("[NiftyReg ERROR] Error when reading the reference image: " + QString(params.referenceImageName));
 		emit cpp2defFinished();
 		return 1;
 	}
@@ -36,8 +39,7 @@ int milxQtRegistrationNifti::cpp2def(PARAMSCPP2DEF params)
 
 	// Read the control point image
 	nifti_image *controlPointImage = reg_io_ReadImageFile(params.cpp2defInputName);
-	if (controlPointImage == NULL){
-		//MainWindow->printError("[NiftyReg ERROR] Error when reading the control point position image: " + QString(params.cpp2defInputName));
+    if (controlPointImage == NULL){
 		emit cpp2defFinished();
 		return 1;
 	}
@@ -75,7 +77,6 @@ int milxQtRegistrationNifti::cpp2def(PARAMSCPP2DEF params)
 	nifti_image_free(controlPointImage);
 	// Ouput the deformation field image
 	reg_io_WriteImageFile(deformationFieldImage, params.cpp2defOutputName);
-	//MainWindow->printInfo("The deformation field has been saved: " + QString(params.cpp2defOutputName));
 	nifti_image_free(deformationFieldImage);
 
 
