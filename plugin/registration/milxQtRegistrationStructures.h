@@ -1,22 +1,16 @@
 // This file contains all the structures and constants shared between most files of the plugin
 #ifndef MILXQTRegistrationStructures_H
 #define MILXQTRegistrationStructures_H
+
 #include <stdio.h>
 
 // Type of the registration F3D or Aladin
 typedef enum
 {
 	F3D,
-	Aladin
+	Aladin,
+	None
 } RegType;
-
-// Parameters for a cpp to deformation field transformation
-typedef struct{
-	char referenceImageName[FILENAME_MAX + 1];
-	char cpp2defInputName[FILENAME_MAX + 1];
-	char cpp2defOutputName[FILENAME_MAX + 1];
-} PARAMSCPP2DEF;
-
 
 // Parameters for F3D algorithm
 typedef struct{
@@ -30,7 +24,9 @@ typedef struct{
 	unsigned int lp;
 	bool nopy;
 	bool useSym;
-} PARAMSF3D;
+	bool cpp2Def;
+	char defOutputName[FILENAME_MAX + 1];
+} ParamsF3D;
 
 
 // Parameters for aladin algorithm
@@ -45,7 +41,7 @@ typedef struct{
 	unsigned int lp;
 	bool useSym;
 	float percentBlock; /* Percentage of block to use, default 50 */
-} PARAMSALADIN;
+} ParamsAladin;
 
 
-#endif // MILXQTRegistrationPLUGIN_H
+#endif // MILXQTRegistrationStructures_H

@@ -6,11 +6,9 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 
-milxQtRegistrationAdvancedOptions::milxQtRegistrationAdvancedOptions(milxQtMain *theParent) : QDialog(theParent)
+milxQtRegistrationAdvancedOptions::milxQtRegistrationAdvancedOptions(QDialog *theParent) : QDialog(theParent)
 {
 	ui.setupUi(this);
-
-	MainWindow = theParent;
 
 	setWindowModality(Qt::ApplicationModal);
 	setWindowTitle(tr("Registration Advanced Options"));
@@ -99,9 +97,9 @@ void milxQtRegistrationAdvancedOptions::createConnections()
 }
 
 
-PARAMSF3D milxQtRegistrationAdvancedOptions::getParamsF3D()
+ParamsF3D milxQtRegistrationAdvancedOptions::getParamsF3D()
 {
-	PARAMSF3D params;
+	ParamsF3D params;
 
 	if (currentAlgo != F3D)
 	{
@@ -136,9 +134,9 @@ PARAMSF3D milxQtRegistrationAdvancedOptions::getParamsF3D()
 }
 
 
-PARAMSALADIN milxQtRegistrationAdvancedOptions::getParamsAladin()
+ParamsAladin milxQtRegistrationAdvancedOptions::getParamsAladin()
 {
-	PARAMSALADIN params;
+	ParamsAladin params;
 
 	if (currentAlgo != Aladin)
 	{

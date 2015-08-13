@@ -36,7 +36,6 @@
 #include <iostream>
 #include "milxQtRegistrationStructures.h"
 
-
 #ifdef _USE_NR_DOUBLE
 #define PrecisionTYPE double
 #else
@@ -64,19 +63,22 @@ class milxQtRegistrationNifti : public QObject
 	Q_OBJECT
 
 public:
-    milxQtRegistrationNifti();
-    virtual ~milxQtRegistrationNifti();
-	int cpp2def(PARAMSCPP2DEF params);
-	int f3d(PARAMSF3D params);
-	int aladin(PARAMSALADIN params);
+	milxQtRegistrationNifti(QObject * parent);
+	int cpp2def(ParamsF3D params);
+	int f3d(ParamsF3D params);
+	int aladin(ParamsAladin params);
+	int average(QString outputName, QStringList filenames);
+
+	void cpp2def_async(ParamsF3D params);
+	void f3d_async(ParamsF3D params);
+	void aladin_async(ParamsAladin params);
+	void average_async(QString outputName, QStringList filenames);
 	
-	void cpp2def_async(PARAMSCPP2DEF params);
-	void f3d_async(PARAMSF3D params);
-	void aladin_async(PARAMSALADIN params);
 
 signals:
-	void cpp2defFinished();
-	void registrationFinished();
+	void cpp2defCompleted();
+	void registrationCompleted();
+	void averageCompleted();
 
 
 protected:

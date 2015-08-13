@@ -6,101 +6,429 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 
-milxQtRegistrationWindow::milxQtRegistrationWindow(milxQtMain *theParent) : QDialog(theParent)
+
+/*
+		Constructor
+*/
+milxQtRegistrationWindow::milxQtRegistrationWindow(QWidget * theParent) : QDialog(theParent)
 {
-	ui.setupUi(this);
-	MainWindow = theParent;
-	advancedOptionsWindow = new milxQtRegistrationAdvancedOptions(MainWindow);
-    niftiReg = new milxQtRegistrationNifti();
-	setWindowModality(Qt::ApplicationModal);
-	setWindowTitle(tr("Registration option"));
-	workInProcess = false;
+	MainWindow = qobject_cast<milxQtMain *>(theParent);
+	advancedOptionsWindow = new milxQtRegistrationAdvancedOptions(this);
+	niftiReg = new milxQtRegistrationNifti(this);
+	workInProgress = false;
+	computeAverage = false;
+	openResults = false;
+	initUI();
 	createConnections();
 }
 
+/*
+	Destructor
+*/
 milxQtRegistrationWindow::~milxQtRegistrationWindow()
 {
-    imageList.clear();
-    for(int i = 0; i<regQueue.count(); i++)
-    {
-        removeFiles(regQueue[i]);
-    }
-    regQueue.clear();
-	delete advancedOptionsWindow;
-	delete niftiReg;
+	// Free the list of images
+	qDeleteAll(images);
+	images.clear();
+
+	// Free the advanced options window
+	delete(advancedOptionsWindow);
+
+	// Destroy niftiReg
+	delete(niftiReg);
 }
 
-void milxQtRegistrationWindow::setup(RegType regType)
+// Initialise the user interface
+void milxQtRegistrationWindow::initUI()
 {
-	// If the work is in process, the interface stays disable
-	if (workInProcess) { return; }
+	// Setup window
+	ui.setupUi(this);
+	setWindowModality(Qt::ApplicationModal);
+	setWindowTitle(tr("Registration option"));
 
-	// Reset interface
-	this->ui.comboBoxAlgo->clear();
-	this->ui.comboBoxRef->clear();
-	this->ui.listWidget->clear();
-
-	// Get the list of opened images
-	getListOfHandledImages();
-	if (imageList.size() < 2)
-	{
-        MainWindow->printError("At least two images need to be opened to perform a registration");
-		this->reject();
-	}
 
 	// Set up the list of algorithms
 	QStringList algoList;
-    algoList << "F3D" << "Aladin";
+	algoList << "F3D" << "Aladin";
 	this->ui.comboBoxAlgo->addItems(algoList);
-	this->ui.comboBoxAlgo->setCurrentIndex(regType);
-    algoComboChange(regType);
+}
 
-	// Set up the combo lists
-	for (int i = 0; i < imageList.size(); i++)
+// Change the algorithm selected (and change the interface accordingly)
+void milxQtRegistrationWindow::setAlgo(RegType regType)
+{
+	// Reset interface
+	this->ui.checkBoxSaveToDir->setChecked(false);
+	this->ui.inputDirectoryBrowser->clear();
+
+	// Set the current algo selected
+	this->ui.comboBoxAlgo->setCurrentIndex(regType);
+
+	// By default we show the deformation field for F3D
+	if (regType == F3D)
 	{
-		QString itemName = QFileInfo(imageList[i]->getName()).fileName();
+		this->ui.checkBoxDeformationF->setEnabled(true);
+		this->ui.checkBoxDeformationF->setChecked(true);
+	}
+	// Otherwise we disable this field
+	else
+	{
+		this->ui.checkBoxDeformationF->setEnabled(false);
+		this->ui.checkBoxDeformationF->setChecked(false);
+	}
+	updateOpenImages();
+	updateImageListCombo();
+}
+
+
+// Update the list of images in the combolist
+void milxQtRegistrationWindow::updateImageListCombo()
+{
+	// If we have work in progress we don't update the image list until completed
+	if (workInProgress) { return; }
+
+	// We disconnect the event to avoid calling it while updateing the reference combo-box
+	disconnect(this->ui.comboBoxRef, SIGNAL(currentIndexChanged(int)), this, SLOT(referenceComboChange(int)));
+
+	// Update the parameters of images before displaying them
+	this->updateParameters();
+
+	// If we have two images
+	if (images.size() >= 2)
+	{
+		// At least one image should be checked
+		// We search if one image is already checked
+		bool oneImageChecked = false;
+		for (int i = 0; i < images.size(); i++)
+		{
+			if (images[i]->isChecked()) { oneImageChecked = true; break; }
+		}
+
+		// If no image checked, we check the first available
+		if (oneImageChecked == false)
+		{
+			for (int i = 0; i < images.size(); i++)
+			{
+				if (!images[i]->isRef()) { images[i]->setChecked(true); break; }
+			}
+		}
+	}
+	
+	// Clear the combos
+	this->ui.comboBoxRef->clear();
+	this->ui.listWidget->clear();
+
+	// Add each image to the list
+	for (int i = 0; i < images.size(); i++)
+	{
+		QString itemName = images[i]->getPath();
 
 		// Add to the reference combobox
 		this->ui.comboBoxRef->addItem(itemName);
-	
+
 		// Add to the image list
 		QListWidgetItem* item = new QListWidgetItem(itemName);
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-		item->setCheckState(Qt::Unchecked);
 
-		// If it's the first image by default it is disabled
-		if (i == 0) { item->setFlags(item->flags() ^ Qt::ItemIsEnabled); }
+		// Is the item checked ?
+		if (images[i]->isChecked()) {
+			item->setCheckState(Qt::Checked);
+		} else {
+			item->setCheckState(Qt::Unchecked);
+		}
 
-		// If it's the second image by default it is checked
-		if (i == 1) { item->setCheckState(Qt::Checked); }
+		// Is the item the reference (then disable it)
+		if (images[i]->isRef()) {
+			item->setFlags(item->flags() ^ Qt::ItemIsEnabled);
+			this->ui.comboBoxRef->setCurrentIndex(i);
+		}
+		
 
 		this->ui.listWidget->addItem(item);
 	}
 
-	// Set default selected items
-	this->ui.comboBoxRef->setCurrentIndex(0);
 
-	if (regType == F3D)
-	{
-		// By default we show the deformation field for F3D
-		this->ui.checkBoxDeformationF->setChecked(true);
-	}
-	else
-	{
-		this->ui.checkBoxDeformationF->setChecked(false);
-	}
-
+	connect(this->ui.comboBoxRef, SIGNAL(currentIndexChanged(int)), this, SLOT(referenceComboChange(int)));
 }
+
+// Update the list of open images that we can use for the registration
+void milxQtRegistrationWindow::updateOpenImages()
+{
+	QWidgetList windows;
+	windows = MainWindow->getListOfWindows();
+	
+	for (int i = 0; i < windows.size(); i++)
+	{
+		if (MainWindow->isImage(windows[i]))
+		{
+			milxQtImage * win = qobject_cast<milxQtImage *>(windows[i]);
+
+			// We only handle float images
+			if (win->isFloatingPointImage())
+			{
+				// If not in the list we add the image
+				if (!isImageInList(win->getName()))
+				{
+					addImage(new milxQtRegistrationImage(this, win, MainWindow));
+				}
+			}
+		}
+	}
+}
+
+// Check if the image is in the list
+bool milxQtRegistrationWindow::isImageInList(QString path)
+{
+	// We look is the image is already in the list
+	bool inlist = false;
+	
+	for (int j = 0; j < images.size(); j++)
+	{
+		if (images[j]->getPath() == path)
+		{
+			inlist = true;
+			break;
+		}
+	}
+	return inlist;
+}
+
+// Disable the user interface
+void milxQtRegistrationWindow::disableUI()
+{
+	// Disable all the fields
+	this->ui.checkBoxDeformationF->setDisabled(true);
+	this->ui.comboBoxAlgo->setDisabled(true);
+	this->ui.comboBoxRef->setDisabled(true);
+	this->ui.btnOk->setDisabled(true);
+	this->ui.listWidget->setDisabled(true);
+	this->ui.btnAdvancedOptions->setDisabled(true);
+
+	// Disable checkboxes
+	for (int row = 0; row < this->ui.listWidget->count(); row++)
+	{
+		QListWidgetItem *item = this->ui.listWidget->item(row);
+		item->setFlags(item->flags() ^ Qt::ItemIsEnabled);
+	}
+}
+
+// Enable the user interface
+void milxQtRegistrationWindow::enableUI()
+{
+	// Disable all the fields
+	this->ui.checkBoxDeformationF->setDisabled(false);
+	this->ui.comboBoxAlgo->setDisabled(false);
+	this->ui.comboBoxRef->setDisabled(false);
+	this->ui.btnOk->setDisabled(false);
+	this->ui.listWidget->setDisabled(false);
+	this->ui.btnAdvancedOptions->setDisabled(false);
+
+	// Disable checkboxes
+	for (int row = 0; row < this->ui.listWidget->count(); row++)
+	{
+		QListWidgetItem *item = this->ui.listWidget->item(row);
+		item->setFlags(item->flags() ^ Qt::ItemIsEnabled);
+	}
+
+	setAlgo((RegType) this->ui.comboBoxAlgo->currentIndex());
+}
+
+// get the parameters of F3D registration
+ParamsF3D milxQtRegistrationWindow::getParamsF3D()
+{
+	ParamsF3D params = advancedOptionsWindow->getParamsF3D();
+	params.cpp2Def = this->ui.checkBoxDeformationF->isChecked();
+	return params;
+}
+
+// get the parameters of aladin registration
+ParamsAladin milxQtRegistrationWindow::getParamsAladin()
+{
+	ParamsAladin params = advancedOptionsWindow->getParamsAladin();
+	return params;
+}
+
+// update images parameters
+void milxQtRegistrationWindow::updateParameters()
+{
+	// If no image to update, return
+	if (images.size() == 0) return;
+
+	// Get the registration type
+	RegType type = (RegType)this->ui.comboBoxAlgo->currentIndex();
+	
+	// Get the reference image
+	int refIndex = this->ui.comboBoxRef->currentIndex();
+	milxQtRegistrationImage * ref = nullptr;
+	if (refIndex >= 0 && refIndex < images.size())
+	{
+		ref = images[refIndex];
+		ref->setIsRef(true);
+	}
+	
+	// Get the output folder
+	QString outFolder = this->ui.inputDirectoryBrowser->text();
+	if (!this->ui.checkBoxSaveToDir->isChecked() || !QDir(outFolder).exists())
+	{
+		outFolder = "";
+	}
+
+	// Do we need to open the results
+	openResults = this->ui.checkBoxOpenResults->isChecked();
+
+	// Update the parameters of the registration for each image
+	for (int i = 0; i < this->ui.listWidget->count(); i++)
+	{
+		// We look if the image is checked
+		QListWidgetItem *item = this->ui.listWidget->item(i);
+		if ((item->flags() & Qt::ItemIsEnabled) && item->checkState())
+		{
+			images[i]->setChecked(true);
+		}
+		else
+		{
+			images[i]->setChecked(false);
+		}
+
+		// We set the reference image
+		images[i]->setReference(ref);
+
+		// We set the output folder
+		images[i]->setOutputFolder(outFolder);
+
+		// We look the type of the registration
+		images[i]->setRegType(type);
+
+		// We set if we need to open the results of the registration
+		images[i]->setOpenResults(openResults);
+
+		// We update the parameters of the registration
+		if (type == RegType::Aladin)
+		{
+			images[i]->setParams(getParamsAladin());
+		}
+		else if (type == RegType::F3D)
+		{
+			images[i]->setParams(getParamsF3D());
+		}
+	}
+}
+
 
 // Create connections with the user interface
 void milxQtRegistrationWindow::createConnections()
 {
-    // Reference combo box changed
 	connect(this->ui.comboBoxRef, SIGNAL(currentIndexChanged(int)), this, SLOT(referenceComboChange(int)));
-    connect(this->ui.comboBoxAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(algoComboChange(int)));
-	connect(this->niftiReg, SIGNAL(registrationFinished()), this, SLOT(registrationFinished()));
-	connect(this->niftiReg, SIGNAL(cpp2defFinished()), this, SLOT(cpp2defFinished()));
+	connect(this->ui.comboBoxAlgo, SIGNAL(currentIndexChanged(int)), this, SLOT(algoComboChange(int)));
 	connect(this->ui.btnAdvancedOptions, SIGNAL(clicked()), this, SLOT(advancedOptionsClicked()));
+	connect(this->ui.btnAddImage, SIGNAL(clicked()), this, SLOT(addImageClicked()));
+	connect(this->ui.btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAllClicked()));
+	connect(this->ui.btnUnselectAll, SIGNAL(clicked()), this, SLOT(unselectAllClicked()));
+	connect(this->ui.btnBrowse, SIGNAL(clicked()), this, SLOT(browseBtnClicked()));
+	connect(this->ui.clearList, SIGNAL(clicked()), this, SLOT(clearList()));
+	connect(this->niftiReg, SIGNAL(averageCompleted()), this, SLOT(averageComputed()));
+}
+
+// Add a new image to the list
+void milxQtRegistrationWindow::addImage(milxQtRegistrationImage * image)
+{
+	if (images.size() == 0)
+	{
+		image->setIsRef(true);
+	}
+
+	images.append(image);
+	connect(image, SIGNAL(done()), this, SLOT(regComplete()));
+}
+
+
+/* 
+					SLOTS
+*/
+
+// The average (Atlas) has been computed
+void milxQtRegistrationWindow::averageComputed()
+{
+	// Do we need to open the results
+	if (openResults)
+	{
+		MainWindow->loadFile(this->atlasPath);
+	}
+
+	// All the work has been completed
+	workCompleted();
+}
+
+
+// Button Clear List clicked
+void milxQtRegistrationWindow::clearList()
+{
+	// Free the list of images
+	qDeleteAll(images);
+	images.clear();
+
+	// Update list
+	this->updateImageListCombo();
+}
+
+
+// Button add image clicked
+void milxQtRegistrationWindow::addImageClicked()
+{
+	QFileDialog fileOpener;
+	fileOpener.setFileMode(QFileDialog::FileMode::ExistingFiles);
+	QStringList filenames = fileOpener.getOpenFileNames(this, tr("Select Files"));
+
+	for (int i = 0; i < filenames.size(); i++)
+	{
+		if (!isImageInList(filenames[i]))
+		{ 
+			addImage(new milxQtRegistrationImage(this, filenames[i], MainWindow));
+		}
+	}
+
+	updateImageListCombo();
+
+}
+
+// Button select all clicked
+void milxQtRegistrationWindow::selectAllClicked()
+{
+	for (int row = 0; row < this->ui.listWidget->count(); row++)
+	{
+		QListWidgetItem *item = this->ui.listWidget->item(row);
+
+		if ((item->flags() & Qt::ItemIsEnabled))
+		{
+			item->setCheckState(Qt::CheckState::Checked);
+		}
+	}
+}
+
+// Button unselect all clicked
+void milxQtRegistrationWindow::unselectAllClicked()
+{
+	for (int row = 0; row < this->ui.listWidget->count(); row++)
+	{
+		QListWidgetItem *item = this->ui.listWidget->item(row);
+
+		if ((item->flags() & Qt::ItemIsEnabled))
+		{
+			item->setCheckState(Qt::CheckState::Unchecked);
+		}
+	}
+}
+
+// Button browse clicked
+void milxQtRegistrationWindow::browseBtnClicked()
+{
+	QFileDialog dialog;
+	dialog.setFileMode(QFileDialog::Directory);
+	dialog.setOption(QFileDialog::ShowDirsOnly);
+	QString folder = dialog.getExistingDirectory(this, tr("Select an output folder"));
+	if (!folder.isEmpty())
+	{
+		this->ui.inputDirectoryBrowser->setText(folder);
+	}
 }
 
 // Advanced option button pushed
@@ -114,371 +442,157 @@ void milxQtRegistrationWindow::advancedOptionsClicked()
 // Algo combo box changed
 void milxQtRegistrationWindow::algoComboChange(int newIndex)
 {
-    if (newIndex == Aladin)
-    {
-        this->ui.checkBoxDeformationF->setChecked(false);
-        this->ui.checkBoxDeformationF->setDisabled(true);
-    }
-    else
-    {
-		if (!workInProcess)
-		{
-			this->ui.checkBoxDeformationF->setDisabled(false);
-		}
-    }
+	if (newIndex == Aladin)
+	{
+		setAlgo(Aladin);
+	}
+	else
+	{
+		setAlgo(F3D);
+	}
 }
 
 // Reference combo box changed
 void milxQtRegistrationWindow::referenceComboChange(int newIndex)
 {
-	// Enable all items and disable the new current reference item in the image to register list
-	for (int row = 0; row < this->ui.listWidget->count(); row++)
+	// Set the current image as reference
+	for (int i = 0; i < images.size(); i++)
 	{
-		QListWidgetItem *item = this->ui.listWidget->item(row);
+		images[i]->setIsRef(false);
 
-		// If it's the previous reference we enable it
-		if (!(item->flags() & Qt::ItemIsEnabled))
+		if (i == newIndex)
 		{
-			item->setFlags(item->flags() | Qt::ItemIsEnabled);
-		}
-
-		// If it's the newIndex we disable and uncheck it
-		if (row == newIndex)
-		{
-			item->setCheckState(Qt::Unchecked);
-			item->setFlags(item->flags() ^ Qt::ItemIsEnabled);
+			images[i]->setIsRef(true);
 		}
 	}
 
-    // We check if at least one image is selected, if not we select the first one available
-    QList<int> selected = getSelectedImages();
-    if(selected.count() == 0)
-    {
-        for(int row = 0; row < this->ui.listWidget->count(); row++)
-        {
-            QListWidgetItem *item = this->ui.listWidget->item(row);
-
-            if(item->flags() & Qt::ItemIsEnabled)
-            {
-                item->setCheckState(Qt::Checked);
-                break;
-            }
-        }
-    }
-}
-
-// Create a new temporary file, and copy its path in the buffer
-bool milxQtRegistrationWindow::createTmpFile(char buffer[FILENAME_MAX + 1])
-{
-	QTemporaryFile tmpFile(QDir::tempPath() + "/smili_reg_XXXXXX.nii");
-
-	tmpFile.setAutoRemove(false);
-	if (!tmpFile.open()) {
-		MainWindow->printError("Unable to create the temporary files");
-		this->reject();
-		return false;
-	}
-	tmpFile.close();
-	strncpy(buffer, tmpFile.fileName().toLatin1().data(), FILENAME_MAX);
-
-	return true;
+	// We update the image list
+	updateImageListCombo();
 }
 
 // Btn Ok clicked
 void milxQtRegistrationWindow::accept()
 {
-	// Get the algorithm of the registration
-	RegType algo = (RegType)this->ui.comboBoxAlgo->currentIndex();
+	// Check if we have at least two images
+	if (images.size() < 2){
+		// Message box: Error we need at least two images
+		QMessageBox msgBox(QMessageBox::Icon::Critical, "Registration", "Error you need at least two images (a reference and and image to register).", QMessageBox::StandardButton::NoButton);
+		msgBox.exec();
+		return;
+	}
 
-	// Get the reference image number
-	int ref = this->ui.comboBoxRef->currentIndex();
+	// Check if we have at least one image checked
+	bool oneImageChecked = false;
+	for (int i = 0; i < images.size(); i++)
+	{
+		if (images[i]->isChecked() == true) { oneImageChecked = true; break; }
+	}
 
-	// Get the deformationField Option
-	bool deformationField = this->ui.checkBoxDeformationF->isChecked();
-	if (this->ui.checkBoxDeformationF->isEnabled() == false) { deformationField = false; }
+	if (!oneImageChecked)
+	{
+		// Message box: Error one image must be checked
+		QMessageBox msgBox(QMessageBox::Icon::Critical, "Registration", "Error, at least one image should be checked", QMessageBox::StandardButton::NoButton);
+		msgBox.exec();
+		return;
+	}
 
-	// Get the list of selected image to register
-	QList<int> images = getSelectedImages();
+	// Update the parameters
+	this->updateParameters();
 
-	// Save the reference image in a temporary file
-	milxQtFile writer;
-	char refPath[FILENAME_MAX + 1];
-	if (!createTmpFile(refPath)) { this->reject(); return; }
-	if (!writer.saveImage(QString(refPath), imageList[ref]))
-    {
-        MainWindow->printError("Unable to save the reference image");
-		this->reject();
-        return;
-    }
-
-    // Add the images to the registration queue
-    for(int i=0; i<images.count(); i++)
-    {
-		// Save the image in a temporary file
-		char imgPath[FILENAME_MAX + 1];
-		if (!createTmpFile(imgPath)) { this->reject(); return; }
-		if (!writer.saveImage(QString(imgPath), imageList[images[i]]))
-		{
-			MainWindow->printError("Unable to save image");
-			this->reject();
-			return;
-		}
-
-		// Create the output path
-		char outPath[FILENAME_MAX + 1];
-		if (!createTmpFile(outPath)) { this->reject(); return; }
-
-		// Fill the parameters of the registration
-		RegistrationParams params;
-		params.algo = algo;
-		params.useCpp2Def = deformationField;
-		
-		if (algo == F3D)
-		{
-			params.F3D = advancedOptionsWindow->getParamsF3D();
-
-			strncpy(params.F3D.referenceName, refPath, FILENAME_MAX);
-			strncpy(params.F3D.floatingName, imgPath, FILENAME_MAX);
-			strncpy(params.F3D.outputWarpedName, outPath, FILENAME_MAX);
-
-			// Create the cpp output file
-			char cppPath[FILENAME_MAX + 1];
-			if (!createTmpFile(cppPath)) { this->reject(); return; }
-			strncpy(params.F3D.outputControlPointGridName, cppPath, FILENAME_MAX);
-
-			// Create file if deformation field
-			if (deformationField)
-			{
-				// Create the deformation field path
-				char defPath[FILENAME_MAX + 1];
-				if (!createTmpFile(defPath)) { this->reject(); return; }
-				strncpy(params.cpp2Def.cpp2defOutputName, defPath, FILENAME_MAX);
-				strncpy(params.cpp2Def.cpp2defInputName, cppPath, FILENAME_MAX);
-				strncpy(params.cpp2Def.referenceImageName, refPath, FILENAME_MAX);
-			} else {
-				params.F3D.outputControlPointGridName[0] = '\0';
-			}
-		}
-		else if (algo == Aladin)
-		{
-			params.Aladin = advancedOptionsWindow->getParamsAladin();
-
-			strncpy(params.Aladin.referenceName, refPath, FILENAME_MAX);
-			strncpy(params.Aladin.floatingName, imgPath, FILENAME_MAX);
-			strncpy(params.Aladin.outputResultName, outPath, FILENAME_MAX);
-		}
-
-		regQueue.push_front(params);
-    }
-
-    // Disable all the fields
-    this->ui.checkBoxDeformationF->setDisabled(true);
-    this->ui.comboBoxAlgo->setDisabled(true);
-    this->ui.comboBoxRef->setDisabled(true);
-    this->ui.btnOk->setDisabled(true);
-    this->ui.listWidget->setDisabled(true);
-	this->ui.btnAdvancedOptions->setDisabled(true);
-
-    // Call the registration function
-    registration();
+	// Disable the form
+	this->disableUI();
 
 	// Hide the windows
 	this->hide();
-}
 
-QList<int> milxQtRegistrationWindow::getSelectedImages()
-{
-    QList<int> images;
+	// Do we have to compute the average of the registered image
+	computeAverage = this->ui.checkBoxCreateAtlas->isChecked();
 
-    for (int row = 0; row < this->ui.listWidget->count(); row++)
-    {
-        QListWidgetItem *item = this->ui.listWidget->item(row);
-
-        // If it's the previous reference we enable it
-        if ((item->flags() & Qt::ItemIsEnabled) && item->checkState())
-        {
-            images.append(row);
-        }
-    }
-
-    return images;
-}
-
-
-// Remove files created during a registration
-void milxQtRegistrationWindow::removeFiles(RegistrationParams reg)
-{
-	QStringList filenames;
-
-	// Create the list of file to delete depending on the algorithm
-	if (reg.algo == F3D)
-	{
-		filenames.push_back(QString(reg.F3D.referenceName));
-		filenames.push_back(QString(reg.F3D.floatingName));
-		filenames.push_back(QString(reg.F3D.outputWarpedName));
-		filenames.push_back(QString(reg.F3D.outputControlPointGridName));
-
-		if (reg.useCpp2Def)
-		{
-			filenames.push_back(QString(reg.cpp2Def.cpp2defOutputName));
-		}
-	}
-	else if (reg.algo == Aladin)
-	{
-		filenames.push_back(QString(reg.Aladin.referenceName));
-		filenames.push_back(QString(reg.Aladin.floatingName));
-		filenames.push_back(QString(reg.Aladin.outputResultName));
-	}
-
-
-	// Remove all files in the list
-	for (int i = 0; i < filenames.size(); i++)
-	{
-		if (!QFile::remove(filenames[i]))
-		{
-			MainWindow->printError("Unable to remove temporary file: " + filenames[i]);
-		}
-	}
+	// Perform the registration
+	this->performRegistrations();
 }
 
 // Btn Cancel clicked
 void milxQtRegistrationWindow::reject()
 {
-	// Remove TMP files
-	QStringList filenames;
-	for (int i = 0; i < regQueue.size(); i++)
-	{
-		removeFiles(regQueue[i]);
-	}
-
-	// Clean all variables
-	imageList.clear();
-	regQueue.clear();
-	filenames.clear();
-
 	// Close and hide
 	this->close();
 	this->hide();
 }
 
-// Cpp2Def is done
-void milxQtRegistrationWindow::cpp2defFinished()
+// A registration has been completed
+void milxQtRegistrationWindow::regComplete()
 {
-	MainWindow->printInfo("cpp2def completed"); 
-	
-	// Open the deformation field
-	QString defPath = QString(currentReg.cpp2Def.cpp2defOutputName);
-	MainWindow->loadFile(defPath);
-	QWidgetList windowsList = MainWindow->getListOfWindows();
-	milxQtImage * window = qobject_cast<milxQtImage *>(windowsList[windowsList.size() - 1]);
-	window->vectorField();
-	window->close();
-
-	// Remove the temporary files
-	removeFiles(currentReg);
-
-	// Perform the next registration
-	registration();
+	performRegistrations();
 }
 
-// Registration is done
-void milxQtRegistrationWindow::registrationFinished()
+// Perform the next registration
+void milxQtRegistrationWindow::performRegistrations()
 {
-    MainWindow->printInfo("Registration completed");
+	int i;
 
-	// Retrieve the path of the temporary files
-	QString outPath;
-	if (currentReg.algo == F3D) {
-		outPath = QString(currentReg.F3D.outputWarpedName);
-	}
-	else {
-		outPath = QString(currentReg.Aladin.outputResultName);
-	}
-
-	// Open the result of the registration
-	MainWindow->loadFile(outPath);
-
-    // Calculate the deformation field is required
-	if (currentReg.useCpp2Def)
-    {
-        MainWindow->printInfo("Calculation of the deformation field");		
-		niftiReg->cpp2def_async(currentReg.cpp2Def);
-    }
-	else
+	workInProgress = true;
+	int test = images.size();
+	for (i = 0; i < images.size(); i++)
 	{
-		// Remove the temporary files
-		removeFiles(currentReg);
-
-		// Perform the next registration
-		registration();
-	}
-}
-
-
-// Get the list of all the open images
-void milxQtRegistrationWindow::getListOfHandledImages()
-{
-	QWidgetList windows;
-	MainWindow->printInfo("Get the list of all handled images for the registration");
-	imageList.clear();
-	windows = MainWindow->getListOfWindows();
-
-	for (int i = 0; i < windows.size(); i++)
-	{
-		if (MainWindow->isImage(windows[i]))
+		if (images[i]->isChecked())
 		{
-			milxQtImage * win = qobject_cast<milxQtImage *>(windows[i]);
+			images[i]->startRegistration();
+			break;
+		}
+	}
 
-			// We only handle float images
-			if (win->isFloatingPointImage())
-			{
-				imageList.append(win);
-			}
+
+	// If all the registration are done
+	if (i == images.size())
+	{
+		// If we have to compute the average
+		if (computeAverage)
+		{
+			computeAtlas();
+		}
+		else
+		{
+			// The work is completed
+			workCompleted();
 		}
 	}
 }
 
-// Main registration function
-void milxQtRegistrationWindow::registration()
+// compute the average of all the registrations
+void milxQtRegistrationWindow::computeAtlas()
 {
-	// If it was the last image
-	if (regQueue.count() == 0)
+	// Get the list of images and find the reference image
+	QStringList filenames;
+	milxQtRegistrationImage * ref;
+
+	for (int i = 0; i < images.size(); i++)
 	{
-		// Enable all the fields
-		this->ui.checkBoxDeformationF->setDisabled(false);
-		this->ui.comboBoxAlgo->setDisabled(false);
-		this->ui.comboBoxRef->setDisabled(false);
-		this->ui.btnOk->setDisabled(false);
-		this->ui.listWidget->setDisabled(false);
-		this->ui.btnAdvancedOptions->setDisabled(false);
+		if (images[i]->isWorkDone())
+		{
+			filenames.append(images[i]->getOutputPath());
+		}
 
-		// Work in process
-		workInProcess = false;
-
-		return;
+		if (images[i]->isRef())
+		{
+			ref = images[i];
+		}
 	}
 
-    // Get information about the current registration
-    currentReg = regQueue.last();
-    regQueue.pop_back();
+	// Create the outputfile for the atlas (the output filename will contain the name of the reference)
+	atlasPath = ref->createAtlasFile();
 
-    // Display information
-    MainWindow->printInfo("REGISTRATION STARTED");
-	workInProcess = true;
+	// Start the computation
+	niftiReg->average_async(atlasPath, filenames);
+}
 
-    // We call the right program depending on the algorithm
-    if(currentReg.algo == F3D)
-	{ 
-		niftiReg->f3d_async(currentReg.F3D);
-	}
-    else if(currentReg.algo == Aladin)
-	{
-		niftiReg->aladin_async(currentReg.Aladin);
-	}
-    else
-	{
-		MainWindow->printError("INVALID REGISTRATION ALGORITHM");
-	}
+// everything has been completed
+void milxQtRegistrationWindow::workCompleted()
+{
+	workInProgress = false;
+	this->enableUI();
 
-    MainWindow->printInfo("Please wait..");
+	// Message box: registration completed
+	QMessageBox msgBox(QMessageBox::Icon::Information, "Registration", "Registration completed !", QMessageBox::StandardButton::NoButton);
+	msgBox.exec();
 }

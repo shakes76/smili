@@ -167,14 +167,14 @@ void milxQtRegistrationPlugin::createConnections()
 // F3D Registration slot
 void milxQtRegistrationPlugin::F3DRegistrationSlot()
 {
-	regWindow->setup(F3D);
+	regWindow->setAlgo(F3D);
 	regWindow->show();
 }
 
 // Aladin Registration slot
 void milxQtRegistrationPlugin::AladinRegistrationSlot()
 {
-	regWindow->setup(Aladin);
+	regWindow->setAlgo(Aladin);
 	regWindow->show();
 }
 

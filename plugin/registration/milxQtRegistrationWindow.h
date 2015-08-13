@@ -7,16 +7,7 @@
 #include "milxQtImage.h"
 #include "milxQtFile.h"
 #include "milxQtRegistrationNiftiReg.h"
-#include "milxQtRegistrationStructures.h"
-
-// Structure containing all the informations about a registration
-struct RegistrationParams {
-  RegType algo;
-  PARAMSF3D F3D;
-  PARAMSALADIN Aladin;
-  PARAMSCPP2DEF cpp2Def;
-  bool useCpp2Def;
-};
+#include "milxQtRegistrationImage.h"
 
 typedef QList<milxQtImage *> QImageList;
 
@@ -29,19 +20,37 @@ class milxQtRegistrationWindow : public QDialog
     Q_OBJECT
 
 public:
-	milxQtRegistrationWindow(milxQtMain *theParent = 0);
+	milxQtRegistrationWindow(QWidget * theParent);
 	virtual ~milxQtRegistrationWindow();
-	void setup(RegType regType);
-	void removeFiles(RegistrationParams reg); // Remove files created during a registration
+	void initUI();
+	void setAlgo(RegType regType);
+	void updateImageListCombo();
+	void updateOpenImages();
+	bool isImageInList(QString path);
+	QList<milxQtRegistrationImage *> images;
+	void updateParameters(); // update images parameters
+	ParamsF3D getParamsF3D();
+	ParamsAladin getParamsAladin();
+	void addImage(milxQtRegistrationImage *); // Add an image to the list
+	void disableUI(); // Disable the user interface
+	void enableUI(); // Enable the user interface
+	void performRegistrations(); // perform the next registration
+	void workCompleted(); // everything has been completed
+	void computeAtlas(); // compute the average (Atlas) of all the registrations
 
 public slots:
 	void accept(); // Click on button Ok
 	void reject(); // Click on button Cancel
 	void referenceComboChange(int newIndex); // Reference combo box changed
     void algoComboChange(int newIndex); // Algo combo box changed
-	void cpp2defFinished(); // Cpp2Def is done
-	void registrationFinished(); // Registration is done
 	void advancedOptionsClicked(); // Open the advanced option windows
+	void addImageClicked(); // Button add image clicked
+	void selectAllClicked(); // Button select all clicked
+	void unselectAllClicked(); // Button unselect all clicked
+	void browseBtnClicked(); // Button browse clicked
+	void regComplete(); // A registration has been completed
+	void clearList(); // Clear the list of images
+	void averageComputed(); // The average (Atlas) has been computed
 
 protected:
 	// User interface
@@ -50,38 +59,20 @@ protected:
 	// Main window of SMILIX
     milxQtMain *MainWindow;
 
-	// NiftiReg implementation
-	milxQtRegistrationNifti *niftiReg;
-
 	// Advanced options window
 	milxQtRegistrationAdvancedOptions *advancedOptionsWindow;
 
 	// Create connections with UI
     void createConnections();
 
-	// Get the list of handled images for the registration
-	void getListOfHandledImages();
+	// Is there any work in progress
+	bool workInProgress;
 
-	// Create a temporary file and copy its path in the buffer
-	bool createTmpFile(char buffer[FILENAME_MAX + 1]);
-
-    // Return the id of the selected images (id in the QImageList imageList)
-    QList<int> getSelectedImages();
-
-	// List of opened images
-	QImageList imageList;
-	
-    // Main registration function
-    void registration();
-
-    // Registration queue
-	QList<RegistrationParams> regQueue;
-
-    // Current registration in progress
-	RegistrationParams currentReg;
-
-	// Is there any work in process
-	bool workInProcess;
+	// Do we need to compute the average of the registrations
+	bool computeAverage;
+	milxQtRegistrationNifti *niftiReg; // nifti reg to compute average
+	QString atlasPath; // Path to the outputed atlas
+	bool openResults; // do we need to open the results
 };
 
 #endif // MILXQTRegistrationWindow_H

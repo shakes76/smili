@@ -15,10 +15,10 @@ class milxQtRegistrationAdvancedOptions : public QDialog
     Q_OBJECT
 
 public:
-	milxQtRegistrationAdvancedOptions(milxQtMain *theParent = 0);
+	milxQtRegistrationAdvancedOptions(QDialog *theParent = 0);
 	virtual ~milxQtRegistrationAdvancedOptions();
-	PARAMSF3D getParamsF3D();
-	PARAMSALADIN getParamsAladin();
+	ParamsF3D getParamsF3D();
+	ParamsAladin getParamsAladin();
 
 	void reset(RegType algo);
 
@@ -30,9 +30,6 @@ public slots:
 protected:
 	// User interface
     Ui::dlgRegistrationAdvancedOptions ui;
-
-	// Main window of SMILIX
-    milxQtMain *MainWindow;
 
 	// Current algo
 	RegType currentAlgo;
