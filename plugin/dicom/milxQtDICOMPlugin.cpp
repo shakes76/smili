@@ -200,7 +200,10 @@ void milxQtDICOMPlugin::openStructureSet()
     ///Export Structures
     std::string seriesName = UIDs[0];
     charImageType::Pointer charImg;
+
+#if (ITK_VERSION_MAJOR > 3) //Review only members
     ExportDICOM_RT<charImageType>(inputRTDirectoryname.toStdString(), rsFilename.toStdString(), outputRTDirectoryname.toStdString(), charImg, seriesName);
+#endif // (ITK_VERSION_MAJOR > 3)
 
     MainWindow->printInfo("Done.");
     emit done(-1);
@@ -512,6 +515,10 @@ void milxQtDICOMPlugin::createActions()
     actionConvertStructure = new QAction(MainWindow);
     actionConvertStructure->setText(QApplication::translate("DICOMPlugin", "Convert RT/Structure Set ...", 0, QApplication::UnicodeUTF8));
     actionConvertStructure->setShortcut(tr("Ctrl+Alt+s"));
+    actionConvertStructure->setDisabled(true);
+#if (ITK_VERSION_MAJOR > 3) //Review only members
+    actionConvertStructure->setDisabled(false);
+#endif // (ITK_VERSION_MAJOR > 3)
     actionConvert = new QAction(MainWindow);
     actionConvert->setText(QApplication::translate("DICOMPlugin", "Convert ...", 0, QApplication::UnicodeUTF8));
     actionConvert->setShortcut(tr("Ctrl+Alt+c"));
@@ -882,20 +889,28 @@ void milxQtDICOMPlugin::createConnections()
 
 bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QString &subject_output_folder, const QString &rel_dir, unsigned int index_subject, unsigned int index_dicom, bool &isFirst)
 {
-    //May be useful if something decides to fail at some point
-    //MainWindow->printInfo(QString("Anonymizing: ") + input.c_str());
+	QString logName= outputAnonymizeDirectoryname + QDir::separator() + "anonymization.log";
+	std::string log = "Anonymizing image: " + input;
+	writeLog(logName, log);
+	MainWindow->printInfo(QString("Anonymizing: ") + input.c_str());
+
+    //TODO: This should be retrieved directly from dicom.
+	// And specific image type created then.
     typedef signed short shortPixelType;
     typedef itk::Image<shortPixelType, milx::imgDimension> shortImageType;
-    ///Create the anonymization string
+
+    ///Create the anonymization string -  This is the folder of the subject
     std::ostringstream index;
     index << index_subject;
     std::string anonymization_value = outputPrefix.toStdString() + index.str();
     
     ///Create 2 readers --> need two in case of T2 maps
+	///TODO: Again this should be retrieved from the DICOM
     typedef itk::ImageFileReader< shortImageType >  ReaderType;
     typedef itk::ImageFileReader< rgbImageType >    rgbReaderType;
     
-    ///Read as normal image first
+    ///First the image need to be read with a random type to able to read the dicom tags
+	///and checkthe image type for saving later one
     ReaderType::Pointer reader = ReaderType::New();
     ImageIOType::Pointer gdcmImageIO = ImageIOType::New();
     reader->SetFileName(input.c_str());
@@ -933,31 +948,17 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
     }
     
     ///If it is a T2 map need change image type / and re-read (unfortunate)
+	///This should be read from the function rather than dicom tags but works
+	///as well
     std::string spl_per_px("0028|0002");
     std::string spl_per_pxl_value;
     getTagValue(gdcmImageIO, spl_per_px, spl_per_pxl_value);
     bool isRGB = false;
-    rgbImageType::Pointer rgbImg;
     if (spl_per_pxl_value == "3")
     {
-        gdcmImageIO = NULL;
-        gdcmImageIO = ImageIOType::New();
-        rgbReaderType::Pointer readerrgb = rgbReaderType::New();
-        readerrgb->SetFileName(input.c_str());
-        readerrgb->SetImageIO( gdcmImageIO );
-        try
-        {
-            readerrgb->Update();  
-        }
-        catch (itk::ExceptionObject &ex)
-        {
-            std::cerr << ex << std::endl;
-            return false;
-        }
-        isRGB = true;
-        rgbImg = readerrgb->GetOutput();
+		isRGB = true;
     }
-    
+
     ///List of DICOM tags to strip
     std::vector<std::string>  dicomTags;
     if (anonPatientInfo->isChecked())
@@ -998,11 +999,13 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
         std::string tag1("0020|0011");
         std::string append1;
         getTagValue(gdcmImageIO, tag1, append1);
+		removeForbiddenChar(append1, "\\/:*?\"<>|");
         outputSequence = outputSequence + QString::fromStdString(append1) + "_";
     
         std::string tag2("0018|0024");
         std::string append2;
         getTagValue(gdcmImageIO, tag2, append2);
+		removeForbiddenChar(append2, "\\/:*?\"<>|");
         outputSequence = outputSequence + QString::fromStdString(append2);
     }
   
@@ -1013,14 +1016,22 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
         exist = QDir().mkpath(outputSequence);
         if (! exist)
         {
+			MainWindow->printError("Failed to create directory: " + outputSequence);
             std::cout << "Create fail: " << anonymization_value << std::endl;
             return false;
         }
     }
+
+	///Write some debug on the type of images
+	log = "Component: [" + gdcmImageIO->GetComponentTypeAsString(gdcmImageIO->GetInternalComponentType()) + "]";
+	log += ", Pixel type: [" + gdcmImageIO->GetPixelTypeAsString(gdcmImageIO->GetPixelType()) + "]\n";
+	writeLog(logName, log);
     
     ///Change dicom header and re-write file
     if (!isRGB) // If normal image
-    {
+	{
+		log = "Changing header";
+		writeLog(logName, log);
         DictionaryType & dictionary = floatImg->GetMetaDataDictionary();  
         std::vector<std::string>::iterator dicomTagIterator;
         for (dicomTagIterator = dicomTags.begin(); dicomTagIterator != dicomTags.end(); dicomTagIterator++)
@@ -1031,6 +1042,7 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
         //make output filename
         std::string filename;
         makeFilename(outputSequence, gdcmImageIO, index_dicom, filename, index_subject);
+
         
         typedef itk::ImageFileWriter< shortImageType >  Writer1Type;
         gdcmImageIO->KeepOriginalUIDOn();
@@ -1038,20 +1050,46 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
         writer1->SetInput(floatImg);
         writer1->SetFileName(filename.c_str());
         writer1->SetImageIO( gdcmImageIO);
+		log = "Writing image as " + filename;
+		writeLog(logName, log);
+		MainWindow->printInfo(QString("Writing image as: ") + filename.c_str());
         try
         {
             writer1->Update();
         }
         catch (itk::ExceptionObject &ex)
         {
+			MainWindow->printError(ex.GetDescription());
             std::cerr << ex << std::endl;
             return false;
         } 
     }
     else // If RGB image
     {
+		rgbReaderType::Pointer readerrgb = rgbReaderType::New();
+
+		gdcmImageIO = NULL;
+		gdcmImageIO = ImageIOType::New();
+		readerrgb->SetFileName(input.c_str());
+		readerrgb->SetImageIO(gdcmImageIO);
+		try
+		{
+			readerrgb->Update();
+		}
+		catch (itk::ExceptionObject &ex)
+		{
+			std::cerr << ex << std::endl;
+			return false;
+		}
+		rgbImageType::Pointer rgbImg = readerrgb->GetOutput();
+
+		ImageIOType::Pointer gdcmImageIO2 = ImageIOType::New();
+
+		log = "Changing header";
+		writeLog(logName, log);
+
         DictionaryType & dictionary = rgbImg->GetMetaDataDictionary();  
-        std::vector<std::string>::iterator dicomTagIterator;
+		std::vector<std::string>::iterator dicomTagIterator;
         for (dicomTagIterator = dicomTags.begin(); dicomTagIterator != dicomTags.end(); dicomTagIterator++)
         {
             itk::EncapsulateMetaData<std::string>(dictionary, *dicomTagIterator, anonymization_value);  
@@ -1062,134 +1100,166 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
         makeFilename(outputSequence, gdcmImageIO, index_dicom, filename, index_subject);
         
         typedef itk::ImageFileWriter< rgbImageType >  Writer1Type;
-        gdcmImageIO->KeepOriginalUIDOn();
+		gdcmImageIO2->SetMetaDataDictionary(dictionary);
+		gdcmImageIO2->SetUseCompression(gdcmImageIO->GetUseCompression());
+		gdcmImageIO2->SetIORegion(gdcmImageIO->GetIORegion());
+		gdcmImageIO2->SetUIDPrefix(gdcmImageIO->GetUIDPrefix());
+		gdcmImageIO2->KeepOriginalUIDOn();
+
         Writer1Type::Pointer writer1 = Writer1Type::New();
         writer1->SetInput(rgbImg);
+		//writer1->SetMetaDataDictionary(dictionary);
         writer1->SetFileName(filename.c_str());
-        writer1->SetImageIO( gdcmImageIO);
+		writer1->SetImageIO(gdcmImageIO2);
+		writer1->UseInputMetaDataDictionaryOff();
+		log = "Writing image as " + filename;
+		writeLog(logName, log);
+		MainWindow->printInfo(QString("Writing image as: ") + filename.c_str());
         try
         {
             writer1->Update();
         }
         catch (itk::ExceptionObject &ex)
         {
+			MainWindow->printError(ex.GetDescription());
             std::cerr << ex << std::endl;
             return false;
-        }     
+        }
     }
-    
+	log = "Success\n";
+	writeLog(logName, log);
     return true;
 }
 
 void milxQtDICOMPlugin::makeFilename(const QString &path, ImageIOType::Pointer gdcmImageIO, unsigned int index, std::string &filename, unsigned int index_subject)
 {
-    std::ostringstream index_dcm;
-    index_dcm << std::setfill('0') << std::setw(4) << index;
-  
-    QString str_separator(QDir::separator());
-    filename = path.toStdString() + str_separator.toStdString(); 
-  
-    if (checkboxPatientName->isChecked())
-    {
-        filename = filename + outputPrefix.toStdString() + "_";
-    }
-    
-    if (checkboxPatientID->isChecked())
-    {
-        std::ostringstream SubID;
-        SubID << index_subject;
-        filename = filename + SubID.str() + "_";
-    }
-  
-    if (checkboxSeriesDate->isChecked())
-    {
-        std::string tag("0008|0021");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxSeriesTime->isChecked())
-    {
-        std::string tag("0008|0031");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxStudyID->isChecked())
-    {
-        std::string tag("0020|0010");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxStudyDesc->isChecked())
-    {
-        std::string tag("0008|1030");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxSeriesNumber->isChecked())
-    {
-        std::string tag("0020|0011");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxSequenceName->isChecked())
-    {
-        std::string tag("0018|0024");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxProtocolName->isChecked())
-    {
-        std::string tag("0018|1030");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    if (checkboxSeriesDescription->isChecked())
-    {
-        std::string tag("0008|103e");
-        std::string append;
-        getTagValue(gdcmImageIO, tag, append);
-        if (append != "")
-        {
-            filename = filename + append + "_";
-        }
-    }
-  
-    filename = filename + index_dcm.str() + ".IMA";
+	std::string tag_idx("0020|0013");
+	std::string append_idx;
+	getTagValue(gdcmImageIO, tag_idx, append_idx);
+
+	std::ostringstream index_dcm;
+	index_dcm << std::setfill('0') << std::setw(4) << append_idx;
+
+
+	QString str_separator(QDir::separator());
+	filename = path.toStdString() + str_separator.toStdString();
+
+	if (checkboxPatientName->isChecked())
+	{
+		std::string append = outputPrefix.toStdString();
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		filename = filename + append + "_";
+	}
+
+	if (checkboxPatientID->isChecked())
+	{
+		std::ostringstream SubID;
+		SubID << index_subject;
+		filename = filename + SubID.str() + "_";
+	}
+
+	if (checkboxSeriesDate->isChecked())
+	{
+		std::string tag("0008|0021");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxSeriesTime->isChecked())
+	{
+		std::string tag("0008|0031");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxStudyID->isChecked())
+	{
+		std::string tag("0020|0010");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxStudyDesc->isChecked())
+	{
+		std::string tag("0008|1030");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxSeriesNumber->isChecked())
+	{
+		std::string tag("0020|0011");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxSequenceName->isChecked())
+	{
+		std::string tag("0018|0024");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxProtocolName->isChecked())
+	{
+		std::string tag("0018|1030");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	if (checkboxSeriesDescription->isChecked())
+	{
+		std::string tag("0008|103e");
+		std::string append;
+		getTagValue(gdcmImageIO, tag, append);
+		removeForbiddenChar(append, "\\/:*?\"<>|");
+		if (append != "")
+		{
+			filename = filename + append + "_";
+		}
+	}
+
+	filename = filename + index_dcm.str() + ".IMA";
+}
+
+void milxQtDICOMPlugin::removeForbiddenChar(std::string &str, char* charsToRemove)
+{
+	for (unsigned int i = 0; i < strlen(charsToRemove); ++i)
+	{
+		str.erase(remove(str.begin(), str.end(), charsToRemove[i]), str.end());
+	}
 }
 
 void milxQtDICOMPlugin::getTagValue(ImageIOType::Pointer gdcmImageIO, const std::string &tag, std::string & tag_value)
@@ -1211,6 +1281,18 @@ void milxQtDICOMPlugin::getTagValue(ImageIOType::Pointer gdcmImageIO, const std:
         tag_value = tag_simplified.toStdString();
         std::replace(tag_value.begin(), tag_value.end(),' ','_');
     }
+}
+
+void milxQtDICOMPlugin::writeLog(QString &filename, std::string &output)
+{
+	QFile file_log(filename);
+	if (file_log.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append))
+	{
+		QTextStream out_log(&file_log);
+		out_log.setCodec("UTF-8");
+		out_log << QString::fromStdString(output) << "\n";
+		file_log.close();
+	}
 }
 
 void milxQtDICOMPlugin::affectValues()
@@ -1245,3 +1327,4 @@ void milxQtDICOMPlugin::affectValues()
 }
 
 Q_EXPORT_PLUGIN2(DICOMPlugin, milxQtDICOMPluginFactory);
+

@@ -8,7 +8,7 @@ PROJECT(DICOMPlugin CXX)
 include(find)
 
 if("${ITK_VERSION_MAJOR}" LESS 4)
-    message(SEND_ERROR "DICOM Plugin requires ITK 4 or above.")
+    message("DICOM Plugin requires ITK 4 or above for DICOM RT support. Disabling structure set support.")
 endif("${ITK_VERSION_MAJOR}" LESS 4)
 
 #~ FIND_PACKAGE(VTK REQUIRED)

@@ -28,9 +28,11 @@
 #include <itkPolygonSpatialObject.h>
 #include <itkGroupSpatialObject.h>
 #include <itkSpatialObjectToImageFilter.h>
-#include <gdcmTypes.h>
-#include <gdcmAttribute.h>
-#include <gdcmReader.h>
+#if (ITK_VERSION_MAJOR > 3) //Review only members
+    #include <gdcmTypes.h>
+    #include <gdcmAttribute.h>
+    #include <gdcmReader.h>
+#endif // (ITK_VERSION_MAJOR > 3)
 //VTK
 #include <vtkPolyDataCollection.h>
 //milxSMILI
@@ -160,6 +162,7 @@ public:
     */
     virtual bool isPluginWindow(QWidget *window);
 
+#if (ITK_VERSION_MAJOR > 3) //Review only members
     /*!
       \fn milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const std::string rsFileName, const std::string outPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient = true)
       \brief Opens a DICOM RT from the UID/Series name given. Returns the image volume from the series read by ITK/GDCM.
@@ -170,6 +173,7 @@ public:
     */
     template<class TImage>
     static bool ExportDICOM_RT(const std::string directoryPath, const std::string rsFileName, const std::string outPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient = true);
+#endif // (ITK_VERSION_MAJOR > 3)
 
 public slots:
     /**
@@ -237,6 +241,16 @@ public slots:
         \param filename: reference to the filename
     */
     void makeFilename(const QString &path, ImageIOType::Pointer gdcmImageIO, unsigned int index, std::string &filename, unsigned int index_subject);
+
+	/**
+	\fn milxQtDICOMPlugin::makeFilename()
+	\brief Small helper to remove unwanted characters under windows
+	\param std: string to strip
+	\param charsToRemove: unwanted characters
+	*/
+	void removeForbiddenChar(std::string &str, char* charsToRemove);
+
+	void writeLog(QString &filename, std::string &output);
     
     /**
         \fn milxQtDICOMPlugin::getTagValue()
@@ -338,6 +352,7 @@ public:
     {   return new milxQtDICOMPlugin(theParent);  }
 };
 
+#if (ITK_VERSION_MAJOR > 3) //Review only members
 template<class TImage>
 bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const std::string rsFileName, const std::string outPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient)
 {
@@ -637,6 +652,7 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
 
   return true;
 }
+#endif // (ITK_VERSION_MAJOR > 3)
 
 template<class TImage>
 void milxQtDICOMPlugin::resetImage(typename itk::SmartPointer<TImage> imageSlice)
@@ -682,3 +698,4 @@ void milxQtDICOMPlugin::mergeImages(typename itk::SmartPointer<TSliceType> tempS
 }
 
 #endif // MILXQTDICOMPLUGIN_H
+
