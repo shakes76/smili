@@ -13,16 +13,16 @@ milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent) : milxQtP
     extension = true;
     pluginName = "Registration";
 
-	regWindow = new milxQtRegistrationWindow(MainWindow);
+    regWindow = new milxQtRegistrationWindow(MainWindow);
 
     createActions();
     createMenu();
     createConnections();
- }
+}
 
 milxQtRegistrationPlugin::~milxQtRegistrationPlugin()
 {
-	delete regWindow;
+    delete regWindow;
     if(isRunning() && threaded)
         quit();
     cout << "Registration Plugin Destroyed." << endl;
@@ -102,56 +102,56 @@ QDockWidget* milxQtRegistrationPlugin::dockWidget()
 bool milxQtRegistrationPlugin::isPluginWindow(QWidget *window)
 {
     //~ if(pluginWindow(window) == 0)
-        return false;
+    return false;
     //~ else
-        //~ return true;
+    //~ return true;
 }
 
 //~ milxQtDeNoiseModel* milxQtDeNoisePlugin::pluginWindow(QWidget *window)
 //~ {
-    //~ if(window)
-        //~ return qobject_cast<milxQtDeNoiseModel *>(window);
-    //~ return 0;
+//~ if(window)
+//~ return qobject_cast<milxQtDeNoiseModel *>(window);
+//~ return 0;
 //~ }
 
 void milxQtRegistrationPlugin::loadExtension()
 {
     //~ if(!MainWindow->isActiveModel())
-        //~ return;
+    //~ return;
 
     //~ milxQtModel *currentWin = MainWindow->activeModel();
     //~ milxQtDeNoiseModel *denoiseModel = new milxQtDeNoiseModel(MainWindow); //hierarchical deletion
-        //~ denoiseModel->setName(currentWin->getName());
-        //~ denoiseModel->SetInput(currentWin->GetOutput());
-        //~ denoiseModel->generateModel();
+    //~ denoiseModel->setName(currentWin->getName());
+    //~ denoiseModel->SetInput(currentWin->GetOutput());
+    //~ denoiseModel->generateModel();
 
     //~ MainWindow->display(denoiseModel);
 }
 
 //~ void milxQtRegistrationPlugin::run()
 //~ {
-    //~ QMutexLocker locker(&mutex); //Lock memory
+//~ QMutexLocker locker(&mutex); //Lock memory
 
-    //~ ///Execute own thread work here
+//~ ///Execute own thread work here
 
-    //~ //exec();
+//~ //exec();
 //~ }
 
 void milxQtRegistrationPlugin::createActions()
 {
     actionF3D = new QAction(MainWindow);
-	actionF3D->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation", 0, QApplication::UnicodeUTF8));
+    actionF3D->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation", 0, QApplication::UnicodeUTF8));
 
-	actionAladin = new QAction(MainWindow);
-	actionAladin->setText(QApplication::translate("RegistrationPlugin", "Aladin (Aladin)"));
+    actionAladin = new QAction(MainWindow);
+    actionAladin->setText(QApplication::translate("RegistrationPlugin", "Aladin (Aladin)"));
 }
 
 void milxQtRegistrationPlugin::createMenu()
 {
     menu = new QMenu(MainWindow);
     menu->setTitle(QApplication::translate("RegistrationPlugin", "Image Registration", 0, QApplication::UnicodeUTF8));
-	menu->addAction(actionF3D);
-	menu->addAction(actionAladin);
+    menu->addAction(actionF3D);
+    menu->addAction(actionAladin);
 
     menuToAdd.append(menu);
 }
@@ -159,23 +159,23 @@ void milxQtRegistrationPlugin::createMenu()
 
 void milxQtRegistrationPlugin::createConnections()
 {
-	connect(actionF3D, SIGNAL(activated()), this, SLOT(F3DRegistrationSlot()));
-	connect(actionAladin, SIGNAL(activated()), this, SLOT(AladinRegistrationSlot()));
+    connect(actionF3D, SIGNAL(activated()), this, SLOT(F3DRegistrationSlot()));
+    connect(actionAladin, SIGNAL(activated()), this, SLOT(AladinRegistrationSlot()));
 }
 
 
 // F3D Registration slot
 void milxQtRegistrationPlugin::F3DRegistrationSlot()
 {
-	regWindow->setAlgo(F3D);
-	regWindow->show();
+    regWindow->setAlgo(F3D);
+    regWindow->show();
 }
 
 // Aladin Registration slot
 void milxQtRegistrationPlugin::AladinRegistrationSlot()
 {
-	regWindow->setAlgo(Aladin);
-	regWindow->show();
+    regWindow->setAlgo(Aladin);
+    regWindow->show();
 }
 
 

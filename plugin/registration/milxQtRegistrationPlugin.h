@@ -19,9 +19,6 @@
 /**
     \class milxQtRegistrationPlugin
     \brief The interface for the Registration plugin for milxQt
-    \author 
-
-    
 */
 class MILXQT_PLUGIN_EXPORT milxQtRegistrationPlugin : public milxQtPluginInterface
 {
@@ -46,7 +43,9 @@ public:
         \brief Does the plugin support opening files? [Implement this in your plugin]
     */
     inline virtual bool hasOpenSupport()
-    { return false; }
+    {
+        return false;
+    }
     /**
         \fn milxQtRegistrationPlugin::openFileSupport()
         \brief Get the file support string for opening (extension wildcard list). [Implement this in your plugin]
@@ -62,7 +61,9 @@ public:
         \brief Does the plugin support opening files? [Implement this in your plugin]
     */
     inline virtual bool hasSaveSupport()
-    {   return false;    }
+    {
+        return false;
+    }
     /**
         \fn milxQtRegistrationPlugin::saveFileSupport()
         \brief Get the file support string for saving (extension wildcard list). [Implement this in your plugin]
@@ -79,7 +80,9 @@ public:
         \brief Does the plugin support collections (PolyData collection etc.). [Implement this in your plugin]
     */
     inline virtual bool hasCollectionSupport()
-    {   return false;    }
+    {
+        return false;
+    }
     /**
         \fn milxQtRegistrationPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames)
         \brief Pass a collection to internal plugin class. [Implement this in your plugin]
@@ -123,7 +126,9 @@ public:
         \brief Return the default dock widget area (if one is provided by plugin). [Implement this in your plugin]
     */
     inline virtual Qt::DockWidgetArea dockDefaultArea()
-    {   return Qt::LeftDockWidgetArea;    }
+    {
+        return Qt::LeftDockWidgetArea;
+    }
 
     /**
         \fn milxQtRegistrationPlugin::isPluginWindow(QWidget *window)
@@ -131,10 +136,10 @@ public:
     */
     virtual bool isPluginWindow(QWidget *window);
 
-	/**
-		\fn milxQtRegistrationPlugin::registration(RegType type)
-		\brief Register the opened images with the selected algorithm
-	*/
+    /**
+    	\fn milxQtRegistrationPlugin::registration(RegType type)
+    	\brief Register the opened images with the selected algorithm
+    */
     void registration(RegType type);
 
 public slots:
@@ -162,29 +167,42 @@ public slots:
     */
     virtual void postStartTasks() {}
 
-	/**
-		\fn F3DRegistrationSlot()
-		\brief Slot for the F3D registration button
-	*/
-	void F3DRegistrationSlot();
+    /**
+    	\fn F3DRegistrationSlot()
+    	\brief Slot for the F3D registration button
+    */
+    void F3DRegistrationSlot();
 
-	/**
-		\fn AladinRegistrationSlot()
-		\brief Slot for the Aladin registration button
-	*/
-	void AladinRegistrationSlot();
+    /**
+    	\fn AladinRegistrationSlot()
+    	\brief Slot for the Aladin registration button
+    */
+    void AladinRegistrationSlot();
 
 protected:
-    
-    QPointer<milxQtMain> MainWindow;
 
+    QPointer<milxQtMain> MainWindow; //!< Pointer to milxQt main window
     QMenu* menu; //!< Registration menu
     QAction* actionF3D; //!< F3D registration action
-	QAction* actionAladin; // Aladin registration action
-	milxQtRegistrationWindow * regWindow; // registration window
+    QAction* actionAladin; //!< Aladin registration action
+    milxQtRegistrationWindow * regWindow; //!< Registration window
 
-    void createActions();
+    /**
+        \fn milxQtRegistrationPlugin::createMenu()
+        \brief Create the registration menu in SMILI
+    */
     void createMenu();
+
+    /**
+        \fn milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent = 0)
+        \brief Create menu actions
+    */
+    void createActions();
+
+    /**
+        \fn milxQtRegistrationPlugin::createConnections()
+        \brief Create the QT connections with the menu
+    */
     void createConnections();
 
 };
@@ -196,7 +214,9 @@ class MILXQT_PLUGIN_EXPORT milxQtRegistrationPluginFactory: public QObject, publ
 
 public:
     milxQtPluginInterface* newPlugin(QObject *theParent = 0)
-    {   return new milxQtRegistrationPlugin(theParent);  }
+    {
+        return new milxQtRegistrationPlugin(theParent);
+    }
 };
 
 #endif // MILXQTRegistrationPLUGIN_H
