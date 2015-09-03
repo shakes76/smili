@@ -266,7 +266,7 @@ void milxQtRegistrationWindow::updateParameters()
 
     // Get the reference image
     int refIndex = this->ui.comboBoxRef->currentIndex();
-    milxQtRegistration * ref = nullptr;
+    milxQtRegistration * ref = NULL;
     if (refIndex >= 0 && refIndex < images.size())
     {
         ref = images[refIndex];
@@ -310,11 +310,11 @@ void milxQtRegistrationWindow::updateParameters()
         images[i]->setOpenResults(openResults);
 
         // We update the parameters of the registration
-        if (type == RegType::Aladin)
+        if (type == Aladin)
         {
             images[i]->setParams(getParamsAladin());
         }
-        else if (type == RegType::F3D)
+        else if (type == F3D)
         {
             images[i]->setParams(getParamsF3D());
         }
@@ -383,7 +383,7 @@ void milxQtRegistrationWindow::clearList()
 void milxQtRegistrationWindow::addImageClicked()
 {
     QFileDialog fileOpener;
-    fileOpener.setFileMode(QFileDialog::FileMode::ExistingFiles);
+    fileOpener.setFileMode(QFileDialog::ExistingFiles);
     QStringList filenames = fileOpener.getOpenFileNames(this, tr("Select Files"));
 
     for (int i = 0; i < filenames.size(); i++)
@@ -407,7 +407,7 @@ void milxQtRegistrationWindow::selectAllClicked()
 
         if ((item->flags() & Qt::ItemIsEnabled))
         {
-            item->setCheckState(Qt::CheckState::Checked);
+            item->setCheckState(Qt::Checked);
         }
     }
 }
@@ -421,7 +421,7 @@ void milxQtRegistrationWindow::unselectAllClicked()
 
         if ((item->flags() & Qt::ItemIsEnabled))
         {
-            item->setCheckState(Qt::CheckState::Unchecked);
+            item->setCheckState(Qt::Unchecked);
         }
     }
 }
@@ -484,7 +484,7 @@ void milxQtRegistrationWindow::accept()
     // Check if we have at least two images
     if (images.size() < 2) {
         // Message box: Error we need at least two images
-        QMessageBox msgBox(QMessageBox::Icon::Critical, "Registration", "Error you need at least two images (a reference and and image to register).", QMessageBox::StandardButton::NoButton);
+        QMessageBox msgBox(QMessageBox::Critical, "Registration", "Error you need at least two images (a reference and and image to register).", QMessageBox::NoButton);
         msgBox.exec();
         return;
     }
@@ -502,7 +502,7 @@ void milxQtRegistrationWindow::accept()
     if (!oneImageChecked)
     {
         // Message box: Error one image must be checked
-        QMessageBox msgBox(QMessageBox::Icon::Critical, "Registration", "Error, at least one image should be checked", QMessageBox::StandardButton::NoButton);
+        QMessageBox msgBox(QMessageBox::Critical, "Registration", "Error, at least one image should be checked", QMessageBox::NoButton);
         msgBox.exec();
         return;
     }
@@ -604,6 +604,6 @@ void milxQtRegistrationWindow::workCompleted()
     this->enableUI();
 
     // Message box: registration completed
-    QMessageBox msgBox(QMessageBox::Icon::Information, "Registration", "Registration completed !", QMessageBox::StandardButton::NoButton);
+    QMessageBox msgBox(QMessageBox::Information, "Registration", "Registration completed !", QMessageBox::NoButton);
     msgBox.exec();
 }

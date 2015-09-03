@@ -15,12 +15,12 @@ void milxQtRegistration::startRegistration()
     // Start the registration
     workDone = false;
 
-    if (type == RegType::Aladin)
+    if (type == Aladin)
     {
         MainWindow->printInfo("Start Aladin Registration\n");
         this->niftiReg->aladin_async(paramsAladin);
     }
-    else if (type == RegType::F3D)
+    else if (type == F3D)
     {
         MainWindow->printInfo("Start F3D Registration\n");
         this->niftiReg->f3d_async(paramsF3D);
@@ -39,14 +39,14 @@ void milxQtRegistration::createFiles()
     tmp_cpp = createFile(QDir::tempPath() + "/smili_reg_cpp_XXXXXX.nii");
 
     // Create the output files
-    if (type == RegType::F3D && paramsF3D.cpp2Def)
+    if (type == F3D && paramsF3D.cpp2Def)
     {
         output_def = createFile(this->outputFolder + "/" + filename + "_deffield_XXXXXX.nii");
     }
     output_path = createFile(this->outputFolder + "/" + filename + "_registered_XXXXXX.nii");
 
     // Copy the filepath in the registration parameters
-    if (type == RegType::F3D)
+    if (type == F3D)
     {
         copyPath(paramsF3D.floatingName, tmp_img);
         copyPath(paramsF3D.referenceName, tmp_ref);
@@ -57,7 +57,7 @@ void milxQtRegistration::createFiles()
             copyPath(paramsF3D.defOutputName, output_def);
         }
     }
-    else if (type == RegType::Aladin)
+    else if (type == Aladin)
     {
         copyPath(paramsAladin.floatingName, tmp_img);
         copyPath(paramsAladin.referenceName, tmp_ref);
@@ -158,7 +158,7 @@ void milxQtRegistration::registrationCompleted()
     }
 
     // If we have to calculate the cpp2def, we start it
-    if (type == RegType::F3D && paramsF3D.cpp2Def)
+    if (type == F3D && paramsF3D.cpp2Def)
     {
         MainWindow->printInfo("---------- Deformation Field Computation ----------\n");
 
@@ -234,12 +234,12 @@ void milxQtRegistration::init(QString filepath)
 {
     path = filepath;
     openedImage = false;
-    window = nullptr;
+    window = NULL;
     checked = true;
     workDone = false;
     openResults = false;
     isRefImg = false;
-    type = RegType::None;
+    type = None;
     outputFolder = QFileInfo(filepath).absolutePath();
     niftiReg = new milxQtRegistrationNifti(this);
     tmp_img = "";
