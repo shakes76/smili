@@ -14,7 +14,7 @@ milxQtRegistrationAdvancedOptions::milxQtRegistrationAdvancedOptions(QDialog *th
     setWindowTitle(tr("Registration Advanced Options"));
 
     createConnections();
-    reset(F3D);
+    reset(F3DNifti);
 }
 
 milxQtRegistrationAdvancedOptions::~milxQtRegistrationAdvancedOptions()
@@ -29,7 +29,7 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
     currentAlgo = algo;
 
 
-    if (algo == F3D)
+    if (algo == F3DNifti)
     {
         ui.titleSplinesOptions->setVisible(true);
         ui.descriptionSplinesOptions->setVisible(true);
@@ -39,13 +39,32 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
         ui.spinBoxSx->setVisible(true);
         ui.spinBoxSy->setVisible(true);
         ui.spinBoxSz->setVisible(true);
-        ui.checkBoxNopy->setVisible(true);
-        ui.vSpacerSplines->changeSize(20, 20, QSizePolicy::Minimum, QSizePolicy::Minimum);
+        ui.vSpacerSplines->changeSize(20, 20, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerOptimisations->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerSymApproach->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 
+        ui.optimisationsForm->setVerticalSpacing(7);
+        ui.lblMaxIt->setVisible(true);
+        ui.spinBoxMaxIt->setVisible(true);
+        ui.lblLn->setVisible(true);
+        ui.spinBoxLn->setVisible(true);
+        ui.lblLp->setVisible(true);
+        ui.spinBoxLp->setVisible(true);
+        ui.checkBoxNopy->setVisible(true);
         ui.lblPctOfBlock->setVisible(false);
         ui.spinBoxPctBlock->setVisible(false);
         ui.checkBoxRigOnly->setVisible(false);
         ui.checkBoxAffDirect->setVisible(false);
+
+        ui.titleSymmetricApproach->setVisible(true);
+        ui.checkBoxSym->setVisible(true);
+
+        ui.lblParameterFile->setVisible(false);
+        ui.lblParameterFileExplanation->setVisible(false);
+        ui.lineParameterFile->setVisible(false);
+        ui.btnBrowseParameterFile->setVisible(false);
+        ui.lblPctOfBlock->setVisible(false);
+        ui.btnClearParameterFile->setVisible(false);
 
         ui.spinBoxSx->setValue(settings.value("F3D/sx", -5).toFloat());
         ui.spinBoxSy->setValue(settings.value("F3D/sy", -5).toFloat());
@@ -59,7 +78,7 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
         ui.checkBoxSym->setChecked(settings.value("F3D/sym", false).toBool());
     }
 
-    if (algo == Aladin)
+    else if (algo == AladinNifti)
     {
         ui.titleSplinesOptions->setVisible(false);
         ui.descriptionSplinesOptions->setVisible(false);
@@ -70,12 +89,32 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
         ui.spinBoxSy->setVisible(false);
         ui.spinBoxSz->setVisible(false);
         ui.checkBoxNopy->setVisible(false);
-        ui.vSpacerSplines->changeSize(20, 20, QSizePolicy::Ignored, QSizePolicy::Ignored);
 
+        ui.vSpacerSplines->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerOptimisations->changeSize(20, 20, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerSymApproach->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+        ui.optimisationsForm->setVerticalSpacing(7);
+        ui.lblMaxIt->setVisible(true);
+        ui.spinBoxMaxIt->setVisible(true);
+        ui.lblLn->setVisible(true);
+        ui.spinBoxLn->setVisible(true);
+        ui.lblLp->setVisible(true);
+        ui.spinBoxLp->setVisible(true);
+        ui.checkBoxNopy->setVisible(false);
         ui.lblPctOfBlock->setVisible(true);
         ui.spinBoxPctBlock->setVisible(true);
         ui.checkBoxRigOnly->setVisible(true);
         ui.checkBoxAffDirect->setVisible(true);
+
+        ui.titleSymmetricApproach->setVisible(true);
+        ui.checkBoxSym->setVisible(true);
+
+        ui.lblParameterFile->setVisible(false);
+        ui.lblParameterFileExplanation->setVisible(false);
+        ui.lineParameterFile->setVisible(false);
+        ui.btnBrowseParameterFile->setVisible(false);
+        ui.btnClearParameterFile->setVisible(false);
 
         ui.spinBoxMaxIt->setValue(settings.value("aladin/maxit", 5).toInt());
         ui.spinBoxLn->setValue(settings.value("aladin/ln", 3).toInt());
@@ -87,23 +126,179 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
         ui.checkBoxSym->setChecked(settings.value("aladin/sym", false).toBool());
     }
 
+    else if (algo == ElastixAffine || algo == ElastixBSpline)
+    {
+        ui.titleSplinesOptions->setVisible(false);
+        ui.descriptionSplinesOptions->setVisible(false);
+        ui.sx->setVisible(false);
+        ui.sy->setVisible(false);
+        ui.sz->setVisible(false);
+        ui.spinBoxSx->setVisible(false);
+        ui.spinBoxSy->setVisible(false);
+        ui.spinBoxSz->setVisible(false);
+        ui.checkBoxNopy->setVisible(false);
+
+        ui.vSpacerSplines->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerOptimisations->changeSize(20, 20, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        ui.vSpacerSymApproach->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+        ui.optimisationsForm->setVerticalSpacing(0);
+        ui.lblMaxIt->setVisible(true);
+        ui.spinBoxMaxIt->setVisible(true);
+        ui.lblLn->setVisible(false);
+        ui.spinBoxLn->setVisible(false);
+        ui.lblLp->setVisible(false);
+        ui.spinBoxLp->setVisible(false);
+        ui.checkBoxNopy->setVisible(false);
+        ui.lblPctOfBlock->setVisible(false);
+        ui.spinBoxPctBlock->setVisible(false);
+        ui.checkBoxRigOnly->setVisible(false);
+        ui.checkBoxAffDirect->setVisible(false);
+
+        ui.titleSymmetricApproach->setVisible(false);
+        ui.checkBoxSym->setVisible(false);
+
+        ui.lblParameterFile->setVisible(true);
+        ui.lineParameterFile->setVisible(true);
+        ui.lblParameterFileExplanation->setVisible(true);
+        ui.btnBrowseParameterFile->setVisible(true);
+        ui.btnClearParameterFile->setVisible(true);
+
+        if (algo == ElastixAffine)
+        {
+            ui.spinBoxMaxIt->setValue(settings.value("elastixAffine/maxit", 250).toInt());
+            ui.lineParameterFile->setText(settings.value("elastixAffine/parameterFile", "").toString());
+        }
+        else if (algo == ElastixBSpline)
+        {
+            ui.spinBoxMaxIt->setValue(settings.value("elastixBSpline/maxit", 500).toInt());
+            ui.lineParameterFile->setText(settings.value("elastixBSpline/parameterFile", "").toString());
+        }
+    }
+
     this->resize(10, 10);
 }
 
 // Create connections with the user interface
 void milxQtRegistrationAdvancedOptions::createConnections()
 {
+    connect(this->ui.btnBrowseParameterFile, SIGNAL(clicked()), this, SLOT(browseBtnClicked()));
+    connect(this->ui.btnClearParameterFile, SIGNAL(clicked()), this, SLOT(clearFileBtnClicked()));
+}
 
+void milxQtRegistrationAdvancedOptions::browseBtnClicked()
+{
+    QFileDialog fileOpener;
+    fileOpener.setFileMode(QFileDialog::FileMode::ExistingFile);
+    QString filename = fileOpener.getOpenFileName(this, tr("Select File"));
+    this->ui.lineParameterFile->setText(filename);
+}
+
+void milxQtRegistrationAdvancedOptions::clearFileBtnClicked()
+{
+    this->ui.lineParameterFile->setText("");
 }
 
 
-ParamsF3D milxQtRegistrationAdvancedOptions::getParamsF3D()
+milxQtRegistrationParams milxQtRegistrationAdvancedOptions::getParamsElastixAffine()
 {
-    ParamsF3D params;
+    milxQtRegistrationParams params;
 
-    if (currentAlgo != F3D)
+    if (this->ui.lineParameterFile->text() != "" && QFile::exists(this->ui.lineParameterFile->text()))
     {
-        this->reset(F3D);
+        params.parameterFile = this->ui.lineParameterFile->text();
+        params.customParameterFile = true;
+
+        return params;
+    }
+
+    // Default parameters
+    params.parametersTxt =
+        "(FixedInternalImagePixelType \"float\")\r\n"
+        "(MovingInternalImagePixelType \"float\")\r\n"
+        "(UseDirectionCosines \"true\")\r\n"
+        "(Registration \"MultiResolutionRegistration\")\r\n"
+        "(Interpolator \"BSplineInterpolator\")\r\n"
+        "(ResampleInterpolator \"FinalBSplineInterpolator\")\r\n"
+        "(Resampler \"DefaultResampler\")\r\n"
+        "(FixedImagePyramid \"FixedRecursiveImagePyramid\")\r\n"
+        "(MovingImagePyramid \"MovingRecursiveImagePyramid\")\r\n"
+        "(Optimizer \"AdaptiveStochasticGradientDescent\")\r\n"
+        "(Transform \"AffineTransform\")\r\n"
+        "(Metric \"AdvancedMattesMutualInformation\")\r\n"
+        "(AutomaticScalesEstimation \"true\")\r\n"
+        "(AutomaticTransformInitialization \"true\")\r\n"
+        "(HowToCombineTransforms \"Compose\")\r\n"
+        "(NumberOfHistogramBins 32)\r\n"
+        "(ErodeMask \"false\")\r\n"
+        "(NumberOfResolutions 4)\r\n"
+        "(MaximumNumberOfIterations " + QString::number(ui.spinBoxMaxIt->value()) + ")\r\n"
+        "(NumberOfSpatialSamples 2048)\r\n"
+        "(NewSamplesEveryIteration \"true\")\r\n"
+        "(ImageSampler \"Random\")\r\n"
+        "(BSplineInterpolationOrder 1)\r\n"
+        "(FinalBSplineInterpolationOrder 3)\r\n"
+        "(DefaultPixelValue 0)\r\n"
+        "(WriteResultImage \"true\")\r\n"
+        "(ResultImageFormat \"nii\")\r\n";
+
+    return params;
+}
+
+
+milxQtRegistrationParams milxQtRegistrationAdvancedOptions::getParamsElastixBSpline()
+{
+    milxQtRegistrationParams params;
+
+    if (this->ui.lineParameterFile->text() != "" && QFile::exists(this->ui.lineParameterFile->text()))
+    {
+        params.parameterFile = this->ui.lineParameterFile->text();
+        params.customParameterFile = true;
+
+        return params;
+    }
+
+    // Default parameters
+    params.parametersTxt =
+        "(FixedInternalImagePixelType \"float\")\r\n"
+        "(MovingInternalImagePixelType \"float\")\r\n"
+        "(UseDirectionCosines \"true\")\r\n"
+        "(Registration \"MultiResolutionRegistration\")\r\n"
+        "(Interpolator \"BSplineInterpolator\")\r\n"
+        "(ResampleInterpolator \"FinalBSplineInterpolator\")\r\n"
+        "(Resampler \"DefaultResampler\")\r\n"
+        "(FixedImagePyramid \"FixedRecursiveImagePyramid\")\r\n"
+        "(MovingImagePyramid \"MovingRecursiveImagePyramid\")\r\n"
+        "(Optimizer \"AdaptiveStochasticGradientDescent\")\r\n"
+        "(Transform \"BSplineTransform\")\r\n"
+        "(Metric \"AdvancedMattesMutualInformation\")\r\n"
+        "(FinalGridSpacingInPhysicalUnits 16)\r\n"
+        "(HowToCombineTransforms \"Compose\")\r\n"
+        "(NumberOfHistogramBins 32)\r\n"
+        "(ErodeMask \"false\")\r\n"
+        "(NumberOfResolutions 4)\r\n"
+        "(MaximumNumberOfIterations " + QString::number(ui.spinBoxMaxIt->value()) + ")\r\n"
+        "(NumberOfSpatialSamples 2048)\r\n"
+        "(NewSamplesEveryIteration \"true\")\r\n"
+        "(ImageSampler \"Random\")\r\n"
+        "(BSplineInterpolationOrder 1)\r\n"
+        "(FinalBSplineInterpolationOrder 3)\r\n"
+        "(DefaultPixelValue 0)\r\n"
+        "(WriteResultImage \"true\")\r\n"
+        "(ResultImageFormat \"nii\")\r\n";
+
+
+    return params;
+}
+
+
+milxQtRegistrationParams milxQtRegistrationAdvancedOptions::getParamsF3DNifti()
+{
+    milxQtRegistrationParams params;
+
+    if (currentAlgo != F3DNifti)
+    {
+        this->reset(F3DNifti);
     }
 
     // Get input Sx
@@ -134,13 +329,13 @@ ParamsF3D milxQtRegistrationAdvancedOptions::getParamsF3D()
 }
 
 
-ParamsAladin milxQtRegistrationAdvancedOptions::getParamsAladin()
+milxQtRegistrationParams milxQtRegistrationAdvancedOptions::getParamsAladinNifti()
 {
-    ParamsAladin params;
+    milxQtRegistrationParams params;
 
-    if (currentAlgo != Aladin)
+    if (currentAlgo != AladinNifti)
     {
-        this->reset(Aladin);
+        this->reset(AladinNifti);
     }
 
     // Get input max it level
@@ -156,7 +351,7 @@ ParamsAladin milxQtRegistrationAdvancedOptions::getParamsAladin()
     params.percentBlock = ui.spinBoxPctBlock->value();
 
     // Aladin direct
-    params.aF3Direct = ui.checkBoxAffDirect->isChecked();
+    params.affineDirect = ui.checkBoxAffDirect->isChecked();
 
     // Rigid only
     params.rigOnly = ui.checkBoxRigOnly->isChecked();
@@ -174,7 +369,7 @@ void milxQtRegistrationAdvancedOptions::accept()
     // Save parameters
     QSettings settings("Smili", "Registration Plugin");
 
-    if (currentAlgo == F3D)
+    if (currentAlgo == F3DNifti)
     {
         settings.setValue("F3D/sx", ui.spinBoxSx->value());
         settings.setValue("F3D/sy", ui.spinBoxSy->value());
@@ -187,7 +382,7 @@ void milxQtRegistrationAdvancedOptions::accept()
         settings.setValue("F3D/nopy", ui.checkBoxNopy->isChecked());
         settings.setValue("F3D/sym", ui.checkBoxSym->isChecked());
     }
-    else if (currentAlgo == Aladin)
+    else if (currentAlgo == AladinNifti)
     {
         settings.setValue("aladin/maxit", ui.spinBoxMaxIt->value());
         settings.setValue("aladin/ln", ui.spinBoxLn->value());
@@ -197,6 +392,16 @@ void milxQtRegistrationAdvancedOptions::accept()
         settings.setValue("aladin/aF3Direct", ui.checkBoxAffDirect->isChecked());
         settings.setValue("aladin/rigOnly", ui.checkBoxRigOnly->isChecked());
         settings.setValue("aladin/sym", ui.checkBoxSym->isChecked());
+    }
+    else if (currentAlgo == ElastixAffine)
+    {
+        settings.setValue("elastixAffine/maxit", ui.spinBoxMaxIt->value());
+        settings.setValue("elastixAffine/parameterFile", ui.lineParameterFile->text());
+    }
+    else if (currentAlgo == ElastixBSpline)
+    {
+        settings.setValue("elastixBSpline/maxit", 500);
+        settings.setValue("elastixBSpline/parameterFile", ui.lineParameterFile->text());
     }
 
     // Close the window

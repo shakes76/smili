@@ -17,8 +17,11 @@
 
 
 /**
-    \class milxQtRegistrationPlugin
-    \brief The interface for the Registration plugin for milxQt
+\class milxQtRegistrationPlugin
+\brief The interface for the Registration plugin for milxQt
+\author
+
+
 */
 class MILXQT_PLUGIN_EXPORT milxQtRegistrationPlugin : public milxQtPluginInterface
 {
@@ -26,104 +29,104 @@ class MILXQT_PLUGIN_EXPORT milxQtRegistrationPlugin : public milxQtPluginInterfa
 
 public:
     /**
-        \fn milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent = 0)
-        \brief Default destructor
+    \fn milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent = 0)
+    \brief Default destructor
     */
     milxQtRegistrationPlugin(QObject *theParent = 0);
     virtual ~milxQtRegistrationPlugin();
 
     /**
-        \fn milxQtRegistrationPlugin::name()
-        \brief Get the Name of the plugin. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::name()
+    \brief Get the Name of the plugin. [Implement this in your plugin]
     */
     virtual QString name();
 
     /**
-        \fn milxQtRegistrationPlugin::hasOpenSupport()
-        \brief Does the plugin support opening files? [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::hasOpenSupport()
+    \brief Does the plugin support opening files? [Implement this in your plugin]
     */
     inline virtual bool hasOpenSupport()
     {
         return false;
     }
     /**
-        \fn milxQtRegistrationPlugin::openFileSupport()
-        \brief Get the file support string for opening (extension wildcard list). [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::openFileSupport()
+    \brief Get the file support string for opening (extension wildcard list). [Implement this in your plugin]
     */
     virtual QString openFileSupport();
     /**
-        \fn milxQtRegistrationPlugin::openExtensions()
-        \brief Get a list of supported file format extensions. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::openExtensions()
+    \brief Get a list of supported file format extensions. [Implement this in your plugin]
     */
     virtual QStringList openExtensions();
     /**
-        \fn milxQtRegistrationPlugin::hasSaveSupport()
-        \brief Does the plugin support opening files? [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::hasSaveSupport()
+    \brief Does the plugin support opening files? [Implement this in your plugin]
     */
     inline virtual bool hasSaveSupport()
     {
         return false;
     }
     /**
-        \fn milxQtRegistrationPlugin::saveFileSupport()
-        \brief Get the file support string for saving (extension wildcard list). [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::saveFileSupport()
+    \brief Get the file support string for saving (extension wildcard list). [Implement this in your plugin]
     */
     virtual QString saveFileSupport();
     /**
-        \fn milxQtRegistrationPlugin::saveExtensions()
-        \brief Get a list of supported file format extensions. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::saveExtensions()
+    \brief Get a list of supported file format extensions. [Implement this in your plugin]
     */
     virtual QStringList saveExtensions();
 
     /**
-        \fn milxQtRegistrationPlugin::hasCollectionSupport()
-        \brief Does the plugin support collections (PolyData collection etc.). [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::hasCollectionSupport()
+    \brief Does the plugin support collections (PolyData collection etc.). [Implement this in your plugin]
     */
     inline virtual bool hasCollectionSupport()
     {
         return false;
     }
     /**
-        \fn milxQtRegistrationPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames)
-        \brief Pass a collection to internal plugin class. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames)
+    \brief Pass a collection to internal plugin class. [Implement this in your plugin]
     */
     virtual void SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames);
 
     /**
-        \fn milxQtRegistrationPlugin::open(QString filename)
-        \brief Open the file using the plugin. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::open(QString filename)
+    \brief Open the file using the plugin. [Implement this in your plugin]
     */
     virtual void open(QString filename);
     /**
-        \fn milxQtRegistrationPlugin::save(QString filename)
-        \brief Save the result as a file using the plugin. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::save(QString filename)
+    \brief Save the result as a file using the plugin. [Implement this in your plugin]
     */
     virtual void save(QString filename);
 
     /**
-        \fn milxQtRegistrationPlugin::genericResult()
-        \brief Get the generic result, which is a milxQtRenderWindow. The result can then be displayed in milxQtMain etc. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::genericResult()
+    \brief Get the generic result, which is a milxQtRenderWindow. The result can then be displayed in milxQtMain etc. [Implement this in your plugin]
     */
     virtual milxQtRenderWindow* genericResult();
     /**
-        \fn milxQtRegistrationPlugin::modelResult()
-        \brief Get the model result. The result can then be displayed in milxQtMain etc. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::modelResult()
+    \brief Get the model result. The result can then be displayed in milxQtMain etc. [Implement this in your plugin]
     */
     virtual milxQtModel* modelResult();
     /**
-        \fn milxQtRegistrationPlugin::imageResult()
-        \brief Get the image result. The result can then be displayed in milxQtMain etc.[Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::imageResult()
+    \brief Get the image result. The result can then be displayed in milxQtMain etc.[Implement this in your plugin]
     */
     virtual milxQtImage* imageResult();
     /**
-        \fn milxQtRegistrationPlugin::dockWidget()
-        \brief Return the dock widget (if one is provided by plugin). [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::dockWidget()
+    \brief Return the dock widget (if one is provided by plugin). [Implement this in your plugin]
     */
     virtual QDockWidget* dockWidget();
 
     /**
-        \fn milxQtRegistrationPlugin::dockDefaultArea()
-        \brief Return the default dock widget area (if one is provided by plugin). [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::dockDefaultArea()
+    \brief Return the default dock widget area (if one is provided by plugin). [Implement this in your plugin]
     */
     inline virtual Qt::DockWidgetArea dockDefaultArea()
     {
@@ -131,83 +134,109 @@ public:
     }
 
     /**
-        \fn milxQtRegistrationPlugin::isPluginWindow(QWidget *window)
-        \brief Is the window provided a plugin generated window? In this case a milxQtShapeModel window. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::isPluginWindow(QWidget *window)
+    \brief Is the window provided a plugin generated window? In this case a milxQtShapeModel window. [Implement this in your plugin]
     */
     virtual bool isPluginWindow(QWidget *window);
 
     /**
-    	\fn milxQtRegistrationPlugin::registration(RegType type)
-    	\brief Register the opened images with the selected algorithm
+    \fn milxQtRegistrationPlugin::registration(RegType type)
+    \brief Register the opened images with the selected algorithm
     */
     void registration(RegType type);
 
 public slots:
     /**
-        \fn milxQtRegistrationPlugin::loadExtension()
-        \brief Load the extension. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::loadExtension()
+    \brief Load the extension. [Implement this in your plugin]
     */
     virtual void loadExtension();
     /**
-        \fn milxQtRegistrationPlugin::update()
-        \brief Update the plugin. [Implement this in your plugin]
+    \fn milxQtRegistrationPlugin::update()
+    \brief Update the plugin. [Implement this in your plugin]
 
-        This generic call is called after plugin is loaded and is designed to be used to update the plugin
-        internals such as manager displays etc.
+    This generic call is called after plugin is loaded and is designed to be used to update the plugin
+    internals such as manager displays etc.
     */
     virtual void update() {}
     /**
-        \fn milxQtRegistrationPlugin::preStartTasks()
-        \brief Tasks to complete before running or starting the thread. [Implement this]
+    \fn milxQtRegistrationPlugin::preStartTasks()
+    \brief Tasks to complete before running or starting the thread. [Implement this]
     */
     virtual void preStartTasks() {}
     /**
-        \fn milxQtRegistrationPlugin::postStartTasks()
-        \brief Tasks to complete after running or starting the thread. [Implement this]
+    \fn milxQtRegistrationPlugin::postStartTasks()
+    \brief Tasks to complete after running or starting the thread. [Implement this]
     */
     virtual void postStartTasks() {}
 
     /**
-    	\fn F3DRegistrationSlot()
-    	\brief Slot for the F3D registration button
+    \fn ItkAffineRegistrationSlot()
+    \brief Slot for the Itk Affine registration button
     */
-    void F3DRegistrationSlot();
+    void ItkAffineRegistrationSlot();
 
     /**
-    	\fn AladinRegistrationSlot()
-    	\brief Slot for the Aladin registration button
+    \fn ItkDemonRegistrationSlot()
+    \brief Slot for the Itk Demon registration button
     */
-    void AladinRegistrationSlot();
+    void ItkDemonRegistrationSlot();
+
+#ifdef USE_NIFTI
+    /**
+    \fn F3DNiftiRegistrationSlot()
+    \brief Slot for the F3D registration button
+    */
+    void F3DNiftiRegistrationSlot();
+
+    /**
+    \fn AladinNiftiRegistrationSlot()
+    \brief Slot for the Aladin registration button
+    */
+    void AladinNiftiRegistrationSlot();
+#endif
+
+#ifdef USE_ELASTIX
+    /**
+    \fn ElastixAffineRegistrationSlot()
+    \brief Slot for the Elastix Affine registration button
+    */
+    void ElastixAffineRegistrationSlot();
+
+    /**
+    \fn ElastixBSplineRegistrationSlot()
+    \brief Slot for the Elastix Affine registration button
+    */
+    void ElastixBSplineRegistrationSlot();
+#endif
 
 protected:
 
-    QPointer<milxQtMain> MainWindow; //!< Pointer to milxQt main window
+    QPointer<milxQtMain> MainWindow;
+
     QMenu* menu; //!< Registration menu
-    QAction* actionF3D; //!< F3D registration action
-    QAction* actionAladin; //!< Aladin registration action
-    milxQtRegistrationWindow * regWindow; //!< Registration window
+    QAction* actionItkAffine; //!< Itk Affine action
+    QAction* actionItkDemon; //!< Itk Demon action
 
-    /**
-        \fn milxQtRegistrationPlugin::createMenu()
-        \brief Create the registration menu in SMILI
-    */
-    void createMenu();
+#ifdef USE_NIFTI
+    QAction* actionF3DNifti; //!< F3D registration action
+    QAction* actionAladinNifti; //!< Aladin registration action
+#endif
 
-    /**
-        \fn milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent = 0)
-        \brief Create menu actions
-    */
+#ifdef USE_ELASTIX
+    QAction* actionElastixAffine; //!< Elastix Affine action
+    QAction* actionElastixBSpline; //!< Elastix BSpline action
+#endif
+
+    milxQtRegistrationWindow * regWindow; //!< registration window
+
     void createActions();
-
-    /**
-        \fn milxQtRegistrationPlugin::createConnections()
-        \brief Create the QT connections with the menu
-    */
+    void createMenu();
     void createConnections();
 
 };
 
-class MILXQT_PLUGIN_EXPORT milxQtRegistrationPluginFactory: public QObject, public milxQtPluginFactory
+class MILXQT_PLUGIN_EXPORT milxQtRegistrationPluginFactory : public QObject, public milxQtPluginFactory
 {
     Q_OBJECT
     Q_INTERFACES(milxQtPluginFactory)

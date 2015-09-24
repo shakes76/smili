@@ -14,12 +14,22 @@ milxQtRegistrationWindow::milxQtRegistrationWindow(QWidget * theParent) : QDialo
 {
     MainWindow = qobject_cast<milxQtMain *>(theParent);
     advancedOptionsWindow = new milxQtRegistrationAdvancedOptions(this);
-    niftiReg = new milxQtRegistrationNifti(this);
+    regAlgos = new milxQtRegistrationAlgos(this);
     workInProgress = false;
     computeAverage = false;
     openResults = false;
     initUI();
     createConnections();
+
+#ifdef USE_ELASTIX
+    // This needs to be setup once for elastix to work properly
+    int ret = elx::xoutSetup("", false, false);
+    if (ret)
+    {
+        QMessageBox msgBox(QMessageBox::Critical, "Elastix Initialisation Error", "Error while initializing Elastix logging system. Elastix registration might fail.", QMessageBox::NoButton);
+        msgBox.exec();
+    }
+#endif
 }
 
 /*
@@ -34,8 +44,8 @@ milxQtRegistrationWindow::~milxQtRegistrationWindow()
     // Free the advanced options window
     delete(advancedOptionsWindow);
 
-    // Destroy niftiReg
-    delete(niftiReg);
+    // Destroy regAlgos
+    delete(regAlgos);
 }
 
 // Initialise the user interface
@@ -46,32 +56,74 @@ void milxQtRegistrationWindow::initUI()
     setWindowModality(Qt::ApplicationModal);
     setWindowTitle(tr("Registration option"));
 
-
     // Set up the list of algorithms
     QStringList algoList;
-    algoList << "F3D" << "Aladin";
+    algoList << "Affine (ITK)" << "Demon (ITK)";
+
+#ifdef USE_NIFTI
+    algoList << "F3D (Nifti)" << "Aladin (Nifti)";
+#endif
+
+#ifdef USE_ELASTIX
+    algoList << "Affine (Elastix)" << "BSpline (Elastix)";
+#endif
+
     this->ui.comboBoxAlgo->addItems(algoList);
+
+    // If we don't have nifti we can't compute the atlas and we can't compute the deformation field
+#ifndef USE_NIFTI
+    this->ui.checkBoxCreateAtlas->setVisible(false);
+    this->ui.checkBoxDeformationF->setVisible(false);
+#endif
+}
+
+// Return the current algorithm selected in the combo box
+RegType milxQtRegistrationWindow::getCurrentAlgo()
+{
+    if (ui.comboBoxAlgo->currentText().compare("Affine (ITK)") == 0) return AffineItk;
+    else if (ui.comboBoxAlgo->currentText().compare("Demon (ITK)") == 0) return DemonItk;
+    else if (ui.comboBoxAlgo->currentText().compare("F3D (Nifti)") == 0) return F3DNifti;
+    else if (ui.comboBoxAlgo->currentText().compare("Aladin (Nifti)") == 0) return AladinNifti;
+    else if (ui.comboBoxAlgo->currentText().compare("Affine (Elastix)") == 0) return ElastixAffine;
+    else if (ui.comboBoxAlgo->currentText().compare("BSpline (Elastix)") == 0) return ElastixBSpline;
+
+    return None;
 }
 
 // Change the algorithm selected (and change the interface accordingly)
 void milxQtRegistrationWindow::setAlgo(RegType regType)
 {
     // Reset interface
-    this->ui.checkBoxSaveToDir->setChecked(false);
-    this->ui.inputDirectoryBrowser->clear();
+    // Set the output directory
+    if (this->ui.inputDirectoryBrowser->text() == "")
+    {
+        this->ui.inputDirectoryBrowser->setText(getDefaultOutputFolder());
+    }
 
     // Set the current algo selected
     this->ui.comboBoxAlgo->setCurrentIndex(regType);
 
-    // By default we show the deformation field for F3D
-    if (regType == F3D)
+    // With ITK we don't have advanced options (hide the button)
+    if (regType == AffineItk || regType == DemonItk)
     {
+        this->ui.btnAdvancedOptions->setVisible(false);
+    }
+    else
+    {
+        this->ui.btnAdvancedOptions->setVisible(true);
+    }
+
+    // By default we don't show the deformation field for Nifti F3D
+    if (regType == F3DNifti)
+    {
+        this->ui.checkBoxDeformationF->setVisible(true);
         this->ui.checkBoxDeformationF->setEnabled(true);
-        this->ui.checkBoxDeformationF->setChecked(true);
+        this->ui.checkBoxDeformationF->setChecked(false);
     }
     // Otherwise we disable this field
     else
     {
+        this->ui.checkBoxDeformationF->setVisible(false);
         this->ui.checkBoxDeformationF->setEnabled(false);
         this->ui.checkBoxDeformationF->setChecked(false);
     }
@@ -210,6 +262,13 @@ void milxQtRegistrationWindow::disableUI()
     this->ui.btnOk->setDisabled(true);
     this->ui.listWidget->setDisabled(true);
     this->ui.btnAdvancedOptions->setDisabled(true);
+    this->ui.checkBoxCreateAtlas->setDisabled(true);
+    this->ui.checkBoxOpenResults->setDisabled(true);
+    this->ui.btnAddImage->setDisabled(true);
+    this->ui.btnBrowse->setDisabled(true);
+    this->ui.btnSelectAll->setDisabled(true);
+    this->ui.btnUnselectAll->setDisabled(true);
+    this->ui.clearList->setDisabled(true);
 
     // Disable checkboxes
     for (int row = 0; row < this->ui.listWidget->count(); row++)
@@ -229,6 +288,13 @@ void milxQtRegistrationWindow::enableUI()
     this->ui.btnOk->setDisabled(false);
     this->ui.listWidget->setDisabled(false);
     this->ui.btnAdvancedOptions->setDisabled(false);
+    this->ui.checkBoxCreateAtlas->setDisabled(false);
+    this->ui.checkBoxOpenResults->setDisabled(false);
+    this->ui.btnAddImage->setDisabled(false);
+    this->ui.btnBrowse->setDisabled(false);
+    this->ui.btnSelectAll->setDisabled(false);
+    this->ui.btnUnselectAll->setDisabled(false);
+    this->ui.clearList->setDisabled(false);
 
     // Disable checkboxes
     for (int row = 0; row < this->ui.listWidget->count(); row++)
@@ -237,22 +303,81 @@ void milxQtRegistrationWindow::enableUI()
         item->setFlags(item->flags() ^ Qt::ItemIsEnabled);
     }
 
-    setAlgo((RegType) this->ui.comboBoxAlgo->currentIndex());
+    setAlgo(this->getCurrentAlgo());
 }
 
-// get the parameters of F3D registration
-ParamsF3D milxQtRegistrationWindow::getParamsF3D()
+// get the parameters of Itk Affine registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsAffineItk()
 {
-    ParamsF3D params = advancedOptionsWindow->getParamsF3D();
+    milxQtRegistrationParams params;
+    return params;
+}
+
+
+// get the parameters of Itk Demon registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsDemonItk()
+{
+    milxQtRegistrationParams params;
+    return params;
+}
+
+// get the parameters of Nifti F3D registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsF3DNifti()
+{
+    milxQtRegistrationParams params = advancedOptionsWindow->getParamsF3DNifti();
     params.cpp2Def = this->ui.checkBoxDeformationF->isChecked();
     return params;
 }
 
-// get the parameters of aladin registration
-ParamsAladin milxQtRegistrationWindow::getParamsAladin()
+// get the parameters of a Nifti Aladin registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsAladinNifti()
 {
-    ParamsAladin params = advancedOptionsWindow->getParamsAladin();
+    milxQtRegistrationParams params = advancedOptionsWindow->getParamsAladinNifti();
     return params;
+}
+
+// get the parameters of Elastix Affine registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsElastixAffine()
+{
+    milxQtRegistrationParams params = advancedOptionsWindow->getParamsElastixAffine();
+    return params;
+}
+
+// get the parameters of Elastix BSpline registration
+milxQtRegistrationParams milxQtRegistrationWindow::getParamsElastixBSpline()
+{
+    milxQtRegistrationParams params = advancedOptionsWindow->getParamsElastixBSpline();
+    return params;
+}
+
+QString milxQtRegistrationWindow::getDefaultOutputFolder()
+{
+    QString outputFoldPath;
+
+    // we try to find the reference image
+    int indexRef;
+    for (indexRef = 0; indexRef < images.size(); indexRef++)
+    {
+        if (images[indexRef]->isRef() == true)
+        {
+            break;
+        }
+    }
+
+    // If we have images opened
+    // the default path is the reference image path + regoutput
+    if (images.size() != 0)
+    {
+        outputFoldPath = QDir(QFileInfo(images[indexRef]->getPath()).absolutePath() + "/regoutput").absolutePath();
+    }
+    else
+    {
+        // Otherwise If no image are opened
+        // By default it will create a folder on the desktop
+        outputFoldPath = QDir(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation) + "/regoutput").absolutePath();
+    }
+
+    return outputFoldPath;
 }
 
 // update images parameters
@@ -262,7 +387,7 @@ void milxQtRegistrationWindow::updateParameters()
     if (images.size() == 0) return;
 
     // Get the registration type
-    RegType type = (RegType)this->ui.comboBoxAlgo->currentIndex();
+    RegType type = this->getCurrentAlgo();
 
     // Get the reference image
     int refIndex = this->ui.comboBoxRef->currentIndex();
@@ -275,7 +400,7 @@ void milxQtRegistrationWindow::updateParameters()
 
     // Get the output folder
     QString outFolder = this->ui.inputDirectoryBrowser->text();
-    if (!this->ui.checkBoxSaveToDir->isChecked() || !QDir(outFolder).exists())
+    if (!QDir(outFolder).exists())
     {
         outFolder = "";
     }
@@ -301,7 +426,7 @@ void milxQtRegistrationWindow::updateParameters()
         images[i]->setReference(ref);
 
         // We set the output folder
-        images[i]->setOutputFolder(outFolder);
+        images[i]->setOutputFolder(QDir(outFolder).absolutePath());
 
         // We look the type of the registration
         images[i]->setRegType(type);
@@ -310,13 +435,29 @@ void milxQtRegistrationWindow::updateParameters()
         images[i]->setOpenResults(openResults);
 
         // We update the parameters of the registration
-        if (type == Aladin)
+        if (type == AffineItk)
         {
-            images[i]->setParams(getParamsAladin());
+            images[i]->setParams(getParamsAffineItk());
         }
-        else if (type == F3D)
+        else if (type == DemonItk)
         {
-            images[i]->setParams(getParamsF3D());
+            images[i]->setParams(getParamsDemonItk());
+        }
+        else if (type == AladinNifti)
+        {
+            images[i]->setParams(getParamsAladinNifti());
+        }
+        else if (type == F3DNifti)
+        {
+            images[i]->setParams(getParamsF3DNifti());
+        }
+        else if (type == ElastixAffine)
+        {
+            images[i]->setParams(getParamsElastixAffine());
+        }
+        else if (type == ElastixBSpline)
+        {
+            images[i]->setParams(getParamsElastixBSpline());
         }
     }
 }
@@ -333,7 +474,8 @@ void milxQtRegistrationWindow::createConnections()
     connect(this->ui.btnUnselectAll, SIGNAL(clicked()), this, SLOT(unselectAllClicked()));
     connect(this->ui.btnBrowse, SIGNAL(clicked()), this, SLOT(browseBtnClicked()));
     connect(this->ui.clearList, SIGNAL(clicked()), this, SLOT(clearList()));
-    connect(this->niftiReg, SIGNAL(averageCompleted()), this, SLOT(averageComputed()));
+    connect(this->regAlgos, SIGNAL(averageCompleted()), this, SLOT(averageComputed()));
+    connect(this->regAlgos, SIGNAL(error(QString, QString)), this, SLOT(regError(QString, QString)));
 }
 
 // Add a new image to the list
@@ -346,6 +488,7 @@ void milxQtRegistrationWindow::addImage(milxQtRegistration * image)
 
     images.append(image);
     connect(image, SIGNAL(done()), this, SLOT(regComplete()));
+    connect(image, SIGNAL(error(QString, QString)), this, SLOT(regError(QString, QString)));
 }
 
 
@@ -442,7 +585,7 @@ void milxQtRegistrationWindow::browseBtnClicked()
 // Advanced option button pushed
 void milxQtRegistrationWindow::advancedOptionsClicked()
 {
-    advancedOptionsWindow->reset((RegType)this->ui.comboBoxAlgo->currentIndex());
+    advancedOptionsWindow->reset(this->getCurrentAlgo());
     advancedOptionsWindow->show();
 }
 
@@ -450,14 +593,31 @@ void milxQtRegistrationWindow::advancedOptionsClicked()
 // Algo combo box changed
 void milxQtRegistrationWindow::algoComboChange(int newIndex)
 {
-    if (newIndex == Aladin)
+    if (newIndex == AffineItk)
     {
-        setAlgo(Aladin);
+        setAlgo(AffineItk);
     }
-    else
+    else if (newIndex == DemonItk)
     {
-        setAlgo(F3D);
+        setAlgo(DemonItk);
     }
+    else if (newIndex == AladinNifti)
+    {
+        setAlgo(AladinNifti);
+    }
+    else if (newIndex == F3DNifti)
+    {
+        setAlgo(F3DNifti);
+    }
+    else if (newIndex == ElastixAffine)
+    {
+        setAlgo(ElastixAffine);
+    }
+    else if (newIndex == ElastixBSpline)
+    {
+        setAlgo(ElastixBSpline);
+    }
+
 }
 
 // Reference combo box changed
@@ -485,6 +645,27 @@ void milxQtRegistrationWindow::accept()
     if (images.size() < 2) {
         // Message box: Error we need at least two images
         QMessageBox msgBox(QMessageBox::Critical, "Registration", "Error you need at least two images (a reference and and image to register).", QMessageBox::NoButton);
+        msgBox.exec();
+        return;
+    }
+
+    // Check if the directory is valid and exist, otherwise we ask to create it
+    QString outputDir = this->ui.inputDirectoryBrowser->text();
+    if (!QFile::exists(outputDir))
+    {
+        // If the directory doesn't exist we ask if we should create it
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Directory Creation", "The directory \"" + outputDir + "\" doesn't exist, do you want to create it ?", QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            QDir().mkdir(outputDir);
+        }
+    }
+
+    // If the directory is invalid and still doesn't exist, error message
+    if (!QDir(outputDir).exists())
+    {
+        QMessageBox msgBox(QMessageBox::Critical, "Registration", "Error the output directory path doesn't exist or is invalid.", QMessageBox::NoButton);
         msgBox.exec();
         return;
     }
@@ -534,6 +715,30 @@ void milxQtRegistrationWindow::reject()
 // A registration has been completed
 void milxQtRegistrationWindow::regComplete()
 {
+    // Perform the next registration
+    performRegistrations();
+}
+
+// An error happenned during the registration
+void milxQtRegistrationWindow::regError(QString functionName, QString errorMsg)
+{
+    // Show an error message
+    QMessageBox msgBox(QMessageBox::Critical, "Registration error in function " + functionName, errorMsg, QMessageBox::NoButton);
+    msgBox.exec();
+
+    // If it's the average function, all the work is done
+    if (functionName == "average()" || functionName == "computeAtlas()") {
+        // Remove the atlas file it failed
+        if (QFile::exists(atlasPath))
+        {
+            QFile::remove(atlasPath);
+        }
+
+        // Work is done
+        workCompleted();
+    }
+
+    // Perform the next registration
     performRegistrations();
 }
 
@@ -560,7 +765,9 @@ void milxQtRegistrationWindow::performRegistrations()
         // If we have to compute the average
         if (computeAverage)
         {
+#ifdef USE_NIFTI
             computeAtlas();
+#endif
         }
         else
         {
@@ -568,8 +775,9 @@ void milxQtRegistrationWindow::performRegistrations()
             workCompleted();
         }
     }
-}
 
+}
+#ifdef USE_NIFTI
 // compute the average of all the registrations
 void milxQtRegistrationWindow::computeAtlas()
 {
@@ -592,10 +800,16 @@ void milxQtRegistrationWindow::computeAtlas()
 
     // Create the outputfile for the atlas (the output filename will contain the name of the reference)
     atlasPath = ref->createAtlasFile();
+    if (atlasPath == "")
+    {
+        regError("computeAtlas()", "Unable to create the atlas file");
+        return;
+    }
 
     // Start the computation
-    niftiReg->average_async(atlasPath, filenames);
+    regAlgos->average_async(atlasPath, filenames);
 }
+#endif
 
 // everything has been completed
 void milxQtRegistrationWindow::workCompleted()
@@ -606,4 +820,11 @@ void milxQtRegistrationWindow::workCompleted()
     // Message box: registration completed
     QMessageBox msgBox(QMessageBox::Information, "Registration", "Registration completed !", QMessageBox::NoButton);
     msgBox.exec();
+
+    // If the files were not opened in SMILI we open the output folder
+    if (!this->ui.checkBoxOpenResults->isChecked())
+    {
+        QString folder = QDir(this->ui.inputDirectoryBrowser->text()).absolutePath();
+        QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
+    }
 }

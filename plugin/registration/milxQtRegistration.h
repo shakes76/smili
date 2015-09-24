@@ -1,9 +1,9 @@
 #ifndef MILXQTRegistration_H
 #define MILXQTRegistration_H
 
-#include "milxQtRegistrationStructures.h"
+#include "milxQtRegistrationParams.h"
 #include "milxQtRegistration.h"
-#include "milxQtRegistrationNiftiReg.h"
+#include "milxQtRegistrationAlgos.h"
 #include "milxQtMain.h"
 #include <QObject>
 #include <QFile>
@@ -62,16 +62,10 @@ public:
     bool isChecked();
 
     /*!
-        \fn milxQtRegistration::setParams(ParamsF3D)
-        \brief Set the F3D registration parameters
+        \fn milxQtRegistration::setParams(milxQtRegistrationParams)
+        \brief Set the registration parameters
     */
-    void setParams(ParamsF3D);
-
-    /*!
-        \fn milxQtRegistration::setParams(ParamsAladin)
-        \brief Set the Aladin registration parameters
-    */
-    void setParams(ParamsAladin);
+    void setParams(milxQtRegistrationParams);
 
     /*!
         \fn milxQtRegistration::setRegType(RegType)
@@ -101,13 +95,13 @@ public:
         \fn milxQtRegistration::milxQtRegistration()
         \brief Start the registration
     */
-    void startRegistration();
+    int startRegistration();
 
     /*!
         \fn milxQtRegistration::createFiles()
         \brief Create the files required for the registration
     */
-    void createFiles();
+    int createFiles();
 
     /*!
         \fn milxQtRegistration::createFile(QString pathtemplate)
@@ -157,6 +151,14 @@ public:
     */
     bool isWorkDone();
 
+    /*!
+    \fn milxQtRegistration::getAlgoName()
+    \brief Return the name of the current algorithm
+    */
+    QString milxQtRegistration::getAlgoName();
+
+    milxQtRegistrationParams params; //!< Parameters for registration
+
 signals:
 
     /*!
@@ -165,6 +167,11 @@ signals:
     */
     void done();
 
+    /*!
+    \fn milxQtRegistration::error(QString functionName, QString errorMsg)
+    \brief The registration and transformations have been done
+    */
+    void error(QString functionName, QString errorMsg);
 
 public slots:
 
@@ -179,6 +186,13 @@ public slots:
         \brief The transformation to deformation field is completed
     */
     void cpp2defCompleted();
+
+
+    /*!
+    \fn milxQtRegistration::algoError(QString functionName, QString errorMsg);
+    \brief The registration and transformations have been done
+    */
+    void algoError(QString functionName, QString errorMsg);
 
     /*!
         \fn milxQtRegistration::setIsRef(bool)
@@ -207,19 +221,11 @@ protected:
     bool checked; //!< Is the image checked: do we need to perform a registration
     bool workDone; //!< Is the registration done
     bool isRefImg; //!< Is this image the reference image
-    ParamsF3D paramsF3D; //!< Parameters for a F3D registration
-    ParamsAladin paramsAladin; //!< Parameters for an Aladin registration
     RegType type; //!< Type of the registration
     milxQtRegistration * reference; //!< Reference image for the registration
-    milxQtRegistrationNifti *niftiReg; //!< Class containing the algorithms for the registration
+    milxQtRegistrationAlgos * regAlgos; //!< Class containing the algorithms for the registration
     milxQtMain *MainWindow; //!< Main window of SMILI
 
-    // Filepath use for the registration
-    QString tmp_img; //!< Temp path/file for the image
-    QString tmp_ref; //!< Temp path/file for the reference
-    QString tmp_cpp; //!< Temp path/file for the cpp file
-    QString output_def; //!< Output path for the deformation field
-    QString output_path; //!< Output path/file for the image
 };
 
 #endif // MILXQTRegistration_H
