@@ -33,12 +33,11 @@ int milxQtRegistrationAlgos::affine(milxQtRegistrationParams params)
     strncpy(outputName, params.outputName.toLatin1().constData(), FILENAME_MAX);
 
 
-    bool result = reg.RegisterAffineITK(
-                      std::string(floatingName),
-                      std::string(referenceName),
-                      std::string(outputName),
-                      false, std::string(""),
-                      std::string(""));
+    bool result = reg.RegisterAffineITK(std::string(referenceName),
+                                        std::string(floatingName),
+                                        std::string(outputName),
+                                        false, std::string(""),
+                                        std::string(""));
 
     if (result == true)
         emit registrationCompleted();
@@ -60,8 +59,8 @@ int milxQtRegistrationAlgos::demon(milxQtRegistrationParams params)
     strncpy(floatingName, params.floatingName.toLatin1().constData(), FILENAME_MAX);
     strncpy(outputName, params.outputName.toLatin1().constData(), FILENAME_MAX);
 
-    bool result = reg.RegisterMilxNonRigid(std::string(floatingName),
-                                           std::string(referenceName),
+    bool result = reg.RegisterMilxNonRigid(std::string(referenceName),
+                                           std::string(floatingName),
                                            std::string(outputName),
                                            false);
 

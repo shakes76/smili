@@ -189,7 +189,7 @@ void milxQtRegistrationAdvancedOptions::createConnections()
 void milxQtRegistrationAdvancedOptions::browseBtnClicked()
 {
     QFileDialog fileOpener;
-    fileOpener.setFileMode(QFileDialog::FileMode::ExistingFile);
+    fileOpener.setFileMode(QFileDialog::ExistingFile);
     QString filename = fileOpener.getOpenFileName(this, tr("Select File"));
     this->ui.lineParameterFile->setText(filename);
 }

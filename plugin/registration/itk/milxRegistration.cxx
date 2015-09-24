@@ -994,7 +994,7 @@ Registration
 
     if (writeFiles == true) {
         //sprintf(outputFileName,"%s%s", outputPrefix.c_str(),"rigid_orig.nii.gz");
-        sprintf(outputFileName, "%s", outputName);
+        sprintf(outputFileName, "%s", outputName.c_str());
         ResampleFilterType::Pointer resampleAffine = ResampleFilterType::New();
         resampleAffine->SetTransform( rigidTransform );
         resampleAffine->SetInput( movingImage );
