@@ -155,7 +155,7 @@ public:
     \fn milxQtRegistration::getAlgoName()
     \brief Return the name of the current algorithm
     */
-    QString milxQtRegistration::getAlgoName();
+    QString getAlgoName();
 
     milxQtRegistrationParams params; //!< Parameters for registration
 
