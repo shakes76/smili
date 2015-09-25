@@ -6,7 +6,7 @@
 #include "milxQtMain.h"
 #include "milxQtImage.h"
 #include "milxQtFile.h"
-#include "milxQtRegistrationNiftiReg.h"
+#include "milxQtRegistrationAlgos.h"
 #include "milxQtRegistration.h"
 
 typedef QList<milxQtImage *> QImageList;
@@ -63,22 +63,52 @@ public:
     bool isImageInList(QString path);
 
     /*!
+    \fn milxQtRegistrationWindow::getCurrentAlgo()
+    \brief Return the current algorithm selected in the combo box
+    */
+    RegType getCurrentAlgo();
+
+    /*!
         \fn milxQtRegistrationWindow::updateParameters()
         \brief Update images parameters, set the values of the form to images
     */
     void updateParameters();
 
     /*!
-        \fn milxQtRegistrationWindow::getParamsF3D()
-        \brief Return the parameters for a F3D registration
+    \fn milxQtRegistrationWindow::getParamsAffineItk()
+    \brief Return the parameters for a Itk Affine registration
     */
-    ParamsF3D getParamsF3D();
+    milxQtRegistrationParams getParamsAffineItk();
 
     /*!
-        \fn milxQtRegistrationWindow::getParamsAladin()
-        \brief Return the parameters for an Aladin registration
+    \fn milxQtRegistrationWindow::getParamsDemonItk()
+    \brief Return the parameters for a Itk Demon registration
     */
-    ParamsAladin getParamsAladin();
+    milxQtRegistrationParams getParamsDemonItk();
+
+    /*!
+        \fn milxQtRegistrationWindow::getParamsF3DNifti()
+        \brief Return the parameters for a Nifti F3D registration
+    */
+    milxQtRegistrationParams getParamsF3DNifti();
+
+    /*!
+        \fn milxQtRegistrationWindow::getParamsAladinNifti()
+        \brief Return the parameters for an Nifti Aladin registration
+    */
+    milxQtRegistrationParams getParamsAladinNifti();
+
+    /*!
+    \fn milxQtRegistrationWindow::getParamsElastixAffine()
+    \brief Return the parameters for a Elastix Affine registration
+    */
+    milxQtRegistrationParams getParamsElastixAffine();
+
+    /*!
+    \fn milxQtRegistrationWindow::getParamsElastixBSpline()
+    \brief Return the parameters for a Elastix BSpline registration
+    */
+    milxQtRegistrationParams getParamsElastixBSpline();
 
     /*!
         \fn milxQtRegistrationWindow::addImage(milxQtRegistration *)
@@ -111,10 +141,18 @@ public:
     void workCompleted();
 
     /*!
+    \fn milxQtRegistrationWindow::getDefaultOutputFolder()
+    \brief Return the default output folder
+    */
+    QString getDefaultOutputFolder();
+
+#ifdef USE_NIFTI
+    /*!
         \fn milxQtRegistrationWindow::computeAtlas()
         \brief Compute the average (Atlas) of all the registrations
     */
     void computeAtlas();
+#endif
 
     QList<milxQtRegistration *> images; //!< List of images for the combobox and list of selectable images
 
@@ -180,6 +218,12 @@ public slots:
     void regComplete();
 
     /*!
+    \fn milxQtRegistrationWindow::regError(QString functionName, QString errorMsg)
+    \brief An error happened during the registration or average function
+    */
+    void regError(QString functionName, QString errorMsg);
+
+    /*!
         \fn milxQtRegistrationWindow::milxQtRegistrationWindow(QWidget *parent = 0)
         \brief Clear the list of images
     */
@@ -203,7 +247,7 @@ protected:
     milxQtRegistrationAdvancedOptions *advancedOptionsWindow; //!< Advanced options window
     bool workInProgress; //!< Is there any work in progress
     bool computeAverage; //!< Do we need to compute the average of the registrations
-    milxQtRegistrationNifti *niftiReg; //!< nifti reg to compute average
+    milxQtRegistrationAlgos * regAlgos; //!< reg algorithm to compute average
     QString atlasPath; //!< Path to the outputed atlas
     bool openResults; //!< Store if we need to open the results
 };

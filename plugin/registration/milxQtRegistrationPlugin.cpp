@@ -139,19 +139,48 @@ void milxQtRegistrationPlugin::loadExtension()
 
 void milxQtRegistrationPlugin::createActions()
 {
-    actionF3D = new QAction(MainWindow);
-    actionF3D->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation", 0, QApplication::UnicodeUTF8));
+    actionItkAffine = new QAction(MainWindow);
+    actionItkAffine->setText(QApplication::translate("RegistrationPlugin", "Affine (Itk)", 0, QApplication::UnicodeUTF8));
 
-    actionAladin = new QAction(MainWindow);
-    actionAladin->setText(QApplication::translate("RegistrationPlugin", "Aladin (Aladin)"));
+    actionItkDemon = new QAction(MainWindow);
+    actionItkDemon->setText(QApplication::translate("RegistrationPlugin", "Demon (Itk)"));
+
+#ifdef USE_NIFTI
+    actionF3DNifti = new QAction(MainWindow);
+    actionF3DNifti->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation (Nifti)", 0, QApplication::UnicodeUTF8));
+
+    actionAladinNifti = new QAction(MainWindow);
+    actionAladinNifti->setText(QApplication::translate("RegistrationPlugin", "Aladin (Nifti)"));
+#endif
+
+
+#ifdef USE_ELASTIX
+    actionElastixAffine = new QAction(MainWindow);
+    actionElastixAffine->setText(QApplication::translate("RegistrationPlugin", "Affine (Elastix)", 0, QApplication::UnicodeUTF8));
+
+    actionElastixBSpline = new QAction(MainWindow);
+    actionElastixBSpline->setText(QApplication::translate("RegistrationPlugin", "BSpline (Elastix)"));
+#endif
+
 }
 
 void milxQtRegistrationPlugin::createMenu()
 {
     menu = new QMenu(MainWindow);
     menu->setTitle(QApplication::translate("RegistrationPlugin", "Image Registration", 0, QApplication::UnicodeUTF8));
-    menu->addAction(actionF3D);
-    menu->addAction(actionAladin);
+
+    menu->addAction(actionItkAffine);
+    menu->addAction(actionItkDemon);
+
+#ifdef USE_NIFTI
+    menu->addAction(actionF3DNifti);
+    menu->addAction(actionAladinNifti);
+#endif
+
+#ifdef USE_ELASTIX
+    menu->addAction(actionElastixAffine);
+    menu->addAction(actionElastixBSpline);
+#endif
 
     menuToAdd.append(menu);
 }
@@ -159,26 +188,66 @@ void milxQtRegistrationPlugin::createMenu()
 
 void milxQtRegistrationPlugin::createConnections()
 {
-    connect(actionF3D, SIGNAL(activated()), this, SLOT(F3DRegistrationSlot()));
-    connect(actionAladin, SIGNAL(activated()), this, SLOT(AladinRegistrationSlot()));
+    connect(actionItkAffine, SIGNAL(activated()), this, SLOT(ItkAffineRegistrationSlot()));
+    connect(actionItkDemon, SIGNAL(activated()), this, SLOT(ItkDemonRegistrationSlot()));
+
+#ifdef USE_NIFTI
+    connect(actionF3DNifti, SIGNAL(activated()), this, SLOT(F3DNiftiRegistrationSlot()));
+    connect(actionAladinNifti, SIGNAL(activated()), this, SLOT(AladinNiftiRegistrationSlot()));
+#endif
+
+#ifdef USE_ELASTIX
+    connect(actionElastixAffine, SIGNAL(activated()), this, SLOT(ElastixAffineRegistrationSlot()));
+    connect(actionElastixBSpline, SIGNAL(activated()), this, SLOT(ElastixBSplineRegistrationSlot()));
+#endif
+
 }
 
-
-// F3D Registration slot
-void milxQtRegistrationPlugin::F3DRegistrationSlot()
+// Itk Affine Registration slot
+void milxQtRegistrationPlugin::ItkAffineRegistrationSlot()
 {
-    regWindow->setAlgo(F3D);
+    regWindow->setAlgo(AffineItk);
     regWindow->show();
 }
 
-// Aladin Registration slot
-void milxQtRegistrationPlugin::AladinRegistrationSlot()
+// Itk Demon Registration slot
+void milxQtRegistrationPlugin::ItkDemonRegistrationSlot()
 {
-    regWindow->setAlgo(Aladin);
+    regWindow->setAlgo(DemonItk);
+    regWindow->show();
+}
+
+#ifdef USE_NIFTI
+// F3DNifti Registration slot
+void milxQtRegistrationPlugin::F3DNiftiRegistrationSlot()
+{
+    regWindow->setAlgo(F3DNifti);
+    regWindow->show();
+}
+
+// AladinNifti Registration slot
+void milxQtRegistrationPlugin::AladinNiftiRegistrationSlot()
+{
+    regWindow->setAlgo(AladinNifti);
+    regWindow->show();
+}
+#endif
+
+#ifdef USE_ELASTIX
+// Elastix Affine Registration slot
+void milxQtRegistrationPlugin::ElastixAffineRegistrationSlot()
+{
+    regWindow->setAlgo(ElastixAffine);
     regWindow->show();
 }
 
 
-
+// Elastix BSpline Registration slot
+void milxQtRegistrationPlugin::ElastixBSplineRegistrationSlot()
+{
+    regWindow->setAlgo(ElastixBSpline);
+    regWindow->show();
+}
+#endif
 
 Q_EXPORT_PLUGIN2(registrationPlugin, milxQtRegistrationPluginFactory);

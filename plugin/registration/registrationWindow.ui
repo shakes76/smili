@@ -18,7 +18,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
      <item>
       <widget class="QLabel" name="labelAlgo">
        <property name="text">
@@ -46,7 +46,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>40</width>
-           <height>20</height>
+           <height>0</height>
           </size>
          </property>
         </spacer>
@@ -212,7 +212,7 @@
      <item>
       <widget class="QLabel" name="labelSave">
        <property name="text">
-        <string>Save to output</string>
+        <string>Output directory :</string>
        </property>
       </widget>
      </item>
@@ -233,13 +233,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="checkBoxSaveToDir">
-       <property name="text">
-        <string>Save to output directory</string>
-       </property>
-      </widget>
      </item>
      <item>
       <spacer name="verticalSpacer_5">
