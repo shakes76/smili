@@ -9,6 +9,7 @@ ENDIF(USE_VTK)
 
 IF(USE_ITK)
   add_subdirectory (milxImageApp)
+  add_subdirectory (milxDICOMApp)
 ENDIF(USE_ITK)
 
 IF(BUILD_MILXQT)

@@ -19,18 +19,40 @@
 
 #include <qplugin.h>
 
+//Image typedefs
+typedef unsigned char charPixelType;
+typedef itk::Image<charPixelType, milx::imgDimension> charImageType;
+typedef short shortPixelType;
+typedef itk::Image<shortPixelType, milx::imgDimension> shortImageType;
+typedef unsigned short ushortPixelType;
+typedef itk::Image<ushortPixelType, milx::imgDimension> ushortImageType;
+typedef int intPixelType;
+typedef itk::Image<intPixelType, milx::imgDimension> intImageType;
+typedef unsigned int uintPixelType;
+typedef itk::Image<intPixelType, milx::imgDimension> uintImageType;
+typedef float floatPixelType;
+typedef itk::Image<floatPixelType, milx::imgDimension> floatImageType;
+typedef itk::VectorImage<floatPixelType, milx::imgDimension> vectorImageType;
+
 milxQtDICOMPlugin::milxQtDICOMPlugin(QObject *theParent) : milxQtPluginInterface(theParent)
 {
     ///Up cast parent to milxQtMain
     MainWindow = qobject_cast<milxQtMain *>(theParent);
 
     threaded = false;
-    dockable = false;
+    dockable = true;
     consoleWindow = false;
     extension = true;
     pluginName = "DICOM";
     //~ dataName = "";
     valid = true;
+
+    manager = new milxQtManager(MainWindow);
+        manager->hide();
+    dock = new QDockWidget(tr("DICOM Manager"), MainWindow);
+        dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+        dock->setWidget(manager);
+        dock->setObjectName("DICOM Manager");
 
     createActions();
     createMenu();
@@ -115,8 +137,8 @@ milxQtImage* milxQtDICOMPlugin::imageResult()
 
 QDockWidget* milxQtDICOMPlugin::dockWidget()
 {
-    return NULL;
-} //No Dock result
+    return dock;
+}
 
 bool milxQtDICOMPlugin::isPluginWindow(QWidget *window)
 {
@@ -160,6 +182,166 @@ void milxQtDICOMPlugin::loadExtension()
 //~ {
     //~ //QObject::connect(denoiseAct, SIGNAL(triggered(bool)), denoiseModel, SLOT(denoise()));
 //~ }
+
+void milxQtDICOMPlugin::viewTags()
+{
+    bool success = true;
+    QString directoryPath;
+    QPointer<QFileDialog> fileOpener = new QFileDialog;
+    QSettings settings("Shekhar Chandra", "milxQt");
+
+    ///If filenames list is empty ask for them
+    if(directoryPath.isEmpty())
+      {
+        QString path = settings.value("recentPath").toString();
+        directoryPath = fileOpener->getExistingDirectory(NULL, tr("Open DICOM Directory"),
+                                             path,
+                                             QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+      }
+
+    if(directoryPath.isEmpty())
+      return;
+
+    ///Get UIDs
+    MainWindow->printInfo("Trying to read DICOMs in " + directoryPath);
+    qApp->processEvents();
+    std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(directoryPath.toStdString());
+
+    ///Check if input path is a directory of series or just a series
+    QStringList directories;
+    if(UIDs.empty())
+    {
+        MainWindow->printWarning("Found no series found in input directory. Checking internal directories");
+        QDir directory(directoryPath);
+        directory.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+        directories = directory.entryList();
+    }
+    else
+    {
+        MainWindow->printInfo(QString("Total of ") + QString::number(UIDs.size()) + " UID(s) found");
+        directories.push_back("");
+    }
+
+    emit working(-1);
+    size_t count = 0;
+    foreach(const QString &dir, directories)
+    {
+        QString relPath = directoryPath + "/" + dir;
+        MainWindow->printInfo("Reading DICOMs in " + dir);
+
+        qApp->processEvents();
+        UIDs = milx::File::GetDICOMSeriesUIDs(relPath.toStdString(), true);
+        std::vector<std::string> seriesNames(UIDs.size(), "");
+        MainWindow->printInfo(QString("Total of ") + QString::number(UIDs.size()) + " UID(s) found in " + dir);
+
+        ///Update case list in manager
+        QStringList headingList;
+        headingList << "Tag" << "Value"; //!< Case Browser
+        int caseTabIndex = manager->newTab("Tags "+dir, headingList);
+
+        for(size_t j = 0; j < UIDs.size(); j ++)
+        {
+            qApp->processEvents();
+            std::string caseID;
+            std::vector< std::pair<std::string, std::string> > tags;
+            if (!milx::File::GetDICOMTags<floatImageType>(relPath.toStdString(), tags, UIDs[j], caseID))
+              continue;
+
+            QStringList entryName;
+            entryName << UIDs[j].c_str() << ""; //!< Case Browser
+
+            //cout << "Loading tags into browser." << endl;
+            QList<QStringList> entryList;
+            for(int k = 0; k < tags.size(); k ++)
+            {
+                QStringList tagList;
+                std::string tag = tags[k].first;
+                std::string value = tags[k].second;
+
+                tagList << tag.c_str() << value.c_str();
+
+                //manager->addItem(caseTabIndex, tagList, Qt::NoItemFlags);
+                entryList.push_back(tagList);
+            }
+            manager->addTreeItem(caseTabIndex, entryName, entryList, Qt::NoItemFlags);
+        }
+        count ++;
+    }
+    MainWindow->printInfo(QString("Processed ") + QString::number(count) + " DICOM folders in " + directoryPath);
+
+    manager->show();
+    MainWindow->printInfo("Done.");
+    emit done(-1);
+}
+
+void milxQtDICOMPlugin::openSeries()
+{
+  bool success = true;
+  QString directoryPath;
+  QPointer<QFileDialog> fileOpener = new QFileDialog;
+  QSettings settings("Shekhar Chandra", "milxQt");
+
+  ///If filenames list is empty ask for them
+  if (directoryPath.isEmpty())
+  {
+    QString path = settings.value("recentPath").toString();
+    directoryPath = fileOpener->getExistingDirectory(NULL, tr("Open DICOM Directory"),
+      path,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  }
+
+  if (directoryPath.isEmpty())
+    return;
+
+  ///Get UIDs
+  std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(directoryPath.toStdString());
+
+  ///Update case list in manager
+  QStringList headingList;
+  headingList << "Tag" << "Value"; //!< Case Browser
+  int caseTabIndex = manager->newTab("Tag Browser", headingList);
+
+  emit working(-1);
+  for (size_t j = 0; j < UIDs.size(); j++)
+  {
+    qApp->processEvents();
+    std::string caseID;
+    floatImageType::Pointer floatImg;
+    std::vector< std::pair<std::string, std::string> > tags;
+    if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(directoryPath.toStdString(), floatImg, tags, UIDs[j], caseID))
+      continue;
+
+    QStringList entryName;
+    entryName << UIDs[j].c_str() << ""; //!< Case Browser
+
+    //cout << "Loading tags into browser." << endl;
+    QList<QStringList> entryList;
+    for (int k = 0; k < tags.size(); k++)
+    {
+      QStringList tagList;
+      std::string tag = tags[k].first;
+      std::string value = tags[k].second;
+
+      tagList << tag.c_str() << value.c_str();
+
+      //manager->addItem(caseTabIndex, tagList, Qt::NoItemFlags);
+      entryList.push_back(tagList);
+    }
+    manager->addTreeItem(caseTabIndex, entryName, entryList, Qt::NoItemFlags);
+    qApp->processEvents();
+
+    //Display Image
+    QPointer<milxQtImage> resultImg = new milxQtImage;
+    resultImg->setName(UIDs[j].c_str());
+    resultImg->setData(floatImg);
+    resultImg->generateImage();
+    MainWindow->display(resultImg);
+  }
+
+  manager->show();
+  MainWindow->printInfo("Done.");
+  emit done(-1);
+}
 
 void milxQtDICOMPlugin::openStructureSet()
 {
@@ -229,42 +411,182 @@ void milxQtDICOMPlugin::convert()
 
     qApp->processEvents();
 
-//    if(MainWindow->getNumberOfTabs() > 1)
-//        MainWindow->newTab();
     ///Open each series and save
     ///See milxQtFile::openImageSeries() for more relevant code
-
     ///Get UIDs and filenames
-    const std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(inputDirectoryname.toStdString());
-    std::vector<std::string> seriesNames(UIDs.size(), "");
-    MainWindow->printInfo(QString("Total of ") + QString::number(UIDs.size()) + " UID(s) found");
+    std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(inputDirectoryname.toStdString(), true);
 
+    ///Check if input path is a directory of series or just a series
+    QStringList directories;
     if(UIDs.empty())
     {
-        MainWindow->printError("No series found in input directory");
-        return;
+        MainWindow->printWarning("Found no series found in input directory. Checking internal directories");
+        QDir directory(inputDirectoryname);
+        directory.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+        directories = directory.entryList();
+    }
+    else
+    {
+        MainWindow->printInfo(QString("Total of ") + QString::number(UIDs.size()) + " UID(s) found");
+        directories.push_back("");
     }
 
     ///Open each image
     emit working(-1);
-    for(size_t j = 0; j < UIDs.size(); j ++)
+    foreach(const QString &dir, directories)
     {
         qApp->processEvents();
-//        const std::vector<std::string> filenames = milx::File::GetDICOMSeriesFilenames(directoryPath, UIDs[j]);
+        QString relPath = inputDirectoryname + "/" + dir;
+        QString relOutputPath = outputDirectoryname + "/" + dir;
+        UIDs = milx::File::GetDICOMSeriesUIDs(relPath.toStdString(), true);
+        std::vector<std::string> seriesNames(UIDs.size(), "");
+        MainWindow->printInfo(QString("Total of ") + QString::number(UIDs.size()) + " UID(s) found in " + dir);
 
-        //Open
-        seriesNames[j] = UIDs[j];
-        floatImageType::Pointer floatImg;
-        MainWindow->printInfo(QString("Opening: ") + seriesNames[j].c_str());
-        milx::File::OpenDICOMSeries<floatImageType>(inputDirectoryname.toStdString(), floatImg, seriesNames[j]);
-        qApp->processEvents();
+        QDir outputSubjectDirectory(relOutputPath);
+        ///Create the subject's output folder
+        bool exist = outputSubjectDirectory.exists();
+        if (!exist)
+        {
+          exist = QDir().mkpath(relOutputPath);
+          if (!exist)
+            continue;
+        }
 
-        //create filename
-        std::string filename = outputDirectoryname.toStdString() + "/" + seriesNames[j] + ".nii.gz";
-        MainWindow->printInfo(QString("Saving DICOM as ") + filename.c_str());
+        for(size_t j = 0; j < UIDs.size(); j ++)
+        {
+            qApp->processEvents();
+            seriesNames[j] = UIDs[j];
+            const std::vector<std::string> seriesFilenames = milx::File::GetDICOMSeriesFilenames(relPath.toStdString(), seriesNames[j]);
 
-        //Save
-        milx::File::SaveImage<floatImageType>(filename, floatImg);
+            //Read Header
+            size_t dimensions = 3;
+            std::string pixelType, componentType;
+            if (!milx::File::ReadImageInformation(seriesFilenames.front(), pixelType, componentType, dimensions))
+            {
+                milx::PrintError("Failed Reading First Image. Check the image type/file. Skipping.");
+                continue;
+            }
+            milx::PrintInfo("UID: " + seriesNames[j]);
+            milx::PrintInfo("Pixel Type: " + pixelType);
+            milx::PrintInfo("Component Type: " + componentType);
+            milx::PrintInfo("Dimensions: " + milx::NumberToString(dimensions));
+
+            //Open image using relevant type
+            std::string caseID;
+            itk::SmartPointer<vectorImageType> vectorImage;
+            itk::SmartPointer<charImageType> labelledImage;
+            itk::SmartPointer<shortImageType> shortImage;
+            itk::SmartPointer<ushortImageType> ushortImage;
+            itk::SmartPointer<intImageType> intImage;
+            itk::SmartPointer<uintImageType> uintImage;
+            itk::SmartPointer<floatImageType> floatImage;
+            std::vector< std::pair<std::string, std::string> > tags;
+            bool labelledImages = false, shortImages = false, ushortImages = false, integerImages = false, uintegerImages = false, vectorImages = false;
+            if (pixelType == "vector" || dimensions > 3) ///\todo handle 4D images here properly
+            {
+                milx::PrintInfo("Detected vector images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<vectorImageType>(relPath.toStdString(), vectorImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                  milx::PrintError("Failed Reading Vector Images. Skipping.");
+                  continue;
+                }
+                vectorImages = true;
+            }
+            else if (componentType == "unsigned_char" || componentType == "unsigned char")
+            {
+                milx::PrintInfo("Detected labelled images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<charImageType>(relPath.toStdString(), labelledImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                  milx::PrintError("Failed Reading Labelled Images. Skipping.");
+                  continue;
+                }
+                labelledImages = true;
+            }
+            else if (componentType == "short" || componentType == "int16")
+            {
+                milx::PrintInfo("Detected short images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<shortImageType>(relPath.toStdString(), shortImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                    milx::PrintError("Failed Reading Short Images. Skipping.");
+                    continue;
+                }
+                shortImages = true;
+            }
+            else if (componentType == "unsigned_short" || componentType == "unsigned short")
+            {
+                milx::PrintInfo("Detected unsigned short images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<ushortImageType>(relPath.toStdString(), ushortImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                    milx::PrintError("Failed Reading Unsigned Short Images. Skipping.");
+                    continue;
+                }
+                ushortImages = true;
+            }
+            else if (componentType == "int" || componentType == "signed" || componentType == "int32" || componentType == "int64")
+            {
+                milx::PrintInfo("Detected integer images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<intImageType>(relPath.toStdString(), intImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                  milx::PrintError("Failed Reading Integer Images. Skipping.");
+                  continue;
+                }
+                integerImages = true;
+            }
+            else if (componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "unsigned")
+            {
+                milx::PrintInfo("Detected unsigned int images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<uintImageType>(relPath.toStdString(), uintImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                  milx::PrintError("Failed Reading Unsigned Integer Images. Skipping.");
+                  continue;
+                }
+                uintegerImages = true;
+            }
+            else
+            {
+                milx::PrintInfo("Detected floating point images.");
+                if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(relPath.toStdString(), floatImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                {
+                  milx::PrintError("Failed Reading Images. Skipping.");
+                  continue;
+                }
+            }
+
+            //edit the series to ensure valid name and no spaces
+            QString nameSimplified = seriesNames[j].c_str();
+            nameSimplified = nameSimplified.simplified();
+            nameSimplified.replace(" ", ""); //no spaces
+            seriesNames[j] = nameSimplified.toStdString();
+            QString caseSimplified = caseID.c_str();
+            caseSimplified = caseSimplified.simplified();
+            caseSimplified.replace(" ", ""); //no spaces
+            caseID = caseSimplified.toStdString();
+
+            MainWindow->printInfo(QString("Opened: ") + seriesNames[j].c_str());
+            qApp->processEvents();
+
+            //create filename
+            std::string filename = relOutputPath.toStdString() + "/" + dir.toStdString() + "_" + caseID + "_" + seriesNames[j] + ".nii.gz";
+            if(caseID == "-1")
+              filename = relOutputPath.toStdString() + "/" + dir.toStdString() + seriesNames[j] + ".nii.gz";
+            MainWindow->printInfo(QString("Saving DICOM as ") + filename.c_str());
+
+            //Save as relevant type
+            if(vectorImages)
+                milx::File::SaveImage<vectorImageType>(filename, vectorImage);
+            else if(labelledImages)
+                milx::File::SaveImage<charImageType>(filename, labelledImage);
+            else if(shortImages)
+                milx::File::SaveImage<shortImageType>(filename, shortImage);
+            else if(ushortImages)
+                milx::File::SaveImage<ushortImageType>(filename, ushortImage);
+            else if(integerImages)
+                milx::File::SaveImage<intImageType>(filename, intImage);
+            else if(uintegerImages)
+                milx::File::SaveImage<uintImageType>(filename, uintImage);
+            else
+                milx::File::SaveImage<floatImageType>(filename, floatImage);
+        }
     }
 
     qApp->processEvents();
@@ -512,6 +834,10 @@ void milxQtDICOMPlugin::createActions()
     actionOpenSeries->setIcon(QIcon(":/resources/toolbar/open_series.png"));
     actionOpenSeries->setText(QApplication::translate("MainWindow", "Open Series", 0, QApplication::UnicodeUTF8));
     actionOpenSeries->setShortcut(tr("Ctrl+Alt+o"));
+    actionTags = new QAction(MainWindow);
+    actionTags->setIcon(QIcon(":/resources/toolbar/search.png"));
+    actionTags->setText(QApplication::translate("MainWindow", "View Tags", 0, QApplication::UnicodeUTF8));
+    actionTags->setShortcut(tr("Ctrl+Alt+t"));
     actionConvertStructure = new QAction(MainWindow);
     actionConvertStructure->setText(QApplication::translate("DICOMPlugin", "Convert RT/Structure Set ...", 0, QApplication::UnicodeUTF8));
     actionConvertStructure->setShortcut(tr("Ctrl+Alt+s"));
@@ -532,6 +858,7 @@ void milxQtDICOMPlugin::createMenu()
     menuDICOM = new QMenu(MainWindow);
     menuDICOM->setTitle(QApplication::translate("DICOMPlugin", "DICOM", 0, QApplication::UnicodeUTF8));
     menuDICOM->addAction(actionOpenSeries);
+    menuDICOM->addAction(actionTags);
     menuDICOM->addAction(actionConvertStructure);
     menuDICOM->addAction(actionConvert);
     menuDICOM->addAction(actionAnonymize);
@@ -878,7 +1205,8 @@ void milxQtDICOMPlugin::createWizardAnonymise()
 void milxQtDICOMPlugin::createConnections()
 {
 //    connect(MainWindow, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateManager(QWidget*)));
-    connect(actionOpenSeries, SIGNAL(activated()), MainWindow, SLOT(openSeries()));
+    connect(actionOpenSeries, SIGNAL(activated()), this, SLOT(openSeries()));
+    connect(actionTags, SIGNAL(activated()), this, SLOT(viewTags()));
     connect(actionConvertStructure, SIGNAL(activated()), this, SLOT(openStructureSet()));
     connect(actionConvert, SIGNAL(activated()), this, SLOT(convert()));
     connect(actionAnonymize, SIGNAL(activated()), this, SLOT(anonymize()));

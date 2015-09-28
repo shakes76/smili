@@ -42,6 +42,7 @@
 #include "milxQtPluginInterface.h"
 #include "milxQtImage.h"
 #include "milxQtMain.h"
+#include "milxQtManager.h"
 
 /**
     \class milxQtDICOMPlugin
@@ -200,7 +201,29 @@ public slots:
     */
     virtual void postStartTasks() {}
 
+    /**
+        \fn milxQtDICOMPlugin::viewTags()
+        \brief View DICOM tags of image series in the manager.
+    */
+    void viewTags();
+    /**
+    \fn milxQtDICOMPlugin::openSeries()
+    \brief Open DICOM image series.
+    */
+    void openSeries();
+    /**
+        \fn milxQtDICOMPlugin::openStructureSet()
+        \brief Open DICOM RT image series.
+    */
     void openStructureSet();
+
+    /**
+        \fn milxQtDICOMPlugin::convert()
+        \brief Convert a DICOM series (or a path to a number of series) to Nifti (*.nii.gz) images.
+
+        The function assumes either the path provided in the wizard is a path containing a DICOM series or
+        that the path provided contains a number of directories each having a DICOM series.
+    */
     void convert();
     void anonymize();
 
@@ -267,6 +290,7 @@ protected:
     QMenu* menuDICOM; //!< DICOM menu
     //----SSM---- (hierarchical deletion)
     QAction* actionOpenSeries; //!< open series action
+    QAction* actionTags; //!< open series action
     QAction* actionConvertStructure; //!< convert RT action
     QAction* actionConvert; //!< convert action
     QAction* actionAnonymize; //!< Anonymize action
@@ -314,6 +338,8 @@ protected:
 
     //data
     milxQtImage *image; //main window owner
+    QPointer<milxQtManager> manager; //!< Manager widget
+    QPointer<QDockWidget> dock; //!< Dock widget
     bool valid;
 
     void createActions();
