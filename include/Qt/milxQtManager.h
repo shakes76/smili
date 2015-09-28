@@ -18,8 +18,7 @@
 #ifndef MILXQTMANAGER_H
 #define MILXQTMANAGER_H
 
-#include <QTabWidget>
-#include <QTreeWidget>
+#include <QtGui/QtGui>
 //milxQt Specific
 #include "milxQtAliases.h"
 
@@ -49,6 +48,9 @@ public slots:
      * \return The index of the created tab
      */
     int newTab(QString tabTitle, QStringList headings);
+    /** \brief Close the current tab
+     */
+    void closeTab(int index);
     /** \brief Clear the current tab
      */
     void clearTab();
@@ -57,6 +59,11 @@ public slots:
      * \param tabIndex index for the tab to be cleared
      */
     void clearTab(int tabIndex);
+    /** \brief Clear the tab given by index
+     *
+     * \param tabIndex index for the tab to be cleared
+     */
+    void exportTab(QString filename = "");
     /** \brief Add all the entries in list to the view
      *
      * \param entries The entries for the current item or row to be add.
@@ -78,8 +85,34 @@ public slots:
      * \param widgetColumn column where the widget is to go
      */
     void addItem(int tabIndex, QStringList entries, QWidget *itemWidgetToAdd, int widgetColumn);
+    /** \brief Add all the entries in list to the view like a tree
+    *
+    * \param index tab index of the entry to be inserted
+    * \param entries The entries for the current item or row to be add.
+    * \param flags item properties, is it Qt::ItemIsEditable etc.
+    */
+    void addTreeItem(int tabIndex, QStringList topLevelName, QList<QStringList> entryList, Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 
 protected:
+    QAction* actionExportTab; //!< export tab action
+    QAction* actionClearTab; //!< clear tab action
+    QAction* actionClear; //!< clear manager action 
+
+    /*!
+    \fn milxQtManager::createActions()
+    \brief Create the actions for context menu etc.
+    */
+    void createActions();
+    /*!
+    \fn milxQtManager::createConnections()
+    \brief Create the connections for context menu etc.
+    */
+    void createConnections();
+    /*!
+    \fn milxQtManager::contextMenuEvent(QContextMenuEvent *event)
+    \brief The context menu setup member
+    */
+    void contextMenuEvent(QContextMenuEvent *event);
 
 private:
 

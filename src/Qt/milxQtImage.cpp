@@ -1146,7 +1146,7 @@ void milxQtImage::updateData(const bool orient)
     imageData->Update();
 #endif
 
-    printDebug("Updated Image Data");
+    printDebug("Updated Image Data as " + QString(imageData->GetScalarTypeAsString()));
 }
 
 void milxQtImage::setupEvents()
@@ -1196,6 +1196,26 @@ void milxQtImage::setLevel(int level)
     viewer->SetColorLevel(lvl);
 
     refresh();
+}
+
+double milxQtImage::GetIntensityWindow()
+{
+    return viewer->GetWindowLevel()->GetWindow();
+}
+
+double milxQtImage::GetIntensityLevel()
+{
+    return viewer->GetWindowLevel()->GetLevel();
+}
+
+void milxQtImage::SetIntensityWindow(double window)
+{
+    viewer->GetWindowLevel()->SetWindow(window);
+}
+
+void milxQtImage::SetIntensityLevel(double level)
+{
+    viewer->GetWindowLevel()->SetLevel(level);
 }
 
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)

@@ -48,9 +48,10 @@ int main(int argc, char* argv[])
     //---------------------------
     ///Program Info
     milx::PrintInfo("--------------------------------------------------------");
-    milx::PrintInfo("MILX-SMILI Overlay Tool for Medical Imaging");
-    milx::PrintInfo("(c) Copyright CSIRO, 2012.");
-    milx::PrintInfo("Australian e-Health Research Centre, CSIRO.");
+    milx::PrintInfo("SMILI Overlay Tool for Medical Imaging");
+    milx::PrintInfo("(c) Copyright Chandra et al., 2015.");
+    milx::PrintInfo("University of Queensland, Australia.");
+    milx::PrintInfo("Australian e-Health Research Centre, CSIRO, Australia.");
     milx::PrintInfo("SMILI Version: " + milx::NumberToString(milx::Version));
     milx::PrintInfo("milxQt Version: " + milx::NumberToString(milxQtVersion));
     milx::PrintInfo("Application Version: 1.03");

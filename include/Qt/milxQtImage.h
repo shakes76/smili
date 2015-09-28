@@ -394,14 +394,6 @@ public:
         return viewer->GetImageActor();
     }
     /*!
-        \fn milxQtImage::GetWindowLevel()
-        \brief Returns the internal image window levels data used for display.
-    */
-    inline vtkImageMapToWindowLevelColors* GetWindowLevel()
-    {
-        return viewer->GetWindowLevel();
-    }
-    /*!
         \fn milxQtImage::GetDisplayExtent()
         \brief Returns the current display extent of the image data, i.e the current slice dimensions/extents.
     */
@@ -629,11 +621,39 @@ public slots:
         \brief Auto window level the display. Uses Otsu threshold value.
     */
     void autoLevel();
-    /**
+/**
         \fn milxQtImage::setLevel(int level)
         \brief Set window level the display to proportion of maxValue.
     */
     void setLevel(int level);
+    /*!
+        \fn milxQtImage::GetWindowLevel()
+        \brief Returns the internal image window levels data used for display.
+    */
+    inline vtkImageMapToWindowLevelColors* GetWindowLevel()
+    {
+        return viewer->GetWindowLevel();
+    }
+    /*!
+        \fn milxQtImage::GetIntensityWindow()
+        \brief Get the window for the image intensity tranfer function
+    */
+    double GetIntensityWindow();
+    /*!
+        \fn milxQtImage::SetIntensityWindow(double level)
+        \brief Set the window for the image intensity tranfer function
+    */
+    void SetIntensityWindow(double window);
+    /*!
+        \fn milxQtImage::GetIntensityLevel()
+        \brief Get the level for the image intensity tranfer function
+    */
+    double GetIntensityLevel();
+    /*!
+        \fn milxQtImage::SetIntensityLevel(double level)
+        \brief Set the level for the image intensity tranfer function
+    */
+    void SetIntensityLevel(double level);
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
     /**
         \fn milxQtImage::overlayContour(QString filename = "")
