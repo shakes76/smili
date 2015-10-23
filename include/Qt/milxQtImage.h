@@ -902,6 +902,11 @@ public slots:
     */
     void gaussianSmooth();
     /**
+        \fn milxQtImage::bilateral()
+        \brief Computes the Bilateral smoothing of the image and displays it.
+    */
+    void bilateral();
+    /**
         \fn milxQtImage::median()
         \brief Computes the median image and displays it.
     */
@@ -1215,6 +1220,7 @@ protected:
     QAction* computeContourAct; //!< Action for contouring image
     QAction* smoothAct; //!< Action for smoothing of image
     QAction* gaussianAct; //!< Action for Gaussian smoothing of image
+    QAction* bilateralAct; //!< Action for bilateral smoothing of image
     QAction* medianAct; //!< Action for median smoothing of image
     QAction* gradMagAct; //!< Action for gradient magnitude of image
     QAction* sobelAct; //!< Action for sobel edges of image

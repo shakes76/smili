@@ -687,6 +687,20 @@ public slots:
 
     //Batch
     /*!
+        \fn milxQtMain::imagesMix()
+        \brief Blend all open images together to create new image usaing a mixer dialog.
+
+        All data from open image windows are blended to the first image.
+    */
+    void imagesMix();
+    /*!
+        \fn milxQtMain::imagesBlend(QVector<float> opacities)
+        \brief Blend all open images together to create new image. 'opacities' would hold a list of floats for blending each image
+
+        All data from open image windows are blended to the first image.
+    */
+    void imagesBlend(QVector<float> opacities);
+    /*!
         \fn milxQtMain::imagesAdd()
         \brief Add all open images together to create new image.
 
@@ -915,6 +929,7 @@ protected:
     //----New---- (hierarchical deletion)
     QAction* actionNewTab; //!< New Tab action
     //----Images---- (hierarchical deletion)
+    QAction* actionBlendImages; //!< blend images batch operation action
     QAction* actionAddImages; //!< add images batch operation action
     QAction* actionAverageImages; //!< average images batch operation action
     QAction* actionSubtractImages; //!< subtract images batch operation action

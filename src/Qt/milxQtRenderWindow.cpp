@@ -53,6 +53,7 @@ milxQtRenderWindow::milxQtRenderWindow(QWidget *theParent, bool contextSystem) :
     logScale = false;
     useDefaultView = true;
     orientationAxes = true;
+    contextMenuEnabled = contextSystem;
     defaultView = AXIAL; //axial
     currentView = AXIAL; //axial
     orientationView = RADIOLOGICAL;
@@ -65,7 +66,7 @@ milxQtRenderWindow::milxQtRenderWindow(QWidget *theParent, bool contextSystem) :
     renderer->SetActiveCamera(camera);
     renderer->ResetCamera();
 
-    contextMenuSystem(contextSystem); //also sets up render window object and widgets
+    contextMenuSystem(contextMenuEnabled); //also sets up render window object and widgets
 
     //orientation glyph (showing equivalent view on human) setup
     setupHumanGlyph();
@@ -96,7 +97,7 @@ void milxQtRenderWindow::contextMenuSystem(bool context)
     QVTKWidget::GetRenderWindow()->ReportGraphicErrorsOn(); ///Force Error reporting
   #endif
 
-    //distance widget setup
+    //widget setups
     SetupWidgets(QVTKWidget::GetInteractor());
 
     ///Performance
@@ -638,7 +639,7 @@ void milxQtRenderWindow::removeModelActor(vtkSmartPointer<vtkActor> mdlActor)
         generateRender();
 }
 
-void milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix)
+void milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkMatrix4x4 *transformMatrix)
 {
     //Check if already in view
     foreach(ImageActorItem item, imageActors)

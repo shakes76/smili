@@ -23,6 +23,7 @@
 #include <vtkRendererCollection.h>
 #include <vtkCamera.h>
 #include <vtkLookupTable.h>
+#include <vtkImageBlend.h>
 #include <vtkTensor.h>
 #include <vtkMultiThreader.h>
 #include <vtkMath.h>
@@ -2161,6 +2162,158 @@ void milxQtMain::voxeliseSurface(vtkSmartPointer<vtkPolyData> surface)
         display(image);
 }
 
+void milxQtMain::imagesMix()
+{
+    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    {
+        printError("Need more than 1 window open to blend.");
+        return;
+    }
+
+    //Create slicers and the dialog
+    QVector< QSlider* > sliders;
+    QVector< QCheckBox* > checkBoxes;
+    QSlider *opacitySldr = new QSlider(this);
+    opacitySldr->setMinimum(0);
+    opacitySldr->setMaximum(10);
+    opacitySldr->setValue(10);
+    QCheckBox *initialCheckbox = new QCheckBox(this);
+    initialCheckbox->setChecked(true);
+    initialCheckbox->setDisabled(true);
+    initialCheckbox->setToolTip(imageWindows[0]->strippedBaseName());
+    QVBoxLayout *initialLayout = new QVBoxLayout(this);
+    initialLayout->addWidget(initialCheckbox);
+    initialLayout->addWidget(opacitySldr);
+    QHBoxLayout *sliderLayout = new QHBoxLayout(this);
+    sliderLayout->addLayout(initialLayout);
+    sliders.push_back(opacitySldr);
+    checkBoxes.push_back(initialCheckbox);
+
+    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    {
+        QVBoxLayout *layout = new QVBoxLayout(this);
+        QSlider *opacitySldr2 = new QSlider(this);
+        opacitySldr2->setMinimum(0);
+        opacitySldr2->setMaximum(10);
+        opacitySldr2->setValue(5);
+        QCheckBox *checkbox = new QCheckBox(this);
+        checkbox->setChecked(true);
+        checkbox->setToolTip(imageWindows[j]->strippedBaseName());
+        layout->addWidget(checkbox);
+        layout->addWidget(opacitySldr2);
+        sliderLayout->addLayout(layout);
+        sliders.push_back(opacitySldr2);
+        checkBoxes.push_back(checkbox);
+    }
+//    QVBoxLayout *btnLayout = new QVBoxLayout(slidersDlg);
+    QHBoxLayout *dlgLayout = new QHBoxLayout(this);
+    QVBoxLayout *btnlayout = new QVBoxLayout(this);
+    QPushButton *btnOK = new QPushButton("OK", this);
+    QPushButton *btnCancel = new QPushButton("Cancel", this);
+    btnlayout->addWidget(btnOK);
+    btnlayout->addWidget(btnCancel);
+    dlgLayout->addLayout(sliderLayout);
+    dlgLayout->addLayout(btnlayout);
+
+    QDialog *slidersDlg = new QDialog(this);
+    slidersDlg->setLayout(dlgLayout);
+    connect(btnOK, SIGNAL(clicked()), slidersDlg, SLOT(accept()));
+    connect(btnCancel, SIGNAL(clicked()), slidersDlg, SLOT(reject()));
+    int ret = slidersDlg->exec();
+
+    if(ret == QDialog::Rejected)
+        return;
+
+    QVector<float> opacities;
+    for(size_t j = 0; j < sliders.size(); j ++)
+    {
+        float value = sliders[j]->value()*0.1;
+        if(!checkBoxes[j]->isChecked())
+            value = 0.0;
+        opacities.push_back(value);
+    }
+
+    imagesBlend(opacities);
+}
+
+void milxQtMain::imagesBlend(QVector<float> opacities)
+{
+    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    {
+        printError("Need more than 1 window open to blend.");
+        return;
+    }
+
+    if(opacities.empty() || opacities.size() < imageWindows.size())
+    {
+        printError("Size of opacities list does not match number of open images.");
+        return;
+    }
+
+    initialiseWindowTraversal();
+    QPointer<milxQtImage> firstImg = nextImage();
+    vtkSmartPointer<vtkImageData> ucharData1 = firstImg->GetWindowLevel()->GetOutput();
+
+    int initialExtent[6];
+    firstImg->GetOutput()->GetExtent(initialExtent);
+
+    // Combine the images (blend takes multiple connections on the 0th input port)
+    emit working(-1);
+    vtkSmartPointer<vtkImageBlend> blend = vtkSmartPointer<vtkImageBlend>::New();
+        linkProgressEventOf(blend);
+        blend->SetOpacity(0,opacities[0]);
+    #if VTK_MAJOR_VERSION <= 5
+        blend->AddInput(ucharData1);
+    #else
+        blend->AddInputData(ucharData1);
+    #endif
+//        blend->SetBlendModeToCompound();
+        blend->SetBlendModeToNormal();
+
+    size_t n = imageWindows.size()-1;
+    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    {
+        QPointer<milxQtImage> secondImg = nextImage();
+
+        if(opacities[j] == 0.0)
+            continue;
+
+        printInfo("Blending with Image: " + secondImg->strippedName() + " with Opacity: " + QString::number(opacities[j]));
+        vtkSmartPointer<vtkImageData> ucharData2 = secondImg->GetWindowLevel()->GetOutput();
+
+        if(!secondImg->GetLookupTable())
+            printWarning("Colourmap is not set. Please set a colour map to ensure proper blending.");
+
+        int actualExtent[6];
+        secondImg->GetOutput()->GetExtent(actualExtent);
+
+        if(initialExtent[1] == actualExtent[1] && initialExtent[3] == actualExtent[3] && initialExtent[5] == actualExtent[5])
+        {
+        #if VTK_MAJOR_VERSION <= 5
+            blend->AddInput(ucharData2);
+        #else
+            blend->AddInputData(ucharData2);
+        #endif
+            blend->SetOpacity(j,opacities[j]/n);
+        }
+        else
+            printError("Images are not the same size. Skipping.");
+    }
+
+    printInfo("Blending");
+    blend->Update();
+    printDebug("Number of components: " + QString::number(blend->GetOutput()->GetNumberOfScalarComponents()));
+    emit done(-1);
+
+    QPointer<milxQtImage> blendResult = new milxQtImage;
+        blendResult->setName("Blended Images");
+        blendResult->setConsole(console);
+        blendResult->setData(blend->GetOutput());
+        blendResult->generateImage();
+
+    display(blendResult);
+}
+
 void milxQtMain::imagesAdd()
 {
     if(getNumberOfWindows() == 0 || imageWindows.size() < 1)
@@ -2387,6 +2540,7 @@ void milxQtMain::createMenu()
     menuData = new QMenu(menuBar);
     //Images
     menuImages = new QMenu(menuBar);
+    actionBlendImages = new QAction(this);
     actionAddImages = new QAction(this);
     actionAverageImages = new QAction(this);
     actionSubtractImages = new QAction(this);
@@ -2466,6 +2620,9 @@ void milxQtMain::createMenu()
     ///Images
     menuImages->setTitle(QApplication::translate("MainWindow", "Images", 0, QApplication::UnicodeUTF8));
     menuBar->addAction(menuImages->menuAction());
+    actionBlendImages->setText(QApplication::translate("MainWindow", "Blend Images", 0, QApplication::UnicodeUTF8));
+    actionBlendImages->setShortcut(tr("Ctrl+b"));
+    menuImages->addAction(actionBlendImages);
     actionAddImages->setText(QApplication::translate("MainWindow", "Add Images", 0, QApplication::UnicodeUTF8));
     actionAddImages->setShortcut(tr("Ctrl+a"));
     menuImages->addAction(actionAddImages);
@@ -2638,6 +2795,7 @@ void milxQtMain::createConnections()
     ///Data
     QObject::connect(menuData, SIGNAL(aboutToShow()), this, SLOT(dataMenu()));
     ///Images
+    QObject::connect(actionBlendImages, SIGNAL(activated()), this, SLOT(imagesMix()));
     QObject::connect(actionAddImages, SIGNAL(activated()), this, SLOT(imagesAdd()));
     QObject::connect(actionAverageImages, SIGNAL(activated()), this, SLOT(imagesAverage()));
     QObject::connect(actionSubtractImages, SIGNAL(activated()), this, SLOT(imagesSubtract()));

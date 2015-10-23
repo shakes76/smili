@@ -52,6 +52,7 @@
 #include <itkConstantPadImageFilter.h>
 #include <itkMaskImageFilter.h>
 #include <itkGradientAnisotropicDiffusionImageFilter.h>
+#include <itkBilateralImageFilter.h>
 #include <itkSmoothingRecursiveGaussianImageFilter.h>
 #include <itkSobelEdgeDetectionImageFilter.h>
 #include <itkMedianImageFilter.h>
@@ -505,13 +506,18 @@ public:
   template<typename TOutImage>
   static itk::SmartPointer<TOutImage> AnisotropicDiffusion(itk::SmartPointer<TImage> img, const int iterations, const float timestep);
   /*!
-  	\fn Image::GaussianSmooth(itk::SmartPointer<TImage> img, const float variance)
-  	\brief Generates the Gaussian smoothing (by convolution) of an image using the variance provided.
+    \fn Image::Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial)
+    \brief Generates the (non-linear) Bilateral smoothing of an image using the sigmas provided.
+  */
+  static itk::SmartPointer<TImage> Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial);
+  /*!
+    \fn Image::GaussianSmooth(itk::SmartPointer<TImage> img, const float variance)
+    \brief Generates the Gaussian smoothing (by convolution) of an image using the variance provided.
   */
   static itk::SmartPointer<TImage> GaussianSmooth(itk::SmartPointer<TImage> img, const float variance);
   /*!
   	\fn Image::Median(itk::SmartPointer<TImage> img, const int radius)
-  	\brief Generates the median filtering (smoothing) of an image of given neighbourhood radius.
+    \brief Generates the (non-linear) median filtering (smoothing) of an image of given neighbourhood radius.
   */
   static itk::SmartPointer<TImage> Median(itk::SmartPointer<TImage> img, const int radius);
 
@@ -670,6 +676,11 @@ public:
   */
   template<typename TOutImage>
   static std::vector< typename itk::SmartPointer<TOutImage> > AnisotropicDiffusionCollection(const std::vector< typename itk::SmartPointer<TImage> > &images, const int iterations, float timestep = -1.0);
+  /*!
+    \fn Image::BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial)
+    \brief Batch process images by bilateral smoothing each image.
+  */
+  static void BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial);
   /*!
   	\fn Image::CastCollection(const std::vector< typename itk::SmartPointer<TImage> > &images)
   	\brief Batch process images by casting each image to type provided in templates.
@@ -2488,6 +2499,28 @@ itk::SmartPointer<TOutImage> Image<TImage>::AnisotropicDiffusion(itk::SmartPoint
 }
 
 template<class TImage>
+itk::SmartPointer<TImage> Image<TImage>::Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial)
+{
+  typedef itk::BilateralImageFilter<TImage, TImage> BilateralImageFilterType;
+  typename BilateralImageFilterType::Pointer bilateralFilter = BilateralImageFilterType::New();
+  bilateralFilter->SetInput(img);
+  bilateralFilter->SetRangeSigma(sigmaRange);
+  bilateralFilter->SetDomainSigma(sigmaSpatial);
+  bilateralFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  try
+  {
+    bilateralFilter->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed Computing Bilateral Smoothing");
+    PrintError(ex.GetDescription());
+  }
+
+  return bilateralFilter->GetOutput();
+}
+
+template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::GaussianSmooth(itk::SmartPointer<TImage> img, const float variance)
 {
   typedef itk::SmoothingRecursiveGaussianImageFilter<TImage, TImage> GuassianImageFilterType;
@@ -3073,6 +3106,15 @@ std::vector< typename itk::SmartPointer<TOutImage> > Image<TImage>::AnisotropicD
   }
 
   return collection;
+}
+
+template<class TImage>
+void Image<TImage>::BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial)
+{
+  const size_t n = images.size();
+
+  for(size_t j = 0; j < n; j ++)
+    images[j] = Bilateral(images[j], sigmaRange, sigmaSpatial);
 }
 
 template<class TImage>

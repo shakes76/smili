@@ -47,7 +47,6 @@
 #include <vtkDijkstraImageGeodesicPath.h>
 #include <vtkTextProperty.h>
 #include <vtkLogLookupTable.h>
-//#include <vtkPNGWriter.h>
 
 #include "milxColourMap.h"
 #include "milxQtFile.h"
@@ -427,28 +426,19 @@ void milxQtImage::generateImage(const bool quietly)
             viewerSetup = true;
         }
 
-        //Pass through data with no LUT initially
-        GetWindowLevel()->SetLookupTable(NULL);
-        lookupTable = GetWindowLevel()->GetLookupTable();
-
-//        if(rgb) //Force colouring of RGB images
-//        {
-//            vtkSmartPointer<vtkImageMapToWindowLevelColors> rgbColourExtract = vtkSmartPointer<vtkImageMapToWindowLevelColors>::New();
-//            #if VTK_MAJOR_VERSION <= 5
-//                rgbColourExtract->SetInput(imageData);
-//            #else
-//                rgbColourExtract->SetInputData(imageData);
-//            #endif
-//                rgbColourExtract->SetOutputFormatToRGBA();
-//                rgbColourExtract->PassAlphaToOutputOn();
-//                linkProgressEventOf(rgbColourExtract);
-//                rgbColourExtract->Update();
-//            lookupTable = rgbColourExtract->GetLookupTable();
-//            GetWindowLevel()->SetLookupTable(lookupTable);
-//        }
+        //Pass through data with no LUT initially if not RGB or RGBA image
+        //According to VTK docs for vtkImageMapToWindowLevelColors: If the lookup table is not set, or is set to NULL, then the input data will be passed through if it is already of type UNSIGNED_CHAR.
+        printInfo("Number of Image Components: " + QString::number(imageData->GetNumberOfScalarComponents()));
+        if(imageData->GetNumberOfScalarComponents() > 2)
+        {
+            GetWindowLevel()->SetLookupTable(NULL);
+            lookupTable = NULL;
+            GetWindowLevel()->SetWindow(255);
+            GetWindowLevel()->SetLevel(127.5);
+        }
 
         if(milxQtRenderWindow::useDefaultView)
-        	  setView(milxQtRenderWindow::defaultView); //Default view
+            setView(milxQtRenderWindow::defaultView); //Default view
 
         emit milxQtRenderWindow::modified(GetImageActor());
         if(!quietly)
@@ -1188,11 +1178,18 @@ void milxQtImage::setLevel(int level)
     imageData->GetScalarRange(range);
     double belowValue = range[0];
     double aboveValue = range[1];
+    if(imageData->GetNumberOfScalarComponents() > 2) //Use RGB range
+    {
+        belowValue = 0;
+        aboveValue = 255;
+    }
 
     float lvl = (aboveValue-belowValue)*level/100 + belowValue;
     printDebug("Contrast Level is "+QString::number(lvl));
 
     viewer->SetColorWindow(aboveValue-lvl);
+    if(imageData->GetNumberOfScalarComponents() > 2) //Use RGB range
+        viewer->SetColorWindow(255);
     viewer->SetColorLevel(lvl);
 
     refresh();
@@ -1385,30 +1382,11 @@ void milxQtImage::blend(milxQtImage *imageToMatch, float opacity)
     if(!GetLookupTable() || !imageToMatch->GetLookupTable())
         printWarning("Lookuptable for one of the images was not set.");
 
-    vtkSmartPointer<vtkImageMapToColors> firstColorMapper = vtkSmartPointer<vtkImageMapToColors>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        firstColorMapper->SetInput( GetOutput() );
-    #else
-        firstColorMapper->SetInputData( GetOutput() );
-    #endif
-        firstColorMapper->SetLookupTable( GetLookupTable() );
-        firstColorMapper->PassAlphaToOutputOn();
-        firstColorMapper->SetOutputFormatToRGBA();
-        firstColorMapper->Update();
-    vtkSmartPointer<vtkImageData> ucharData1 = firstColorMapper->GetOutput();
+    emit working(-1);
+    vtkSmartPointer<vtkImageData> ucharData1 = GetWindowLevel()->GetOutput();
 
     printInfo("Blending with Image: " + imageToMatch->strippedName());
-    vtkSmartPointer<vtkImageMapToColors> secondColorMapper = vtkSmartPointer<vtkImageMapToColors>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        secondColorMapper->SetInput( imageToMatch->GetOutput() );
-    #else
-        secondColorMapper->SetInputData( imageToMatch->GetOutput() );
-    #endif
-        secondColorMapper->SetLookupTable( imageToMatch->GetLookupTable() );
-        secondColorMapper->PassAlphaToOutputOn();
-        secondColorMapper->SetOutputFormatToRGBA();
-        secondColorMapper->Update();
-    vtkSmartPointer<vtkImageData> ucharData2 = secondColorMapper->GetOutput();
+    vtkSmartPointer<vtkImageData> ucharData2 = imageToMatch->GetWindowLevel()->GetOutput();
     printInfo("Number of components in Blending Image: " + QString::number(ucharData2->GetNumberOfScalarComponents()));
 
     // Combine the images (blend takes multiple connections on the 0th input port)
@@ -1420,66 +1398,27 @@ void milxQtImage::blend(milxQtImage *imageToMatch, float opacity)
         blend->AddInputData(ucharData1);
         blend->AddInputData(ucharData2);
     #endif
+        blend->SetOpacity(0,opacity);
         blend->SetOpacity(1,opacity);
         linkProgressEventOf(blend);
 //        blend->SetBlendModeToCompound();
-//        blend->SetBlendModeToNormal();
+        blend->SetBlendModeToNormal();
         blend->Update();
-
-    /*int *extent = imageToMatch->GetDisplayExtent();
-
-    vtkSmartPointer<vtkImageFlip> imageReorient = vtkSmartPointer<vtkImageFlip>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        imageReorient->SetInput(ucharData2);
-    #else
-        imageReorient->SetInputData(ucharData2);
-    #endif
-        imageReorient->SetFilteredAxis(1);
-        imageReorient->FlipAboutOriginOn();
-        linkProgressEventOf(imageReorient);
-        imageReorient->Update();
-
-    int actualExtent[6];
-    ucharData2->GetExtent(actualExtent);
-
-    if(extent[3]-extent[2] == 0) //flip y extent
-    {
-        extent[2] = actualExtent[3]-extent[2];
-        extent[3] = actualExtent[3]-extent[3];
-    }*/
-
-    /*vtkSmartPointer<vtkImageReslice> slice = vtkSmartPointer<vtkImageReslice>::New();
-    #if VTK_MAJOR_VERSION <=5
-//        slice->SetInput(blend->GetOutput());
-        slice->SetInput(ucharData2);
-    #else
-//        slice->SetInputData(blend->GetOutput());
-        slice->SetInputData(ucharData2);
-    #endif // VTK_MAJOR_VERSION
-        linkProgressEventOf(slice);
-        slice->SetOutputExtent(extent);
-        slice->Update();
-
-    vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
-        writer->SetFileName("blend_test.png");
-    #if VTK_MAJOR_VERSION <=5
-        writer->SetInput(slice->GetOutput());
-    #else
-        writer->SetInputData(slice->GetOutput());
-    #endif // VTK_MAJOR_VERSION
-        writer->Write();*/
 
     printInfo("Number of components in Blended Image: " + QString::number(blend->GetOutput()->GetNumberOfScalarComponents()));
     printInfo("Type of pixel in Blended Image: " + QString(blend->GetOutput()->GetScalarTypeAsString()));
 
-    lookupTable = NULL;
-    GetWindowLevel()->SetLookupTable(NULL);
     setData(blend->GetOutput());
-//    setData(ucharData2);
-//    emit done(-1);
+    emit done(-1);
+
+    //Force RGB colouring
+    GetWindowLevel()->SetLookupTable(NULL);
+    lookupTable = NULL;
+    GetWindowLevel()->SetWindow(255);
+    GetWindowLevel()->SetLevel(127.5);
+    viewer->GetRenderer()->ResetCamera();
 
     generateImage();
-//    emit imageAvailable(ucharData2, "Blended Images");
 }
 
 void milxQtImage::volumeRendering()
@@ -2896,6 +2835,36 @@ void milxQtImage::gaussianSmooth()
     }
 }
 
+void milxQtImage::bilateral()
+{
+  if(usingVTKImage)
+    {
+      printError("Bilateral Smoothin from VTK image not support yet.");
+      return;
+    }
+
+  bool ok1 = false, ok2 = false;
+  float sigmaRange = QInputDialog::getDouble(this, tr("Please Provide the range sigma to use"),
+                                           tr("Range Sigma:"), 0.5, 0.0, 2147483647, 5, &ok1);
+  float sigmaSpatial = QInputDialog::getDouble(this, tr("Please Provide the domain/spatial sigma to use"),
+                                           tr("Domain Sigma:"), 5, 0.0, 2147483647, 5, &ok2);
+
+  if(ok1)
+    {
+      printInfo("Computing Bilateral Smoothing of Image");
+      emit working(-1);
+      if(eightbit)
+        imageChar = milx::Image<charImageType>::Bilateral(imageChar, sigmaRange, sigmaSpatial);
+      //        else if(rgb)
+      //            imageRGB = milx::Image<rgbImageType>::Bilateral(imageRGB, sigmaRange, sigmaSpatial);
+      else
+        imageFloat = milx::Image<floatImageType>::Bilateral(imageFloat, sigmaRange, sigmaSpatial);
+      emit done(-1);
+
+      generateImage();
+    }
+}
+
 void milxQtImage::median()
 {
     if(usingVTKImage)
@@ -3726,6 +3695,9 @@ void milxQtImage::createActions()
     gaussianAct = new QAction(this);
     gaussianAct->setText(QApplication::translate("Image", "Smooth via Gaussian Convolution", 0, QApplication::UnicodeUTF8));
     gaussianAct->setShortcut(tr("Alt+c"));
+    bilateralAct = new QAction(this);
+    bilateralAct->setText(QApplication::translate("Image", "Smooth via Bilateral Filter", 0, QApplication::UnicodeUTF8));
+    bilateralAct->setShortcut(tr("Alt+b"));
     medianAct = new QAction(this);
     medianAct->setText(QApplication::translate("Image", "Smooth via Median", 0, QApplication::UnicodeUTF8));
     medianAct->setShortcut(tr("Shift+Alt+s"));
@@ -3743,7 +3715,7 @@ void milxQtImage::createActions()
     laplacianAct->setShortcut(tr("Alt+l"));
     highPassAct = new QAction(this);
     highPassAct->setText(QApplication::translate("Image", "Butterworth High-Pass Filter", 0, QApplication::UnicodeUTF8));
-    highPassAct->setShortcut(tr("Alt+b"));
+    highPassAct->setShortcut(tr("Shift+Alt+b"));
     normAct = new QAction(this);
     normAct->setText(QApplication::translate("Image", "Normalize", 0, QApplication::UnicodeUTF8));
     normAct->setShortcut(tr("Alt+n"));
@@ -3903,6 +3875,7 @@ void milxQtImage::createConnections()
 #endif
     connect(smoothAct, SIGNAL(triggered()), this, SLOT(anisotropicDiffusion()));
     connect(gaussianAct, SIGNAL(triggered()), this, SLOT(gaussianSmooth()));
+    connect(bilateralAct, SIGNAL(triggered()), this, SLOT(bilateral()));
     connect(medianAct, SIGNAL(triggered()), this, SLOT(median()));
     connect(gradMagAct, SIGNAL(triggered()), this, SLOT(gradientMagnitude()));
     connect(sobelAct, SIGNAL(triggered()), this, SLOT(sobelEdges()));
@@ -4024,6 +3997,7 @@ QMenu* milxQtImage::operationsMenu()
     operateMenu->addAction(computeContourAct);
     operateMenu->addAction(smoothAct);
     operateMenu->addAction(gaussianAct);
+    operateMenu->addAction(bilateralAct);
     operateMenu->addAction(medianAct);
     operateMenu->addAction(gradMagAct);
     operateMenu->addAction(sobelAct);
