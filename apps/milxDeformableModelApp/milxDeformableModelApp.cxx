@@ -36,7 +36,7 @@ typedef itk::Image<charPixelType, milx::imgDimension> charImageType;
 
 //Supported operations
 enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smooth, laplacian, thresholdscalars, flip, diffscalars, copyscalars, diffscalarspairs, statscalars, removescalars, mse, procrustes, icp,
-                voxelise, orient};
+                voxelise, orient, flat};
 
 /**
   \file milxDeformableModelApp.cxx
@@ -61,10 +61,11 @@ int main(int argc, char *argv[])
   //---------------------------
   ///Program Info
   milx::PrintInfo("--------------------------------------------------------");
-  milx::PrintInfo("MILX-SMILI Deformable Model Diagnostic Tool for Models/Surfaces/Meshes.");
-  milx::PrintInfo("(c) Copyright Shekhar Chandra et al., 2014.");
+  milx::PrintInfo("SMILI Deformable Model Tool for Models/Surfaces/Meshes.");
+  milx::PrintInfo("(c) Copyright Chandra et al., 2015.");
   milx::PrintInfo("Version: " + milx::NumberToString(milx::Version));
-  milx::PrintInfo("Australian e-Health Research Centre, CSIRO.");
+  milx::PrintInfo("University of Queensland, Australia.");
+  milx::PrintInfo("Australian e-Health Research Centre, CSIRO, Australia.");
   milx::PrintInfo("--------------------------------------------------------\n");
 
   //---------------------------
@@ -114,6 +115,7 @@ int main(int argc, char *argv[])
   ///Deformable model options
   ValueArg<float> voxeliseArg("", "voxelise", "Voxelise a model into image space with given spacing. Output will be in Nifty format (*.nii.gz).", false, 0.5, "Voxelise");
   ValueArg<std::string> orientArg("", "orient", "Apply direction/orientation to a model from the given image", false, "image.nii.gz", "Orient");
+  ValueArg<size_t> flatArg("", "flatten", "Flatten a model to either a sphere (0) or plane (1). Needs to be a genus zero (no topological hole) mesh.", false, 0, "Flatten");
 
   ///Add argumnets
   cmd.add( multinames );
@@ -151,6 +153,9 @@ int main(int argc, char *argv[])
   ///Deformable model args
   xorlist.push_back(&voxeliseArg);
   xorlist.push_back(&orientArg);
+#ifdef ITK_USE_REVIEW //Review only members
+  xorlist.push_back(&flatArg);
+#endif
 
   ///Parse the argv array.
   cmd.xorAdd(xorlist);
@@ -175,6 +180,7 @@ int main(int argc, char *argv[])
   ///Deformable model value parsed by each arg.
   const float voxelSpacing = voxeliseArg.getValue();
   std::string orientName = orientArg.getValue();
+  const size_t flatMode = flatArg.getValue();
 
   ///Check operation
   operations operation = none;
@@ -424,6 +430,18 @@ int main(int argc, char *argv[])
     milx::PrintInfo("Orienting surfaces: ");
     operation = orient;
   }
+  if(flatArg.isSet())
+    {
+      if(!prefixArg.isSet())
+        {
+          milx::PrintError("Orient Argument Error: Output Prefix (-p) must be provided.");
+          milx::PrintError("Re-run with the prefix name set.");
+          exit(EXIT_FAILURE);
+        }
+      //flat
+      milx::PrintInfo("Flattening surfaces: ");
+      operation = flat;
+    }
 
   ///Partition list into two if option given
   std::vector<std::string> altfilenames;
@@ -725,6 +743,14 @@ int main(int argc, char *argv[])
       outputRequired = false;
       multiOutputRequired = true;
       break;
+#ifdef ITK_USE_REVIEW //Review only members
+    case flat:
+      Model.FlattenCollection(collection, flatMode);
+
+      outputRequired = false;
+      multiOutputRequired = true;
+      break;
+#endif
 
     case none: //--------------------------------
       break;

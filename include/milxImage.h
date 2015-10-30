@@ -52,6 +52,7 @@
 #include <itkConstantPadImageFilter.h>
 #include <itkMaskImageFilter.h>
 #include <itkGradientAnisotropicDiffusionImageFilter.h>
+#include <itkBilateralImageFilter.h>
 #include <itkSmoothingRecursiveGaussianImageFilter.h>
 #include <itkSobelEdgeDetectionImageFilter.h>
 #include <itkMedianImageFilter.h>
@@ -237,6 +238,9 @@ public:
     \brief Converts a ITK Vector image object to an VTK image object. You MUST DeepCopy the result as the ITK smartpointer is not aware of the VTK smartpointer.
   */
   static vtkSmartPointer<vtkImageData> ConvertITKVectorImageToVTKImage(itk::SmartPointer<TImage> img);
+
+  template<typename TPrecision>
+  static itk::SmartPointer<TImage> ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY = true, const bool ignoreDirection = false);
 #ifndef ITK_ONLY //Requires VTK
   /*!
     \fn Image:: ApplyOrientationToVTKImage(vtkSmartPointer<vtkImageData> img, itk::SmartPointer<TImage> refImage, vtkSmartPointer<vtkMatrix4x4> &transformMatrix, const bool labelledImage, const bool flipY = true)
@@ -408,6 +412,23 @@ public:
   static itk::SmartPointer<TImage> ConvolveImages(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> kernelImg);
 #endif // (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
 
+  //Info
+  /*!
+  \fn Image::Information(itk::SmartPointer<TImage> img)
+  \brief Prints the information of the image to standard output.
+  */
+  static void Information(itk::SmartPointer<TImage> img);
+  /*!
+  \fn Image::ImageMaximum(itk::SmartPointer<TImage> img)
+  \brief Returns the maximum pixel value of an image.
+  */
+  static double ImageMaximum(itk::SmartPointer<TImage> img);
+  /*!
+  \fn Image::ImageMinimum(itk::SmartPointer<TImage> img)
+  \brief Returns the minimum pixel value of an image.
+  */
+  static double ImageMinimum(itk::SmartPointer<TImage> img);
+
   //Filters
   /*!
   	\fn Image::CheckerBoard(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCheckerBoard, const int numberOfSquares = 0)
@@ -458,11 +479,7 @@ public:
   	\brief Generates an image which is statistically normalised so having pixel values between -1 and 1.
   */
   static itk::SmartPointer< itk::Image<float, TImage::ImageDimension> > Normalization(itk::SmartPointer<TImage> img);
-  /*!
-  	\fn Image::Information(itk::SmartPointer<TImage> img)
-  	\brief Prints the information of the image to standard output.
-  */
-  static void Information(itk::SmartPointer<TImage> img);
+
   /*!
   	\fn Image::MatchInformation(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, bool originOnly = false)
   	\brief Changes the image info to match that of provided image. By default, only the spacing, region and origin are changed.
@@ -502,13 +519,18 @@ public:
   template<typename TOutImage>
   static itk::SmartPointer<TOutImage> AnisotropicDiffusion(itk::SmartPointer<TImage> img, const int iterations, const float timestep);
   /*!
-  	\fn Image::GaussianSmooth(itk::SmartPointer<TImage> img, const float variance)
-  	\brief Generates the Gaussian smoothing (by convolution) of an image using the variance provided.
+    \fn Image::Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial)
+    \brief Generates the (non-linear) Bilateral smoothing of an image using the sigmas provided.
+  */
+  static itk::SmartPointer<TImage> Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial);
+  /*!
+    \fn Image::GaussianSmooth(itk::SmartPointer<TImage> img, const float variance)
+    \brief Generates the Gaussian smoothing (by convolution) of an image using the variance provided.
   */
   static itk::SmartPointer<TImage> GaussianSmooth(itk::SmartPointer<TImage> img, const float variance);
   /*!
   	\fn Image::Median(itk::SmartPointer<TImage> img, const int radius)
-  	\brief Generates the median filtering (smoothing) of an image of given neighbourhood radius.
+    \brief Generates the (non-linear) median filtering (smoothing) of an image of given neighbourhood radius.
   */
   static itk::SmartPointer<TImage> Median(itk::SmartPointer<TImage> img, const int radius);
 
@@ -603,16 +625,6 @@ public:
   */
   template<typename TOutImage>
   static itk::SmartPointer<TOutImage> OtsuMultipleThresholdImage(itk::SmartPointer<TImage> img, const int bins, const int noOfLabels = 1);
-  /*!
-  	\fn Image::ImageMaximum(itk::SmartPointer<TImage> img)
-  	\brief Returns the maximum pixel value of an image.
-  */
-  static double ImageMaximum(itk::SmartPointer<TImage> img);
-  /*!
-  	\fn Image::ImageMinimum(itk::SmartPointer<TImage> img)
-  	\brief Returns the minimum pixel value of an image.
-  */
-  static double ImageMinimum(itk::SmartPointer<TImage> img);
 
   //Vector operations
   /*!
@@ -667,6 +679,11 @@ public:
   */
   template<typename TOutImage>
   static std::vector< typename itk::SmartPointer<TOutImage> > AnisotropicDiffusionCollection(const std::vector< typename itk::SmartPointer<TImage> > &images, const int iterations, float timestep = -1.0);
+  /*!
+    \fn Image::BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial)
+    \brief Batch process images by bilateral smoothing each image.
+  */
+  static void BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial);
   /*!
   	\fn Image::CastCollection(const std::vector< typename itk::SmartPointer<TImage> > &images)
   	\brief Batch process images by casting each image to type provided in templates.
@@ -890,6 +907,170 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ConvertITKVectorImageToVTKImage(itk
   return field;
 }
 
+template<class TImage>
+template<typename TPrecision>
+itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY, const bool ignoreDirection)
+{
+  typename TImage::DirectionType direction = refImage->GetDirection();
+  typename TImage::PointType origin = refImage->GetOrigin();
+
+  typedef itk::InterpolateImageFunction<TImage, TPrecision> InterpolatorType;
+  typename InterpolatorType::Pointer interpolator;
+  if(labelledImage)
+    interpolator = itk::NearestNeighborInterpolateImageFunction<TImage, TPrecision>::New();
+  else
+    interpolator = itk::LinearInterpolateImageFunction<TImage, TPrecision>::New();
+
+  typename TImage::DirectionType identityMatrix;
+  identityMatrix.SetIdentity();
+//  typename TImage::PointType axesOrigin;
+//  axesOrigin.Fill(0.0);
+
+  //Remove origin and direction to get raw volume
+  typedef itk::ChangeInformationImageFilter<TImage> ChangeFilterType;
+  typename ChangeFilterType::Pointer stripInfo = ChangeFilterType::New();
+    stripInfo->SetInput( img );
+    stripInfo->ChangeDirectionOn();
+    stripInfo->SetOutputDirection(identityMatrix);
+//    stripInfo->ChangeOriginOn();
+//    stripInfo->SetOutputOrigin(axesOrigin);
+
+  vtkSmartPointer<vtkMatrix4x4> matrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
+  matrix->Identity();
+  for (int i = 0; i < 3; i ++)
+    for (int k = 0; k < 3; k ++)
+      matrix->SetElement(i,k, direction(i,k));
+  matrix->Transpose(); //img volume to correct space, comment to go from space to img volume
+
+  vtkSmartPointer<vtkMatrix4x4> transformMatrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
+    transformMatrix->Identity();
+    //Flip the image for VTK coordinate system
+//    if(flipY)
+//      transformMatrix->SetElement(1,1,-1); //flip
+
+  vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+    transform->Identity();
+    transform->PostMultiply();
+    transform->Concatenate(transformMatrix); //flip
+    transform->Translate(-origin[0], -origin[1], -origin[2]); //remove origin
+    transform->Concatenate(matrix); //direction
+    transform->Translate(origin.GetDataPointer()); //add origin displacement
+    transform->Update();
+  vtkSmartPointer<vtkMatrix4x4> matrix2 = transform->GetMatrix();
+
+  typename TImage::DirectionType orientMatrix;
+  for (int i = 0; i < 3; i ++)
+    for (int k = 0; k < 3; k ++)
+      orientMatrix(i,k) = matrix2->GetElement(i,k);
+  typename itk::Vector<TPrecision, milx::imgDimension> offset;
+//  typename TImage::PointType new_origin;
+  for (int i = 0; i < 3; i ++)
+  {
+//    new_origin[i] = matrix2->GetElement(i,3);
+    offset[i] = matrix2->GetElement(i,3);
+  }
+  matrix2->Print(cout);
+
+  typedef itk::ResampleImageFilter<TImage, TImage, TPrecision> ResampleImageFilterType;
+  /*typename ResampleImageFilterType::Pointer stripInfo = ResampleImageFilterType::New();
+    stripInfo->SetInput(img);
+    stripInfo->SetDefaultPixelValue(0.0);
+    stripInfo->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
+//    stripInfo->SetOutputOrigin(  axesOrigin );
+    stripInfo->SetOutputSpacing( refImage->GetSpacing() );
+//    stripInfo->SetOutputDirection( identityMatrix ); // 1 1 1 direction
+    stripInfo->SetInterpolator(interpolator);
+    stripInfo->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
+  typedef typename AffineTransformType::Pointer AffineTransformPointer;
+  AffineTransformPointer stripTransform = AffineTransformType::New();
+  stripTransform->SetIdentity();
+  typename TImage::DirectionType matrix = direction.GetInverse();
+  stripTransform->SetMatrix(matrix);
+  stripTransform->Translate(origin.GetVectorFromOrigin());
+//  stripTransform->SetCenter(axesOrigin);
+//  stripTransform->SetTranslation(origin.GetVectorFromOrigin());
+  AffineTransformPointer stripInvTransform = AffineTransformType::New();
+  stripInvTransform->GetInverse(stripTransform);
+
+  stripInfo->SetTransform(stripInvTransform);*/
+
+  typename TImage::SizeType inputSize = refImage->GetLargestPossibleRegion().GetSize();
+  typename TImage::SizeType outputSize;
+  typedef typename TImage::SizeType::SizeValueType SizeValueType;
+  outputSize[0] = static_cast<SizeValueType>(inputSize[0] * 1);
+  outputSize[1] = static_cast<SizeValueType>(inputSize[1] * 1);
+  outputSize[2] = static_cast<SizeValueType>(inputSize[2] * 1);
+
+  typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
+    resample->SetInput(stripInfo->GetOutput());
+//    resample->SetInput(img);
+    resample->SetDefaultPixelValue(0.0);
+    resample->SetSize( outputSize );
+    resample->SetOutputStartIndex( refImage->GetLargestPossibleRegion().GetIndex() );
+//    resample->SetOutputOrigin(  refImage->GetOrigin() );
+    resample->SetOutputSpacing( refImage->GetSpacing() );
+    resample->SetInterpolator(interpolator);
+    resample->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  ///Up cast transform to correct type
+  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
+  typedef typename AffineTransformType::Pointer AffineTransformPointer;
+  AffineTransformPointer affineTransform = AffineTransformType::New();
+  affineTransform->SetIdentity();
+
+  ///Transform
+//  typename TImage::DirectionType matrix;
+//  if(ignoreDirection)
+//    matrix = identityMatrix;
+//  else
+//    matrix = direction.GetInverse();
+//  if(flipY)
+//    matrix(1,1) *= -1; //flip y
+//  affineTransform->SetMatrix(matrix);
+  affineTransform->SetMatrix(orientMatrix);
+
+  affineTransform->SetOffset(offset);
+//  affineTransform->SetCenter(origin);
+//  affineTransform->SetTranslation(origin.GetVectorFromOrigin());
+
+//  AffineTransformPointer invTransform = AffineTransformType::New();
+//  invTransform->GetInverse(affineTransform);
+
+  ///Origin
+  AffineTransformPointer affineTransform2 = AffineTransformType::New();
+  affineTransform2->SetIdentity();
+//  typename TImage::DirectionType invOrientMatrix(orientMatrix.GetInverse());
+//  affineTransform2->SetMatrix(invOrientMatrix);
+  affineTransform2->SetMatrix(orientMatrix);
+  //get zeroth point
+  typename TImage::IndexType originIndex;
+  originIndex.Fill(0);
+  typename TImage::PointType old_origin;
+  refImage->TransformIndexToPhysicalPoint(originIndex, old_origin);
+  typename TImage::PointType new_origin = affineTransform2->TransformPoint(old_origin);
+  resample->SetOutputOrigin(new_origin);
+//  resample->SetOutputOrigin(origin);
+
+  resample->SetTransform(affineTransform);
+
+  try
+  {
+    resample->UpdateLargestPossibleRegion();
+    resample->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed applying orientation to Image");
+    PrintError(ex.GetDescription());
+  }
+
+  return resample->GetOutput();
+//  stripInfo->Update();
+//  return stripInfo->GetOutput();
+}
+
 #ifndef ITK_ONLY //Requires VTK
 template<class TImage>
 vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmartPointer<vtkImageData> img, itk::SmartPointer<TImage> refImage, vtkSmartPointer<vtkMatrix4x4> &transformMatrix, const bool labelledImage, const bool flipY)
@@ -929,12 +1110,22 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmart
   reslice->AutoCropOutputOn();
   reslice->TransformInputSamplingOn();
   reslice->SetOutputDimensionality(milx::imgDimension);
-  reslice->SetResliceTransform(transform);
+  reslice->SetResliceAxes(transform->GetMatrix());
+
   if(!labelledImage)
       reslice->SetInterpolationModeToLinear(); //reduce artefacts for normal images
   else
+  {
       reslice->SetInterpolationModeToNearestNeighbor(); //reduce artefacts for labels
+      PrintDebug("Using NN Interpolator for Image Orientation.");
+//  #if VTK_MAJOR_VERSION > 5
+//      reslice->SetOutputScalarType(VTK_CHAR);
+//  #endif
+  }
   reslice->Update();
+
+  std::string resliceType = reslice->GetOutput()->GetScalarTypeAsString();
+  PrintDebug("Orientated Image Type as " + resliceType);
 
   return reslice->GetOutput();
 }
@@ -1877,6 +2068,65 @@ itk::SmartPointer<TImage> Image<TImage>::ConvolveImages(itk::SmartPointer<TImage
 }
 #endif //(ITK_REVIEW || ITK_VERSION_MAJOR > 3)
 
+//Info
+template<class TImage>
+void Image<TImage>::Information(itk::SmartPointer<TImage> img)
+{
+  typename TImage::DirectionType direction = img->GetDirection();
+  typename TImage::PointType origin = img->GetOrigin();
+  typename TImage::SpacingType spacing = img->GetSpacing();
+  typename TImage::SizeType imageSize = img->GetLargestPossibleRegion().GetSize();
+
+  std::cout << "Origin: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(origin[j]) << "  ";
+  std::cout << "\nSpacing: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(spacing[j]) << "  ";
+  std::cout << "\nSize: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(imageSize[j]) << "  ";
+  std::cout << "\nReal Size: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(spacing[j] * imageSize[j]) << "  ";
+  std::cout << "\nDirection/Orientation: " << std::endl;
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+  {
+    std::cout << "| ";
+    for (typename TImage::SizeValueType k = 0; k < TImage::ImageDimension; k++)
+    {
+      std::cout << milx::NumberToString(direction(j, k));
+      if (k < TImage::ImageDimension - 1)
+        std::cout << ",\t";
+    }
+    std::cout << " |" << std::endl;
+  }
+}
+
+template<class TImage>
+double Image<TImage>::ImageMaximum(itk::SmartPointer<TImage> img)
+{
+  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
+  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+  imageCalculatorFilter->SetImage(img);
+  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  imageCalculatorFilter->Compute();
+
+  return imageCalculatorFilter->GetMaximum();
+}
+
+template<class TImage>
+double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
+{
+  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
+  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+  imageCalculatorFilter->SetImage(img);
+  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  imageCalculatorFilter->Compute();
+
+  return imageCalculatorFilter->GetMinimum();
+}
+
 //Filters
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::CheckerBoard(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCheckerBoard, const int numberOfSquares)
@@ -2074,40 +2324,6 @@ itk::SmartPointer< itk::Image<float, TImage::ImageDimension> > Image<TImage>::No
   }
 
   return normalizeFilter->GetOutput();
-}
-
-template<class TImage>
-void Image<TImage>::Information(itk::SmartPointer<TImage> img)
-{
-  typename TImage::DirectionType direction = img->GetDirection();
-  typename TImage::PointType origin = img->GetOrigin();
-  typename TImage::SpacingType spacing = img->GetSpacing();
-  typename TImage::SizeType imageSize = img->GetLargestPossibleRegion().GetSize();
-
-  std::cout << "Origin: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(origin[j]) << "  ";
-  std::cout << "\nSpacing: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(spacing[j]) << "  ";
-  std::cout << "\nSize: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(imageSize[j]) << "  ";
-  std::cout << "\nReal Size: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(spacing[j]*imageSize[j]) << "  ";
-  std::cout << "\nDirection/Orientation: " << std::endl;
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-  {
-    std::cout << "| ";
-    for(typename TImage::SizeValueType k = 0; k < TImage::ImageDimension; k ++)
-    {
-      std::cout << milx::NumberToString(direction(j,k));
-      if(k < TImage::ImageDimension-1)
-        std::cout << ",\t";
-    }
-    std::cout << " |" << std::endl;
-  }
 }
 
 template<class TImage>
@@ -2316,6 +2532,28 @@ itk::SmartPointer<TOutImage> Image<TImage>::AnisotropicDiffusion(itk::SmartPoint
   }
 
   return gradAniDiff->GetOutput();
+}
+
+template<class TImage>
+itk::SmartPointer<TImage> Image<TImage>::Bilateral(itk::SmartPointer<TImage> img, const float sigmaRange, const float sigmaSpatial)
+{
+  typedef itk::BilateralImageFilter<TImage, TImage> BilateralImageFilterType;
+  typename BilateralImageFilterType::Pointer bilateralFilter = BilateralImageFilterType::New();
+  bilateralFilter->SetInput(img);
+  bilateralFilter->SetRangeSigma(sigmaRange);
+  bilateralFilter->SetDomainSigma(sigmaSpatial);
+  bilateralFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  try
+  {
+    bilateralFilter->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed Computing Bilateral Smoothing");
+    PrintError(ex.GetDescription());
+  }
+
+  return bilateralFilter->GetOutput();
 }
 
 template<class TImage>
@@ -2765,30 +3003,6 @@ itk::SmartPointer<TOutImage> Image<TImage>::OtsuMultipleThresholdImage(itk::Smar
 }
 
 template<class TImage>
-double Image<TImage>::ImageMaximum(itk::SmartPointer<TImage> img)
-{
-  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
-  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New ();
-  imageCalculatorFilter->SetImage(img);
-  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-  imageCalculatorFilter->Compute();
-
-  return imageCalculatorFilter->GetMaximum();
-}
-
-template<class TImage>
-double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
-{
-  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
-  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New ();
-  imageCalculatorFilter->SetImage(img);
-  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-  imageCalculatorFilter->Compute();
-
-  return imageCalculatorFilter->GetMinimum();
-}
-
-template<class TImage>
 template<typename TScalarImage>
 itk::SmartPointer<TScalarImage> Image<TImage>::VectorMagnitude(itk::SmartPointer<TImage> img)
 {
@@ -2904,6 +3118,15 @@ std::vector< typename itk::SmartPointer<TOutImage> > Image<TImage>::AnisotropicD
   }
 
   return collection;
+}
+
+template<class TImage>
+void Image<TImage>::BilateralCollection(std::vector< typename itk::SmartPointer<TImage> > &images, float sigmaRange, float sigmaSpatial)
+{
+  const size_t n = images.size();
+
+  for(size_t j = 0; j < n; j ++)
+    images[j] = Bilateral(images[j], sigmaRange, sigmaSpatial);
 }
 
 template<class TImage>

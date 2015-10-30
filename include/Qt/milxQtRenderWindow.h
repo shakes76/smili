@@ -210,10 +210,10 @@ public:
         QVTKWidget::resize(winSize[0],winSize[1]);
     }
     /*!
-        \fn milxQtRenderWindow::SetLookupTable(vtkSmartPointer<vtkScalarsToColors> lut)
+        \fn milxQtRenderWindow::SetLookupTable(vtkSmartPointer<vtkLookupTable> lut)
         \brief Set the lookup table of the colours in display window.
     */
-    inline void SetLookupTable(vtkSmartPointer<vtkScalarsToColors> lut)
+    inline void SetLookupTable(vtkSmartPointer<vtkLookupTable> lut)
     {
         lookupTable = lut;
     }
@@ -262,13 +262,16 @@ public:
     */
     inline virtual vtkImageActor* GetImageActor()
     {
-        return NULL;       //Implement in derived class
+        if(!imageActors.empty())
+            return imageActors.last().imageActor;       //Implement in derived class
+        else
+            return NULL;
     }
     /*!
         \fn milxQtRenderWindow::GetLookupTable()
         \brief Get the lookup table of the colours in display window.
     */
-    inline vtkScalarsToColors* GetLookupTable()
+    inline vtkLookupTable* GetLookupTable()
     {
         return lookupTable;
     }
@@ -358,10 +361,15 @@ public slots:
     */
     void removeModelActor(vtkSmartPointer<vtkActor> mdlActor);
     /*!
-        \fn milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix)
-        \brief Directly add image actor to generic view.
+        \fn milxQtRenderWindow::addActor(vtkSmartPointer<vtkActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix = NULL)
+        \brief Directly add actor to generic view with transform matrix.
     */
-    void addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix);
+    void addActor(vtkSmartPointer<vtkActor> imgActor, vtkMatrix4x4 *transformMatrix = NULL);
+    /*!
+    \fn milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix = NULL)
+    \brief Directly add image actor to generic view.
+    */
+    void addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkMatrix4x4 *transformMatrix = NULL);
     /*!
         \fn milxQtRenderWindow::removeImageActor(vtkSmartPointer<vtkImageActor> imgActor)
         \brief Directly remove image actor from generic view.
@@ -803,6 +811,7 @@ protected:
     bool logScale; //! Using log scalar map?
     bool useDefaultView; //!< Use default view whenever possible?
     bool orientationAxes; //!< Display orientation (posterior etc.) axes?
+    bool contextMenuEnabled; //!< Display orientation (posterior etc.) axes?
 
     //Variables
     int defaultView; //!< Default view for data (default is axial)
@@ -877,7 +886,7 @@ protected:
     //VTK Rendering Internals
     vtkSmartPointer<vtkRenderer> renderer; //!< Renderer for the data
     vtkSmartPointer<vtkRenderWindow> renderWindow; //!< Render Window used if no other set, only for deletion, access through QVTKWidget members
-    vtkSmartPointer<vtkScalarsToColors> lookupTable; //!< Lookup table for the shapes/images, base class is used to allow references to different look up table types
+    vtkSmartPointer<vtkLookupTable> lookupTable; //!< Lookup table for the shapes/images, base class is used to allow references to different look up table types
     vtkSmartPointer<vtkCamera> camera; //!< camera for the view
 
     vtkSmartPointer<vtkScalarBarActor> scale; //!< Scale for the display

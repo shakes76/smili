@@ -94,7 +94,7 @@ IF(BUILD_PLUGINS AND NOT APPLE)
     INSTALL(DIRECTORY ${SMILI_PLUGINS_PATH} DESTINATION . COMPONENT Runtime)
 ENDIF(BUILD_PLUGINS AND NOT APPLE)
 
-SET(CPACK_PACKAGE_EXECUTABLES milxOverlay milxOverlay milxImageApp milxImageApp milxModelApp milxModelApp milxDeformableModelApp milxDeformableModelApp milxLabelVisualisation milxLabelVisualisation smilx sMILX)
+SET(CPACK_PACKAGE_EXECUTABLES milxOverlay milxOverlay milxImageApp milxImageApp milxModelApp milxModelApp milxDeformableModelApp milxDeformableModelApp milxLabelVisualisation milxLabelVisualisation milxDICOMApp milxDICOMApp smilx sMILX)
 
 IF (WIN32)
     set(_add_executable_param WIN32)

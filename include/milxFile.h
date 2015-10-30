@@ -19,6 +19,7 @@
 #define __MILXFILE_H
 
 //STL
+#include <utility>
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -134,24 +135,6 @@ public:
   */
   static std::vector<std::string> GetSupportedImageFileExtensions();
   /*!
-    \fn File::GetDICOMSeriesUIDs(const std::string directoryPath)
-    \brief Returns the list of UIDs for a given directory.
-
-    This is useful because directories may contain more than one dataset.
-
-    Returns an empty list if an error was encountered.
-  */
-  static std::vector<std::string> GetDICOMSeriesUIDs(const std::string directoryPath);
-  /*!
-    \fn File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName)
-    \brief Returns the filenames for a given UID/Series name for a given directory.
-
-    This function simply returns only filenames and nothing is actually read as an image.
-
-    Returns an empty list if an error was encountered.
-  */
-  static std::vector<std::string> GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName);
-  /*!
     \fn File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data)
     \brief Opens an image file, which is any of the following: JPEG, PNG, DICOM, TIFF, NIFTI etc.
 
@@ -192,16 +175,6 @@ public:
   template<class TImage>
   static bool OpenImages(std::vector<std::string> &filenames, std::vector< typename itk::SmartPointer<TImage> > &images);
   /*!
-    \fn File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient = true)
-    \brief Opens a DICOM series from the UID/Series name given. Returns the image volume from the series read by ITK/GDCM.
-
-    You can get the seriesName via the GetDICOMSeriesUIDs() member, which is read from the filenames. The DICOM tags are read and seriesName is replaced with DICOM tag version.
-
-    Returns true if successful. Image is also NOT flipped for VTK.
-  */
-  template<class TImage>
-  static bool OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient = true);
-  /*!
     \fn File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io = NULL)
     \brief Saves an image file, which is any of the following: JPEG, PNG, DICOM, TIFF, NIFTI etc.
 
@@ -219,6 +192,64 @@ public:
   */
   template<class TImage>
   static bool SaveImages(std::vector<std::string> &filenames, const std::vector< typename itk::SmartPointer<TImage> > images);
+
+  ///DICOM Related
+  /*!
+  \fn File::GetDICOMSeriesUIDs(const std::string directoryPath, bool recursive = false)
+  \brief Returns the list of UIDs for a given directory.
+
+  This is useful because directories may contain more than one dataset. Recursive allows for multiple datasets.
+
+  Returns an empty list if an error was encountered.
+  */
+  static std::vector<std::string> GetDICOMSeriesUIDs(const std::string directoryPath, bool recursive = false);
+  /*!
+  \fn File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName)
+  \brief Returns the filenames for a given UID/Series name for a given directory.
+
+  This function simply returns only filenames and nothing is actually read as an image.
+
+  Returns an empty list if an error was encountered.
+  */
+  static std::vector<std::string> GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName);
+  /*!
+  \fn File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+  \brief Opens a DICOM series and returns the image meta data read by ITK/GDCM, i.e. the DICOM tags from the header, as well as the image data.
+
+  You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. This does not read the whole image data and is faster for a quick query.
+  */
+  template<class TImage>
+  static bool GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID);
+  /*!
+  \fn File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID = "")
+  \brief Opens a DICOM series and returns the image meta data read by ITK/GDCM, i.e. the DICOM tags from the header.
+
+  You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. This does not read the whole image data and is faster for a quick query.
+  */
+  template<class TImage>
+  static bool GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID);
+  /*!
+  \fn File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+  \brief Opens a DICOM series and returns the DICOM tags read by ITK/GDCM, i.e. the DICOM tags from the header, as a list of string pairs.
+
+  You can get the UIDs via the GetDICOMSeriesUIDs() member and the meta data via GetDICOMMetaData(), which are read from the filenames.
+  */
+  template<class TImage>
+  static bool GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID);
+  template<class TImage>
+  static bool GetDICOMTags(const itk::MetaDataDictionary dictionary, std::vector< std::pair<std::string, std::string> > &tags);
+  /*!
+  \fn File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID)
+  \brief Opens a DICOM series from the path given. Returns the image volume from the series read by ITK/GDCM.
+
+  You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. The DICOM tags are read and seriesName and caseID is replaced with DICOM tag values.
+
+  Returns true if successful. Image is also NOT flipped for VTK.
+  */
+  template<class TImage>
+  static bool OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID);
+  template<class TImage>
+  static bool OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID);
 #endif
 
 #ifndef ITK_ONLY
@@ -562,63 +593,6 @@ bool File::OpenImages(std::vector<std::string> &filenames, std::vector< typename
 }
 
 template<class TImage>
-bool File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, const bool reorient)
-{
-  typedef itk::ImageSeriesReader<TImage> ReaderType;
-  typedef itk::GDCMImageIO ImageIOType;
-
-  const std::vector<std::string> filenames = GetDICOMSeriesFilenames(directoryPath, seriesName);
-
-  ImageIOType::Pointer gdcmIO = ImageIOType::New();
-  typename ReaderType::Pointer reader = ReaderType::New();
-    reader->SetImageIO( gdcmIO );
-    reader->SetFileNames( filenames );
-    reader->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-    try
-    {
-      reader->Update();
-    }
-    catch (itk::ExceptionObject &excp)
-    {
-      std::cerr << "File Exception caught while reading series!" << std::endl;
-      std::cerr << excp << std::endl;
-      return false;
-    }
-
-  ///Print info
-  typedef itk::MetaDataObject< std::string > MetaDataStringType;
-  std::string series_type_id("0008|103e");
-  itk::MetaDataDictionary & dic = gdcmIO->GetMetaDataDictionary();
-  itk::MetaDataDictionary::ConstIterator series_type_itr = dic.Find(series_type_id);
-
-  std::string caseId = "0010|0020";
-  itk::MetaDataDictionary::ConstIterator case_itr = dic.Find( caseId );
-
-  std::string echoNumber = "0018|0086";
-  itk::MetaDataDictionary::ConstIterator echoNumber_itr = dic.Find( echoNumber );
-
-  MetaDataStringType::ConstPointer entryValue= dynamic_cast<const MetaDataStringType *>(series_type_itr->second.GetPointer());
-  if(entryValue)
-  {
-    seriesName = entryValue->GetMetaDataObjectValue();
-    std::cout << "Series: " << entryValue->GetMetaDataObjectValue() << std::endl;
-  }
-  MetaDataStringType::ConstPointer entryValue2= dynamic_cast<const MetaDataStringType *>(case_itr->second.GetPointer());
-  if(entryValue2)
-    std::cout << "Case: " << entryValue2->GetMetaDataObjectValue() << std::endl;
-  MetaDataStringType::ConstPointer entryValue3;
-  if(dic.HasKey(echoNumber))
-  {
-    entryValue3 = dynamic_cast<const MetaDataStringType *>(echoNumber_itr->second.GetPointer());
-    std::cout << "Echo Number: " << entryValue3->GetMetaDataObjectValue() << std::endl;
-  }
-
-  data = reader->GetOutput();
-
-  return true;
-}
-
-template<class TImage>
 bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io)
 {
   typedef itk::ImageFileWriter<TImage> ImageWriter;
@@ -661,6 +635,161 @@ bool File::SaveImages(std::vector<std::string> &filenames, const std::vector< ty
   if(images.empty())
     return false;
   filenames = readFilenames;
+
+  return true;
+}
+
+//DICOM related
+template<class TImage>
+bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+{
+  typedef itk::ImageSeriesReader<TImage> ReaderType;
+  typedef itk::GDCMImageIO ImageIOType;
+
+  const std::vector<std::string> filenames = GetDICOMSeriesFilenames(directoryPath, seriesName);
+
+  ImageIOType::Pointer gdcmIO = ImageIOType::New();
+  typename ReaderType::Pointer reader = ReaderType::New();
+  reader->SetImageIO(gdcmIO);
+  reader->SetFileNames(filenames);
+  reader->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  try
+  {
+    reader->Update();
+  }
+  catch (itk::ExceptionObject &excp)
+  {
+    std::cerr << "File Exception caught while reading series!" << std::endl;
+    std::cerr << excp << std::endl;
+    return false;
+  }
+
+  ///Print info
+  typedef itk::MetaDataObject< std::string > MetaDataStringType;
+  std::string series_type_id("0008|103e");
+  itk::MetaDataDictionary & dic = gdcmIO->GetMetaDataDictionary();
+  itk::MetaDataDictionary::ConstIterator series_type_itr = dic.Find(series_type_id);
+
+  std::string caseId = "0010|0020";
+  itk::MetaDataDictionary::ConstIterator case_itr = dic.Find(caseId);
+
+  std::string echoNumber = "0018|0086";
+  itk::MetaDataDictionary::ConstIterator echoNumber_itr = dic.Find(echoNumber);
+
+  MetaDataStringType::ConstPointer entryValue = dynamic_cast<const MetaDataStringType *>(series_type_itr->second.GetPointer());
+  if (entryValue)
+  {
+    seriesName = entryValue->GetMetaDataObjectValue();
+    std::cout << "Series: " << entryValue->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue2 = dynamic_cast<const MetaDataStringType *>(case_itr->second.GetPointer());
+  if (entryValue2)
+  {
+    caseID = entryValue2->GetMetaDataObjectValue();
+    std::cout << "Case: " << entryValue2->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue3;
+  if (dic.HasKey(echoNumber))
+  {
+    entryValue3 = dynamic_cast<const MetaDataStringType *>(echoNumber_itr->second.GetPointer());
+    std::cout << "Echo Number: " << entryValue3->GetMetaDataObjectValue() << std::endl;
+  }
+
+  ///Return Meta Data as dictionary
+  dict = gdcmIO->GetMetaDataDictionary();
+  ///Return image data
+  data = reader->GetOutput();
+
+  return true;
+}
+
+template<class TImage>
+bool File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+{
+  typename itk::SmartPointer<TImage> data;
+
+  if (!GetDICOMData<TImage>(directoryPath, data, dict, seriesName, caseID))
+    return false;
+
+  return true;
+}
+
+template<class TImage>
+bool File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+{
+  typedef itk::MetaDataObject< std::string > MetaDataStringType;
+  typedef itk::MetaDataDictionary DictionaryType;
+  DictionaryType dictionary;
+  if (!GetDICOMMetaData<TImage>(directoryPath, dictionary, seriesName, caseID))
+    return false;
+
+  DictionaryType::ConstIterator itr = dictionary.Begin();
+  DictionaryType::ConstIterator end = dictionary.End();
+
+  while (itr != end)
+  {
+    itk::MetaDataObjectBase::Pointer entry = itr->second;
+    MetaDataStringType::Pointer entryvalue = dynamic_cast<MetaDataStringType *>(entry.GetPointer());
+    std::string entryTag = itr->first;
+    if (entryvalue) //convert MetaDataObject pair to string pair
+    {
+      std::pair<std::string, std::string> entryPair = std::make_pair(entryTag, entryvalue->GetMetaDataObjectValue());
+      tags.push_back(entryPair);
+    }
+    ++itr;
+  }
+
+  return true;
+}
+
+template<class TImage>
+bool File::GetDICOMTags(const itk::MetaDataDictionary dictionary, std::vector< std::pair<std::string, std::string> > &tags)
+{
+  typedef itk::MetaDataObject< std::string > MetaDataStringType;
+  typedef itk::MetaDataDictionary DictionaryType;
+
+  DictionaryType::ConstIterator itr = dictionary.Begin();
+  DictionaryType::ConstIterator end = dictionary.End();
+
+  while (itr != end)
+  {
+    itk::MetaDataObjectBase::Pointer entry = itr->second;
+    MetaDataStringType::Pointer entryvalue = dynamic_cast<MetaDataStringType *>(entry.GetPointer());
+    std::string entryTag = itr->first;
+    if (entryvalue) //convert MetaDataObject pair to string pair
+    {
+      std::pair<std::string, std::string> entryPair = std::make_pair(entryTag, entryvalue->GetMetaDataObjectValue());
+      tags.push_back(entryPair);
+    }
+    ++itr;
+  }
+
+  return true;
+}
+
+template<class TImage>
+bool File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID)
+{
+  typedef itk::MetaDataDictionary DictionaryType;
+  DictionaryType dictionary;
+
+  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID))
+    return false;
+
+  return true;
+}
+
+template<class TImage>
+bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+{
+  typedef itk::MetaDataDictionary DictionaryType;
+  DictionaryType dictionary;
+
+  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID))
+    return false;
+
+  if (!milx::File::GetDICOMTags<TImage>(dictionary, tags))
+    return false;
 
   return true;
 }

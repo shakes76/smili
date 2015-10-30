@@ -27,7 +27,7 @@ using namespace TCLAP;
 typedef std::vector< std::string >::iterator stringiterator;
 
 //Supported operations
-enum operations {none = 0, info, convert, labelinfo, rescale, invert, relabel, smooth, median, gradmag, laplacian, distancemap, threshold, Otsu, crop, mask, resample, match, checker, add, diff, mean, merge, cast, flip};
+enum operations {none = 0, info, convert, labelinfo, rescale, invert, relabel, smooth, bilateral, median, gradmag, laplacian, distancemap, threshold, Otsu, crop, mask, resample, match, checker, add, diff, mean, merge, cast, flip};
 
 //Image stuff
 typedef unsigned char charPixelType;
@@ -71,10 +71,11 @@ int main(int argc, char *argv[])
   //---------------------------
   ///Program Info
   milx::PrintInfo("--------------------------------------------------------");
-  milx::PrintInfo("MILX-SMILI Image Diagnostic Tool for Images/Volumes.");
-  milx::PrintInfo("(c) Copyright Shekhar Chandra et al., 2013.");
+  milx::PrintInfo("SMILI Image Tool for Images/Volumes.");
+  milx::PrintInfo("(c) Copyright Chandra et al., 2015.");
   milx::PrintInfo("Version: " + milx::NumberToString(milx::Version));
-  milx::PrintInfo("Australian e-Health Research Centre, CSIRO.");
+  milx::PrintInfo("University of Queensland, Australia.");
+  milx::PrintInfo("Australian e-Health Research Centre, CSIRO, Australia.");
   milx::PrintInfo("--------------------------------------------------------\n");
 
   //---------------------------
@@ -82,10 +83,12 @@ int main(int argc, char *argv[])
   CmdLine cmd("A diagnostic tool for image/volume operations", ' ', milx::NumberToString(milx::Version));
 
   ///Optional
+  ValueArg<size_t> threadsArg("", "threads", "Set he number of global threads to use.", false, milx::NumberOfProcessors(), "Threads");
   ValueArg<std::string> outputArg("o", "output", "Output Image", false, "result.nii.gz", "Output");
   ValueArg<std::string> prefixArg("p", "prefix", "Output prefix for multiple output.", false, "img_", "Output Prefix");
   //~ ValueArg<float> decimateArg("d", "decimate", "Decimate all the meshes provided using the Quadric Decimate algorithm", false, 0.5, "Decimate");
   ValueArg<float> smoothArg("s", "smooth", "Smooth the images using the Gradient Anisotropic Diffusion algorithm given timestep (use negative value to auto select).", false, -1.0, "Smooth");
+  ValueArg<float> bilateralArg("", "bilateral", "Smooth the images using the Bilteral algorithm given range sigma. Use sigma argument for provide spatial sigma.", false, 0.1, "Bilateral");
   ValueArg<size_t> medianArg("", "median", "Smooth the images using the median filtering given the number of pixels in neighbourhood.", false, 1, "Median");
   ValueArg<size_t> mergeArg("", "merge", "Merge the labels in labelled images, 0:keep, 1:aggregate, 2:pack, 3:strict.", false, 0, "Merge");
   ValueArg<std::string> cropArg("", "crop", "Masks and crops the images using the mask image name provided.", false, "mask.nii.gz", "Crop");
@@ -97,6 +100,7 @@ int main(int argc, char *argv[])
   ValueArg<float> aboveArg("", "above", "Add above value to operation (such as to thresholding).", false, 0.0, "Above");
   ValueArg<float> belowArg("", "below", "Add below value to operation (such as to thresholding).", false, 255.0, "Below");
   ValueArg<float> insideArg("", "inside", "Add inside value to operation (such as to thresholding).", false, 1.0, "Inside");
+  ValueArg<float> sigmaArg("", "sigma", "Sigma (Stddev) value to operation (such as to bilateral).", false, 1.0, "Sigma");
   ValueArg<size_t> iterationsArg("i", "iterations", "Number of iterations to use in the operation (such as smoothing).", false, 5, "Labels");
   ValueArg<size_t> labelsArg("", "labels", "Number of labels to use in the operation (such as Otsu thresholding) else print labelling info.", false, 3, "Labels");
   ValueArg<size_t> OtsuArg("", "Otsu", "Otsu multiple threshold with the number of bins to use.", false, 128, "Otsu");
@@ -128,6 +132,7 @@ int main(int argc, char *argv[])
 
   ///Add argumnets
   cmd.add( multinames );
+  cmd.add( threadsArg );
   cmd.add( outputArg );
   cmd.add( prefixArg );
   //~ cmd.add( rigidArg );
@@ -135,6 +140,7 @@ int main(int argc, char *argv[])
   cmd.add( aboveArg );
   cmd.add( belowArg );
   cmd.add( insideArg );
+  cmd.add( sigmaArg );
   cmd.add( binaryArg );
   cmd.add( iterationsArg );
   cmd.add( labelsArg );
@@ -146,6 +152,7 @@ int main(int argc, char *argv[])
   //~ xorlist.push_back(&scaleArg);
   //~ xorlist.push_back(&decimateArg);
   xorlist.push_back(&smoothArg);
+  xorlist.push_back(&bilateralArg);
   xorlist.push_back(&medianArg);
   xorlist.push_back(&gradMagArg);
   xorlist.push_back(&laplacianArg);
@@ -177,6 +184,7 @@ int main(int argc, char *argv[])
 
   ///Get the value parsed by each arg.
   //Filenames of surfaces
+  const size_t threads = threadsArg.getValue();
   std::vector<std::string> filenames = multinames.getValue();
   std::string outputName = outputArg.getValue();
   const std::string prefixName = prefixArg.getValue();
@@ -186,11 +194,13 @@ int main(int argc, char *argv[])
   //~ const float decimateFactor = decimateArg.getValue();
   //~ const float scaleFactor = scaleArg.getValue();
   const float smoothTimestep = smoothArg.getValue();
+  const float rangeSigma = bilateralArg.getValue();
   const size_t radius = medianArg.getValue();
   const size_t mergeType = mergeArg.getValue();
   float aboveValue = aboveArg.getValue();
   float belowValue = belowArg.getValue();
   float insideValue = insideArg.getValue();
+  float sigmaValue = sigmaArg.getValue();
   size_t iterations = iterationsArg.getValue(); //number of labels
   size_t labelsValue = labelsArg.getValue(); //number of labels
   size_t OtsuValue = OtsuArg.getValue(); //number of bins
@@ -202,6 +212,10 @@ int main(int argc, char *argv[])
     maskName = cropArg.getValue();
   else
     maskName = maskArg.getValue();
+
+  ///Setup ITK Threads
+  itk::MultiThreader::SetGlobalDefaultNumberOfThreads(threads);
+  milx::PrintInfo("Threads to use: " + milx::NumberToString(threads));
 
   ///Display operation
   operations operation = none;
@@ -244,7 +258,7 @@ int main(int argc, char *argv[])
     //Info
     operation = convert;
   }
-  if( smoothArg.isSet() || medianArg.isSet() || gradMagArg.isSet() || laplacianArg.isSet() || distancemapArg.isSet() || cropArg.isSet() || maskArg.isSet()
+  if( smoothArg.isSet() || bilateralArg.isSet() || medianArg.isSet() || gradMagArg.isSet() || laplacianArg.isSet() || distancemapArg.isSet() || cropArg.isSet() || maskArg.isSet()
      || resampleArg.isSet() || matchArg.isSet() || checkerArg.isSet() || thresholdArg.isSet() || OtsuArg.isSet() || rescaleArg.isSet() || invertArg.isSet() || relabelArg.isSet() || addArg.isSet()
      || diffArg.isSet() || meanArg.isSet() || mergeArg.isSet() || castArg.isSet() || flipArg.isSet() )
   {
@@ -287,6 +301,8 @@ int main(int argc, char *argv[])
     //Operations allowed
     if(smoothArg.isSet())
       operation = smooth;
+    if(bilateralArg.isSet())
+      operation = bilateral;
     if(medianArg.isSet())
       operation = median;
     if(gradMagArg.isSet())
@@ -355,6 +371,15 @@ int main(int argc, char *argv[])
     if(!smoothArg.isSet())
     {
       milx::PrintError("Argument Error: Another argument (such as smoothing) must be provided.");
+      milx::PrintError("Re-run with one of these flags set.");
+      exit(EXIT_FAILURE);
+    }
+  }
+  if(sigmaArg.isSet())
+  {
+    if(!bilateralArg.isSet())
+    {
+      milx::PrintError("Argument Error: Another argument (such as bilateral) must be provided.");
       milx::PrintError("Re-run with one of these flags set.");
       exit(EXIT_FAILURE);
     }
@@ -439,7 +464,7 @@ int main(int argc, char *argv[])
     milx::PrintInfo("Detected vector images.");
     if( !milx::File::OpenImages<vectorImageType>(filenames, vectorCollection) ) //Error NOT printed inside
     {
-      milx::PrintError("Failed Reading Labelled Images. Exiting.");
+      milx::PrintError("Failed Reading Vector Images. Exiting.");
       exit(EXIT_FAILURE);
     }
     vectorImages = true;
@@ -593,6 +618,10 @@ int main(int argc, char *argv[])
 
       case median:
         milx::Image<charImageType>::MedianCollection(labelledCollection, radius);
+        break;
+
+      case bilateral:
+        milx::Image<charImageType>::BilateralCollection(labelledCollection, rangeSigma, sigmaValue);
         break;
 
       case gradmag:
@@ -801,6 +830,10 @@ int main(int argc, char *argv[])
 
       case smooth:
         collection = milx::Image<floatImageType>::AnisotropicDiffusionCollection<floatImageType>(collection, iterations, smoothTimestep);
+        break;
+
+      case bilateral:
+        milx::Image<floatImageType>::BilateralCollection(collection, rangeSigma, sigmaValue);
         break;
 
       case median:

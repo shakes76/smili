@@ -9,7 +9,7 @@
 #endif
 
 #ifndef vtkFloatingPointType
-# define vtkFloatingPointType vtkFloatingPointType
+//# define vtkFloatingPointType vtkFloatingPointType
 typedef float vtkFloatingPointType;
 #endif
 
@@ -22,9 +22,9 @@ MeshToVTKPolyData <TMesh>
 {
 
   m_itkTriangleMesh = TriangleMeshType::New();
-  m_Points = vtkPoints::New();
-  m_PolyData = vtkPolyData::New();
-  m_Polys = vtkCellArray::New();
+  m_Points = vtkSmartPointer<vtkPoints>::New();
+  m_PolyData = vtkSmartPointer<vtkPolyData>::New();
+  m_Polys = vtkSmartPointer<vtkCellArray>::New();
 }
 
 
@@ -53,7 +53,7 @@ MeshToVTKPolyData <TMesh>
 }
 
 template <class TMesh>
-vtkPolyData *
+vtkSmartPointer<vtkPolyData>
 MeshToVTKPolyData<TMesh>
 ::GetOutput()
 {
@@ -77,30 +77,26 @@ MeshToVTKPolyData <TMesh>
       return; 
     }
 
-  m_Points->SetNumberOfPoints(numPoints);
-  
-  int idx=0;
-  double vpoint[3];
   while( points != myPoints->End() ) 
     {   
+    double vpoint[3];
     point = points.Value();
     vpoint[0]= point[0];
     vpoint[1]= point[1];
     vpoint[2]= point[2];
-    m_Points->SetPoint(idx++,vpoint);
+    m_Points->InsertNextPoint(vpoint);
     points++;
     }
 
   m_PolyData->SetPoints(m_Points);
-
-  m_Points->Delete();
+//  m_Points->Delete();
 
   CellsContainerPointer cells = m_itkTriangleMesh->GetCells();
   CellsContainerIterator cellIt = cells->Begin();
-  vtkIdType pts[3];
   while ( cellIt != cells->End() )
     {
-  CellType *nextCell = cellIt->Value();
+    vtkIdType pts[3];
+    CellType *nextCell = cellIt->Value();
     typename CellType::PointIdIterator pointIt = nextCell->PointIdsBegin() ;
     PointType  p;
     int i;
@@ -115,7 +111,8 @@ MeshToVTKPolyData <TMesh>
         i=0;
         while (pointIt != nextCell->PointIdsEnd() ) 
         {
-        pts[i++] = *pointIt++;  
+        pts[i++] = *pointIt;
+        pointIt++;
         }
         m_Polys->InsertNextCell(3,pts);
         break;
@@ -127,7 +124,7 @@ MeshToVTKPolyData <TMesh>
     }
   
   m_PolyData->SetPolys(m_Polys);
-  m_Polys->Delete();
+//  m_Polys->Delete();
 
 }
 

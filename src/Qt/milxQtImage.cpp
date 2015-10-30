@@ -18,13 +18,12 @@
 #include "milxQtImage.h"
 
 //ITK
-
+//#include <itkImageToHistogramFilter.h>
 //VTK Libraries
 #include <vtkCamera.h>
 #include <vtkImageMagnify.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
-#include <vtkImageAccumulate.h>
 #include <vtkImageActor.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #include <vtkInteractorStyleImage.h>
@@ -40,6 +39,7 @@
 #include <vtkImageFlip.h>
 #include <vtkImageReslice.h>
 #include <vtkImageBlend.h>
+#include <vtkDistanceRepresentation.h>
 #include <vtkOrientedGlyphContourRepresentation.h>
 #include <vtkBoxRepresentation.h>
 #include <vtkImageActorPointPlacer.h>
@@ -47,7 +47,6 @@
 #include <vtkDijkstraImageGeodesicPath.h>
 #include <vtkTextProperty.h>
 #include <vtkLogLookupTable.h>
-//#include <vtkPNGWriter.h>
 
 #include "milxColourMap.h"
 #include "milxQtFile.h"
@@ -68,6 +67,7 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
     track = false;
 
     meanValue = 0;
+    stddevValue = 0;
     minValue = 0;
     maxValue = 0;
 
@@ -399,6 +399,7 @@ void milxQtImage::generateImage(const bool quietly)
         }
         viewer->GetInteractorStyle()->InvokeEvent(vtkCommand::ResetWindowLevelEvent); //Reset window level as if pressing 'r'
         viewer->GetRenderer()->ResetCamera(); //Reset window view as if pressing 'Shift+r'
+        viewer->UpdateCursor();
         viewer->Render();
 
         ///Check for magnification
@@ -427,28 +428,19 @@ void milxQtImage::generateImage(const bool quietly)
             viewerSetup = true;
         }
 
-        //Pass through data with no LUT initially
-        GetWindowLevel()->SetLookupTable(NULL);
-        lookupTable = GetWindowLevel()->GetLookupTable();
-
-//        if(rgb) //Force colouring of RGB images
-//        {
-//            vtkSmartPointer<vtkImageMapToWindowLevelColors> rgbColourExtract = vtkSmartPointer<vtkImageMapToWindowLevelColors>::New();
-//            #if VTK_MAJOR_VERSION <= 5
-//                rgbColourExtract->SetInput(imageData);
-//            #else
-//                rgbColourExtract->SetInputData(imageData);
-//            #endif
-//                rgbColourExtract->SetOutputFormatToRGBA();
-//                rgbColourExtract->PassAlphaToOutputOn();
-//                linkProgressEventOf(rgbColourExtract);
-//                rgbColourExtract->Update();
-//            lookupTable = rgbColourExtract->GetLookupTable();
-//            GetWindowLevel()->SetLookupTable(lookupTable);
-//        }
+        //Pass through data with no LUT initially if not RGB or RGBA image
+        //According to VTK docs for vtkImageMapToWindowLevelColors: If the lookup table is not set, or is set to NULL, then the input data will be passed through if it is already of type UNSIGNED_CHAR.
+        printInfo("Number of Image Components: " + QString::number(imageData->GetNumberOfScalarComponents()));
+        if(imageData->GetNumberOfScalarComponents() > 2)
+        {
+            GetWindowLevel()->SetLookupTable(NULL);
+            lookupTable = NULL;
+            GetWindowLevel()->SetWindow(255);
+            GetWindowLevel()->SetLevel(127.5);
+        }
 
         if(milxQtRenderWindow::useDefaultView)
-        	  setView(milxQtRenderWindow::defaultView); //Default view
+            setView(milxQtRenderWindow::defaultView); //Default view
 
         emit milxQtRenderWindow::modified(GetImageActor());
         if(!quietly)
@@ -609,154 +601,6 @@ vtkSmartPointer<vtkImageData> milxQtImage::butterWorthHighPass(vtkSmartPointer<v
     rfftCastFilter->Update();
 
     return rfftCastFilter->GetOutput();
-}
-
-void milxQtImage::enableScale(QString title, const bool quiet, double minRange, double maxRange, int noOfLabels)
-{
-    if(!milxQtRenderWindow::scale)
-        milxQtRenderWindow::scale = vtkSmartPointer<vtkScalarBarActor>::New();
-    if(!milxQtRenderWindow::scalarBar)
-        milxQtRenderWindow::scalarBar = vtkSmartPointer<vtkScalarBarWidget>::New();
-
-    ///Ask if use default scalar LUT
-    QMessageBox msgBox;
-    msgBox.setText("An auto adjusted bar is about to be created");
-    msgBox.setInformativeText("Would you like to customise the bar?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-
-    int ret = QMessageBox::No;
-    if(!quiet)
-      ret = msgBox.exec();
-
-    const float barWidth = 0.1, barHeight = 0.7;
-
-    double range[2];
-    imageData->GetScalarRange(range);
-
-    lookupTable->SetRange(range[0], range[1]);
-
-    vtkSmartPointer<vtkLogLookupTable> logLookupTable;
-    if(milxQtRenderWindow::logScale)
-    {
-        printInfo("Detected log scale.");
-        logLookupTable = vtkSmartPointer<vtkLogLookupTable>::New();
-        logLookupTable->DeepCopy(vtkLookupTable::SafeDownCast(lookupTable));
-    }
-
-    if(ret == QMessageBox::Yes && !quiet)
-    {
-        bool ok1 = false, ok2 = false;
-
-        noOfLabels = QInputDialog::getInt(this, tr("How many labels to show"),
-                                          tr("Labels:"), noOfLabels, 0, 99, 1, &ok1);
-        title = QInputDialog::getText(this, tr("Title of Bar"),
-                                          tr("Title:"), QLineEdit::Normal,
-                                          title, &ok2);
-
-        if(!ok1 || !ok2)
-            return;
-
-        if(milxQtRenderWindow::logScale)
-            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
-        else
-            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
-        milxQtRenderWindow::scale->SetNumberOfLabels(noOfLabels);
-
-        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
-          filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
-          filterColorsOverlay->Update();
-
-        milxQtRenderWindow::customScalarBar = true;
-    }
-    else if(quiet && minRange != maxRange)
-    {
-        printInfo("Using custom scalar range for scalars.");
-        if(milxQtRenderWindow::logScale)
-            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
-        else
-            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
-        milxQtRenderWindow::scale->SetNumberOfLabels(noOfLabels);
-
-        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
-          filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
-          filterColorsOverlay->Update();
-
-        milxQtRenderWindow::customScalarBar = true;
-    }
-    else
-    {
-        printInfo("Using scalar range from image.");
-        if(milxQtRenderWindow::logScale)
-            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
-        else
-            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
-        milxQtRenderWindow::scale->SetNumberOfLabels(3);
-
-        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
-          filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
-          filterColorsOverlay->Update();
-
-        milxQtRenderWindow::customScalarBar = false;
-    }
-
-    milxQtRenderWindow::scale->SetTitle(title.toStdString().c_str());
-    milxQtRenderWindow::scale->GetLabelTextProperty()->SetFontFamilyToArial();
-    milxQtRenderWindow::scale->GetLabelTextProperty()->SetFontSize(8);
-    milxQtRenderWindow::scale->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
-    milxQtRenderWindow::scale->GetPositionCoordinate()->SetValue(.2,.05);
-    milxQtRenderWindow::scale->SetWidth( barWidth );
-    milxQtRenderWindow::scale->SetHeight( barHeight );
-    milxQtRenderWindow::scale->SetPosition( 0.99 - barWidth, 0.1 );
-    milxQtRenderWindow::scale->SetLabelFormat("%-#6.3f");
-    milxQtRenderWindow::scale->GetTitleTextProperty()->SetFontFamilyToArial();
-    milxQtRenderWindow::scale->GetTitleTextProperty()->SetFontSize(8);
-    milxQtRenderWindow::scale->GetLabelTextProperty()->SetJustificationToCentered();
-
-    if(milxQtRenderWindow::backgroundAct->isChecked())
-    {
-        milxQtRenderWindow::scale->GetLabelTextProperty()->SetColor(0, 0, 0);
-        milxQtRenderWindow::scale->GetTitleTextProperty()->SetColor(0, 0, 0);
-    }
-
-    //Add scale to scale widget
-    milxQtRenderWindow::scalarBar->SetInteractor(QVTKWidget::GetInteractor());
-    milxQtRenderWindow::scalarBar->SetScalarBarActor(milxQtRenderWindow::scale);
-    milxQtRenderWindow::scalarBar->EnabledOn();
-
-    milxQtRenderWindow::scaleBefore = true;
-    milxQtRenderWindow::scaleAct->setChecked(true);
-}
-
-void milxQtImage::scaleDisplay(const bool forceDisplay)
-{
-    if(!viewerSetup)
-    {
-        printError("Image Data not generated. Ignoring scalar bar operation.");
-        return;
-    }
-
-    if(!lookupTable)
-    {
-      QMessageBox msgBox;
-      msgBox.setText("Currently not using a colour map");
-      msgBox.setInformativeText("Please choose a colour map first");
-      msgBox.setStandardButtons(QMessageBox::Ok);
-      msgBox.setIcon(QMessageBox::Warning);
-      msgBox.exec();
-      scaleAct->setChecked(false);
-      return;
-    }
-
-    if(scaleAct->isChecked() || forceDisplay)
-        enableScale(imageData->GetPointData()->GetScalars()->GetName(), forceDisplay);
-    else
-        disableScale();
-
-    Render();
 }
 
 void milxQtImage::trackView(milxQtImage *windowToTrack, ViewType viewTo)
@@ -998,10 +842,17 @@ void milxQtImage::updateTrackedView(vtkObject *obj)
                 viewer->SetSlice(actual[0]);
                 printDebug("Sagittal");
             }
+        #if(VTK_MAJOR_VERSION > 5)
+            viewer->GetCursor()->SetCenter(current[0], current[1], current[2]);
+        #else
+            viewer->GetCursor()->SetFocalPoint(current[0], current[1], current[2]);
+        #endif
+            viewer->GetCursor()->Update();
         }
     }
 
     viewer->GetRenderWindow()->InvokeEvent(vtkCommand::ModifiedEvent, NULL);
+    viewer->Render();
     emit milxQtRenderWindow::modified(GetImageActor());
 }
 
@@ -1119,7 +970,7 @@ void milxQtImage::updateData(const bool orient)
             origin = imageRGB->GetOrigin();
             spacing = imageRGB->GetSpacing();
             if(orient)
-                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, true, flipped);
+                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, false, flipped);
             else
                 imageData = newImageData;
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
@@ -1133,7 +984,7 @@ void milxQtImage::updateData(const bool orient)
             origin = imageFloat->GetOrigin();
             spacing = imageFloat->GetSpacing();
             if(orient)
-                imageData = milx::Image<floatImageType>::ApplyOrientationToVTKImage(newImageData, imageFloat, transformMatrix, true, flipped);
+                imageData = milx::Image<floatImageType>::ApplyOrientationToVTKImage(newImageData, imageFloat, transformMatrix, false, flipped);
             else
                 imageData = newImageData;
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
@@ -1146,7 +997,7 @@ void milxQtImage::updateData(const bool orient)
     imageData->Update();
 #endif
 
-    printDebug("Updated Image Data");
+    printDebug("Updated Image Data as " + QString(imageData->GetScalarTypeAsString()));
 }
 
 void milxQtImage::setupEvents()
@@ -1162,22 +1013,137 @@ void milxQtImage::setupEvents()
 void milxQtImage::autoLevel()
 {
     printInfo("Auto Updating Window Level");
+    printDebug("Current Window:" + QString::number(GetIntensityWindow()));
+    printDebug("Current Level:" + QString::number(GetIntensityLevel()));
 
+    int bins = 256;
+    float belowValue = -1000, aboveValue = 4000, lowerPercentile = 0.01, upperPercentile = 0.99;
     if(maxValue == minValue)
-        histogram(256, 0, 255, false);
+        histogram(bins, belowValue, aboveValue, false); //above and below unused here, uses image min/max automatically
+    belowValue = minValue;
+    aboveValue = maxValue;
+
+    //Compute Histogram
+    //const unsigned int MeasurementVectorSize = 1; // Grayscale
+    //const unsigned int binsPerDimension = bins;
 
     emit working(-1);
-    float lvl = 0;
+    /*float lowLevel, maxLevel, medianValue, windowLevel, level;
     if(eightbit)
-        lvl = milx::Image<charImageType>::OtsuThreshold(imageChar, 128);
-//    else if(rgb)
-//        lvl = milx::Image::OtsuThreshold(imageRGB, 128);
+    {
+        printDebug("Using Float Histogram");
+        typedef itk::Statistics::ImageToHistogramFilter<charImageType> ImageToHistogramFilterType;
+        ImageToHistogramFilterType::HistogramType::MeasurementVectorType lowerBound(binsPerDimension);
+        lowerBound.Fill(belowValue);
+        ImageToHistogramFilterType::HistogramType::MeasurementVectorType upperBound(binsPerDimension);
+        upperBound.Fill(aboveValue);
+        ImageToHistogramFilterType::HistogramType::SizeType size(MeasurementVectorSize);
+        size.Fill(binsPerDimension);
+        ImageToHistogramFilterType::Pointer imageToHistogramFilter = ImageToHistogramFilterType::New();
+        imageToHistogramFilter->SetInput( imageChar );
+        //imageToHistogramFilter->SetHistogramBinMinimum( lowerBound );
+        //imageToHistogramFilter->SetHistogramBinMaximum( upperBound );
+        imageToHistogramFilter->SetAutoMinimumMaximum(true);
+        imageToHistogramFilter->SetHistogramSize( size );
+        try
+          {
+          imageToHistogramFilter->Update();
+          }
+        catch( itk::ExceptionObject & error )
+          {
+          std::cerr << "Histogram Error: " << error << std::endl;
+          return;
+          }
+
+        ImageToHistogramFilterType::HistogramType* histogram = imageToHistogramFilter->GetOutput();
+        medianValue = histogram->Quantile(0, 0.5);
+        lowLevel = histogram->Quantile(0, lowerPercentile);
+        maxLevel = histogram->Quantile(0, upperPercentile);
+    }
+    else if(rgb)
+    {
+        printError("RGB Image Histogram to be supported soon.");
+        return;
+    }
     else
-        lvl = milx::Image<floatImageType>::OtsuThreshold(imageFloat, 128);
+    {
+        printDebug("Using Float Histogram");
+        typedef itk::Statistics::ImageToHistogramFilter<floatImageType> ImageToHistogramFilterType;
+        ImageToHistogramFilterType::HistogramType::MeasurementVectorType lowerBound(binsPerDimension);
+        lowerBound.Fill(belowValue);
+        ImageToHistogramFilterType::HistogramType::MeasurementVectorType upperBound(binsPerDimension);
+        upperBound.Fill(aboveValue) ;
+        ImageToHistogramFilterType::HistogramType::SizeType size(MeasurementVectorSize);
+        size.Fill(binsPerDimension);
+        ImageToHistogramFilterType::Pointer imageToHistogramFilter = ImageToHistogramFilterType::New();
+        imageToHistogramFilter->SetInput( imageFloat );
+        //imageToHistogramFilter->SetHistogramBinMinimum( lowerBound );
+        //imageToHistogramFilter->SetHistogramBinMaximum( upperBound );
+        imageToHistogramFilter->SetAutoMinimumMaximum(true);
+        imageToHistogramFilter->SetHistogramSize( size );
+        try
+          {
+          imageToHistogramFilter->Update();
+          }
+        catch( itk::ExceptionObject & error )
+          {
+          std::cerr << "Histogram Error: " << error << std::endl;
+          return;
+          }
+        ImageToHistogramFilterType::HistogramType* histogram = imageToHistogramFilter->GetOutput();
+        medianValue = histogram->Quantile(0, 0.5);
+        lowLevel = histogram->Quantile(0, lowerPercentile);
+        maxLevel = histogram->Quantile(0, upperPercentile);
+    }
+    windowLevel = maxLevel-lowLevel;
+//    level = meanValue;
+    level = medianValue;*/
     emit done(-1);
 
-    viewer->SetColorWindow(maxValue-lvl);
-    viewer->SetColorLevel(lvl);
+    emit working(-1);
+    //Compute the percentile contributions to trim levels for better contrast
+    size_t k = 0, kMin = 0, kMax = 0, kMid = 0;
+    double binSpacing = (aboveValue-belowValue)/bins, accummulator = 0.0, proportion = 0.0;
+    //Upper limit of histgram
+    k = 0;
+    accummulator = 0.0;
+    for(double j = belowValue; j < aboveValue; j += binSpacing, k ++)
+      {
+        proportion = accummulator/hist->GetVoxelCount();
+        if(proportion >= lowerPercentile)
+          break;
+        accummulator += hist->GetOutput()->GetPointData()->GetScalars()->GetTuple1(k); //freq k
+      }
+    kMin = k-1;
+//    printDebug("k low:" + QString::number(kMin));
+//    printDebug("accummulator low:" + QString::number(accummulator));
+    double lowLevel = minValue+(kMin)*binSpacing;
+    //Lower limit of histgram
+    k = bins-1;
+    accummulator = 0.0;
+    for(double j = aboveValue; j > belowValue; j -= binSpacing, k --)
+    {
+        proportion = accummulator/hist->GetVoxelCount();
+        if(proportion >= lowerPercentile)
+            break;
+        accummulator += hist->GetOutput()->GetPointData()->GetScalars()->GetTuple1(k); //freq k
+    }
+    kMax = k+1;
+//    printDebug("k high:" + QString::number(kMax));
+//    printDebug("accummulator high:" + QString::number(accummulator));
+    double maxLevel = minValue+(kMax)*binSpacing;
+    double windowLevel = maxLevel-lowLevel;
+    double level = lowLevel+windowLevel/2; //center the new window from low limit
+    emit done(-1);
+
+    printDebug("Histogram Low Level:" + QString::number(lowLevel));
+    printDebug("Histogram High Level:" + QString::number(maxLevel));
+    printInfo("Window:" + QString::number(windowLevel));
+    printInfo("Level:" + QString::number(level));
+
+    viewer->SetColorWindow(windowLevel);
+    viewer->SetColorLevel(level);
+    viewer->Render();
 }
 
 void milxQtImage::setLevel(int level)
@@ -1188,14 +1154,41 @@ void milxQtImage::setLevel(int level)
     imageData->GetScalarRange(range);
     double belowValue = range[0];
     double aboveValue = range[1];
+    if(imageData->GetNumberOfScalarComponents() > 2) //Use RGB range
+    {
+        belowValue = 0;
+        aboveValue = 255;
+    }
 
     float lvl = (aboveValue-belowValue)*level/100 + belowValue;
     printDebug("Contrast Level is "+QString::number(lvl));
 
     viewer->SetColorWindow(aboveValue-lvl);
+    if(imageData->GetNumberOfScalarComponents() > 2) //Use RGB range
+        viewer->SetColorWindow(255);
     viewer->SetColorLevel(lvl);
 
     refresh();
+}
+
+double milxQtImage::GetIntensityWindow()
+{
+    return viewer->GetWindowLevel()->GetWindow();
+}
+
+double milxQtImage::GetIntensityLevel()
+{
+    return viewer->GetWindowLevel()->GetLevel();
+}
+
+void milxQtImage::SetIntensityWindow(double window)
+{
+    viewer->GetWindowLevel()->SetWindow(window);
+}
+
+void milxQtImage::SetIntensityLevel(double level)
+{
+    viewer->GetWindowLevel()->SetLevel(level);
 }
 
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
@@ -1365,30 +1358,11 @@ void milxQtImage::blend(milxQtImage *imageToMatch, float opacity)
     if(!GetLookupTable() || !imageToMatch->GetLookupTable())
         printWarning("Lookuptable for one of the images was not set.");
 
-    vtkSmartPointer<vtkImageMapToColors> firstColorMapper = vtkSmartPointer<vtkImageMapToColors>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        firstColorMapper->SetInput( GetOutput() );
-    #else
-        firstColorMapper->SetInputData( GetOutput() );
-    #endif
-        firstColorMapper->SetLookupTable( GetLookupTable() );
-        firstColorMapper->PassAlphaToOutputOn();
-        firstColorMapper->SetOutputFormatToRGBA();
-        firstColorMapper->Update();
-    vtkSmartPointer<vtkImageData> ucharData1 = firstColorMapper->GetOutput();
+    emit working(-1);
+    vtkSmartPointer<vtkImageData> ucharData1 = GetWindowLevel()->GetOutput();
 
     printInfo("Blending with Image: " + imageToMatch->strippedName());
-    vtkSmartPointer<vtkImageMapToColors> secondColorMapper = vtkSmartPointer<vtkImageMapToColors>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        secondColorMapper->SetInput( imageToMatch->GetOutput() );
-    #else
-        secondColorMapper->SetInputData( imageToMatch->GetOutput() );
-    #endif
-        secondColorMapper->SetLookupTable( imageToMatch->GetLookupTable() );
-        secondColorMapper->PassAlphaToOutputOn();
-        secondColorMapper->SetOutputFormatToRGBA();
-        secondColorMapper->Update();
-    vtkSmartPointer<vtkImageData> ucharData2 = secondColorMapper->GetOutput();
+    vtkSmartPointer<vtkImageData> ucharData2 = imageToMatch->GetWindowLevel()->GetOutput();
     printInfo("Number of components in Blending Image: " + QString::number(ucharData2->GetNumberOfScalarComponents()));
 
     // Combine the images (blend takes multiple connections on the 0th input port)
@@ -1400,66 +1374,27 @@ void milxQtImage::blend(milxQtImage *imageToMatch, float opacity)
         blend->AddInputData(ucharData1);
         blend->AddInputData(ucharData2);
     #endif
+        blend->SetOpacity(0,opacity);
         blend->SetOpacity(1,opacity);
         linkProgressEventOf(blend);
 //        blend->SetBlendModeToCompound();
-//        blend->SetBlendModeToNormal();
+        blend->SetBlendModeToNormal();
         blend->Update();
-
-    /*int *extent = imageToMatch->GetDisplayExtent();
-
-    vtkSmartPointer<vtkImageFlip> imageReorient = vtkSmartPointer<vtkImageFlip>::New();
-    #if VTK_MAJOR_VERSION <= 5
-        imageReorient->SetInput(ucharData2);
-    #else
-        imageReorient->SetInputData(ucharData2);
-    #endif
-        imageReorient->SetFilteredAxis(1);
-        imageReorient->FlipAboutOriginOn();
-        linkProgressEventOf(imageReorient);
-        imageReorient->Update();
-
-    int actualExtent[6];
-    ucharData2->GetExtent(actualExtent);
-
-    if(extent[3]-extent[2] == 0) //flip y extent
-    {
-        extent[2] = actualExtent[3]-extent[2];
-        extent[3] = actualExtent[3]-extent[3];
-    }*/
-
-    /*vtkSmartPointer<vtkImageReslice> slice = vtkSmartPointer<vtkImageReslice>::New();
-    #if VTK_MAJOR_VERSION <=5
-//        slice->SetInput(blend->GetOutput());
-        slice->SetInput(ucharData2);
-    #else
-//        slice->SetInputData(blend->GetOutput());
-        slice->SetInputData(ucharData2);
-    #endif // VTK_MAJOR_VERSION
-        linkProgressEventOf(slice);
-        slice->SetOutputExtent(extent);
-        slice->Update();
-
-    vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
-        writer->SetFileName("blend_test.png");
-    #if VTK_MAJOR_VERSION <=5
-        writer->SetInput(slice->GetOutput());
-    #else
-        writer->SetInputData(slice->GetOutput());
-    #endif // VTK_MAJOR_VERSION
-        writer->Write();*/
 
     printInfo("Number of components in Blended Image: " + QString::number(blend->GetOutput()->GetNumberOfScalarComponents()));
     printInfo("Type of pixel in Blended Image: " + QString(blend->GetOutput()->GetScalarTypeAsString()));
 
-    lookupTable = NULL;
-    GetWindowLevel()->SetLookupTable(NULL);
     setData(blend->GetOutput());
-//    setData(ucharData2);
-//    emit done(-1);
+    emit done(-1);
+
+    //Force RGB colouring
+    GetWindowLevel()->SetLookupTable(NULL);
+    lookupTable = NULL;
+    GetWindowLevel()->SetWindow(255);
+    GetWindowLevel()->SetLevel(127.5);
+    viewer->GetRenderer()->ResetCamera();
 
     generateImage();
-//    emit imageAvailable(ucharData2, "Blended Images");
 }
 
 void milxQtImage::volumeRendering()
@@ -2876,6 +2811,36 @@ void milxQtImage::gaussianSmooth()
     }
 }
 
+void milxQtImage::bilateral()
+{
+  if(usingVTKImage)
+    {
+      printError("Bilateral Smoothin from VTK image not support yet.");
+      return;
+    }
+
+  bool ok1 = false, ok2 = false;
+  float sigmaRange = QInputDialog::getDouble(this, tr("Please Provide the range sigma to use"),
+                                           tr("Range Sigma:"), 0.5, 0.0, 2147483647, 5, &ok1);
+  float sigmaSpatial = QInputDialog::getDouble(this, tr("Please Provide the domain/spatial sigma to use"),
+                                           tr("Domain Sigma:"), 5, 0.0, 2147483647, 5, &ok2);
+
+  if(ok1)
+    {
+      printInfo("Computing Bilateral Smoothing of Image");
+      emit working(-1);
+      if(eightbit)
+        imageChar = milx::Image<charImageType>::Bilateral(imageChar, sigmaRange, sigmaSpatial);
+      //        else if(rgb)
+      //            imageRGB = milx::Image<rgbImageType>::Bilateral(imageRGB, sigmaRange, sigmaSpatial);
+      else
+        imageFloat = milx::Image<floatImageType>::Bilateral(imageFloat, sigmaRange, sigmaSpatial);
+      emit done(-1);
+
+      generateImage();
+    }
+}
+
 void milxQtImage::median()
 {
     if(usingVTKImage)
@@ -3313,6 +3278,165 @@ void milxQtImage::setDefaultOrientation(int orientMode)
     milxQtRenderWindow::setDefaultOrientation(orientMode);
 }
 
+void milxQtImage::enableScale(QString title, const bool quiet, double minRange, double maxRange, int noOfLabels)
+{
+    if(!milxQtRenderWindow::scale)
+        milxQtRenderWindow::scale = vtkSmartPointer<vtkScalarBarActor>::New();
+    if(!milxQtRenderWindow::scalarBar)
+        milxQtRenderWindow::scalarBar = vtkSmartPointer<vtkScalarBarWidget>::New();
+
+    ///Ask if use default scalar LUT
+    QMessageBox msgBox;
+    msgBox.setText("An auto adjusted bar is about to be created");
+    msgBox.setInformativeText("Would you like to customise the bar?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+
+    int ret = QMessageBox::No;
+    if(!quiet)
+      ret = msgBox.exec();
+
+    const float barWidth = 0.1, barHeight = 0.7;
+
+    double range[2];
+    imageData->GetScalarRange(range);
+
+    lookupTable->SetRange(range[0], range[1]);
+
+    vtkSmartPointer<vtkLogLookupTable> logLookupTable;
+    if(milxQtRenderWindow::logScale)
+    {
+        printInfo("Detected log scale.");
+        logLookupTable = vtkSmartPointer<vtkLogLookupTable>::New();
+        logLookupTable->DeepCopy(vtkLookupTable::SafeDownCast(lookupTable));
+    }
+
+    if(ret == QMessageBox::Yes && !quiet)
+    {
+        bool ok1 = false, ok2 = false;
+
+        noOfLabels = QInputDialog::getInt(this, tr("How many labels to show"),
+                                          tr("Labels:"), noOfLabels, 0, 99, 1, &ok1);
+        title = QInputDialog::getText(this, tr("Title of Bar"),
+                                          tr("Title:"), QLineEdit::Normal,
+                                          title, &ok2);
+
+        if(!ok1 || !ok2)
+            return;
+
+        if(milxQtRenderWindow::logScale)
+            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
+        else
+            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
+        milxQtRenderWindow::scale->SetNumberOfLabels(noOfLabels);
+
+        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
+          filterColorsOverlay->SetLookupTable(lookupTable);
+          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->Update();
+
+        milxQtRenderWindow::customScalarBar = true;
+    }
+    else if(quiet && minRange != maxRange)
+    {
+        printInfo("Using custom scalar range for scalars.");
+        if(milxQtRenderWindow::logScale)
+            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
+        else
+            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
+        milxQtRenderWindow::scale->SetNumberOfLabels(noOfLabels);
+
+        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
+          filterColorsOverlay->SetLookupTable(lookupTable);
+          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->Update();
+
+        milxQtRenderWindow::customScalarBar = true;
+    }
+    else
+    {
+        printInfo("Using scalar range from image.");
+        if(milxQtRenderWindow::logScale)
+            milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
+        else
+            milxQtRenderWindow::scale->SetLookupTable(lookupTable);
+        milxQtRenderWindow::scale->SetNumberOfLabels(3);
+
+        vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
+          filterColorsOverlay->SetLookupTable(lookupTable);
+          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->Update();
+
+        milxQtRenderWindow::customScalarBar = false;
+    }
+
+    milxQtRenderWindow::scale->SetTitle(title.toStdString().c_str());
+    milxQtRenderWindow::scale->GetLabelTextProperty()->SetFontFamilyToArial();
+    milxQtRenderWindow::scale->GetLabelTextProperty()->SetFontSize(8);
+    milxQtRenderWindow::scale->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
+    milxQtRenderWindow::scale->GetPositionCoordinate()->SetValue(.2,.05);
+    milxQtRenderWindow::scale->SetWidth( barWidth );
+    milxQtRenderWindow::scale->SetHeight( barHeight );
+    milxQtRenderWindow::scale->SetPosition( 0.99 - barWidth, 0.1 );
+    milxQtRenderWindow::scale->SetLabelFormat("%-#6.3f");
+    milxQtRenderWindow::scale->GetTitleTextProperty()->SetFontFamilyToArial();
+    milxQtRenderWindow::scale->GetTitleTextProperty()->SetFontSize(8);
+    milxQtRenderWindow::scale->GetLabelTextProperty()->SetJustificationToCentered();
+
+    if(milxQtRenderWindow::backgroundAct->isChecked())
+    {
+        milxQtRenderWindow::scale->GetLabelTextProperty()->SetColor(0, 0, 0);
+        milxQtRenderWindow::scale->GetTitleTextProperty()->SetColor(0, 0, 0);
+    }
+
+    //Add scale to scale widget
+    milxQtRenderWindow::scalarBar->SetInteractor(QVTKWidget::GetInteractor());
+    milxQtRenderWindow::scalarBar->SetScalarBarActor(milxQtRenderWindow::scale);
+    milxQtRenderWindow::scalarBar->EnabledOn();
+
+    milxQtRenderWindow::scaleBefore = true;
+    milxQtRenderWindow::scaleAct->setChecked(true);
+}
+
+void milxQtImage::scaleDisplay(const bool forceDisplay)
+{
+    if(!viewerSetup)
+    {
+        printError("Image Data not generated. Ignoring scalar bar operation.");
+        return;
+    }
+
+    if(!lookupTable)
+    {
+      QMessageBox msgBox;
+      msgBox.setText("Currently not using a colour map");
+      msgBox.setInformativeText("Please choose a colour map first");
+      msgBox.setStandardButtons(QMessageBox::Ok);
+      msgBox.setIcon(QMessageBox::Warning);
+      msgBox.exec();
+      scaleAct->setChecked(false);
+      return;
+    }
+
+    if(scaleAct->isChecked() || forceDisplay)
+        enableScale(imageData->GetPointData()->GetScalars()->GetName(), forceDisplay);
+    else
+        disableScale();
+
+    Render();
+}
+
+void milxQtImage::showCrosshair(const bool quietly)
+{
+    if(cursorAct->isChecked())
+      enableCrosshair();
+    else
+      disableCrosshair();
+
+    if(!quietly)
+        emit modified(this);
+}
+
 void milxQtImage::setView(int viewMode)
 {
     if(!volume)
@@ -3375,7 +3499,7 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
     double range[2];
     imageData->GetScalarRange(range);
 
-    int ret = QMessageBox::No;
+    int ret = QMessageBox::Yes;
     if(plotHistogram)
     {
         ///ask user number of bins
@@ -3405,7 +3529,7 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
 
     double binSpacing = (aboveValue-belowValue)/bins;
     printInfo("Bin Spacing: " + QString::number(binSpacing));
-    vtkSmartPointer<vtkImageAccumulate> hist = vtkSmartPointer<vtkImageAccumulate>::New(); //!< Histogram of the image
+    hist = vtkSmartPointer<vtkImageAccumulate>::New(); //!< Histogram of the image
     #if VTK_MAJOR_VERSION <= 5
         hist->SetInput(imageData);
     #else
@@ -3415,32 +3539,37 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
         hist->SetComponentExtent(0, bins-1, 0, 0, 0, 0); //bins
         hist->SetComponentOrigin(belowValue, 0, 0); //offset
         hist->SetComponentSpacing(binSpacing, 0, 0); //spacing
-        hist->IgnoreZeroOff();
         if(ret == QMessageBox::Yes)
         {
             printWarning("Ignore zero values in summary statistics");
             hist->IgnoreZeroOn();
         }
+        else
+            hist->IgnoreZeroOff();
         linkProgressEventOf(hist);
         hist->Update();
         hist->Print(cout);
 
     const coordinate meanTuple( hist->GetMean() );
+    const coordinate stddevTuple(hist->GetStandardDeviation());
     const coordinate minTuple( hist->GetMin() );
     const coordinate maxTuple( hist->GetMax() );
     if(imageData->GetNumberOfScalarComponents() == 1)
     {
         meanValue = meanTuple[0];
+        stddevValue = stddevTuple[0];
         minValue = minTuple[0];
         maxValue = maxTuple[0];
     }
     else
     {
         meanValue = meanTuple.mean();
+        stddevValue = stddevTuple.mean();
         minValue = minTuple.mean();
         maxValue = maxTuple.mean();
     }
     printInfo("Mean of the data: " + QString::number(meanValue));
+    printInfo("Std Deviation of the data: " + QString::number(stddevValue));
     printInfo("Min/Max of the data: " + QString::number(minValue) + "/" + QString::number(maxValue));
 
     if(plotHistogram)
@@ -3535,6 +3664,8 @@ void milxQtImage::surfacePlot()
 
 void milxQtImage::refresh()
 {
+    viewer->UpdateCursor();
+    viewer->GetInteractorStyle()->InvokeEvent(vtkCommand::ResetWindowLevelEvent); //Reset window level as if pressing 'r'
     viewer->Render();
     milxQtRenderWindow::refresh();
 }
@@ -3542,6 +3673,7 @@ void milxQtImage::refresh()
 void milxQtImage::reset()
 {
     updateData(orientAct->isChecked());
+    viewer->GetRenderer()->ResetCamera(); //Reset window view as if pressing 'Shift+r'
     refresh();
 }
 
@@ -3683,6 +3815,12 @@ void milxQtImage::updateDisplay(QPointer<milxQtImage> img)
         applyOrientDisplay(true);
     }
 
+    if(img->isCrosshair() ^ isCrosshair())
+    {
+        cursorAct->setChecked(img->isCrosshair());
+        showCrosshair(true);
+    }
+
     Render();
 }
 
@@ -3706,6 +3844,9 @@ void milxQtImage::createActions()
     gaussianAct = new QAction(this);
     gaussianAct->setText(QApplication::translate("Image", "Smooth via Gaussian Convolution", 0, QApplication::UnicodeUTF8));
     gaussianAct->setShortcut(tr("Alt+c"));
+    bilateralAct = new QAction(this);
+    bilateralAct->setText(QApplication::translate("Image", "Smooth via Bilateral Filter", 0, QApplication::UnicodeUTF8));
+    bilateralAct->setShortcut(tr("Alt+b"));
     medianAct = new QAction(this);
     medianAct->setText(QApplication::translate("Image", "Smooth via Median", 0, QApplication::UnicodeUTF8));
     medianAct->setShortcut(tr("Shift+Alt+s"));
@@ -3723,7 +3864,7 @@ void milxQtImage::createActions()
     laplacianAct->setShortcut(tr("Alt+l"));
     highPassAct = new QAction(this);
     highPassAct->setText(QApplication::translate("Image", "Butterworth High-Pass Filter", 0, QApplication::UnicodeUTF8));
-    highPassAct->setShortcut(tr("Alt+b"));
+    highPassAct->setShortcut(tr("Shift+Alt+b"));
     normAct = new QAction(this);
     normAct->setText(QApplication::translate("Image", "Normalize", 0, QApplication::UnicodeUTF8));
     normAct->setShortcut(tr("Alt+n"));
@@ -3855,6 +3996,11 @@ void milxQtImage::createActions()
     orientAct->setShortcut(tr("Shift+Alt+o"));
     orientAct->setCheckable(true);
     orientAct->setChecked(true);
+    cursorAct = new QAction(this);
+    cursorAct->setText(QApplication::translate("Image", "Show Cursor", 0, QApplication::UnicodeUTF8));
+    cursorAct->setShortcut(tr("Shift+Alt+c"));
+    cursorAct->setCheckable(true);
+    cursorAct->setChecked(false);
 
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
     cropAct->setDisabled(false);
@@ -3883,6 +4029,7 @@ void milxQtImage::createConnections()
 #endif
     connect(smoothAct, SIGNAL(triggered()), this, SLOT(anisotropicDiffusion()));
     connect(gaussianAct, SIGNAL(triggered()), this, SLOT(gaussianSmooth()));
+    connect(bilateralAct, SIGNAL(triggered()), this, SLOT(bilateral()));
     connect(medianAct, SIGNAL(triggered()), this, SLOT(median()));
     connect(gradMagAct, SIGNAL(triggered()), this, SLOT(gradientMagnitude()));
     connect(sobelAct, SIGNAL(triggered()), this, SLOT(sobelEdges()));
@@ -3934,6 +4081,7 @@ void milxQtImage::createConnections()
     connect(infoAct, SIGNAL(triggered()), this, SLOT(imageInformation()));
     connect(interpolateAct, SIGNAL(triggered()), this, SLOT(interpolateDisplay()));
     connect(orientAct, SIGNAL(triggered()), this, SLOT(applyOrientDisplay()));
+    connect(cursorAct, SIGNAL(triggered()), this, SLOT(showCrosshair()));
     connect(milxQtRenderWindow::refreshAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(milxQtRenderWindow::resetAct, SIGNAL(triggered()), this, SLOT(reset()));
 
@@ -3979,6 +4127,7 @@ QMenu* milxQtImage::basicContextMenu()
     contextMenu->addAction(infoAct);
     contextMenu->addAction(interpolateAct);
     contextMenu->addAction(orientAct);
+    contextMenu->addAction(cursorAct);
     contextMenu->addAction(milxQtRenderWindow::humanAct);
     ///Change View of Volume
     contextMenu->addMenu(milxQtRenderWindow::viewMenu);
@@ -4004,6 +4153,7 @@ QMenu* milxQtImage::operationsMenu()
     operateMenu->addAction(computeContourAct);
     operateMenu->addAction(smoothAct);
     operateMenu->addAction(gaussianAct);
+    operateMenu->addAction(bilateralAct);
     operateMenu->addAction(medianAct);
     operateMenu->addAction(gradMagAct);
     operateMenu->addAction(sobelAct);
@@ -4117,6 +4267,22 @@ void milxQtImage::SetupWidgets(vtkRenderWindowInteractor *interactor)
     lineWidget = vtkSmartPointer<vtkLineWidget2>::New();
         lineWidget->SetInteractor(interactor);
         lineWidget->CreateDefaultRepresentation();
+
+    //distance widget setup
+    distanceWidget = vtkSmartPointer<vtkDistanceWidget>::New();
+        distanceWidget->SetInteractor(interactor);
+        distanceWidget->CreateDefaultRepresentation();
+        vtkDistanceRepresentation::SafeDownCast(distanceWidget->GetRepresentation())->SetLabelFormat("%-#6.3g mm");
+
+    //cross distance widget setup
+    biDirectionWidget = vtkSmartPointer<vtkBiDimensionalWidget>::New();
+        biDirectionWidget->SetInteractor(interactor);
+        biDirectionWidget->CreateDefaultRepresentation();
+
+    //angle widget setup
+    angleWidget = vtkSmartPointer<vtkAngleWidget>::New();
+        angleWidget->SetInteractor(interactor);
+        angleWidget->CreateDefaultRepresentation();
 
     //sphere widget setup
     sphereRep = vtkSmartPointer<vtkSphereRepresentation>::New();

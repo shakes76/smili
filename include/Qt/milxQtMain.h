@@ -349,6 +349,21 @@ public slots:
     */
     void updateWindowsWithValue(int value);
     /*!
+    \fn milxQtMain::updateWindowsWithAutoLevel()
+    \brief Updates the windows with auto levelling.
+    */
+    void updateWindowsWithAutoLevel();
+    /*!
+    \fn milxQtMain::updateWindowsWithRefresh()
+    \brief Updates the windows with default views and window levels.
+    */
+    void updateWindowsWithRefresh();
+    /*!
+    \fn milxQtMain::updateWindowsWithCursors()
+    \brief Updates the windows with cursors.
+    */
+    void updateWindowsWithCursors();
+    /*!
         \fn milxQtMain::updateWindowsWithView(int value)
         \brief Updates the windows view, such as from a combo box etc.
     */
@@ -687,6 +702,20 @@ public slots:
 
     //Batch
     /*!
+        \fn milxQtMain::imagesMix()
+        \brief Blend all open images together to create new image usaing a mixer dialog.
+
+        All data from open image windows are blended to the first image.
+    */
+    void imagesMix();
+    /*!
+        \fn milxQtMain::imagesBlend(QVector<float> opacities)
+        \brief Blend all open images together to create new image. 'opacities' would hold a list of floats for blending each image
+
+        All data from open image windows are blended to the first image.
+    */
+    void imagesBlend(QVector<float> opacities);
+    /*!
         \fn milxQtMain::imagesAdd()
         \brief Add all open images together to create new image.
 
@@ -915,6 +944,7 @@ protected:
     //----New---- (hierarchical deletion)
     QAction* actionNewTab; //!< New Tab action
     //----Images---- (hierarchical deletion)
+    QAction* actionBlendImages; //!< blend images batch operation action
     QAction* actionAddImages; //!< add images batch operation action
     QAction* actionAverageImages; //!< average images batch operation action
     QAction* actionSubtractImages; //!< subtract images batch operation action
@@ -946,7 +976,10 @@ protected:
     //Image toolbar actions
     QAction* actionImageText; //!< toggle text annotate mode
     QSlider* imageLevelSlider; //!< adjust window level of image display
-    QDial* imageLevelDial; //!< adjust window level of image display via a dial
+    QPushButton* imageLevelButton; //!< auto level button
+    //QDial* imageLevelDial; //!< adjust window level of image display via a dial
+    QPushButton* refreshButton; //!< window refresh button
+    QPushButton* cursorButton; //!< crosshairs button
 
     //Workspaces (hierarchical deletion)
     QTabWidget* workspaces; //!< Pointer to the Workspace environment for the user.

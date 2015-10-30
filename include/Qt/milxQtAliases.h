@@ -104,7 +104,7 @@ The export command is
 #define MILXQT_PLUGIN_TEMPLATEDLL
 #endif
 
-static const float milxQtVersion = static_cast<float>(0.998);
+static const float milxQtVersion = static_cast<float>(0.999);
 static const int minWindowSize = 256;
 static const int maxAASamples = 2; //Anti-Aliasing
 

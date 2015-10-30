@@ -1,6 +1,7 @@
 #ifndef __MeshToVTKPolyData_h__
 #define __MeshToVTKPolyData_h__
 
+#include "vtkSmartPointer.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "vtkPolyData.h"
@@ -56,7 +57,7 @@ class MeshToVTKPolyData : public Object
   void SetInput(TriangleMeshType * mesh);
   TriangleMeshType * GetInput();
 
-  vtkPolyData * GetOutput();
+  vtkSmartPointer<vtkPolyData> GetOutput();
 
   void Update();
 
@@ -68,9 +69,9 @@ class MeshToVTKPolyData : public Object
 
   typename TriangleMeshType::Pointer m_itkTriangleMesh;
 
-  vtkPoints  * m_Points;
-  vtkPolyData * m_PolyData;
-  vtkCellArray * m_Polys;
+  vtkSmartPointer<vtkPoints>  m_Points;
+  vtkSmartPointer<vtkPolyData> m_PolyData;
+  vtkSmartPointer<vtkCellArray> m_Polys;
   
 };
 
