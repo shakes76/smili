@@ -1109,9 +1109,10 @@ void milxQtMain::predisplay(milxQtImage* newImage)
       slicesView->addImageActor(newImage->GetImageActor(), newImage->getTransformMatrix());
       slicesView->addImageActor(imgSagittal->GetImageActor(), imgSagittal->getTransformMatrix());
       slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
+      //slicesView->addActor(newImage->GetCursorActor(), newImage->getTransformMatrix());
       slicesView->generateRender();
 
-      //crosshairs for tracking
+      //setup tracking slices and crosshairs
       newImage->trackView(imgSagittal, AXIAL);
       newImage->trackView(imgCoronal, AXIAL);
       imgSagittal->trackView(newImage, SAGITTAL);
@@ -1541,6 +1542,55 @@ void milxQtMain::updateWindowsWithValue(int value)
     imageLevelSlider->setToolTip(QString::number(value)+"%");
 }
 
+void milxQtMain::updateWindowsWithAutoLevel()
+{
+  initialiseWindowTraversal();
+
+  while (currentWindow())
+  {
+    milxQtWindow *win = currentWindow();
+    if (isImage(win))
+    {
+      milxQtImage *img = qobject_cast<milxQtImage *>(win);
+      img->autoLevel();
+    }
+    nextWindow();
+  }
+}
+
+void milxQtMain::updateWindowsWithRefresh()
+{
+  initialiseWindowTraversal();
+
+  while (currentWindow())
+  {
+      milxQtRenderWindow *win = nextRenderWindow();
+      if (isImage(win))
+      {
+          milxQtImage *img = qobject_cast<milxQtImage *>(win);
+          img->refresh();
+      }
+      else
+          win->refresh();
+  }
+}
+
+void milxQtMain::updateWindowsWithCursors()
+{
+  initialiseWindowTraversal();
+
+  while (currentWindow())
+  {
+      milxQtWindow *win = currentWindow();
+      if (isImage(win))
+      {
+          milxQtImage *img = qobject_cast<milxQtImage *>(win);
+          img->enableCrosshair();
+      }
+      nextWindow();
+  }
+}
+
 void milxQtMain::updateWindowsWithView(int value)
 {
     initialiseWindowTraversal();
@@ -1751,7 +1801,8 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
                     QPointer<milxQtImage> img = qobject_cast<milxQtImage *>(window);
                     img->setSlice(activeImage()->getSlice());
                     img->setView(activeImage()->getView());
-
+                    if(img->isCrosshair())
+                        img->setCrosshairPosition(activeImage()->getCrosshairPosition());
                 }
                 else if(srcIsImage && isModel(window))
                 {
@@ -2761,6 +2812,15 @@ void milxQtMain::createToolBars()
     imageLevelSlider->setTickPosition(QSlider::TicksRight);
     imageLevelSlider->setTickInterval(1);
     QObject::connect(imageLevelSlider, SIGNAL(valueChanged(int)), this, SLOT(updateWindowsWithValue(int)));
+    imageLevelButton = new QPushButton(tr(""), this);
+    imageLevelButton->setIcon(QIcon(":/resources/toolbar/intensity.png"));
+    QObject::connect(imageLevelButton, SIGNAL(clicked()), this, SLOT(updateWindowsWithAutoLevel()));
+    refreshButton = new QPushButton(tr(""), this);
+    refreshButton->setIcon(QIcon(":/resources/toolbar/refresh.png"));
+    QObject::connect(refreshButton, SIGNAL(clicked()), this, SLOT(updateWindowsWithRefresh()));
+    cursorButton = new QPushButton(tr(""), this);
+    cursorButton->setIcon(QIcon(":/resources/toolbar/crosshairs_2D.png"));
+    QObject::connect(cursorButton, SIGNAL(clicked()), this, SLOT(updateWindowsWithCursors()));
     /*imageLevelDial = new QDial(this);
 //    imageLevelDial->setFloatable(true);
     imageLevelDial->setMinimum(0);
@@ -2769,6 +2829,9 @@ void milxQtMain::createToolBars()
     imageLevelDial->setValue(50);*/
     addToolBar(Qt::LeftToolBarArea, imageToolBar);
 //    imageToolBar->addAction(actionImageText);
+    imageToolBar->addWidget(refreshButton);
+    imageToolBar->addWidget(imageLevelButton);
+    imageToolBar->addWidget(cursorButton);
     imageToolBar->addWidget(imageLevelSlider);
 //    imageToolBar->addWidget(imageLevelDial);
 }
@@ -2859,6 +2922,13 @@ void milxQtMain::setupTooltips()
 
     actionCompare->setToolTip("Compare the data in window with others by placing it into a multi-display window");
     actionCompare->setStatusTip("Compare the data in window with others by placing it into a multi-display window");
+
+    refreshButton->setToolTip("Refresh the window views, levels and camera to default.");
+    refreshButton->setStatusTip("Refresh the window views, levels and camera to default.");
+    imageLevelButton->setToolTip("Auto level the image intensities based on inter-quartile ranges.");
+    imageLevelButton->setStatusTip("Auto level the image intensities based on inter-quartile ranges.");
+    cursorButton->setToolTip("Enable crosshairs for all images.");
+    cursorButton->setStatusTip("Enable crosshairs for all images.");
 }
 
 void milxQtMain::contextMenuEvent(QContextMenuEvent *currentEvent)

@@ -339,19 +339,19 @@ void milxQtRenderWindow::axesDisplay()
     else
         disableAxes();
 
-    Render();
+    refresh();
 }
 
 void milxQtRenderWindow::disableOrient()
 {
     humanAct->setChecked(false);
-    generateRender();
+    refresh();
 }
 
 void milxQtRenderWindow::orientDisplay()
 {
     humanAct->setChecked(!humanAct->isChecked());
-    generateRender();
+    refresh();
 }
 
 void milxQtRenderWindow::lighting()
@@ -572,23 +572,23 @@ void milxQtRenderWindow::loadView(QString filename)
     {
         QSettings settings("Shekhar Chandra", "milxQt");
 
-        vtkFloatingPointType clippingRange[2];
+        double clippingRange[2];
         clippingRange[0] = settings.value("cameraSettings.ClippingRange.x").toDouble();
         clippingRange[1] = settings.value("cameraSettings.ClippingRange.y").toDouble();
 
-        vtkFloatingPointType focalPoint[3];
+        double focalPoint[3];
         focalPoint[0] = settings.value("cameraSettings.FocalPoint.x").toDouble();
         focalPoint[1] = settings.value("cameraSettings.FocalPoint.y").toDouble();
         focalPoint[2] = settings.value("cameraSettings.FocalPoint.z").toDouble();
 
-        vtkFloatingPointType position[3];
+        double position[3];
         position[0] = settings.value("cameraSettings.Position.x").toDouble();
         position[1] = settings.value("cameraSettings.Position.y").toDouble();
         position[2] = settings.value("cameraSettings.Position.z").toDouble();
 
-        vtkFloatingPointType angle = settings.value("cameraSettings.ViewAngle").toDouble();
+        double angle = settings.value("cameraSettings.ViewAngle").toDouble();
 
-        vtkFloatingPointType viewUp[3];
+        double viewUp[3];
         viewUp[0] = settings.value("cameraSettings.ViewUp.x").toDouble();
         viewUp[1] = settings.value("cameraSettings.ViewUp.y").toDouble();
         viewUp[2] = settings.value("cameraSettings.ViewUp.z").toDouble();
@@ -637,6 +637,15 @@ void milxQtRenderWindow::removeModelActor(vtkSmartPointer<vtkActor> mdlActor)
     RemoveActor(mdlActor); //!< remove model actor to current render
     if(!rendered)
         generateRender();
+}
+
+void milxQtRenderWindow::addActor(vtkSmartPointer<vtkActor> actor, vtkMatrix4x4 *transformMatrix)
+{
+  vtkSmartPointer<vtkActor> rndActor = vtkSmartPointer<vtkActor>::New();
+  rndActor->SetMapper(actor->GetMapper());
+  if (transformMatrix)
+    rndActor->SetUserMatrix(transformMatrix);
+  AddActor(rndActor); //!< transfer actor to current render
 }
 
 void milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkMatrix4x4 *transformMatrix)

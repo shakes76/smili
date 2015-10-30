@@ -264,7 +264,7 @@ void DeformableModel::ApplyOrientation(itk::SmartPointer<TImage> image, const bo
   typename TImage::DirectionType direction = image->GetDirection();
   typename TImage::PointType origin = image->GetOrigin();
 
-  coordinate centroid = Math<vtkFloatingPointType>::Centroid(CurrentModel->GetPoints());
+  coordinate centroid = Math<double>::Centroid(CurrentModel->GetPoints());
 
   vtkSmartPointer<vtkMatrix4x4> flipMatrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
   flipMatrix->Identity();

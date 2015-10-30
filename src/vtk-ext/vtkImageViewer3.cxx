@@ -22,7 +22,10 @@
 #include <vtkCommand.h>
 #include <vtkImageData.h>
 #include <vtkRenderWindow.h>
+#include <vtkProperty.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRendererCollection.h>
+#include <vtkWorldPointPicker.h>
 #include <vtkImageActor.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #if(VTK_MAJOR_VERSION > 5)
@@ -153,12 +156,83 @@ public:
   double InitialLevel;
 };
 
+class vtkImageViewer3CursorCallback : public vtkCommand
+{
+public:
+  static vtkImageViewer3CursorCallback *New() { return new vtkImageViewer3CursorCallback; }
+
+  void Execute(vtkObject *caller,
+    unsigned long event,
+    void *vtkNotUsed(callData))
+  {
+    if (this->IV->GetInput() == NULL)
+    {
+      return;
+    }
+
+    //Get the interactor
+    vtkInteractorStyleImage *isi =
+      static_cast<vtkInteractorStyleImage *>(caller);
+
+    int *size = this->IV->GetRenderWindow()->GetSize();
+
+    if (this->IV->GetCursorEnabled())
+    {
+      isi->GetInteractor()->GetPicker()->Pick(isi->GetInteractor()->GetEventPosition()[0],
+        isi->GetInteractor()->GetEventPosition()[1],
+        0,  // always zero.
+        isi->GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
+      double picked[3];
+      isi->GetInteractor()->GetPicker()->GetPickPosition(picked);
+    #if(VTK_MAJOR_VERSION > 5)
+      this->IV->GetCursor()->SetCenter(picked[0], picked[1], picked[2]);
+    #else
+      this->IV->GetCursor()->SetModelBounds(this->IV->GetImageActor()->GetBounds());
+      this->IV->GetCursor()->SetFocalPoint(picked[0], picked[1], picked[2]);
+    #endif
+      this->IV->GetCursor()->Update();
+      this->IV->GetRenderWindow()->Modified();
+    }
+
+    this->IV->Render();
+  }
+
+  vtkImageViewer3 *IV;
+};
+
 //ImageViewer
 vtkStandardNewMacro(vtkImageViewer3);
 
 vtkImageViewer3::vtkImageViewer3()
 {
   NeurologicalView = true;
+  CursorEnabled = false;
+  cursor = NULL;
+#if(VTK_MAJOR_VERSION < 6)
+  cursorMapper = NULL;
+#endif
+  cursorActor = NULL;
+}
+
+vtkImageViewer3::~vtkImageViewer3()
+{
+  if (cursor)
+  {
+    cursor->Delete();
+    cursor = NULL;
+  }
+#if(VTK_MAJOR_VERSION < 6)
+  if (cursorMapper)
+  {
+    cursorMapper->Delete();
+    cursorMapper = NULL;
+  }
+#endif
+  if (cursorActor)
+  {
+    cursorActor->Delete();
+    cursorActor = NULL;
+  }
 }
 
 void vtkImageViewer3::PrintSelf(ostream& os, vtkIndent indent)
@@ -175,7 +249,6 @@ void vtkImageViewer3::UpdateOrientation()
 
   if(!NeurologicalView)
   {
-//    return this->Superclass::UpdateOrientation();
       switch (this->SliceOrientation)
       {
         case vtkImageViewer3::SLICE_ORIENTATION_XY: //Axial
@@ -200,18 +273,6 @@ void vtkImageViewer3::UpdateOrientation()
   else
   {
     // Set the camera position
-    /*
-    vtkSmartPointer<vtkMatrix4x4> matrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    matrix->Identity();
-
-    //only want rotations in the plane
-    for(int j = 0; j < 3; j ++)
-    {
-        matrix->SetElement(j, 0, Direction(j,0));
-        matrix->SetElement(j, 1, Direction(j,1));
-        matrix->SetElement(j, 2, Direction(j,2));
-    }*/
-
     std::cout << "Using Neurological (head-first) Orientation" << std::endl;
     switch (this->SliceOrientation)
     {
@@ -219,31 +280,20 @@ void vtkImageViewer3::UpdateOrientation()
         cam->SetFocalPoint(0,0,0);
         cam->SetPosition(0,0,-1); // -1 if medical ?
         cam->SetViewUp(0,1,0);
-        //~ matrix->SetElement(1, 1, -1);
         break;
 
       case vtkImageViewer3::SLICE_ORIENTATION_XZ: //Coronal
         cam->SetFocalPoint(0,0,0);
         cam->SetPosition(0,1,0); // 1 if medical ?
         cam->SetViewUp(0,0,1);
-        //~ matrix->SetElement(1, 1, -1);
         break;
 
       case vtkImageViewer3::SLICE_ORIENTATION_YZ: //Saggital
         cam->SetFocalPoint(0,0,0);
         cam->SetPosition(-1,0,0); // -1 if medical ?
         cam->SetViewUp(0,0,1);
-        //~ matrix->SetElement(1, 1, -1);
         break;
     }
-    /*
-    //Transform camera
-    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
-      transform->Identity();
-    transform->Concatenate(matrix);
-
-    cam->SetUserTransform(transform);
-    this->Renderer->ResetCamera();*/
   }
 }
 
@@ -265,12 +315,16 @@ void vtkImageViewer3::InstallPipeline()
       vtkImageViewer3Callback *cbk = vtkImageViewer3Callback::New();
       cbk->IV = this;
       this->InteractorStyle->AddObserver(
-        vtkCommand::WindowLevelEvent, cbk);
+        vtkCommand::WindowLevelEvent, cbk); //WindowLevel
       this->InteractorStyle->AddObserver(
-        vtkCommand::StartWindowLevelEvent, cbk);
+        vtkCommand::StartWindowLevelEvent, cbk); //WindowLevel
       this->InteractorStyle->AddObserver(
-        vtkCommand::ResetWindowLevelEvent, cbk);
+        vtkCommand::ResetWindowLevelEvent, cbk); //WindowLevel
       cbk->Delete();
+      vtkImageViewer3CursorCallback *cbk2 = vtkImageViewer3CursorCallback::New();
+      cbk2->IV = this;
+      this->InteractorStyle->AddObserver(
+        vtkCommand::MiddleButtonPressEvent, cbk2); //Cursor
       }
 
     this->Interactor->SetInteractorStyle(this->InteractorStyle);
@@ -291,4 +345,105 @@ void vtkImageViewer3::InstallPipeline()
     this->ImageActor->SetInput(this->WindowLevel->GetOutput());
   #endif
     }
+}
+
+void vtkImageViewer3::SetSliceOrientation(int orientation)
+{
+  Superclass::SetSliceOrientation(orientation);
+#if(VTK_MAJOR_VERSION > 5)
+  if(CursorEnabled)
+    cursorActor->GetCursorAlgorithm()->SetReslicePlaneNormal(this->SliceOrientation);
+#endif
+}
+
+/*void vtkImageViewer2::SetSlice(int slice)
+{
+  Superclass::SetSlice(slice);
+
+}*/
+
+void vtkImageViewer3::EnableCursor()
+{
+#if(VTK_MAJOR_VERSION > 5)
+  if (!cursor)
+    cursor = vtkResliceCursor::New();
+  cursor->SetImage(this->GetInput());
+  cursor->SetThickMode(0);
+  cursor->SetThickness(2, 2, 2);
+  if(!CursorEnabled)
+    {
+      //Set as center of image to initialise
+      /*double bounds[6];
+      this->GetInput()->GetBounds(bounds);
+      cursor->SetCenter( (bounds[1]-bounds[0])/2, (bounds[3]-bounds[2])/2, (bounds[5]-bounds[4])/2);*/
+      cursor->SetCenter(this->GetInput()->GetOrigin());
+    }
+
+  if (!cursorActor)
+    cursorActor = vtkResliceCursorActor::New();
+  cursorActor->GetCursorAlgorithm()->SetResliceCursor(cursor);
+  cursorActor->GetCursorAlgorithm()->SetReslicePlaneNormal(this->SliceOrientation);
+#else
+  if (!cursor)
+    cursor = vtkCursor3D::New();
+  cursor->SetModelBounds(this->GetImageActor()->GetBounds());
+  cursor->AllOn();
+  cursor->OutlineOff();
+
+  if (!cursorMapper)
+    cursorMapper = vtkPolyDataMapper::New();
+  cursorMapper->SetInputConnection(cursor->GetOutputPort());
+
+  if (!cursorActor)
+    cursorActor = vtkActor::New();
+  cursorActor->GetProperty()->SetColor(1, 0, 0);
+  cursorActor->SetMapper(cursorMapper);
+#endif
+  cursor->Update();
+
+  this->Renderer->AddActor(cursorActor);
+  this->Modified();
+  this->UpdateDisplayExtent();
+  this->Render();
+  CursorEnabled = true;
+}
+
+void vtkImageViewer3::UpdateCursor()
+{
+  if(CursorEnabled)
+    {
+      cursor->Update();
+  #if(VTK_MAJOR_VERSION > 5)
+      cursorActor->GetCursorAlgorithm()->SetReslicePlaneNormal(this->SliceOrientation);
+  #endif
+    }
+}
+
+void vtkImageViewer3::DisableCursor()
+{
+#if(VTK_MAJOR_VERSION > 5)
+  this->Renderer->RemoveActor(cursorActor);
+#else
+  if (cursor)
+    cursor->AllOff();
+#endif
+  CursorEnabled = false;
+}
+
+double* vtkImageViewer3::GetCursorFocalPoint()
+{
+#if(VTK_MAJOR_VERSION > 5)
+  return cursor->GetCenter();
+#else
+  return cursor->GetFocalPoint();
+#endif
+}
+
+void vtkImageViewer3::SetCursorFocalPoint(double *point)
+{
+#if(VTK_MAJOR_VERSION > 5)
+  cursor->SetCenter(point);
+#else
+  cursor->SetFocalPoint(point);
+#endif
 }

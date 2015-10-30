@@ -412,6 +412,23 @@ public:
   static itk::SmartPointer<TImage> ConvolveImages(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> kernelImg);
 #endif // (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
 
+  //Info
+  /*!
+  \fn Image::Information(itk::SmartPointer<TImage> img)
+  \brief Prints the information of the image to standard output.
+  */
+  static void Information(itk::SmartPointer<TImage> img);
+  /*!
+  \fn Image::ImageMaximum(itk::SmartPointer<TImage> img)
+  \brief Returns the maximum pixel value of an image.
+  */
+  static double ImageMaximum(itk::SmartPointer<TImage> img);
+  /*!
+  \fn Image::ImageMinimum(itk::SmartPointer<TImage> img)
+  \brief Returns the minimum pixel value of an image.
+  */
+  static double ImageMinimum(itk::SmartPointer<TImage> img);
+
   //Filters
   /*!
   	\fn Image::CheckerBoard(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCheckerBoard, const int numberOfSquares = 0)
@@ -462,11 +479,7 @@ public:
   	\brief Generates an image which is statistically normalised so having pixel values between -1 and 1.
   */
   static itk::SmartPointer< itk::Image<float, TImage::ImageDimension> > Normalization(itk::SmartPointer<TImage> img);
-  /*!
-  	\fn Image::Information(itk::SmartPointer<TImage> img)
-  	\brief Prints the information of the image to standard output.
-  */
-  static void Information(itk::SmartPointer<TImage> img);
+
   /*!
   	\fn Image::MatchInformation(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, bool originOnly = false)
   	\brief Changes the image info to match that of provided image. By default, only the spacing, region and origin are changed.
@@ -612,16 +625,6 @@ public:
   */
   template<typename TOutImage>
   static itk::SmartPointer<TOutImage> OtsuMultipleThresholdImage(itk::SmartPointer<TImage> img, const int bins, const int noOfLabels = 1);
-  /*!
-  	\fn Image::ImageMaximum(itk::SmartPointer<TImage> img)
-  	\brief Returns the maximum pixel value of an image.
-  */
-  static double ImageMaximum(itk::SmartPointer<TImage> img);
-  /*!
-  	\fn Image::ImageMinimum(itk::SmartPointer<TImage> img)
-  	\brief Returns the minimum pixel value of an image.
-  */
-  static double ImageMinimum(itk::SmartPointer<TImage> img);
 
   //Vector operations
   /*!
@@ -1112,9 +1115,17 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmart
   if(!labelledImage)
       reslice->SetInterpolationModeToLinear(); //reduce artefacts for normal images
   else
+  {
       reslice->SetInterpolationModeToNearestNeighbor(); //reduce artefacts for labels
-
+      PrintDebug("Using NN Interpolator for Image Orientation.");
+//  #if VTK_MAJOR_VERSION > 5
+//      reslice->SetOutputScalarType(VTK_CHAR);
+//  #endif
+  }
   reslice->Update();
+
+  std::string resliceType = reslice->GetOutput()->GetScalarTypeAsString();
+  PrintDebug("Orientated Image Type as " + resliceType);
 
   return reslice->GetOutput();
 }
@@ -2057,6 +2068,65 @@ itk::SmartPointer<TImage> Image<TImage>::ConvolveImages(itk::SmartPointer<TImage
 }
 #endif //(ITK_REVIEW || ITK_VERSION_MAJOR > 3)
 
+//Info
+template<class TImage>
+void Image<TImage>::Information(itk::SmartPointer<TImage> img)
+{
+  typename TImage::DirectionType direction = img->GetDirection();
+  typename TImage::PointType origin = img->GetOrigin();
+  typename TImage::SpacingType spacing = img->GetSpacing();
+  typename TImage::SizeType imageSize = img->GetLargestPossibleRegion().GetSize();
+
+  std::cout << "Origin: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(origin[j]) << "  ";
+  std::cout << "\nSpacing: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(spacing[j]) << "  ";
+  std::cout << "\nSize: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(imageSize[j]) << "  ";
+  std::cout << "\nReal Size: ";
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+    std::cout << milx::NumberToString(spacing[j] * imageSize[j]) << "  ";
+  std::cout << "\nDirection/Orientation: " << std::endl;
+  for (typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j++)
+  {
+    std::cout << "| ";
+    for (typename TImage::SizeValueType k = 0; k < TImage::ImageDimension; k++)
+    {
+      std::cout << milx::NumberToString(direction(j, k));
+      if (k < TImage::ImageDimension - 1)
+        std::cout << ",\t";
+    }
+    std::cout << " |" << std::endl;
+  }
+}
+
+template<class TImage>
+double Image<TImage>::ImageMaximum(itk::SmartPointer<TImage> img)
+{
+  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
+  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+  imageCalculatorFilter->SetImage(img);
+  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  imageCalculatorFilter->Compute();
+
+  return imageCalculatorFilter->GetMaximum();
+}
+
+template<class TImage>
+double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
+{
+  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
+  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+  imageCalculatorFilter->SetImage(img);
+  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  imageCalculatorFilter->Compute();
+
+  return imageCalculatorFilter->GetMinimum();
+}
+
 //Filters
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::CheckerBoard(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCheckerBoard, const int numberOfSquares)
@@ -2254,40 +2324,6 @@ itk::SmartPointer< itk::Image<float, TImage::ImageDimension> > Image<TImage>::No
   }
 
   return normalizeFilter->GetOutput();
-}
-
-template<class TImage>
-void Image<TImage>::Information(itk::SmartPointer<TImage> img)
-{
-  typename TImage::DirectionType direction = img->GetDirection();
-  typename TImage::PointType origin = img->GetOrigin();
-  typename TImage::SpacingType spacing = img->GetSpacing();
-  typename TImage::SizeType imageSize = img->GetLargestPossibleRegion().GetSize();
-
-  std::cout << "Origin: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(origin[j]) << "  ";
-  std::cout << "\nSpacing: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(spacing[j]) << "  ";
-  std::cout << "\nSize: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(imageSize[j]) << "  ";
-  std::cout << "\nReal Size: ";
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-    std::cout << milx::NumberToString(spacing[j]*imageSize[j]) << "  ";
-  std::cout << "\nDirection/Orientation: " << std::endl;
-  for(typename TImage::SizeValueType j = 0; j < TImage::ImageDimension; j ++)
-  {
-    std::cout << "| ";
-    for(typename TImage::SizeValueType k = 0; k < TImage::ImageDimension; k ++)
-    {
-      std::cout << milx::NumberToString(direction(j,k));
-      if(k < TImage::ImageDimension-1)
-        std::cout << ",\t";
-    }
-    std::cout << " |" << std::endl;
-  }
 }
 
 template<class TImage>
@@ -2964,30 +3000,6 @@ itk::SmartPointer<TOutImage> Image<TImage>::OtsuMultipleThresholdImage(itk::Smar
   PrintDebug("Otsu Thresholds - " + thresholdStrs);
 
   return otsuThresholdImageCalculator->GetOutput();
-}
-
-template<class TImage>
-double Image<TImage>::ImageMaximum(itk::SmartPointer<TImage> img)
-{
-  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
-  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New ();
-  imageCalculatorFilter->SetImage(img);
-  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-  imageCalculatorFilter->Compute();
-
-  return imageCalculatorFilter->GetMaximum();
-}
-
-template<class TImage>
-double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
-{
-  typedef itk::MinimumMaximumImageCalculator<TImage> ImageCalculatorFilterType;
-  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New ();
-  imageCalculatorFilter->SetImage(img);
-  imageCalculatorFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-  imageCalculatorFilter->Compute();
-
-  return imageCalculatorFilter->GetMinimum();
 }
 
 template<class TImage>

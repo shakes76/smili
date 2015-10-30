@@ -349,6 +349,21 @@ public slots:
     */
     void updateWindowsWithValue(int value);
     /*!
+    \fn milxQtMain::updateWindowsWithAutoLevel()
+    \brief Updates the windows with auto levelling.
+    */
+    void updateWindowsWithAutoLevel();
+    /*!
+    \fn milxQtMain::updateWindowsWithRefresh()
+    \brief Updates the windows with default views and window levels.
+    */
+    void updateWindowsWithRefresh();
+    /*!
+    \fn milxQtMain::updateWindowsWithCursors()
+    \brief Updates the windows with cursors.
+    */
+    void updateWindowsWithCursors();
+    /*!
         \fn milxQtMain::updateWindowsWithView(int value)
         \brief Updates the windows view, such as from a combo box etc.
     */
@@ -961,7 +976,10 @@ protected:
     //Image toolbar actions
     QAction* actionImageText; //!< toggle text annotate mode
     QSlider* imageLevelSlider; //!< adjust window level of image display
-    QDial* imageLevelDial; //!< adjust window level of image display via a dial
+    QPushButton* imageLevelButton; //!< auto level button
+    //QDial* imageLevelDial; //!< adjust window level of image display via a dial
+    QPushButton* refreshButton; //!< window refresh button
+    QPushButton* cursorButton; //!< crosshairs button
 
     //Workspaces (hierarchical deletion)
     QTabWidget* workspaces; //!< Pointer to the Workspace environment for the user.

@@ -361,8 +361,13 @@ public slots:
     */
     void removeModelActor(vtkSmartPointer<vtkActor> mdlActor);
     /*!
-        \fn milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix = NULL)
-        \brief Directly add image actor to generic view.
+        \fn milxQtRenderWindow::addActor(vtkSmartPointer<vtkActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix = NULL)
+        \brief Directly add actor to generic view with transform matrix.
+    */
+    void addActor(vtkSmartPointer<vtkActor> imgActor, vtkMatrix4x4 *transformMatrix = NULL);
+    /*!
+    \fn milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkSmartPointer<vtkMatrix4x4> transformMatrix = NULL)
+    \brief Directly add image actor to generic view.
     */
     void addImageActor(vtkSmartPointer<vtkImageActor> imgActor, vtkMatrix4x4 *transformMatrix = NULL);
     /*!
