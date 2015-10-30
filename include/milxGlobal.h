@@ -56,7 +56,7 @@ namespace milx
  */
 //@{
 //Global Constants
-const float Version = static_cast<float>(0.86);
+const float Version = static_cast<float>(0.91);
 static bool VerboseMode = true;
 
 //Global Typedefs

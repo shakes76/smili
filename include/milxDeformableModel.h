@@ -19,7 +19,12 @@
 #define __MILXDEFORMABLEMODEL_H
 //ITK
 #include <itkImage.h>
+#include <itkVTKPolyDataToMesh.h> //itkVTKGlue
+#include <itkMeshToVTKPolyData.h> //itkVTKGlue
 #include <itkLinearInterpolateImageFunction.h>
+#ifdef ITK_USE_REVIEW //Review only members
+  #include <itkConformalFlatteningMeshFilter.h>
+#endif
 //VTK
 #include <vtkSmartPointer.h>
 #include <vtkPolyData.h>
@@ -32,6 +37,7 @@
 #include <milxMath.h>
 #include <milxModel.h>
 #include <milxImage.h>
+#include <milxFile.h>
 
 //enums
 
@@ -40,6 +46,8 @@ namespace milx
 /**
   \class DeformableModel
   \brief Represents a deformable model (i.e. a model with cells and scalar values that has special members for interacting with images).
+
+  It also handles interaction with ITK images and meshes.
 */
 class SMILI_EXPORT DeformableModel : public Model
 {
@@ -84,6 +92,25 @@ public:
     */
   template<typename TImage>
   itk::SmartPointer<TImage> VoxeliseAsITKImage(const unsigned char insideValue, double *spacing, double *bounds = NULL, const size_t padVoxels = 1);
+  /*!
+    \fn DeformableModel::ConvertVTKPolyDataToITKMesh()
+    \brief Convert the current vtkPolyData to an itk::Mesh.
+    */
+  template<typename MeshType>
+  itk::SmartPointer<MeshType> ConvertVTKPolyDataToITKMesh();
+  /*!
+    \fn DeformableModel::ConvertITKMeshToVTKPolyData(itk::SmartPointer<MeshType> mesh)
+    \brief Convert an itk::Mesh to the current vtkPolyData.
+    */
+  template<typename MeshType>
+  void ConvertITKMeshToVTKPolyData(itk::SmartPointer<MeshType> mesh);
+#ifdef ITK_USE_REVIEW //Review only members
+  /*!
+    \fn DeformableModel::Flatten(const size_t flatMode = 1)
+    \brief Given a genus zero (no holes) surface, 'flatten' it by conformally mapping the surface to a sphere/plane. If flatMode is 1, a sphere is produced.
+    */
+  void Flatten(const size_t flatMode = 1);
+#endif
   //@}
 
   /**
@@ -127,6 +154,13 @@ public:
    */
   template<typename TImage>
   void VoxeliseCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const coordinateType spacing, std::vector< typename itk::SmartPointer<TImage> > &images);
+#ifdef ITK_USE_REVIEW //Review only members
+  /**
+   * \fn DeformableModel::FlattenCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const size_t flatMode)
+   * \brief Flatten a collection of models. See Flatten().
+   */
+  void FlattenCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const size_t flatMode);
+#endif
   //@}
 
 protected:
@@ -143,6 +177,86 @@ itk::SmartPointer<TImage> DeformableModel::VoxeliseAsITKImage(const unsigned cha
   return milx::Image<TImage>::ConvertVTKImageToITKImage(img);
 }
 
+template<typename MeshType>
+itk::SmartPointer<MeshType> DeformableModel::ConvertVTKPolyDataToITKMesh()
+{
+  typedef itk::VTKPolyDataToMesh<MeshType>  MeshFilterType;
+  typename MeshFilterType::Pointer filter = MeshFilterType::New();
+  filter->SetInput(CurrentModel);
+  try
+  {
+    std::cout << "Converting to ITK Mesh" << std::endl;
+    filter->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed ITK Conversion");
+    PrintError(ex.GetDescription());
+  }
+
+  return filter->GetOutput();
+}
+
+template<typename MeshType>
+void DeformableModel::ConvertITKMeshToVTKPolyData(itk::SmartPointer<MeshType> mesh)
+{
+  typedef itk::MeshToVTKPolyData<MeshType>  MeshFilterType;
+  typename MeshFilterType::Pointer filter = MeshFilterType::New();
+  filter->SetInput(mesh);
+  try
+  {
+    std::cout << "Converting to VTK PolyData" << std::endl;
+    filter->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed VTK Conversion");
+    PrintError(ex.GetDescription());
+  }
+  vtkSmartPointer<vtkPolyData> convMesh = filter->GetOutput();
+
+  CurrentModel->DeepCopy(convMesh);
+  std::cout << "Number of Points in VTK PolyData: " <<  CurrentModel->GetNumberOfPoints() << std::endl;
+  std::cout << "Number of Cells in VTK PolyData: " <<  CurrentModel->GetNumberOfCells() << std::endl;
+}
+
+#ifdef ITK_USE_REVIEW //Review only members
+void DeformableModel::Flatten(const size_t flatMode)
+{
+  //Triangulate
+  Triangulate();
+
+  //convert to ITK
+  typedef itk::Mesh<vtkFloatingPointType, 3> MeshType;
+  itk::SmartPointer<MeshType> mesh = ConvertVTKPolyDataToITKMesh<MeshType>();
+  std::cout << "Number of Points in ITK Mesh: " <<  mesh->GetNumberOfPoints() << std::endl;
+
+  //flatten
+  typedef itk::ConformalFlatteningMeshFilter<MeshType, MeshType>  FlatFilterType;
+  FlatFilterType::Pointer filter = FlatFilterType::New();
+  filter->SetInput(mesh);
+  //~ filter->SetPolarCellIdentifier(0);
+  if(flatMode == 1)
+      filter->MapToPlane();
+  else
+      filter->MapToSphere();
+  try
+  {
+    std::cout << "Trying to flatten..." << std::endl;
+    filter->Update();
+  }
+  catch (itk::ExceptionObject & ex )
+  {
+    PrintError("Failed Flattening");
+    PrintError(ex.GetDescription());
+  }
+  itk::SmartPointer<MeshType> flatMesh = filter->GetOutput();
+
+  //convert back to VTK
+  ConvertITKMeshToVTKPolyData<MeshType>(flatMesh);
+}
+#endif
+
 template<typename TImage>
 void DeformableModel::ApplyOrientation(itk::SmartPointer<TImage> image, const bool applyOrigin, const bool flipY)
 {
@@ -150,7 +264,7 @@ void DeformableModel::ApplyOrientation(itk::SmartPointer<TImage> image, const bo
   typename TImage::DirectionType direction = image->GetDirection();
   typename TImage::PointType origin = image->GetOrigin();
 
-  coordinate centroid = Math<vtkFloatingPointType>::Centroid(CurrentModel->GetPoints());
+  coordinate centroid = Math<double>::Centroid(CurrentModel->GetPoints());
 
   vtkSmartPointer<vtkMatrix4x4> flipMatrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
   flipMatrix->Identity();
@@ -314,6 +428,25 @@ void DeformableModel::VoxeliseCollection(vtkSmartPointer<vtkPolyDataCollection> 
 
   InternalInPlaceOperation = false;
 }
+
+#ifdef ITK_USE_REVIEW //Review only members
+void DeformableModel::FlattenCollection(vtkSmartPointer<vtkPolyDataCollection> collection, const size_t flatMode)
+{
+  const size_t n = collection->GetNumberOfItems();
+  InternalInPlaceOperation = true;
+
+  collection->InitTraversal();
+  for(size_t j = 0; j < n; j ++)
+    {
+      vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
+      Model::SetInput(mesh);
+      Flatten(flatMode);
+      mesh->DeepCopy(Model::Result());
+    }
+
+  InternalInPlaceOperation = false;
+}
+#endif
 
 } //end namespace milx
 

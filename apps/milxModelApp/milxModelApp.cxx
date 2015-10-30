@@ -21,6 +21,7 @@
 // vtk includes
 #include <vtkSmartPointer.h>
 #include <vtkPolyData.h>
+#include <vtkMultiThreader.h>
 #include <vtkPolyDataCollection.h>
 #include <vtkTransformCollection.h>
 // SMILI
@@ -51,16 +52,32 @@ enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smoo
   \verbatim
   milxModelApp --split combined_new_weights.vtk --component Atlas_MRI_surface_R_ace.vtk --component Atlas_MRI_surface_R_fem.vtk -p split_ 
   \endverbatim
+
+  Copy scalars from atlas mesh to other meshes in directory and output to another directory with same names
+  \verbatim
+  milxModelApp --scalarcopy focus_atlases/focus_bladder_atlas.vtk results/bladder/asm_bladder_*.vtk -p results_scalars/bladder/
+  \endverbatim
+
+  Clip meshes in directory keeping only parts with value of 1 and output to another directory with same names
+  \verbatim
+  milxModelApp --clip 1 results_scalars/bladder/asm_bladder_*.vtk -p results_clipped/bladder/
+  \endverbatim
+
+  Compute scalars stats (mean, variance etc. per point) of meshes in directory and output single mesh (of first mesh) with stats as arrays in mesh
+  \verbatim
+  milxModelApp --scalarstats Hausdorff/bladder/bladder__*.vtk -o bladder_stats.vtk
+  \endverbatim
 */
 int main(int argc, char *argv[])
 {
   //---------------------------
   ///Program Info
   milx::PrintInfo("--------------------------------------------------------");
-  milx::PrintInfo("MILX-SMILI Model Diagnostic Tool for Models/Surfaces/Meshes.");
-  milx::PrintInfo("(c) Copyright Shekhar Chandra et al., 2013.");
+  milx::PrintInfo("SMILI Model Tool for Models/Surfaces/Meshes.");
+  milx::PrintInfo("(c) Copyright Chandra et al., 2015.");
   milx::PrintInfo("Version: " + milx::NumberToString(milx::Version));
-  milx::PrintInfo("Australian e-Health Research Centre, CSIRO.");
+  milx::PrintInfo("University of Queensland, Australia.");
+  milx::PrintInfo("Australian e-Health Research Centre, CSIRO, Australia.");
   milx::PrintInfo("--------------------------------------------------------\n");
 
   //---------------------------
@@ -68,6 +85,7 @@ int main(int argc, char *argv[])
   CmdLine cmd("A diagnostic tool for models/surface operations", ' ', milx::NumberToString(milx::Version));
 
   ///Optional
+  ValueArg<size_t> threadsArg("", "threads", "Set he number of global threads to use.", false, milx::NumberOfProcessors(), "Threads");
   ValueArg<std::string> outputArg("o", "output", "Output Surface", false, "result.vtk", "Output");
   ValueArg<std::string> prefixArg("p", "prefix", "Output prefix for multiple output", false, "surface_", "Output Prefix");
   ValueArg<std::string> outputFormatArg("", "outputformat", "Specify the default output format for multiple outputs (vtk, vtp, ply, stl, default: same as input)", false, "vtk", "Output format");
@@ -78,7 +96,7 @@ int main(int argc, char *argv[])
   ValueArg<float> scaleArg("s", "scale", "Scale the coordinates of the point", false, 0.9, "Scale");
   ValueArg<float> thresholdAboveArg("", "thresholdabove", "Thresold scalars above value", false, 0.0, "Above");
   ValueArg<float> thresholdBelowArg("", "thresholdbelow", "Thresold scalars below value", false, 0.0, "Below");
-  ValueArg<float> clipArg("", "clip", "Clip model based on scalars value", false, 1.0, "Clip");
+  ValueArg<float> clipArg("", "clip", "Clip model based on scalars value (keeping only parts with value)", false, 1.0, "Clip");
   MultiArg<std::string> componentsArg("", "component", "Surface is a component of the surfaces", false, "Component");
   ///Clamped Optional
   std::vector<size_t> axesAllowed;
@@ -96,7 +114,7 @@ int main(int argc, char *argv[])
   SwitchArg colourConcatenateArg("", "colourcat", "Concatenate surfaces provided and colour them", false);
   SwitchArg splitArg("", "split", "Split each surface given components", false);
   SwitchArg diffScalarArg("", "scalardiff", "Difference in Scalars", false);
-  SwitchArg statsScalarArg("", "scalarstats", "Statistics of Scalars", false);
+  SwitchArg statsScalarArg("", "scalarstats", "Statistics of Scalars (mean, variance etc. per point) output mesh with stats as arrays", false);
   SwitchArg removeScalarArg("", "scalarremove", "Remove the Scalars", false);
   SwitchArg copyScalarArg("", "scalarcopy", "Copy the Scalars from first mesh to all others while removing existing ones.", false);
   SwitchArg mseArg("", "mse", "Mean Squared Error of Points in models", false);
@@ -109,6 +127,7 @@ int main(int argc, char *argv[])
   UnlabeledMultiArg<std::string> multinames("surfaces", "Surfaces to operate on", true, "Surfaces");
 
   ///Add argumnets
+  cmd.add( threadsArg );
   cmd.add( multinames );
 //  cmd.add( altmultinames );
   cmd.add( outputArg );
@@ -148,6 +167,7 @@ int main(int argc, char *argv[])
   cmd.parse( argc, argv );
 
   ///Get the value parsed by each arg.
+  const size_t threads = threadsArg.getValue();
   //Filenames of surfaces
   std::vector<std::string> filenames = multinames.getValue();
 //  std::vector<std::string> altfilenames = altmultinames.getValue();
@@ -162,6 +182,10 @@ int main(int argc, char *argv[])
   float clipValue = clipArg.getValue();
   size_t flipAxis = flipArg.getValue();
   std::vector<std::string> componentNames = componentsArg.getValue();
+
+  ///Setup ITK Threads
+  vtkMultiThreader::SetGlobalDefaultNumberOfThreads(threads);
+  milx::PrintInfo("Threads to use: " + milx::NumberToString(threads));
 
   ///Display operation
   operations operation = none;
@@ -581,11 +605,13 @@ int main(int argc, char *argv[])
       break;
 
     case clip:
+      Model.ClipCollection(collection, clipValue, clipValue);
       if (collection->GetNumberOfItems() == 1) {
-        Model.ClipCollection(collection, clipValue, clipValue);
+        collection->InitTraversal();
+        Model.Result() = collection->GetNextItem();
       } else {
-      outputRequired = false;
-      multiOutputRequired = true;
+        outputRequired = false;
+        multiOutputRequired = true;
       }
       break;
 

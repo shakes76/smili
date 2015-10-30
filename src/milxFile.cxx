@@ -110,7 +110,7 @@ namespace milx
     return extensions;
   }
 
-  std::vector<std::string> File::GetDICOMSeriesUIDs(const std::string directoryPath)
+  std::vector<std::string> File::GetDICOMSeriesUIDs(const std::string directoryPath, bool recursive)
   {
     std::vector<std::string> UIDs;
     typedef itk::GDCMSeriesFileNames GeneratorType;
@@ -118,6 +118,8 @@ namespace milx
     nameGenerator->SetUseSeriesDetails(true);
     nameGenerator->AddSeriesRestriction("0008|0021");
     nameGenerator->SetDirectory(directoryPath.c_str());
+    if(recursive)
+        nameGenerator->RecursiveOn();
     nameGenerator->AddObserver(itk::ProgressEvent(), ProgressUpdates);
   #if (ITK_VERSION_MAJOR > 3)
     try

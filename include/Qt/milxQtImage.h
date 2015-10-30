@@ -27,6 +27,7 @@
 #include <vtkMatrix4x4.h>
 #include <vtkImageAppend.h>
 #include <vtkImagePermute.h>
+#include <vtkImageAccumulate.h>
 #include <vtkImageMapToWindowLevelColors.h>
 //ITK Imaging
 #include <itkRGBPixel.h>
@@ -394,12 +395,57 @@ public:
         return viewer->GetImageActor();
     }
     /*!
-        \fn milxQtImage::GetWindowLevel()
-        \brief Returns the internal image window levels data used for display.
+    \fn milxQtImage::GetCursorActor(vtkResliceCursor *newCursor)
+    \brief Set the internal cursor used for display.
     */
-    inline vtkImageMapToWindowLevelColors* GetWindowLevel()
+#if(VTK_MAJOR_VERSION > 5)
+    inline void SetCursor(vtkResliceCursor *newCursor)
     {
-        return viewer->GetWindowLevel();
+        viewer->SetCursor(newCursor);
+    }
+#else
+    inline void SetCursor(vtkCursor3D *newCursor)
+    {
+      viewer->SetCursor(newCursor);
+    }
+#endif
+    /*!
+    \fn milxQtImage::GetCursorActor()
+    \brief Get the internal cursor used for display.
+    */
+#if(VTK_MAJOR_VERSION > 5)
+    inline vtkResliceCursor* GetCursor()
+    {
+        return viewer->GetCursor();
+    }
+#else
+    inline vtkCursor3D* GetCursor()
+    {
+      return viewer->GetCursor();
+    }
+#endif
+    /*!
+    \fn milxQtImage::SetCursorActor(vtkResliceCursorActor *newCursorActor)
+    \brief Set the internal cursor actor used for display.
+    */
+#if(VTK_MAJOR_VERSION > 5)
+    inline void SetCursorActor(vtkResliceCursorActor *newCursorActor)
+    {
+        viewer->SetCursorActor(newCursorActor);
+    }
+#else
+    inline void SetCursorActor(vtkActor *newCursorActor)
+    {
+      viewer->SetCursorActor(newCursorActor);
+    }
+#endif
+    /*!
+    \fn milxQtImage::GetCursorActor()
+    \brief Returns the internal cursor actor used for display.
+    */
+    inline vtkProp3D* GetCursorActor()
+    {
+        return viewer->GetCursorActor();
     }
     /*!
         \fn milxQtImage::GetDisplayExtent()
@@ -535,41 +581,13 @@ public:
     {
         return orientAct->isChecked();
     }
-
     /*!
-        \fn milxQtImage::enableScale(QString title = "", const bool quiet = false, double minRange = 0.0, double maxRange = 0.0, int noOfLabels = 3)
-        \brief Enable scale bar display with the title provided.
-
-        Quiet Boolean is to prevent possible popups to ask user parameters.
+        \fn milxQtImage::isCrosshair()
+        \brief Returns true if cursor shown to the display of the image
     */
-    virtual void enableScale(QString title = "", const bool quiet = false, double minRange = 0.0, double maxRange = 0.0, int noOfLabels = 3);
-    /*!
-        \fn milxQtImage::scaleDisplay(const bool forceDisplay = false)
-        \brief Toggles the scale bar display.
-
-        forceDisplay Boolean is to overide possible previous settings and display bar.
-    */
-    virtual void scaleDisplay(const bool forceDisplay = false);
-    /*!
-        \fn milxQtImage::enableCrosshair()
-        \brief Enables the mouse pointer as a crosshair instead. Scene must be rendered before calling.
-    */
-    virtual inline void enableCrosshair()
+    inline bool isCrosshair()
     {
-        if(rendered)
-        {
-            viewer->GetRenderWindow()->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
-            crosshairAct->setChecked(true);
-        }
-    }
-    /*!
-        \fn milxQtImage::disableCrosshair()
-        \brief Restores the mouse pointer to default.
-    */
-    virtual inline void disableCrosshair()
-    {
-        viewer->GetRenderWindow()->SetCurrentCursor(0);
-        crosshairAct->setChecked(false);
+      return cursorAct->isChecked();
     }
 
     /*!
@@ -629,11 +647,39 @@ public slots:
         \brief Auto window level the display. Uses Otsu threshold value.
     */
     void autoLevel();
-    /**
+/**
         \fn milxQtImage::setLevel(int level)
         \brief Set window level the display to proportion of maxValue.
     */
     void setLevel(int level);
+    /*!
+        \fn milxQtImage::GetWindowLevel()
+        \brief Returns the internal image window levels data used for display.
+    */
+    inline vtkImageMapToWindowLevelColors* GetWindowLevel()
+    {
+        return viewer->GetWindowLevel();
+    }
+    /*!
+        \fn milxQtImage::GetIntensityWindow()
+        \brief Get the window for the image intensity tranfer function
+    */
+    double GetIntensityWindow();
+    /*!
+        \fn milxQtImage::SetIntensityWindow(double level)
+        \brief Set the window for the image intensity tranfer function
+    */
+    void SetIntensityWindow(double window);
+    /*!
+        \fn milxQtImage::GetIntensityLevel()
+        \brief Get the level for the image intensity tranfer function
+    */
+    double GetIntensityLevel();
+    /*!
+        \fn milxQtImage::SetIntensityLevel(double level)
+        \brief Set the level for the image intensity tranfer function
+    */
+    void SetIntensityLevel(double level);
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
     /**
         \fn milxQtImage::overlayContour(QString filename = "")
@@ -882,6 +928,11 @@ public slots:
     */
     void gaussianSmooth();
     /**
+        \fn milxQtImage::bilateral()
+        \brief Computes the Bilateral smoothing of the image and displays it.
+    */
+    void bilateral();
+    /**
         \fn milxQtImage::median()
         \brief Computes the median image and displays it.
     */
@@ -974,6 +1025,67 @@ public slots:
     */
     void setDefaultOrientation(int orientMode);
     /*!
+        \fn milxQtImage::enableScale(QString title = "", const bool quiet = false, double minRange = 0.0, double maxRange = 0.0, int noOfLabels = 3)
+        \brief Enable scale bar display with the title provided.
+
+        Quiet Boolean is to prevent possible popups to ask user parameters.
+    */
+    virtual void enableScale(QString title = "", const bool quiet = false, double minRange = 0.0, double maxRange = 0.0, int noOfLabels = 3);
+    /*!
+        \fn milxQtImage::scaleDisplay(const bool forceDisplay = false)
+        \brief Toggles the scale bar display.
+
+        forceDisplay Boolean is to overide possible previous settings and display bar.
+    */
+    virtual void scaleDisplay(const bool forceDisplay = false);
+    /*!
+        \fn milxQtImage::showCrosshair()
+        \brief Show the cursor/crosshair for marking depending on action. Image must be generated before calling.
+    */
+    virtual void showCrosshair(const bool quietly = false);
+    /*!
+        \fn milxQtImage::enableCrosshair()
+        \brief Enables the cursor/crosshair for marking. Image must be generated before calling.
+    */
+    virtual inline void enableCrosshair()
+    {
+        if(viewerSetup)
+        {
+            viewer->EnableCursor();
+            cursorAct->setChecked(true);
+        }
+    }
+    /*!
+        \fn milxQtImage::disableCrosshair()
+        \brief removes the cursor/crosshair.
+    */
+    virtual inline void disableCrosshair()
+    {
+        viewer->DisableCursor();
+        cursorAct->setChecked(false);
+    }
+    /*!
+        \fn milxQtImage::enableCrosshairPointer()
+        \brief Enables the mouse pointer as a crosshair instead. Scene must be rendered before calling.
+    */
+    virtual inline void enableCrosshairPointer()
+    {
+        if(rendered)
+        {
+            viewer->GetRenderWindow()->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
+            crosshairAct->setChecked(true);
+        }
+    }
+    /*!
+        \fn milxQtImage::disableCrosshairPointer()
+        \brief Restores the mouse pointer to default.
+    */
+    virtual inline void disableCrosshairPointer()
+    {
+        viewer->GetRenderWindow()->SetCurrentCursor(0);
+        crosshairAct->setChecked(false);
+    }
+    /*!
         \fn milxQtImage::setView(int viewMode)
         \brief Change view to view mode identified by number.
         0-axial, 1-coronal, 2-sagittal
@@ -994,6 +1106,21 @@ public slots:
         \brief Change view to zy-plane.
     */
     virtual void viewToZYPlane();
+    /*!
+    \fn milxQtImage::setCrosshairPosition(double *position)
+    \brief Set the position of the Crosshair
+    */
+    inline void setCrosshairPosition(double *position)
+    {
+        viewer->SetCursorFocalPoint(position);
+        viewer->UpdateCursor();
+    }
+    /*!
+    \fn milxQtImage::getCrosshairPosition(double *position)
+    \brief Get the position of the Crosshair
+    */
+    inline double* getCrosshairPosition()
+    {   return viewer->GetCursorFocalPoint();   }
     /*!
         \fn milxQtImage::updateLookupTable()
         \brief Sets the necessary LUTs to model view.
@@ -1177,12 +1304,14 @@ protected:
     vtkSmartPointer<vtkImageData> imageData; //!< Points to the current VTK Image Data, Smart Pointer
     vtkSmartPointer<vtkImageAppend> imageDataAppended; //!< Appended Data
     vtkSmartPointer<vtkImagePermute> permute; //!< Permute axis class, Smart Pointer
+    vtkSmartPointer<vtkImageAccumulate> hist; //!< Histogram filter, allocated on histogram() call
     QList<ModelActorItem> modelActors; //!< Model actors being displayed in image view
 
     itkEventQtObserver::Pointer observeProgress; //!< Observer for the Qt event loop
 
     ///Other Variables
     double meanValue; //!< Average data value currently held
+    double stddevValue; //!< Std deviation data value currently held
     double minValue; //!< min value in image
     double maxValue; //!< max value in image
 
@@ -1195,6 +1324,7 @@ protected:
     QAction* computeContourAct; //!< Action for contouring image
     QAction* smoothAct; //!< Action for smoothing of image
     QAction* gaussianAct; //!< Action for Gaussian smoothing of image
+    QAction* bilateralAct; //!< Action for bilateral smoothing of image
     QAction* medianAct; //!< Action for median smoothing of image
     QAction* gradMagAct; //!< Action for gradient magnitude of image
     QAction* sobelAct; //!< Action for sobel edges of image
@@ -1246,6 +1376,7 @@ protected:
     QAction* infoAct; //!< Action for displaying information about the image.
     QAction* interpolateAct; //!< Interpolate image?
     QAction* orientAct; //!< Orient image?
+    QAction* cursorAct; //!< Show cursor?
 
     /*!
     	\fn milxQtImage::updateData(const bool orient = true)
