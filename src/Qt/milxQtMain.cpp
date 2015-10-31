@@ -1060,83 +1060,98 @@ void milxQtMain::predisplay(milxQtImage* newImage)
     const size_t numberOfWindows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList().size();
 
     if(defaultViewTypeBox->currentIndex() != SINGLE && numberOfWindows > 0)
-      newTab();
+        newTab();
     else if(defaultViewTypeBox->currentIndex() == SINGLE)
     {
-      newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      display(newImage);
+        newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        display(newImage);
     }
 
     if(defaultViewTypeBox->currentIndex() != SINGLE) //Are we displaying scanner like three views + 3D view?
     {
-      //Axial view
-      newImage->setNamePrefix("Axial: ");
-      newImage->setName(filename);
-      newImage->disableDefaultView();//ignore default view
-      newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      newImage->viewToAxial();
-      display(newImage);
+        int ret = QMessageBox::Yes;
+        if (actionLinkWindows->isChecked())
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Linked Views mode detected and has to be disabled for multi-view.");
+            msgBox.setInformativeText("Do you want to disable link views and continue?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            ret = msgBox.exec();
+        }
+        if (ret == QMessageBox::No)
+            return;
+        else if (actionLinkWindows->isChecked())
+            actionLinkWindows->setChecked(false);
 
-      //Sagittal view
-      QPointer<milxQtImage> imgSagittal = new milxQtImage;  //list deletion
-      imgSagittal->setDisplayData(newImage);
-      imgSagittal->setNamePrefix("Sagittal: ");
-      imgSagittal->setName(filename);
-      imgSagittal->setConsole(console);
-      imgSagittal->disableDefaultView();
-      imgSagittal->generateImage();
-      imgSagittal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      imgSagittal->viewToSagittal();
-      display(imgSagittal);
+        //Axial view
+        newImage->setNamePrefix("Axial: ");
+        newImage->setName(filename);
+        newImage->disableDefaultView();//ignore default view
+        newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        newImage->viewToAxial();
+        display(newImage);
 
-      //Coronal view
-      QPointer<milxQtImage> imgCoronal = new milxQtImage;  //list deletion
-      imgCoronal->setDisplayData(newImage);
-      imgCoronal->setNamePrefix("Coronal: ");
-      imgCoronal->setName(filename);
-      imgCoronal->setConsole(console);
-      imgCoronal->disableDefaultView();
-      imgCoronal->generateImage();
-      imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      imgCoronal->viewToCoronal();
-      display(imgCoronal);
+        //Sagittal view
+        QPointer<milxQtImage> imgSagittal = new milxQtImage;  //list deletion
+        imgSagittal->setDisplayData(newImage);
+        imgSagittal->setNamePrefix("Sagittal: ");
+        imgSagittal->setName(filename);
+        imgSagittal->setConsole(console);
+        imgSagittal->disableDefaultView();
+        imgSagittal->generateImage();
+        imgSagittal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        imgSagittal->viewToSagittal();
+        display(imgSagittal);
 
-      //3D view
-      QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
-      slicesView->setNamePrefix("3D View: ");
-      slicesView->setName(filename);
-      slicesView->setConsole(console);
-      slicesView->addImageActor(newImage->GetImageActor(), newImage->getTransformMatrix());
-      slicesView->addImageActor(imgSagittal->GetImageActor(), imgSagittal->getTransformMatrix());
-      slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
-      //slicesView->addActor(newImage->GetCursorActor(), newImage->getTransformMatrix());
-      slicesView->generateRender();
+        //Coronal view
+        QPointer<milxQtImage> imgCoronal = new milxQtImage;  //list deletion
+        imgCoronal->setDisplayData(newImage);
+        imgCoronal->setNamePrefix("Coronal: ");
+        imgCoronal->setName(filename);
+        imgCoronal->setConsole(console);
+        imgCoronal->disableDefaultView();
+        imgCoronal->generateImage();
+        imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        imgCoronal->viewToCoronal();
+        display(imgCoronal);
 
-      //setup tracking slices and crosshairs
-      newImage->trackView(imgSagittal, AXIAL);
-      newImage->trackView(imgCoronal, AXIAL);
-      imgSagittal->trackView(newImage, SAGITTAL);
-      imgSagittal->trackView(imgCoronal, SAGITTAL);
-      imgCoronal->trackView(newImage, CORONAL);
-      imgCoronal->trackView(imgSagittal, CORONAL);
+        //3D view
+        QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
+        slicesView->setNamePrefix("3D View: ");
+        slicesView->setName(filename);
+        slicesView->setConsole(console);
+        slicesView->addImageActor(newImage->GetImageActor(), newImage->getTransformMatrix());
+        slicesView->addImageActor(imgSagittal->GetImageActor(), imgSagittal->getTransformMatrix());
+        slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
+        //slicesView->addActor(newImage->GetCursorActor(), newImage->getTransformMatrix());
+        slicesView->generateRender();
 
-      ///Here we use the Qt signals and slots directly as it was found that the VTK-Qt connector caused problems
-      ///with the image actors.
-      connect(newImage, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      connect(imgSagittal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      connect(imgCoronal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      ///link the data properties too, one change updates others
-      connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        //setup tracking slices and crosshairs
+        newImage->trackView(imgSagittal, AXIAL);
+        newImage->trackView(imgCoronal, AXIAL);
+        imgSagittal->trackView(newImage, SAGITTAL);
+        imgSagittal->trackView(imgCoronal, SAGITTAL);
+        imgCoronal->trackView(newImage, CORONAL);
+        imgCoronal->trackView(imgSagittal, CORONAL);
 
-      display(slicesView);
+        ///Here we use the Qt signals and slots directly as it was found that the VTK-Qt connector caused problems
+        ///with the image actors.
+        connect(newImage, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        connect(imgSagittal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        connect(imgCoronal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        ///link the data properties too, one change updates others
+        connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
 
-      updateQtEvents(); //ensure all complete before tiling
-      tileTab();
+        display(slicesView);
+
+        updateQtEvents(); //ensure all complete before tiling
+        tileTab();
   }
 }
 
