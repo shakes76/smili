@@ -10,6 +10,7 @@ When subclassing windows such as models or images, you should
 Linked Views -------
 milxQtMain::transferViewToWindows holds the implementation of link windows.
 All windows make connection to this member and executed if actionLinkWindows->isChecked()
+A connection is made between the ModifiedEvent in VTK to the transferViewToWindows() function.
 
 Image Slices (Changing) -------
 Slices are changed using mouse wheel in vtkInteractorStyleImage2.
@@ -17,3 +18,37 @@ The arrow keys change slices in updateSlice of milxQtImage
 
 Tracking Views in Images -------
 This mode is for linking images in multi-view
+
+Auto Level ---------
+Based on standard approaches to auto level such as in ITK SNAP, percentiles are used to exclude pixels in the outlier ranges.
+Window levels are then set as:
+There is a diagram:
+             ____________
+            /
+           /
+__________/
+         | ^ |
+           L
+         <-W->
+
+This is my understanding:
+
+Level (L) designates the center of the range of values mapped to
+grayscale. Window designates the extent of the range to either side of the
+level. Thus, the range mapped is (level-window/2) to (level+window/2). For
+a positive window value, regions less than (level-window/2) are clamped to
+black and regions greater than (level+window/2) are clamped to white.
+Regions at (level) are 50% gray. With a negative window value you get the
+inverse image.
+
+Ed Bachta
+ebachta at ncsa.uiuc.edu
+
+In SMILI, we use 1% trimmed histogram to determine the window and place the level in the middle of the window. The limits of the window are determined by proportion of 0.99 from the top and bottom of the histogram.
+
+Image Cursor ---------
+Since the cursor is supposed to be shown on multiple image windows for identifying the same position in R3, the cursor needs to be shared between image windows.
+There were two options. There could be a cursor per tab (or in total) in milxQtMain or a cursor per viewer that could use the Left click event to update and transferViewToWindows() function to copy to other windows.
+RsliceCursorWidget has a cursor widget: http://www.vtk.org/gitweb?p=VTK.git;a=blob;f=Examples/GUI/Qt/FourPaneViewer/QtVTKRenderWindows.cxx
+I have chosen to employ parts of the ResliceCursorWidget class for the cursor in SMILI. The cursor is implemented in vtkImageViewer3 using vtkResliceCursor and vtkResliceCursorActor.
+Track view enables the cursor and then sets all the window cursor the same just as in QtVTKRenderWindows app.
