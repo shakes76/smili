@@ -199,11 +199,12 @@ public:
       #if(VTK_MAJOR_VERSION > 5)
         this->IV->GetCursor()->SetCenter(picked[0], picked[1], picked[2]);
       #else
-        this->IV->GetCursor()->SetModelBounds(this->IV->GetImageActor()->GetBounds());
+        this->IV->GetCursor()->SetModelBounds(this->IV->GetInput()->GetBounds());
         this->IV->GetCursor()->SetFocalPoint(picked[0], picked[1], picked[2]);
       #endif
         this->IV->GetCursor()->Update();
         this->IV->GetRenderWindow()->Modified();
+        this->IV->UpdateDisplayExtent();
       }
     }
 
@@ -400,7 +401,7 @@ void vtkImageViewer3::EnableCursor()
 #else
   if (!cursor)
     cursor = vtkCursor3D::New();
-  cursor->SetModelBounds(this->GetImageActor()->GetBounds());
+  cursor->SetModelBounds(this->GetInput()->GetBounds());
   cursor->AllOn();
   cursor->OutlineOff();
 
@@ -417,6 +418,7 @@ void vtkImageViewer3::EnableCursor()
 
   this->Renderer->AddActor(cursorActor);
   this->Modified();
+  this->GetRenderWindow()->Modified();
   this->UpdateDisplayExtent();
   this->Render();
   CursorEnabled = true;
