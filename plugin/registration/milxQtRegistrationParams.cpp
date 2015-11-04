@@ -2,6 +2,12 @@
 
 milxQtRegistrationParams::milxQtRegistrationParams()
 {
+    reset();
+}
+
+
+void milxQtRegistrationParams::reset()
+{
     referenceName = "";
     floatingName = "";
     outputName = "";
@@ -12,7 +18,6 @@ milxQtRegistrationParams::milxQtRegistrationParams()
     parameterFile = "";
     customParameterFile = false;
 }
-
 
 milxQtRegistrationParams::~milxQtRegistrationParams()
 {

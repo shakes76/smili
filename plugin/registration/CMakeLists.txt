@@ -15,8 +15,7 @@ INCLUDE(${QT_USE_FILE})
 OPTION(USE_NIFTI "Use Nifti registration library" OFF)
 OPTION(USE_ELASTIX "Use Elastix registration library" OFF)
 
-
-# NiftiReg Options		
+# NiftiReg Options
 # Nifti reg
 IF(USE_NIFTI)
 	IF(WIN32)

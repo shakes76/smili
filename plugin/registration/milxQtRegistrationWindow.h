@@ -146,6 +146,13 @@ public:
     */
     QString getDefaultOutputFolder();
 
+    /*
+    \fn milxQtRegistrationWindow::writeSimilarities()
+    \brief Write the similarities file
+    */
+    void writeSimilarities();
+
+
 #ifdef USE_NIFTI
     /*!
         \fn milxQtRegistrationWindow::computeAtlas()

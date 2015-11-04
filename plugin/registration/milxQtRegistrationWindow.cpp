@@ -269,6 +269,7 @@ void milxQtRegistrationWindow::disableUI()
     this->ui.btnSelectAll->setDisabled(true);
     this->ui.btnUnselectAll->setDisabled(true);
     this->ui.clearList->setDisabled(true);
+    this->ui.checkBoxSimilarities->setDisabled(true);
 
     // Disable checkboxes
     for (int row = 0; row < this->ui.listWidget->count(); row++)
@@ -295,6 +296,7 @@ void milxQtRegistrationWindow::enableUI()
     this->ui.btnSelectAll->setDisabled(false);
     this->ui.btnUnselectAll->setDisabled(false);
     this->ui.clearList->setDisabled(false);
+    this->ui.checkBoxSimilarities->setDisabled(false);
 
     // Disable checkboxes
     for (int row = 0; row < this->ui.listWidget->count(); row++)
@@ -398,6 +400,13 @@ void milxQtRegistrationWindow::updateParameters()
         ref->setIsRef(true);
     }
 
+    // If we have to compute similarities
+    bool computeSimilarities = false;
+    if (this->ui.checkBoxSimilarities->isChecked())
+    {
+        computeSimilarities = true;
+    }
+
     // Get the output folder
     QString outFolder = this->ui.inputDirectoryBrowser->text();
     if (!QDir(outFolder).exists())
@@ -459,6 +468,9 @@ void milxQtRegistrationWindow::updateParameters()
         {
             images[i]->setParams(getParamsElastixBSpline());
         }
+
+        // We set if we have to compute the similarities
+        images[i]->setComputeSimilarities(computeSimilarities);
     }
 }
 
@@ -762,6 +774,12 @@ void milxQtRegistrationWindow::performRegistrations()
     // If all the registration are done
     if (i == images.size())
     {
+        // If we have to write the similarities
+        if (this->ui.checkBoxSimilarities->isChecked())
+        {
+            writeSimilarities();
+        }
+
         // If we have to compute the average
         if (computeAverage)
         {
@@ -777,6 +795,78 @@ void milxQtRegistrationWindow::performRegistrations()
     }
 
 }
+
+// Write the similarities file
+void milxQtRegistrationWindow::writeSimilarities()
+{
+    // Find the reference images
+    int indexRef = 0;
+    for (indexRef = 0; indexRef < images.size(); indexRef++)
+    {
+        if (images[indexRef]->isRef())
+        {
+            break;
+        }
+    }
+
+    // Write the similarity file before the registration (i == 0) and after the registration (i == 1)
+    for (int i = 0; i < 2; i++)
+    {
+        // Create the file
+
+        QString similarityFile;
+
+        if (i == 0)
+            similarityFile = images[indexRef]->createSimilarityFileBefore();
+        else if (i == 1)
+            similarityFile = images[indexRef]->createSimilarityFileAfter();
+
+        // Write the CSV
+        QFile file(similarityFile);
+
+        if (file.open(QIODevice::ReadWrite))
+        {
+            QTextStream stream(&file);
+            // Create the header
+            stream << "Reference;Registered Image;Output Image;Computation Time;NMI;SSD;NCC;LNCC\n";
+
+            // Loop through the images
+            for (int j = 0; j < images.size(); j++)
+            {
+                if (images[j]->isWorkDone() || images[j]->isChecked())
+                {
+                    milxQtSimilarities similarities;
+
+                    if (i == 0)
+                        similarities = images[j]->similarities_before;
+                    else if (i == 1)
+                        similarities = images[j]->similarities_after;
+
+                    // Write results in textfile
+                    stream << images[indexRef]->getPath() << ";";
+                    stream << images[j]->getPath() << ";";
+                    stream << images[j]->getOutputPath() << ";";
+
+                    if (i == 0)
+                        stream << "0;";
+                    else if (i == 1)
+                        stream << images[j]->getDuration() << ";";
+
+
+                    stream << similarities.nmi << ";";
+                    stream << similarities.ssd << ";";
+                    stream << similarities.ncc << ";";
+                    stream << similarities.lncc;
+                    stream << "\n";
+                }
+            }
+
+            file.close();
+        }
+    }
+}
+
+
 #ifdef USE_NIFTI
 // compute the average of all the registrations
 void milxQtRegistrationWindow::computeAtlas()
@@ -820,6 +910,12 @@ void milxQtRegistrationWindow::workCompleted()
     // Message box: registration completed
     QMessageBox msgBox(QMessageBox::Information, "Registration", "Registration completed !", QMessageBox::NoButton);
     msgBox.exec();
+
+    // Reset images
+    for (int i = 0; i < images.size(); i++)
+    {
+        images[i]->reset();
+    }
 
     // If the files were not opened in SMILI we open the output folder
     if (!this->ui.checkBoxOpenResults->isChecked())

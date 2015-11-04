@@ -63,7 +63,6 @@ BioMedIA Lab: http://www.ict.csiro.au/BioMedIA/
 
 #include <itkTimeProbesCollectorBase.h>
 #include <itkTransformFileWriter.h>
-
 #if ITK_VERSION_MAJOR < 4
 #include <itkOrientedImage.h>
 #include <itkBSplineDeformableTransform.h>
@@ -1012,6 +1011,7 @@ Registration
 
     return true;
 }
+
 
 bool
 Registration

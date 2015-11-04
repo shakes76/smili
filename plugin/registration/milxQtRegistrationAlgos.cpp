@@ -1,4 +1,5 @@
 #include "milxQtRegistrationAlgos.h"
+#include "milxQtRegistration.h"
 
 milxQtRegistrationAlgos::milxQtRegistrationAlgos(QObject * parent) : QObject(parent)
 {
@@ -13,11 +14,6 @@ void milxQtRegistrationAlgos::affine_async(milxQtRegistrationParams params)
 void milxQtRegistrationAlgos::demon_async(milxQtRegistrationParams params)
 {
     future = QtConcurrent::run(this, &milxQtRegistrationAlgos::demon, params);
-}
-
-double milxQtRegistrationAlgos::nmi(char ref[FILENAME_MAX + 1], char img[FILENAME_MAX + 1])
-{
-    return 0;
 }
 
 int milxQtRegistrationAlgos::affine(milxQtRegistrationParams params)
@@ -92,6 +88,12 @@ void milxQtRegistrationAlgos::aladin_async(milxQtRegistrationParams params)
 void milxQtRegistrationAlgos::average_async(QString outputName, QStringList filenames)
 {
     future = QtConcurrent::run(this, &milxQtRegistrationAlgos::average, outputName, filenames);
+}
+
+
+void milxQtRegistrationAlgos::similarities_async(milxQtRegistration * image)
+{
+    future = QtConcurrent::run(this, &milxQtRegistrationAlgos::similarities, image);
 }
 
 int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
@@ -1207,6 +1209,93 @@ int milxQtRegistrationAlgos::aladin(milxQtRegistrationParams params)
     emit registrationCompleted();
     return 0;
 }
+
+int milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
+{
+    QString program = "reg_measure";
+    milxQtSimilarities similarities;
+
+    // We compute the similarity before the registration (i == 0) and after the registration (i == 1)
+    for (int i = 0; i < 2; i++)
+    {
+        QStringList arguments;
+        arguments << "-ref" << image->reference->getPath();
+
+        if (i == 0)
+            arguments << "-flo" << image->getPath();
+        else if (i == 1)
+            arguments << "-flo" << image->getOutputPath();
+
+        QString similarityOutput = image->createFile(QDir::tempPath() + QDir::separator() + "similarity_XXXXXX.txt");
+        arguments << "-out" << similarityOutput;
+
+        arguments << "-ncc" << "-lncc" << "-nmi" << "-ssd";
+
+        /*
+        QString test2 = "";
+        for (int j = 0; j < arguments.size(); j++)
+        {
+            QString test = arguments[j];
+            test2 = test2 + test + " ";
+        }
+        */
+
+        // Call reg_measure
+        QProcess *myProcess = new QProcess(this);
+        myProcess->start(program, arguments);
+        myProcess->waitForFinished();
+
+        // Read the results
+        QFile inputFile(similarityOutput);
+        if (inputFile.open(QIODevice::ReadOnly))
+        {
+            int lineNumber = 0;
+            QTextStream in(&inputFile);
+            while (!in.atEnd())
+            {
+                QString line = in.readLine();
+                bool ok = false;
+                double value = line.toDouble(&ok);
+
+                if (ok && lineNumber == 0) {
+                    similarities.ncc = value;
+                }
+                else if (ok && lineNumber == 1) {
+                    similarities.lncc = value;
+                }
+                else if (ok && lineNumber == 2) {
+                    similarities.nmi = value;
+                }
+                else if (ok && lineNumber == 3) {
+                    similarities.ssd = value;
+                }
+
+                lineNumber++;
+            }
+
+            if (i == 0)
+                image->similarities_before = similarities;
+            else if (i == 1)
+                image->similarities_after = similarities;
+
+
+            inputFile.close();
+        }
+
+        // Remove the file
+        if (QFile::exists(similarityOutput))
+        {
+            QFile::remove(similarityOutput);
+        }
+
+        delete myProcess;
+    }
+
+
+    emit similaritiesComputed();
+    return 0;
+}
+
 #endif
 
 #ifdef USE_ELASTIX
