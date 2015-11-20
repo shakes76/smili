@@ -60,7 +60,7 @@ void milxQtRegistrationWindow::initUI()
     QStringList algoList;
     algoList << "Affine (ITK)" << "Demon (ITK)";
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     algoList << "F3D (Nifti)" << "Aladin (Nifti)";
 #endif
 
@@ -71,7 +71,7 @@ void milxQtRegistrationWindow::initUI()
     this->ui.comboBoxAlgo->addItems(algoList);
 
     // If we don't have nifti we can't compute the atlas and we can't compute the deformation field
-#ifndef USE_NIFTI
+#ifndef USE_NIFTI_REG
     this->ui.checkBoxCreateAtlas->setVisible(false);
     this->ui.checkBoxDeformationF->setVisible(false);
 #endif
@@ -783,7 +783,7 @@ void milxQtRegistrationWindow::performRegistrations()
         // If we have to compute the average
         if (computeAverage)
         {
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
             computeAtlas();
 #endif
         }
@@ -867,7 +867,7 @@ void milxQtRegistrationWindow::writeSimilarities()
 }
 
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
 // compute the average of all the registrations
 void milxQtRegistrationWindow::computeAtlas()
 {

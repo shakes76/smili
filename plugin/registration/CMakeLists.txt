@@ -12,12 +12,12 @@ FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
 INCLUDE(${QT_USE_FILE})
 
 # Options: library to use
-OPTION(USE_NIFTI "Use Nifti registration library" OFF)
+OPTION(USE_NIFTI_REG "Use Nifti registration library" OFF)
 OPTION(USE_ELASTIX "Use Elastix registration library" OFF)
 
 # NiftiReg Options
 # Nifti reg
-IF(USE_NIFTI)
+IF(USE_NIFTI_REG)
 	IF(WIN32)
 		IF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS $ENV{ProgramW6432}) #Win64 environment
 			set(NIFTI_REG_DIR $ENV{ProgramW6432}/NiftyReg CACHE STRING "NIFTI REG - Base Directory")
@@ -30,14 +30,14 @@ IF(USE_NIFTI)
 	ENDIF(UNIX)
 	MARK_AS_ADVANCED(NIFTI_REG_DIR)
 	message("Using NIFTI REG from ${NIFTI_REG_DIR}")
-	set(NIFTI_REG_LIBS _reg_aladin _reg_blockMatching _reg_f3d _reg_femTransformation _reg_globalTransformation _reg_KLdivergence _reg_localTransformation _reg_maths _reg_mutualinformation _reg_ReadWriteImage _reg_resampling _reg_ssd _reg_thinPlateSpline _reg_tools reg_nifti reg_nrrd reg_png z png)
+	set(NIFTI_REG_LIBS _reg_aladin _reg_blockMatching _reg_dti _reg_f3d _reg_femTransformation _reg_globalTransformation _reg_KLdivergence _reg_lncc _reg_localTransformation _reg_maths _reg_nmi _reg_optimiser _reg_ReadWriteImage _reg_resampling _reg_ssd _reg_thinPlateSpline _reg_tools reg_nifti reg_nrrd reg_NrrdIO reg_png z png)
 
 	include_directories (${NIFTI_REG_DIR}/include)
 	link_directories(${SMILI_BINARY_DIR}/lib ${NIFTI_REG_DIR}/lib)
 	
 	set(LIBS ${LIBS} ${NIFTI_REG_LIBS})
-	add_definitions(-DUSE_NIFTI)
-ENDIF(USE_NIFTI)
+	add_definitions(-DUSE_NIFTI_REG)
+ENDIF(USE_NIFTI_REG)
 
 # Elastix
 IF(USE_ELASTIX)

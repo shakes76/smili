@@ -145,7 +145,7 @@ void milxQtRegistrationPlugin::createActions()
     actionItkDemon = new QAction(MainWindow);
     actionItkDemon->setText(QApplication::translate("RegistrationPlugin", "Demon (Itk)"));
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     actionF3DNifti = new QAction(MainWindow);
     actionF3DNifti->setText(QApplication::translate("RegistrationPlugin", "Free Form Deformation (Nifti)", 0, QApplication::UnicodeUTF8));
 
@@ -172,7 +172,7 @@ void milxQtRegistrationPlugin::createMenu()
     menu->addAction(actionItkAffine);
     menu->addAction(actionItkDemon);
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     menu->addAction(actionF3DNifti);
     menu->addAction(actionAladinNifti);
 #endif
@@ -191,7 +191,7 @@ void milxQtRegistrationPlugin::createConnections()
     connect(actionItkAffine, SIGNAL(activated()), this, SLOT(ItkAffineRegistrationSlot()));
     connect(actionItkDemon, SIGNAL(activated()), this, SLOT(ItkDemonRegistrationSlot()));
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     connect(actionF3DNifti, SIGNAL(activated()), this, SLOT(F3DNiftiRegistrationSlot()));
     connect(actionAladinNifti, SIGNAL(activated()), this, SLOT(AladinNiftiRegistrationSlot()));
 #endif
@@ -217,7 +217,7 @@ void milxQtRegistrationPlugin::ItkDemonRegistrationSlot()
     regWindow->show();
 }
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
 // F3DNifti Registration slot
 void milxQtRegistrationPlugin::F3DNiftiRegistrationSlot()
 {

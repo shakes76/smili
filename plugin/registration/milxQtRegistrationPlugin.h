@@ -182,7 +182,7 @@ public slots:
     */
     void ItkDemonRegistrationSlot();
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /**
     \fn F3DNiftiRegistrationSlot()
     \brief Slot for the F3D registration button
@@ -218,7 +218,7 @@ protected:
     QAction* actionItkAffine; //!< Itk Affine action
     QAction* actionItkDemon; //!< Itk Demon action
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     QAction* actionF3DNifti; //!< F3D registration action
     QAction* actionAladinNifti; //!< Aladin registration action
 #endif

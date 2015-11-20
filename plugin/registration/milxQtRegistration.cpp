@@ -25,7 +25,7 @@ int milxQtRegistration::startRegistration()
         MainWindow->printInfo("New Itk Demon registration started.\n");
         this->regAlgos->demon_async(params);
     }
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     else if (this->type == AladinNifti)
     {
         MainWindow->printInfo("New Nifti Aladin registration started.\n");
@@ -278,7 +278,7 @@ void milxQtRegistration::registrationCompleted()
         MainWindow->loadFile(params.outputName);
     }
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     // If we have to calculate the cpp2def, we start it
     if (this->type == F3DNifti && params.cpp2Def)
     {
@@ -407,7 +407,7 @@ void milxQtRegistration::init(QString filepath)
     connect(this->regAlgos, SIGNAL(registrationCompleted()), this, SLOT(registrationCompleted()));
     connect(this->regAlgos, SIGNAL(error(QString, QString)), this, SLOT(algoError(QString, QString)));
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     // Add a listener (cpp2def completed) if we have nifti library
     connect(this->regAlgos, SIGNAL(cpp2defCompleted()), this, SLOT(cpp2defCompleted()));
 

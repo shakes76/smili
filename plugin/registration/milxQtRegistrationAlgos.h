@@ -26,7 +26,7 @@
 
 class milxQtRegistration;
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
 #include "_reg_ReadWriteImage.h"
 #include "_reg_f3d2.h"
 #include "_reg_ReadWriteImage.h"
@@ -111,7 +111,7 @@ public:
     */
     void demon_async(milxQtRegistrationParams params);
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationAlgos::cpp2def(milxQtRegistrationParams params)
         \brief Cpp to deformation field transformation using Nifti Reg Library
@@ -207,7 +207,7 @@ signals:
     */
     void error(QString functionName, QString errorMsg);
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationAlgos::cpp2defCompleted()
         \brief The transformation from cpp to deformation field has been completed

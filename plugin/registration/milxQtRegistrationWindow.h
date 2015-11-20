@@ -153,7 +153,7 @@ public:
     void writeSimilarities();
 
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationWindow::computeAtlas()
         \brief Compute the average (Atlas) of all the registrations

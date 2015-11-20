@@ -98,14 +98,14 @@ public:
     void setOutputFolder(QString);
 
     /*!
-        \fn milxQtRegistration::milxQtRegistration()
+        \fn milxQtRegistration::isOpened()
         \brief Is the image open in SMILi
     */
     bool isOpened();
 
     /*!
-        \fn milxQtRegistration::milxQtRegistration()
-        \brief Start the registration
+        \fn milxQtRegistration::startRegistration()
+        \brief Start the registrationf
     */
     int startRegistration();
 
