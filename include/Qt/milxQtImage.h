@@ -643,10 +643,10 @@ public slots:
     virtual void contour();
 
     /**
-        \fn milxQtImage::autoLevel()
+        \fn milxQtImage::autoLevel(float percentile=0.99)
         \brief Auto window level the display. Uses Otsu threshold value.
     */
-    void autoLevel();
+    void autoLevel(float percentile=0.99);
 /**
         \fn milxQtImage::setLevel(int level)
         \brief Set window level the display to proportion of maxValue.
@@ -972,6 +972,16 @@ public slots:
         \brief Subtracts img from current image.
     */
     void subtract(QString filename = "");
+    /**
+    \fn milxQtImage::multiply(milxQtImage *img)
+    \brief Multiplies img to current image.
+    */
+    void multiply(milxQtImage *img);
+    /**
+    \fn milxQtImage::multiply(QString filename = "")
+    \brief Multiplies img to current image.
+    */
+    void multiply(QString filename = "");
     /**
         \fn milxQtImage::scale(float scaling)
         \brief scales the intensities of current images.

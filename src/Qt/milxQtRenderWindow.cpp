@@ -956,6 +956,30 @@ void milxQtRenderWindow::colourMapToGray(double minRange, double maxRange)
     updateLookupTable();
 }
 
+void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
+{
+    double range[2];
+    if(minRange == 0.0 && maxRange == 0.0)
+        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+    else
+    {
+        range[0] = minRange;
+        range[1] = maxRange;
+    }
+
+    milx::ColourMap *colours = new milx::ColourMap;
+    colours->toSeismic();
+    colours->SetRange(range);
+
+    lookupTable = colours->GetOutput();
+
+    if(!actionSeismic->isChecked())
+        actionSeismic->setChecked(true);
+
+    logScale = false;
+    updateLookupTable();
+}
+
 void milxQtRenderWindow::colourMapToLogGray(double minRange, double maxRange)
 {
     double range[2];
@@ -1263,6 +1287,30 @@ void milxQtRenderWindow::colourMapToCubeHelix(double minRange, double maxRange)
 
     if(!actionCubeHelix->isChecked())
         actionCubeHelix->setChecked(true);
+
+    logScale = false;
+    updateLookupTable();
+}
+
+void milxQtRenderWindow::colourMapToHSV(double minRange, double maxRange)
+{
+    double range[2];
+    if(minRange == 0.0 && maxRange == 0.0)
+        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+    else
+    {
+        range[0] = minRange;
+        range[1] = maxRange;
+    }
+
+    milx::ColourMap *colours = new milx::ColourMap;
+    colours->toHSV();
+    colours->SetRange(range);
+
+    lookupTable = colours->GetOutput();
+
+    if(!actionHSV->isChecked())
+        actionHSV->setChecked(true);
 
     logScale = false;
     updateLookupTable();
@@ -1706,6 +1754,9 @@ void milxQtRenderWindow::createActions()
 //    actionLogGray->setText(QApplication::translate("Render", "Gray (Log 10)", 0, QApplication::UnicodeUTF8));
     actionLogGray->setCheckable(true);
     actionLogGray->setChecked(false);
+    actionSeismic = new LabelledAction("Seismic", QPixmap(":resources/cmaps/cm_seismic.png"));
+    actionSeismic->setCheckable(true);
+    actionSeismic->setChecked(false);
     actionNIH = new LabelledAction("NIH", QPixmap(":resources/cmaps/cm_nih.png"), this);
 //    actionNIH->setText(QApplication::translate("Render", "NIH", 0, QApplication::UnicodeUTF8));
     actionNIH->setCheckable(true);
@@ -1760,6 +1811,9 @@ void milxQtRenderWindow::createActions()
 //    actionCubeHelix->setIcon(QIcon(":resources/cmaps/cm_gnuplot.png"));
     actionCubeHelix->setCheckable(true);
     actionCubeHelix->setChecked(false);
+    actionHSV = new LabelledAction("HSV", QPixmap(":resources/cmaps/cm_hsv.png"), this);
+    actionHSV->setCheckable(true);
+    actionHSV->setChecked(false);
     mapGroup = new QActionGroup(this);
     mapGroup->addAction(actionDefault);
     mapGroup->addAction(actionJet);
@@ -1767,6 +1821,7 @@ void milxQtRenderWindow::createActions()
     mapGroup->addAction(actionInvRainbow);
     mapGroup->addAction(actionGray);
     mapGroup->addAction(actionLogGray);
+    mapGroup->addAction(actionSeismic);
     mapGroup->addAction(actionNIH);
     mapGroup->addAction(actionNIH_FIRE);
     mapGroup->addAction(actionAAL);
@@ -1832,6 +1887,7 @@ void milxQtRenderWindow::createConnections()
     connect(actionInvRainbow, SIGNAL(triggered()), this, SLOT(colourMapToVTK()));
     connect(actionGray, SIGNAL(triggered()), this, SLOT(colourMapToGray()));
     connect(actionLogGray, SIGNAL(triggered()), this, SLOT(colourMapToLogGray()));
+    connect(actionSeismic, SIGNAL(triggered()), this, SLOT(colourMapToSeismic()));
     connect(actionNIH, SIGNAL(triggered()), this, SLOT(colourMapToNIH()));
     connect(actionNIH_FIRE, SIGNAL(triggered()), this, SLOT(colourMapToNIH_Fire()));
     connect(actionAAL, SIGNAL(triggered()), this, SLOT(colourMapToAAL()));
@@ -1844,6 +1900,7 @@ void milxQtRenderWindow::createConnections()
     connect(actionSpectral, SIGNAL(triggered()), this, SLOT(colourMapToSpectral()));
     connect(actionGNUPlot, SIGNAL(triggered()), this, SLOT(colourMapToGNUPlot()));
     connect(actionCubeHelix, SIGNAL(triggered()), this, SLOT(colourMapToCubeHelix()));
+    connect(actionHSV, SIGNAL(triggered()), this, SLOT(colourMapToHSV()));
     connect(saveViewAct, SIGNAL(triggered()), this, SLOT(saveView()));
     connect(loadViewAct, SIGNAL(triggered()), this, SLOT(loadView()));
     connect(saveViewFileAct, SIGNAL(triggered()), this, SLOT(saveViewFile()));
@@ -1867,6 +1924,7 @@ QMenu* milxQtRenderWindow::colourMapsMenu()
     colourMapMenu->addAction(actionRainbow);
     colourMapMenu->addAction(actionGray);
     colourMapMenu->addAction(actionLogGray);
+    colourMapMenu->addAction(actionSeismic);
     colourMapMenu->addAction(actionSpectral);
     colourMapMenu->addAction(actionGNUPlot);
     colourMapMenu->addAction(actionBone);
@@ -1874,6 +1932,7 @@ QMenu* milxQtRenderWindow::colourMapsMenu()
     colourMapMenu->addAction(actionCOOL);
     colourMapMenu->addAction(actionCOOLWARM);
     colourMapMenu->addAction(actionCubeHelix);
+    colourMapMenu->addAction(actionHSV);
     colourMapMenu->addAction(actionInvRainbow);
     colourMapMenu->addAction(actionNIH);
     colourMapMenu->addAction(actionNIH_FIRE);

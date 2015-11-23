@@ -445,6 +445,16 @@ public slots:
         qobject_cast<QWorkspace *>(workspaces->currentWidget())->tile();
     }
     /*!
+        \fn milxQtMain::tileTabVertically()
+        \brief Tile all the windows vertically in the current tab.
+    */
+    void tileTabVertically();
+    /*!
+        \fn milxQtMain::tileTabHorizontally()
+        \brief Tile all the windows horizontally in the current tab.
+    */
+    void tileTabHorizontally();
+    /*!
         \fn milxQtMain::helpContents()
         \brief Show the help contents browser.
     */
@@ -735,6 +745,13 @@ public slots:
     */
     void imagesSubtract();
     /*!
+    \fn milxQtMain::imagesMultiply()
+    \brief Multiply all open images together to create new image.
+
+    All data from open image windows are multiplied to the first image.
+    */
+    void imagesMultiply();
+    /*!
         \fn milxQtMain::imagesConvolve()
         \brief Convolve all open images together to create new image.
 
@@ -948,12 +965,15 @@ protected:
     QAction* actionAddImages; //!< add images batch operation action
     QAction* actionAverageImages; //!< average images batch operation action
     QAction* actionSubtractImages; //!< subtract images batch operation action
+    QAction* actionMultiplyImages; //!< multiply images batch operation action
     QAction* actionConvolveImages; //!< Convolve images batch operation action
     QAction* actionMergeLabels; //!< Merge labelled images batch operation action
     //----Windows---- (hierarchical deletion)
     QAction* actionLinkWindows; //!< Using linked cameras for all windows in a tab?
     QAction* actionCascade; //!< Cascade windows in workspace action
     QAction* actionTile; //!< Tile windows in workspace action
+    QAction* actionTileVertically; //!< Tile vertically windows in workspace action
+    QAction* actionTileHorizontally; //!< Tile horizontally windows in workspace action
     QAction* actionConsole; //!< toggle action for console
     //----Help---- (hierarchical deletion)
     QAction* actionContents; //!< Action for showing contents of help
