@@ -384,15 +384,20 @@ void milxQtRenderWindow::textDisplay()
 
     vtkSmartPointer<vtkTextActor> textActor = vtkSmartPointer<vtkTextActor>::New();
         textActor->SetInput(newText.toStdString().c_str());
+        textActor->SetTextScaleModeToProp();
         textActor->GetTextProperty()->SetColor( rValue, gValue, bValue );
         textActors.append(textActor);
 
     vtkSmartPointer<vtkTextWidget> textWidget = vtkSmartPointer<vtkTextWidget>::New();
         textWidget->SetInteractor(QVTKWidget::GetInteractor());
         textWidget->SetTextActor(textActor);
-        textWidget->SelectableOff();
         textWidget->On();
         textWidgets.append(textWidget);
+
+    Connector->Connect(textWidget,
+                       vtkCommand::WidgetActivateEvent,
+                       this,
+                       SLOT( updateTextActor(vtkObject*, unsigned long, void*, void*, vtkCommand*) )); //High Priority
 
     Render();
 }
@@ -690,28 +695,67 @@ void milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, 
         generateRender();
 }
 
+void milxQtRenderWindow::updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
+{
+    vtkSmartPointer<vtkTextWidget> textWidget = vtkTextWidget::SafeDownCast(obj);
+    vtkSmartPointer<vtkTextActor> textActor = textWidget->GetTextActor();
+
+    QMessageBox msgBox;
+    msgBox.setText("Would you like to remove this text?");
+    msgBox.setInformativeText("Remove this text?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+
+    if(ret == QMessageBox::No)
+    {
+        bool ok, ok1, ok2, ok3;
+        QString newText = QInputDialog::getText(this, tr("Please Enter text"),
+                                          tr("Text:"), QLineEdit::Normal, textActor->GetInput(), &ok);
+        float rValue = QInputDialog::getDouble(this, tr("Please Provide red channel (0.0-1.0)"),
+                         tr("Red:"), 1.0, -2147483647, 2147483647, 3, &ok1);
+        float gValue = QInputDialog::getDouble(this, tr("Please Provide green channel (0.0-1.0)"),
+                         tr("Green:"), 0.0, -2147483647, 2147483647, 3, &ok2);
+        float bValue = QInputDialog::getDouble(this, tr("Please Provide blue channel (0.0-1.0)"),
+                         tr("Blue:"), 0.0, -2147483647, 2147483647, 3, &ok3);
+
+        if(!ok || !ok1 || !ok2 || !ok3)
+            return;
+
+        textActor->SetInput(newText.toStdString().c_str());
+        textActor->SetTextScaleModeToProp();
+        textActor->GetTextProperty()->SetColor( rValue, gValue, bValue );
+
+        textWidget->SetTextActor(textActor);
+    }
+    else
+        textWidget->Off();
+
+    Render();
+}
+
 void milxQtRenderWindow::updateImageActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
 {
-    vtkSmartPointer<vtkImageActor> actor = vtkImageActor::SafeDownCast(obj);
+  vtkSmartPointer<vtkImageActor> actor = vtkImageActor::SafeDownCast(obj);
 
-    //Update the actor which is somehere in list
-    foreach(ImageActorItem item, imageActors)
+  //Update the actor which is somehere in list
+  foreach(ImageActorItem item, imageActors)
     {
-        if(actor == item.parentActor)
+      if(actor == item.parentActor)
         {
-            int extents[6];
+          int extents[6];
 
-            actor->GetDisplayExtent(extents);
+          actor->GetDisplayExtent(extents);
 
-            item.imageActor->SetDisplayExtent(extents);
-            item.imageActor->SetInterpolate(actor->GetInterpolate());
-//            item.imageActor->SetInput(actor->GetInput());
+          item.imageActor->SetDisplayExtent(extents);
+          item.imageActor->SetInterpolate(actor->GetInterpolate());
+          //            item.imageActor->SetInput(actor->GetInput());
 
-            break; //Only one of each is allowed
+          break; //Only one of each is allowed
         }
     }
 
-    Render();
+  Render();
 }
 
 void milxQtRenderWindow::updateImageActor(vtkSmartPointer<vtkImageActor> actor)

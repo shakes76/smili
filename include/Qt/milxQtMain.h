@@ -605,6 +605,16 @@ public slots:
         return qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList().size();
     }
     /**
+        \fn milxQtMain::getNumberOfImageWindows()
+        \brief Return the number of image windows in the current tab.
+    */
+    int getNumberOfImageWindows();
+    /**
+        \fn milxQtMain::getNumberOfModelWindows()
+        \brief Return the number of model windows in the current tab.
+    */
+    int getNumberOfModelWindows();
+    /**
         \fn milxQtMain::getNumberOfTabs()
         \brief Return the number of tabs in the main window.
     */

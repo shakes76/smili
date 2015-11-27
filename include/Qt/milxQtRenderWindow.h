@@ -403,6 +403,11 @@ public slots:
     inline void importViewFrom(milxQtRenderWindow *windowToImportFrom)
     {   importFrom(windowToImportFrom);   }
     /*!
+      \fn milxQtRenderWindow::updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
+      \brief Update any text actors in display to current slice.
+    */
+    virtual void updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command);
+    /*!
       \fn milxQtRenderWindow::updateImageActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
       \brief Update any image actors in display to current slice when slice number changes.
     */

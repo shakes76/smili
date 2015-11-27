@@ -2437,6 +2437,13 @@ void milxQtModel::updateLookupTable()
             printInfo("Found multi-component scalars. Not using colour map and using colours directly.");
     }
 
+    ///\todo Force Opacity to 1.0 here, better more clearer way?
+    ///Alpha channel for colormap not allow for models
+    double zeroRGBA[4];
+    lookupTable->GetTableValue(0, zeroRGBA);
+    if(zeroRGBA[3] == 0.0)
+        lookupTable->SetTableValue(0, zeroRGBA[0], zeroRGBA[1], zeroRGBA[2], 1.0); //opaque
+
     modelMapper->SetLookupTable(lookupTable);
     modelMapper->SetScalarRange( range[0], range[1] );
 

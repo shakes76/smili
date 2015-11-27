@@ -1613,35 +1613,37 @@ void milxQtMain::updateWindowsWithAutoLevel()
 
 void milxQtMain::updateWindowsWithRefresh()
 {
-  initialiseWindowTraversal();
+    initialiseWindowTraversal();
 
-  while (currentWindow())
-  {
-      milxQtRenderWindow *win = nextRenderWindow();
-      if (isImage(win))
-      {
-          milxQtImage *img = qobject_cast<milxQtImage *>(win);
-          img->refresh();
-      }
-      else
-          win->refresh();
-  }
+    while (currentWindow())
+    {
+        milxQtRenderWindow *win = nextRenderWindow();
+        if (isImage(win))
+        {
+            milxQtImage *img = qobject_cast<milxQtImage *>(win);
+            img->refresh();
+        }
+        else
+            win->refresh();
+    }
 }
 
 void milxQtMain::updateWindowsWithCursors()
 {
-  initialiseWindowTraversal();
+    initialiseWindowTraversal();
 
-  while (currentWindow())
-  {
-      milxQtWindow *win = currentWindow();
-      if (isImage(win))
-      {
-          milxQtImage *img = qobject_cast<milxQtImage *>(win);
-          img->enableCrosshair();
-      }
-      nextWindow();
-  }
+    while (currentWindow())
+    {
+        milxQtWindow *win = currentWindow();
+        cout << "Weeee1: " << win->strippedBaseName().toStdString() << endl;
+        if (isImage(win))
+        {
+            cout << "Weeee2: " << win->strippedBaseName().toStdString() << endl;
+            milxQtImage *img = qobject_cast<milxQtImage *>(win);
+            img->enableCrosshair();
+        }
+        nextWindow();
+    }
 }
 
 void milxQtMain::updateWindowsWithView(int value)
@@ -1730,6 +1732,40 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
     }
 
     return winGp;
+}
+
+int milxQtMain::getNumberOfImageWindows()
+{
+    int n = getNumberOfWindows();
+
+    int m = 0;
+    initialiseWindowTraversal();
+    for(int j = 0; j < n; j ++)
+    {
+        milxQtWindow *win = nextWindow();
+        if(isImage(win))
+            m ++;
+    }
+    printDebug("Number of Image Windows: " + QString::number(m));
+
+    return m;
+}
+
+int milxQtMain::getNumberOfModelWindows()
+{
+    int n = getNumberOfWindows();
+
+    int m = 0;
+    initialiseWindowTraversal();
+    for(int j = 0; j < n; j ++)
+    {
+        milxQtWindow *win = nextWindow();
+        if(isModel(win))
+            m ++;
+    }
+    printDebug("Number of Model Windows: " + QString::number(m));
+
+    return m;
 }
 
 milxQtWindow* milxQtMain::currentWindow()
@@ -1832,7 +1868,7 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
 
     ///Copy camera of similar windows
     bool srcIsImage = isActiveImage();
-//    bool srcIsModel = isActiveModel();
+    bool srcIsModel = isActiveModel();
 
     if(rnd)
     {
@@ -1854,15 +1890,15 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
                     QPointer<milxQtImage> img = qobject_cast<milxQtImage *>(window);
                     img->setSlice(activeImage()->getSlice());
                     img->setView(activeImage()->getView());
-                    if(img->isCrosshair())
+                    if(img->isCrosshair() && activeImage()->isCrosshair())
                         img->setCrosshairPosition(activeImage()->getCrosshairPosition());
                 }
-                else if(srcIsImage && isModel(window))
+                /*else if(srcIsImage && isModel(window))
                 {
                     //Image-to-Model specific
                     QPointer<milxQtModel> mdl = qobject_cast<milxQtModel *>(window);
                     mdl->setView(activeImage()->getView());
-                }
+                }*/
                 /*else if(srcIsModel && isImage(window))
                 {
                     //Model-to-Image specific
@@ -1870,7 +1906,8 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
                     img->setView(activeModel()->getView());
                 }*/ //Copy Camera is better
 
-                distCamera->DeepCopy(srcCamera);
+                if( !(srcIsImage && isModel(window)) && !(srcIsModel && isImage(window))) //no image-model
+                    distCamera->DeepCopy(srcCamera);
             }
 
             window->Render(); //!< refresh the destination display, quick
@@ -2268,11 +2305,15 @@ void milxQtMain::voxeliseSurface(vtkSmartPointer<vtkPolyData> surface)
 
 void milxQtMain::imagesMix()
 {
-    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    int n = getNumberOfImageWindows();
+    if(getNumberOfWindows() < 2 || n < 2)
     {
         printError("Need more than 1 window open to blend.");
         return;
     }
+
+    initialiseWindowTraversal();
+    QPointer<milxQtImage> firstImg = nextImage();
 
     //Create slicers and the dialog
     QVector< QSlider* > sliders;
@@ -2284,7 +2325,7 @@ void milxQtMain::imagesMix()
     QCheckBox *initialCheckbox = new QCheckBox(this);
     initialCheckbox->setChecked(true);
 //    initialCheckbox->setDisabled(true);
-    initialCheckbox->setToolTip(imageWindows[0]->strippedBaseName());
+    initialCheckbox->setToolTip(firstImg->strippedBaseName());
     QVBoxLayout *initialLayout = new QVBoxLayout(this);
     initialLayout->addWidget(initialCheckbox);
     initialLayout->addWidget(opacitySldr);
@@ -2293,17 +2334,29 @@ void milxQtMain::imagesMix()
     sliders.push_back(opacitySldr);
     checkBoxes.push_back(initialCheckbox);
 
-    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    if(firstImg->GetLookupTable() == NULL)
     {
-        if(imageWindows[j]->GetLookupTable() == NULL)
-          {
+        QMessageBox msgBox;
+        msgBox.setText("Colormap not set?");
+        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+    }
+
+    for(int j = 1; j < n; j ++) //!< For all windows, do operation
+    {
+        QPointer<milxQtImage> secondImg = nextImage();
+
+        if(secondImg->GetLookupTable() == NULL)
+        {
             QMessageBox msgBox;
             msgBox.setText("Colormap not set?");
-            msgBox.setInformativeText("Image " + imageWindows[j]->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);
             msgBox.exec();
-          }
+        }
 
         QVBoxLayout *layout = new QVBoxLayout(this);
         QSlider *opacitySldr2 = new QSlider(this);
@@ -2312,7 +2365,7 @@ void milxQtMain::imagesMix()
         opacitySldr2->setValue(5);
         QCheckBox *checkbox = new QCheckBox(this);
         checkbox->setChecked(true);
-        checkbox->setToolTip(imageWindows[j]->strippedBaseName());
+        checkbox->setToolTip(secondImg->strippedBaseName());
         layout->addWidget(checkbox);
         layout->addWidget(opacitySldr2);
         sliderLayout->addLayout(layout);
@@ -2352,13 +2405,14 @@ void milxQtMain::imagesMix()
 
 void milxQtMain::imagesBlend(QVector<float> opacities)
 {
-    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    int n = getNumberOfImageWindows();
+    if(getNumberOfWindows() < 2 || n < 2)
     {
         printError("Need more than 1 window open to blend.");
         return;
     }
 
-    if(opacities.empty() || opacities.size() < imageWindows.size())
+    if(opacities.empty() || opacities.size() < n)
     {
         printError("Size of opacities list does not match number of open images.");
         return;
@@ -2394,8 +2448,7 @@ void milxQtMain::imagesBlend(QVector<float> opacities)
 //        blend->SetBlendModeToCompound();
         blend->SetBlendModeToNormal();
 
-    size_t n = imageWindows.size()-1;
-    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    for(int j = 1; j < n; j ++) //!< For all windows, do operation
     {
         QPointer<milxQtImage> secondImg = nextImage();
 

@@ -148,6 +148,7 @@ public:
 
       this->IV->SetColorWindow(newWindow);
       this->IV->SetColorLevel(newLevel);
+      std::cout << "Window: " << newWindow << ", Level: " << newLevel << std::endl;
       this->IV->Render();
     }
 
