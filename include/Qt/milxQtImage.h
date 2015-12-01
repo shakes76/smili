@@ -29,6 +29,10 @@
 #include <vtkImagePermute.h>
 #include <vtkImageAccumulate.h>
 #include <vtkImageMapToWindowLevelColors.h>
+#if(VTK_MAJOR_VERSION > 5)
+    #include <vtkResliceCursor.h>
+    #include <vtkResliceCursorActor.h>
+#endif
 //ITK Imaging
 #include <itkRGBPixel.h>
 #include <itkImage.h>
