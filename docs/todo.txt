@@ -8,9 +8,8 @@ Wishlist:
 - Text Editor Plugin?
 
 Features:
-- Autolevel all images
-- Cursor mode, show in all images
-- Blending of images with slider
+- Fast Label and Image Viewer
+
 
 BUGS:
 - Drag n Drop between windows doesn't use processed/modified results
