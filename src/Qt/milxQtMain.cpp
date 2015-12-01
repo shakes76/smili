@@ -118,6 +118,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Program Info
     printInfo("--------------------------------------------------------");
     printInfo("sMILX Visualisation Tool for Medical Imaging");
+    printInfo("Open Source Release (BSD License)");
     printInfo("(c) Copyright CSIRO, 2015.");
     printInfo("University of Queensland, Australia.");
     printInfo("Australian e-Health Research Centre, CSIRO.");
