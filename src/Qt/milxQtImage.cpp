@@ -434,10 +434,10 @@ void milxQtImage::generateImage(const bool quietly)
         if(imageData->GetNumberOfScalarComponents() > 2)
         {
             GetWindowLevel()->SetLookupTable(NULL);
-            lookupTable = NULL;
             GetWindowLevel()->SetWindow(255);
             GetWindowLevel()->SetLevel(127.5);
         }
+        lookupTable = NULL;
 
         if(milxQtRenderWindow::useDefaultView)
             setView(milxQtRenderWindow::defaultView); //Default view
@@ -1010,14 +1010,14 @@ void milxQtImage::setupEvents()
                                   NULL, 1.0); //High Priority
 }
 
-void milxQtImage::autoLevel()
+void milxQtImage::autoLevel(float percentile)
 {
     printInfo("Auto Updating Window Level");
     printDebug("Current Window:" + QString::number(GetIntensityWindow()));
     printDebug("Current Level:" + QString::number(GetIntensityLevel()));
 
     int bins = 256;
-    float belowValue = -1000, aboveValue = 4000, lowerPercentile = 0.01, upperPercentile = 0.99;
+    float belowValue = -1000, aboveValue = 4000, lowerPercentile = 1.0-percentile, upperPercentile = percentile;
     if(maxValue == minValue)
         histogram(bins, belowValue, aboveValue, false); //above and below unused here, uses image min/max automatically
     belowValue = minValue;
@@ -3149,6 +3149,51 @@ void milxQtImage::subtract(QString filename)
     subtract(imageToSubtract);
 }
 
+void milxQtImage::multiply(milxQtImage *img)
+{
+  if (usingVTKImage)
+  {
+      printError("Multiplying of VTK image not support yet.");
+      return;
+  }
+
+  printInfo("Multiplying Image");
+  emit working(-1);
+  if (eightbit && img->is8BitImage())
+      imageChar = milx::Image<charImageType>::MultiplyImages(imageChar, img->GetCharImage());
+  else if (!eightbit && !rgb && img->isFloatingPointImage())
+      imageFloat = milx::Image<floatImageType>::MultiplyImages(imageFloat, img->GetFloatImage());
+  else
+      printError("Multiplying images of Vector, RGB or different types not supported.");
+  emit done(-1);
+
+  generateImage();
+}
+
+void milxQtImage::multiply(QString filename)
+{
+  if (usingVTKImage)
+  {
+      printError("Multiplying from VTK image not support yet.");
+      return;
+  }
+
+  if (filename.isEmpty())
+      filename = getOpenFilename();
+
+  if (filename.isEmpty())
+      return;
+
+  QPointer<milxQtImage> imageToMultiply = new milxQtImage;
+  QPointer<milxQtFile> reader = new milxQtFile;
+  bool success = reader->openImage(filename, imageToMultiply);
+
+  if (!success)
+      return;
+
+  multiply(imageToMultiply);
+}
+
 void milxQtImage::scale(float scaling)
 {
     if(usingVTKImage)
@@ -3332,7 +3377,7 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
 
         vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
           filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->PassAlphaToOutputOn();
           filterColorsOverlay->Update();
 
         milxQtRenderWindow::customScalarBar = true;
@@ -3348,7 +3393,7 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
 
         vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
           filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->PassAlphaToOutputOn();
           filterColorsOverlay->Update();
 
         milxQtRenderWindow::customScalarBar = true;
@@ -3364,7 +3409,7 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
 
         vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
           filterColorsOverlay->SetLookupTable(lookupTable);
-          filterColorsOverlay->PassAlphaToOutputOff();
+          filterColorsOverlay->PassAlphaToOutputOn();
           filterColorsOverlay->Update();
 
         milxQtRenderWindow::customScalarBar = false;
@@ -3485,7 +3530,7 @@ void milxQtImage::updateLookupTable()
 
     vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
         filterColorsOverlay->SetLookupTable(lookupTable);
-        filterColorsOverlay->PassAlphaToOutputOff();
+        filterColorsOverlay->PassAlphaToOutputOn();
         filterColorsOverlay->Update();
 
     scaleDisplay();

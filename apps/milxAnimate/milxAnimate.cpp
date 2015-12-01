@@ -82,11 +82,15 @@ int main(int argc, char* argv[])
     ///Switches
     SwitchArg jetArg("", "jet", "Change colourmap of the scalars to the Jet map", false);
     SwitchArg vtkArg("", "vtk", "Change colourmap of the scalars to blue-red (rainbow VTK) map", false);
+    SwitchArg hsvArg("", "hsv", "Change colourmap of the scalars to blue-red (rainbow HSV) map", false);
     SwitchArg rainbowArg("", "rainbow", "Change colourmap of the scalars to the rainbow map", false);
+    SwitchArg spectralArg("", "spectral", "Change colourmap of the scalars to the spectral map", false);
     SwitchArg nihArg("", "NIH", "Change colourmap of the scalars to NIH", false);
     SwitchArg fireArg("", "NIH_FIRE", "Change colourmap of the scalars to NIH Fire", false);
     SwitchArg aalArg("", "AAL", "Change colourmap of the scalars to AAL", false);
+    SwitchArg fsArg("", "FS", "Change colourmap of the scalars to FreeSurfer", false);
     SwitchArg hotArg("", "HOT", "Change colourmap of the scalars to HOT", false);
+    SwitchArg coolArg("", "COOL", "Change colourmap of the scalars to COOL", false);
     SwitchArg loadViewArg("", "loadview", "Load saved view (use smilx or onscreen render mode to view and save with Right Click->View->Save View", false);
     SwitchArg onscreenArg("", "onscreen", "Enable on screen rendering, i.e. display the rendering as an interactive window.", false);
     SwitchArg whiteArg("", "white", "Make background white rather than default gradient colour.", false);
@@ -144,11 +148,15 @@ int main(int argc, char* argv[])
 
     cmd.add( jetArg );
     cmd.add( vtkArg );
+    cmd.add( hsvArg );
     cmd.add( rainbowArg );
+    cmd.add( spectralArg );
     cmd.add( nihArg );
     cmd.add( fireArg );
     cmd.add( aalArg );
+    cmd.add( fsArg );
     cmd.add( hotArg );
+    cmd.add( coolArg );
     cmd.add( loadViewArg );
     cmd.add( loadViewFileArg );
     cmd.add( onscreenArg );
@@ -473,20 +481,29 @@ int main(int argc, char* argv[])
     }
 
     //Colour maps
+    cout << ">>> Overlay: Setting Colourmap" << endl;
     if(jetArg.isSet())
         model->colourMapToJet();
     if(vtkArg.isSet())
         model->colourMapToVTK();
+    if(hsvArg.isSet())
+      model->colourMapToHSV();
     if(rainbowArg.isSet())
         model->colourMapToRainbow();
+    if(spectralArg.isSet())
+      model->colourMapToSpectral();
     if(nihArg.isSet())
         model->colourMapToNIH();
     if(fireArg.isSet())
         model->colourMapToNIH_Fire();
     if(aalArg.isSet())
         model->colourMapToAAL();
+    if(fsArg.isSet())
+      model->colourMapToFS();
     if(hotArg.isSet())
         model->colourMapToHOT();
+    if(coolArg.isSet())
+      model->colourMapToCOOL();
     if(minArg.isSet() || maxArg.isSet()) //set the range if another colour map is used
         model->SetScalarRange(range);
     if(isoArg.isSet())

@@ -384,15 +384,20 @@ void milxQtRenderWindow::textDisplay()
 
     vtkSmartPointer<vtkTextActor> textActor = vtkSmartPointer<vtkTextActor>::New();
         textActor->SetInput(newText.toStdString().c_str());
+        textActor->SetTextScaleModeToProp();
         textActor->GetTextProperty()->SetColor( rValue, gValue, bValue );
         textActors.append(textActor);
 
     vtkSmartPointer<vtkTextWidget> textWidget = vtkSmartPointer<vtkTextWidget>::New();
         textWidget->SetInteractor(QVTKWidget::GetInteractor());
         textWidget->SetTextActor(textActor);
-        textWidget->SelectableOff();
         textWidget->On();
         textWidgets.append(textWidget);
+
+    Connector->Connect(textWidget,
+                       vtkCommand::WidgetActivateEvent,
+                       this,
+                       SLOT( updateTextActor(vtkObject*, unsigned long, void*, void*, vtkCommand*) )); //High Priority
 
     Render();
 }
@@ -690,28 +695,67 @@ void milxQtRenderWindow::addImageActor(vtkSmartPointer<vtkImageActor> imgActor, 
         generateRender();
 }
 
+void milxQtRenderWindow::updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
+{
+    vtkSmartPointer<vtkTextWidget> textWidget = vtkTextWidget::SafeDownCast(obj);
+    vtkSmartPointer<vtkTextActor> textActor = textWidget->GetTextActor();
+
+    QMessageBox msgBox;
+    msgBox.setText("Would you like to remove this text?");
+    msgBox.setInformativeText("Remove this text?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+
+    if(ret == QMessageBox::No)
+    {
+        bool ok, ok1, ok2, ok3;
+        QString newText = QInputDialog::getText(this, tr("Please Enter text"),
+                                          tr("Text:"), QLineEdit::Normal, textActor->GetInput(), &ok);
+        float rValue = QInputDialog::getDouble(this, tr("Please Provide red channel (0.0-1.0)"),
+                         tr("Red:"), 1.0, -2147483647, 2147483647, 3, &ok1);
+        float gValue = QInputDialog::getDouble(this, tr("Please Provide green channel (0.0-1.0)"),
+                         tr("Green:"), 0.0, -2147483647, 2147483647, 3, &ok2);
+        float bValue = QInputDialog::getDouble(this, tr("Please Provide blue channel (0.0-1.0)"),
+                         tr("Blue:"), 0.0, -2147483647, 2147483647, 3, &ok3);
+
+        if(!ok || !ok1 || !ok2 || !ok3)
+            return;
+
+        textActor->SetInput(newText.toStdString().c_str());
+        textActor->SetTextScaleModeToProp();
+        textActor->GetTextProperty()->SetColor( rValue, gValue, bValue );
+
+        textWidget->SetTextActor(textActor);
+    }
+    else
+        textWidget->Off();
+
+    Render();
+}
+
 void milxQtRenderWindow::updateImageActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
 {
-    vtkSmartPointer<vtkImageActor> actor = vtkImageActor::SafeDownCast(obj);
+  vtkSmartPointer<vtkImageActor> actor = vtkImageActor::SafeDownCast(obj);
 
-    //Update the actor which is somehere in list
-    foreach(ImageActorItem item, imageActors)
+  //Update the actor which is somehere in list
+  foreach(ImageActorItem item, imageActors)
     {
-        if(actor == item.parentActor)
+      if(actor == item.parentActor)
         {
-            int extents[6];
+          int extents[6];
 
-            actor->GetDisplayExtent(extents);
+          actor->GetDisplayExtent(extents);
 
-            item.imageActor->SetDisplayExtent(extents);
-            item.imageActor->SetInterpolate(actor->GetInterpolate());
-//            item.imageActor->SetInput(actor->GetInput());
+          item.imageActor->SetDisplayExtent(extents);
+          item.imageActor->SetInterpolate(actor->GetInterpolate());
+          //            item.imageActor->SetInput(actor->GetInput());
 
-            break; //Only one of each is allowed
+          break; //Only one of each is allowed
         }
     }
 
-    Render();
+  Render();
 }
 
 void milxQtRenderWindow::updateImageActor(vtkSmartPointer<vtkImageActor> actor)
@@ -951,6 +995,30 @@ void milxQtRenderWindow::colourMapToGray(double minRange, double maxRange)
 
     if(!actionGray->isChecked())
         actionGray->setChecked(true);
+
+    logScale = false;
+    updateLookupTable();
+}
+
+void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
+{
+    double range[2];
+    if(minRange == 0.0 && maxRange == 0.0)
+        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+    else
+    {
+        range[0] = minRange;
+        range[1] = maxRange;
+    }
+
+    milx::ColourMap *colours = new milx::ColourMap;
+    colours->toSeismic();
+    colours->SetRange(range);
+
+    lookupTable = colours->GetOutput();
+
+    if(!actionSeismic->isChecked())
+        actionSeismic->setChecked(true);
 
     logScale = false;
     updateLookupTable();
@@ -1263,6 +1331,30 @@ void milxQtRenderWindow::colourMapToCubeHelix(double minRange, double maxRange)
 
     if(!actionCubeHelix->isChecked())
         actionCubeHelix->setChecked(true);
+
+    logScale = false;
+    updateLookupTable();
+}
+
+void milxQtRenderWindow::colourMapToHSV(double minRange, double maxRange)
+{
+    double range[2];
+    if(minRange == 0.0 && maxRange == 0.0)
+        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+    else
+    {
+        range[0] = minRange;
+        range[1] = maxRange;
+    }
+
+    milx::ColourMap *colours = new milx::ColourMap;
+    colours->toHSV();
+    colours->SetRange(range);
+
+    lookupTable = colours->GetOutput();
+
+    if(!actionHSV->isChecked())
+        actionHSV->setChecked(true);
 
     logScale = false;
     updateLookupTable();
@@ -1706,6 +1798,9 @@ void milxQtRenderWindow::createActions()
 //    actionLogGray->setText(QApplication::translate("Render", "Gray (Log 10)", 0, QApplication::UnicodeUTF8));
     actionLogGray->setCheckable(true);
     actionLogGray->setChecked(false);
+    actionSeismic = new LabelledAction("Seismic", QPixmap(":resources/cmaps/cm_seismic.png"));
+    actionSeismic->setCheckable(true);
+    actionSeismic->setChecked(false);
     actionNIH = new LabelledAction("NIH", QPixmap(":resources/cmaps/cm_nih.png"), this);
 //    actionNIH->setText(QApplication::translate("Render", "NIH", 0, QApplication::UnicodeUTF8));
     actionNIH->setCheckable(true);
@@ -1760,6 +1855,9 @@ void milxQtRenderWindow::createActions()
 //    actionCubeHelix->setIcon(QIcon(":resources/cmaps/cm_gnuplot.png"));
     actionCubeHelix->setCheckable(true);
     actionCubeHelix->setChecked(false);
+    actionHSV = new LabelledAction("HSV", QPixmap(":resources/cmaps/cm_hsv.png"), this);
+    actionHSV->setCheckable(true);
+    actionHSV->setChecked(false);
     mapGroup = new QActionGroup(this);
     mapGroup->addAction(actionDefault);
     mapGroup->addAction(actionJet);
@@ -1767,6 +1865,7 @@ void milxQtRenderWindow::createActions()
     mapGroup->addAction(actionInvRainbow);
     mapGroup->addAction(actionGray);
     mapGroup->addAction(actionLogGray);
+    mapGroup->addAction(actionSeismic);
     mapGroup->addAction(actionNIH);
     mapGroup->addAction(actionNIH_FIRE);
     mapGroup->addAction(actionAAL);
@@ -1832,6 +1931,7 @@ void milxQtRenderWindow::createConnections()
     connect(actionInvRainbow, SIGNAL(triggered()), this, SLOT(colourMapToVTK()));
     connect(actionGray, SIGNAL(triggered()), this, SLOT(colourMapToGray()));
     connect(actionLogGray, SIGNAL(triggered()), this, SLOT(colourMapToLogGray()));
+    connect(actionSeismic, SIGNAL(triggered()), this, SLOT(colourMapToSeismic()));
     connect(actionNIH, SIGNAL(triggered()), this, SLOT(colourMapToNIH()));
     connect(actionNIH_FIRE, SIGNAL(triggered()), this, SLOT(colourMapToNIH_Fire()));
     connect(actionAAL, SIGNAL(triggered()), this, SLOT(colourMapToAAL()));
@@ -1844,6 +1944,7 @@ void milxQtRenderWindow::createConnections()
     connect(actionSpectral, SIGNAL(triggered()), this, SLOT(colourMapToSpectral()));
     connect(actionGNUPlot, SIGNAL(triggered()), this, SLOT(colourMapToGNUPlot()));
     connect(actionCubeHelix, SIGNAL(triggered()), this, SLOT(colourMapToCubeHelix()));
+    connect(actionHSV, SIGNAL(triggered()), this, SLOT(colourMapToHSV()));
     connect(saveViewAct, SIGNAL(triggered()), this, SLOT(saveView()));
     connect(loadViewAct, SIGNAL(triggered()), this, SLOT(loadView()));
     connect(saveViewFileAct, SIGNAL(triggered()), this, SLOT(saveViewFile()));
@@ -1867,6 +1968,7 @@ QMenu* milxQtRenderWindow::colourMapsMenu()
     colourMapMenu->addAction(actionRainbow);
     colourMapMenu->addAction(actionGray);
     colourMapMenu->addAction(actionLogGray);
+    colourMapMenu->addAction(actionSeismic);
     colourMapMenu->addAction(actionSpectral);
     colourMapMenu->addAction(actionGNUPlot);
     colourMapMenu->addAction(actionBone);
@@ -1874,6 +1976,7 @@ QMenu* milxQtRenderWindow::colourMapsMenu()
     colourMapMenu->addAction(actionCOOL);
     colourMapMenu->addAction(actionCOOLWARM);
     colourMapMenu->addAction(actionCubeHelix);
+    colourMapMenu->addAction(actionHSV);
     colourMapMenu->addAction(actionInvRainbow);
     colourMapMenu->addAction(actionNIH);
     colourMapMenu->addAction(actionNIH_FIRE);

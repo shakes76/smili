@@ -1,7 +1,7 @@
-# SMILI Release v1.0 Beta 2
-**Highlights: Image Blending via a mixer, VTK 6.3 support, Image Cursors, DICOM Improvements, Image Autolevel, Bilateral Image filtering and surface flattening.**
+# SMILI Release v1.0 RC 1
 
-Changelog:
+
+# SMILI Release v1.0 Beta 2
 Updated the apps that were out of date.
 Fixed distance widget and others that were not working before.
 Replaced crosshairs icon.
