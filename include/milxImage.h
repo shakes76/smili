@@ -70,6 +70,7 @@
 #include <itkShrinkImageFilter.h>
 #include <itkAddImageFilter.h>
 #include <itkSubtractImageFilter.h>
+#include <itkMultiplyImageFilter.h>
 #include <itkRegionOfInterestImageFilter.h>
 #include <itkNearestNeighborInterpolateImageFunction.h>
 #include <itkBSplineInterpolateImageFunction.h>
@@ -268,6 +269,11 @@ public:
   template<typename TOutImage>
   static itk::SmartPointer<TOutImage> CastImage(itk::SmartPointer<TImage> img);
   /*!
+    \fn Image::DeepCopy(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCopyFrom)
+    \brief Copy the contents of an image to another.
+  */
+  //static void DeepCopy(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCopyFrom);
+  /*!
     \fn Image::DuplicateImage(itk::SmartPointer<TImage> img)
     \brief Duplicates the image into a new image.
   */
@@ -392,6 +398,11 @@ public:
     return SubtractImages(img1, img2);
   }
   /*!
+  \fn Image::MultiplyImages(itk::SmartPointer<TImage> img1, itk::SmartPointer<TImage> img2)
+  \brief Multiplies (element-wise) image 2 from image 1, returning the result.
+  */
+  static itk::SmartPointer<TImage> MultiplyImages(itk::SmartPointer<TImage> img1, itk::SmartPointer<TImage> img2);
+  /*!
     \fn Image::ScaleImage(itk::SmartPointer<TImage> img, float scaling)
     \brief Scales the image intensities by scaling factor and returns the result.
   */
@@ -487,6 +498,17 @@ public:
   	Set the originOnly argument true to only match the origin.
   */
   static itk::SmartPointer<TImage> MatchInformation(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, bool originOnly = false);
+  /*!
+    \fn Image::CopyInformation(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, bool originOnly = false)
+    \brief Changes the image info to match that of provided image. By default, only the spacing, region and origin are changed.
+
+    Set the originOnly argument true to only match the origin. Function is alias for MatchInformation().
+  */
+  static itk::SmartPointer<TImage> CopyInformation(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, bool originOnly = false)
+  {
+    return MatchInformation(img, imgToMatch, originOnly);
+  }
+
   /*!
   	\fn Image::MatchHistogram(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToMatch, int bins = 128)
   	\brief Changes the image gray levels to match histogram of image provided.
@@ -1175,6 +1197,20 @@ itk::SmartPointer<TOutImage> Image<TImage>::CastImage(itk::SmartPointer<TImage> 
 
   return castFilter->GetOutput();
 }
+
+/*template<class TImage>
+template<typename TOutImage>
+void Image<TImage>::DeepCopy(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> imgToCopyFrom, TImage::RegionType region)
+{
+  itk::ImageRegionConstIterator<TImage> inputIterator(imgToCopyFrom, region);
+  itk::ImageRegionIterator<TImage> outputIterator(img, region);
+  while(!inputIterator.IsAtEnd())
+    {
+    outputIterator.Set(inputIterator.Get());
+    ++inputIterator;
+    ++outputIterator;
+    }
+}*/
 
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::DuplicateImage(itk::SmartPointer<TImage> img)
@@ -1988,6 +2024,28 @@ itk::SmartPointer<TImage> Image<TImage>::SubtractImages(itk::SmartPointer<TImage
   }
 
   return subtractFilter->GetOutput();
+}
+
+template<class TImage>
+itk::SmartPointer<TImage> Image<TImage>::MultiplyImages(itk::SmartPointer<TImage> img1, itk::SmartPointer<TImage> img2)
+{
+  typedef itk::MultiplyImageFilter<TImage, TImage> MultiplyImageType;
+
+  typename MultiplyImageType::Pointer multiplyFilter = MultiplyImageType::New();
+  multiplyFilter->SetInput1(img1);
+  multiplyFilter->SetInput2(img2);
+  multiplyFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  try
+  {
+    multiplyFilter->Update();
+  }
+  catch (itk::ExceptionObject & ex)
+  {
+    PrintError("Failed Multiplication");
+    PrintError(ex.GetDescription());
+  }
+
+  return multiplyFilter->GetOutput();
 }
 
 template<class TImage>

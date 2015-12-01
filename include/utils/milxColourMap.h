@@ -54,7 +54,7 @@ public:
 
   void reset();
 
-  enum ColourMapFlags {JET, RAINBOW, VTK, GRAY, LOG_GRAY, NIH, NIH_FIRE, AAL, FS, HOT, COOL, COOLWARM, KNEE, BONE, SPECTRAL, GNUPLOT, CUBEHELIX};
+  enum ColourMapFlags {JET, RAINBOW, VTK, GRAY, SEISMIC, LOG_GRAY, NIH, NIH_FIRE, AAL, FS, HOT, COOL, COOLWARM, KNEE, BONE, SPECTRAL, GNUPLOT, CUBEHELIX, HSV};
 
   // Set map as Rainbow
   inline void toJet()
@@ -76,7 +76,12 @@ public:
   { reset();  mapFlag = GRAY; }
   inline void SetGray()
   { toGray();  }
-  // Set map as Gray
+  // Set map as Seismic
+  inline void toSeismic()
+  { reset();  mapFlag = SEISMIC; }
+  inline void SetSeismic()
+  { toSeismic();  }
+  // Set map as Log Gray
   inline void toLogGray()
   { reset();  mapFlag = LOG_GRAY; }
   inline void SetLogGray()
@@ -131,16 +136,21 @@ public:
   { reset();  mapFlag = SPECTRAL; }
   inline void SetSpectral()
   { toSpectral();  }
-  //Set Map as Spectral
+  //Set Map as GNUPlot
   inline void toGNUPlot()
   { reset();  mapFlag = GNUPLOT; }
   inline void SetGNUPlot()
   { toGNUPlot();  }
-  //Set Map as Spectral
+  //Set Map as CubeHelix
   inline void toCubeHelix()
   { reset();  mapFlag = CUBEHELIX; }
   inline void SetCubeHelix()
   { toCubeHelix();  }
+  //Set Map as HSV
+  inline void toHSV()
+  { reset();  mapFlag = HSV; }
+  inline void SetHSV()
+  { toHSV();  }
 
   inline void SetRange(double range[2])
   {

@@ -118,6 +118,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Program Info
     printInfo("--------------------------------------------------------");
     printInfo("sMILX Visualisation Tool for Medical Imaging");
+    printInfo("Open Source Release (BSD License)");
     printInfo("(c) Copyright CSIRO, 2015.");
     printInfo("University of Queensland, Australia.");
     printInfo("Australian e-Health Research Centre, CSIRO.");
@@ -938,6 +939,42 @@ void milxQtMain::closeTab(int index)
     }
 }
 
+void milxQtMain::tileTabVertically()
+{
+    QWorkspace *wrkSpc = qobject_cast<QWorkspace *>(workspaces->currentWidget());
+    QWidgetList windows = wrkSpc->windowList();
+    if (windows.count() < 2) {
+        tileTab();
+        return;
+    }
+    int wHeight = wrkSpc->height() / windows.count();
+    int y = 0;
+    foreach(QWidget *widget, windows)
+    {
+        widget->parentWidget()->resize(wrkSpc->width(), wHeight);
+        widget->parentWidget()->move(0, y);
+        y += wHeight;
+    }
+}
+
+void milxQtMain::tileTabHorizontally()
+{
+    QWorkspace *wrkSpc = qobject_cast<QWorkspace *>(workspaces->currentWidget());
+    QWidgetList windows = wrkSpc->windowList();
+    if (windows.count() < 2) {
+        tileTab();
+        return;
+    }
+    int wWidth = wrkSpc->width() / windows.count();
+    int x = 0;
+    foreach(QWidget *widget, windows)
+    {
+        widget->parentWidget()->resize(wWidth, wrkSpc->height());
+        widget->parentWidget()->move(x, 0);
+        x += wWidth;
+    }
+}
+
 void milxQtMain::helpContents()
 {
     printDebug("Showing Help browser");
@@ -1060,83 +1097,98 @@ void milxQtMain::predisplay(milxQtImage* newImage)
     const size_t numberOfWindows = qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList().size();
 
     if(defaultViewTypeBox->currentIndex() != SINGLE && numberOfWindows > 0)
-      newTab();
+        newTab();
     else if(defaultViewTypeBox->currentIndex() == SINGLE)
     {
-      newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      display(newImage);
+        newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        display(newImage);
     }
 
     if(defaultViewTypeBox->currentIndex() != SINGLE) //Are we displaying scanner like three views + 3D view?
     {
-      //Axial view
-      newImage->setNamePrefix("Axial: ");
-      newImage->setName(filename);
-      newImage->disableDefaultView();//ignore default view
-      newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      newImage->viewToAxial();
-      display(newImage);
+        int ret = QMessageBox::Yes;
+        if (actionLinkWindows->isChecked())
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Linked Views mode detected and has to be disabled for multi-view.");
+            msgBox.setInformativeText("Do you want to disable link views and continue?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            ret = msgBox.exec();
+        }
+        if (ret == QMessageBox::No)
+            return;
+        else if (actionLinkWindows->isChecked())
+            actionLinkWindows->setChecked(false);
 
-      //Sagittal view
-      QPointer<milxQtImage> imgSagittal = new milxQtImage;  //list deletion
-      imgSagittal->setDisplayData(newImage);
-      imgSagittal->setNamePrefix("Sagittal: ");
-      imgSagittal->setName(filename);
-      imgSagittal->setConsole(console);
-      imgSagittal->disableDefaultView();
-      imgSagittal->generateImage();
-      imgSagittal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      imgSagittal->viewToSagittal();
-      display(imgSagittal);
+        //Axial view
+        newImage->setNamePrefix("Axial: ");
+        newImage->setName(filename);
+        newImage->disableDefaultView();//ignore default view
+        newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        newImage->viewToAxial();
+        display(newImage);
 
-      //Coronal view
-      QPointer<milxQtImage> imgCoronal = new milxQtImage;  //list deletion
-      imgCoronal->setDisplayData(newImage);
-      imgCoronal->setNamePrefix("Coronal: ");
-      imgCoronal->setName(filename);
-      imgCoronal->setConsole(console);
-      imgCoronal->disableDefaultView();
-      imgCoronal->generateImage();
-      imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
-      imgCoronal->viewToCoronal();
-      display(imgCoronal);
+        //Sagittal view
+        QPointer<milxQtImage> imgSagittal = new milxQtImage;  //list deletion
+        imgSagittal->setDisplayData(newImage);
+        imgSagittal->setNamePrefix("Sagittal: ");
+        imgSagittal->setName(filename);
+        imgSagittal->setConsole(console);
+        imgSagittal->disableDefaultView();
+        imgSagittal->generateImage();
+        imgSagittal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        imgSagittal->viewToSagittal();
+        display(imgSagittal);
 
-      //3D view
-      QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
-      slicesView->setNamePrefix("3D View: ");
-      slicesView->setName(filename);
-      slicesView->setConsole(console);
-      slicesView->addImageActor(newImage->GetImageActor(), newImage->getTransformMatrix());
-      slicesView->addImageActor(imgSagittal->GetImageActor(), imgSagittal->getTransformMatrix());
-      slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
-      //slicesView->addActor(newImage->GetCursorActor(), newImage->getTransformMatrix());
-      slicesView->generateRender();
+        //Coronal view
+        QPointer<milxQtImage> imgCoronal = new milxQtImage;  //list deletion
+        imgCoronal->setDisplayData(newImage);
+        imgCoronal->setNamePrefix("Coronal: ");
+        imgCoronal->setName(filename);
+        imgCoronal->setConsole(console);
+        imgCoronal->disableDefaultView();
+        imgCoronal->generateImage();
+        imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
+        imgCoronal->viewToCoronal();
+        display(imgCoronal);
 
-      //setup tracking slices and crosshairs
-      newImage->trackView(imgSagittal, AXIAL);
-      newImage->trackView(imgCoronal, AXIAL);
-      imgSagittal->trackView(newImage, SAGITTAL);
-      imgSagittal->trackView(imgCoronal, SAGITTAL);
-      imgCoronal->trackView(newImage, CORONAL);
-      imgCoronal->trackView(imgSagittal, CORONAL);
+        //3D view
+        QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
+        slicesView->setNamePrefix("3D View: ");
+        slicesView->setName(filename);
+        slicesView->setConsole(console);
+        slicesView->addImageActor(newImage->GetImageActor(), newImage->getTransformMatrix());
+        slicesView->addImageActor(imgSagittal->GetImageActor(), imgSagittal->getTransformMatrix());
+        slicesView->addImageActor(imgCoronal->GetImageActor(), imgCoronal->getTransformMatrix());
+        //slicesView->addActor(newImage->GetCursorActor(), newImage->getTransformMatrix());
+        slicesView->generateRender();
 
-      ///Here we use the Qt signals and slots directly as it was found that the VTK-Qt connector caused problems
-      ///with the image actors.
-      connect(newImage, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      connect(imgSagittal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      connect(imgCoronal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
-      ///link the data properties too, one change updates others
-      connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
-      connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        //setup tracking slices and crosshairs
+        newImage->trackView(imgSagittal, AXIAL);
+        newImage->trackView(imgCoronal, AXIAL);
+        imgSagittal->trackView(newImage, SAGITTAL);
+        imgSagittal->trackView(imgCoronal, SAGITTAL);
+        imgCoronal->trackView(newImage, CORONAL);
+        imgCoronal->trackView(imgSagittal, CORONAL);
 
-      display(slicesView);
+        ///Here we use the Qt signals and slots directly as it was found that the VTK-Qt connector caused problems
+        ///with the image actors.
+        connect(newImage, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        connect(imgSagittal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        connect(imgCoronal, SIGNAL(modified(vtkSmartPointer<vtkImageActor> )), slicesView, SLOT(updateImageActor(vtkSmartPointer<vtkImageActor>)));
+        ///link the data properties too, one change updates others
+        connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(newImage, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgSagittal, SIGNAL(modified(QPointer<milxQtImage> )), imgCoronal, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), newImage, SLOT(updateDisplay(QPointer<milxQtImage>)));
+        connect(imgCoronal, SIGNAL(modified(QPointer<milxQtImage> )), imgSagittal, SLOT(updateDisplay(QPointer<milxQtImage>)));
 
-      updateQtEvents(); //ensure all complete before tiling
-      tileTab();
+        display(slicesView);
+
+        updateQtEvents(); //ensure all complete before tiling
+        tileTab();
   }
 }
 
@@ -1489,6 +1541,8 @@ QActionGroup* milxQtMain::updateWindowMenu()
     menuWindows->clear();
     menuWindows->addAction(actionCascade);
     menuWindows->addAction(actionTile);
+    menuWindows->addAction(actionTileVertically);
+    menuWindows->addAction(actionTileHorizontally);
     menuWindows->addSeparator()->setText(tr("Docked Windows"));
     foreach(QAction *dockAct, dockActions)
     {
@@ -1560,35 +1614,37 @@ void milxQtMain::updateWindowsWithAutoLevel()
 
 void milxQtMain::updateWindowsWithRefresh()
 {
-  initialiseWindowTraversal();
+    initialiseWindowTraversal();
 
-  while (currentWindow())
-  {
-      milxQtRenderWindow *win = nextRenderWindow();
-      if (isImage(win))
-      {
-          milxQtImage *img = qobject_cast<milxQtImage *>(win);
-          img->refresh();
-      }
-      else
-          win->refresh();
-  }
+    while (currentWindow())
+    {
+        milxQtRenderWindow *win = nextRenderWindow();
+        if (isImage(win))
+        {
+            milxQtImage *img = qobject_cast<milxQtImage *>(win);
+            img->refresh();
+        }
+        else
+            win->refresh();
+    }
 }
 
 void milxQtMain::updateWindowsWithCursors()
 {
-  initialiseWindowTraversal();
+    initialiseWindowTraversal();
 
-  while (currentWindow())
-  {
-      milxQtWindow *win = currentWindow();
-      if (isImage(win))
-      {
-          milxQtImage *img = qobject_cast<milxQtImage *>(win);
-          img->enableCrosshair();
-      }
-      nextWindow();
-  }
+    while (currentWindow())
+    {
+        milxQtWindow *win = currentWindow();
+        cout << "Weeee1: " << win->strippedBaseName().toStdString() << endl;
+        if (isImage(win))
+        {
+            cout << "Weeee2: " << win->strippedBaseName().toStdString() << endl;
+            milxQtImage *img = qobject_cast<milxQtImage *>(win);
+            img->enableCrosshair();
+        }
+        nextWindow();
+    }
 }
 
 void milxQtMain::updateWindowsWithView(int value)
@@ -1677,6 +1733,40 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
     }
 
     return winGp;
+}
+
+int milxQtMain::getNumberOfImageWindows()
+{
+    int n = getNumberOfWindows();
+
+    int m = 0;
+    initialiseWindowTraversal();
+    for(int j = 0; j < n; j ++)
+    {
+        milxQtWindow *win = nextWindow();
+        if(isImage(win))
+            m ++;
+    }
+    printDebug("Number of Image Windows: " + QString::number(m));
+
+    return m;
+}
+
+int milxQtMain::getNumberOfModelWindows()
+{
+    int n = getNumberOfWindows();
+
+    int m = 0;
+    initialiseWindowTraversal();
+    for(int j = 0; j < n; j ++)
+    {
+        milxQtWindow *win = nextWindow();
+        if(isModel(win))
+            m ++;
+    }
+    printDebug("Number of Model Windows: " + QString::number(m));
+
+    return m;
 }
 
 milxQtWindow* milxQtMain::currentWindow()
@@ -1779,7 +1869,7 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
 
     ///Copy camera of similar windows
     bool srcIsImage = isActiveImage();
-//    bool srcIsModel = isActiveModel();
+    bool srcIsModel = isActiveModel();
 
     if(rnd)
     {
@@ -1801,15 +1891,15 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
                     QPointer<milxQtImage> img = qobject_cast<milxQtImage *>(window);
                     img->setSlice(activeImage()->getSlice());
                     img->setView(activeImage()->getView());
-                    if(img->isCrosshair())
+                    if(img->isCrosshair() && activeImage()->isCrosshair())
                         img->setCrosshairPosition(activeImage()->getCrosshairPosition());
                 }
-                else if(srcIsImage && isModel(window))
+                /*else if(srcIsImage && isModel(window))
                 {
                     //Image-to-Model specific
                     QPointer<milxQtModel> mdl = qobject_cast<milxQtModel *>(window);
                     mdl->setView(activeImage()->getView());
-                }
+                }*/
                 /*else if(srcIsModel && isImage(window))
                 {
                     //Model-to-Image specific
@@ -1817,7 +1907,8 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
                     img->setView(activeModel()->getView());
                 }*/ //Copy Camera is better
 
-                distCamera->DeepCopy(srcCamera);
+                if( !(srcIsImage && isModel(window)) && !(srcIsModel && isImage(window))) //no image-model
+                    distCamera->DeepCopy(srcCamera);
             }
 
             window->Render(); //!< refresh the destination display, quick
@@ -2215,11 +2306,15 @@ void milxQtMain::voxeliseSurface(vtkSmartPointer<vtkPolyData> surface)
 
 void milxQtMain::imagesMix()
 {
-    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    int n = getNumberOfImageWindows();
+    if(getNumberOfWindows() < 2 || n < 2)
     {
         printError("Need more than 1 window open to blend.");
         return;
     }
+
+    initialiseWindowTraversal();
+    QPointer<milxQtImage> firstImg = nextImage();
 
     //Create slicers and the dialog
     QVector< QSlider* > sliders;
@@ -2230,8 +2325,8 @@ void milxQtMain::imagesMix()
     opacitySldr->setValue(10);
     QCheckBox *initialCheckbox = new QCheckBox(this);
     initialCheckbox->setChecked(true);
-    initialCheckbox->setDisabled(true);
-    initialCheckbox->setToolTip(imageWindows[0]->strippedBaseName());
+//    initialCheckbox->setDisabled(true);
+    initialCheckbox->setToolTip(firstImg->strippedBaseName());
     QVBoxLayout *initialLayout = new QVBoxLayout(this);
     initialLayout->addWidget(initialCheckbox);
     initialLayout->addWidget(opacitySldr);
@@ -2240,8 +2335,30 @@ void milxQtMain::imagesMix()
     sliders.push_back(opacitySldr);
     checkBoxes.push_back(initialCheckbox);
 
-    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    if(firstImg->GetLookupTable() == NULL)
     {
+        QMessageBox msgBox;
+        msgBox.setText("Colormap not set?");
+        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.exec();
+    }
+
+    for(int j = 1; j < n; j ++) //!< For all windows, do operation
+    {
+        QPointer<milxQtImage> secondImg = nextImage();
+
+        if(secondImg->GetLookupTable() == NULL)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Colormap not set?");
+            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.exec();
+        }
+
         QVBoxLayout *layout = new QVBoxLayout(this);
         QSlider *opacitySldr2 = new QSlider(this);
         opacitySldr2->setMinimum(0);
@@ -2249,7 +2366,7 @@ void milxQtMain::imagesMix()
         opacitySldr2->setValue(5);
         QCheckBox *checkbox = new QCheckBox(this);
         checkbox->setChecked(true);
-        checkbox->setToolTip(imageWindows[j]->strippedBaseName());
+        checkbox->setToolTip(secondImg->strippedBaseName());
         layout->addWidget(checkbox);
         layout->addWidget(opacitySldr2);
         sliderLayout->addLayout(layout);
@@ -2289,13 +2406,14 @@ void milxQtMain::imagesMix()
 
 void milxQtMain::imagesBlend(QVector<float> opacities)
 {
-    if(getNumberOfWindows() < 2 || imageWindows.size() < 2)
+    int n = getNumberOfImageWindows();
+    if(getNumberOfWindows() < 2 || n < 2)
     {
         printError("Need more than 1 window open to blend.");
         return;
     }
 
-    if(opacities.empty() || opacities.size() < imageWindows.size())
+    if(opacities.empty() || opacities.size() < n)
     {
         printError("Size of opacities list does not match number of open images.");
         return;
@@ -2303,7 +2421,17 @@ void milxQtMain::imagesBlend(QVector<float> opacities)
 
     initialiseWindowTraversal();
     QPointer<milxQtImage> firstImg = nextImage();
-    vtkSmartPointer<vtkImageData> ucharData1 = firstImg->GetWindowLevel()->GetOutput();
+    //vtkSmartPointer<vtkImageData> ucharData1 = firstImg->GetWindowLevel()->GetOutput();
+    vtkSmartPointer<vtkImageMapToColors> filterColorsImage = vtkSmartPointer<vtkImageMapToColors>::New();
+    filterColorsImage->SetLookupTable(firstImg->GetLookupTable());
+#if VTK_MAJOR_VERSION <= 5
+    filterColorsImage->SetInput(firstImg->GetOutput());
+#else
+    filterColorsImage->SetInputData(firstImg->GetOutput());
+#endif
+    filterColorsImage->PassAlphaToOutputOn();
+    filterColorsImage->Update();
+    vtkSmartPointer<vtkImageData> ucharData1 = filterColorsImage->GetOutput();
 
     int initialExtent[6];
     firstImg->GetOutput()->GetExtent(initialExtent);
@@ -2321,8 +2449,7 @@ void milxQtMain::imagesBlend(QVector<float> opacities)
 //        blend->SetBlendModeToCompound();
         blend->SetBlendModeToNormal();
 
-    size_t n = imageWindows.size()-1;
-    for(int j = 1; j < imageWindows.size(); j ++) //!< For all windows, do operation
+    for(int j = 1; j < n; j ++) //!< For all windows, do operation
     {
         QPointer<milxQtImage> secondImg = nextImage();
 
@@ -2330,7 +2457,17 @@ void milxQtMain::imagesBlend(QVector<float> opacities)
             continue;
 
         printInfo("Blending with Image: " + secondImg->strippedName() + " with Opacity: " + QString::number(opacities[j]));
-        vtkSmartPointer<vtkImageData> ucharData2 = secondImg->GetWindowLevel()->GetOutput();
+//        vtkSmartPointer<vtkImageData> ucharData2 = secondImg->GetWindowLevel()->GetOutput();
+        vtkSmartPointer<vtkImageMapToColors> filterColorsOverlay = vtkSmartPointer<vtkImageMapToColors>::New();
+        filterColorsOverlay->SetLookupTable(secondImg->GetLookupTable());
+     #if VTK_MAJOR_VERSION <= 5
+        filterColorsOverlay->SetInput(secondImg->GetOutput());
+     #else
+        filterColorsOverlay->SetInputData(secondImg->GetOutput());
+     #endif
+        filterColorsOverlay->PassAlphaToOutputOn();
+        filterColorsOverlay->Update();
+        vtkSmartPointer<vtkImageData> ucharData2 = filterColorsOverlay->GetOutput();
 
         if(!secondImg->GetLookupTable())
             printWarning("Colourmap is not set. Please set a colour map to ensure proper blending.");
@@ -2345,7 +2482,7 @@ void milxQtMain::imagesBlend(QVector<float> opacities)
         #else
             blend->AddInputData(ucharData2);
         #endif
-            blend->SetOpacity(j,opacities[j]/n);
+            blend->SetOpacity(j,opacities[j]);
         }
         else
             printError("Images are not the same size. Skipping.");
@@ -2415,6 +2552,32 @@ void milxQtMain::imagesSubtract()
     emit done(-1);
 
     display(resultImg);
+}
+
+void milxQtMain::imagesMultiply()
+{
+  if (getNumberOfWindows() == 0 || imageWindows.size() < 1)
+    return;
+
+  emit working(-1);
+  initialiseWindowTraversal();
+  QPointer<milxQtImage> firstImg = nextImage();
+
+  QPointer<milxQtImage> resultImg = new milxQtImage;
+  printInfo("Assigning " + firstImg->getName());
+  resultImg->setName("Product Image");
+  resultImg->setConsole(console);
+  resultImg->setData(firstImg, true);
+  for (int j = 1; j < imageWindows.size(); j++) //!< For all windows, do operation
+  {
+    QPointer<milxQtImage> img = nextImage();
+
+    printInfo("Multiplying " + img->getName());
+    resultImg->multiply(img);
+  }
+  emit done(-1);
+
+  display(resultImg);
 }
 
 void milxQtMain::imagesConvolve()
@@ -2595,6 +2758,7 @@ void milxQtMain::createMenu()
     actionAddImages = new QAction(this);
     actionAverageImages = new QAction(this);
     actionSubtractImages = new QAction(this);
+    actionMultiplyImages = new QAction(this);
     actionConvolveImages = new QAction(this);
     actionMergeLabels = new QAction(this);
     //Window
@@ -2602,6 +2766,8 @@ void milxQtMain::createMenu()
     actionLinkWindows = new QAction(this);
     actionCascade = new QAction(this);
     actionTile = new QAction(this);
+    actionTileVertically = new QAction(this);
+    actionTileHorizontally = new QAction(this);
     menuWindowList = new QMenu(menuBar);
     importFromMenu = new QMenu(this);
     //Help
@@ -2683,6 +2849,9 @@ void milxQtMain::createMenu()
     actionSubtractImages->setText(QApplication::translate("MainWindow", "Difference Images", 0, QApplication::UnicodeUTF8));
     actionSubtractImages->setShortcut(tr("Ctrl+d"));
     menuImages->addAction(actionSubtractImages);
+    actionMultiplyImages->setText(QApplication::translate("MainWindow", "Multiply Images", 0, QApplication::UnicodeUTF8));
+    actionMultiplyImages->setShortcut(tr("Ctrl+d"));
+    menuImages->addAction(actionMultiplyImages);
     actionConvolveImages->setText(QApplication::translate("MainWindow", "Convolve Images", 0, QApplication::UnicodeUTF8));
     actionConvolveImages->setShortcut(tr("Ctrl+c"));
     menuImages->addAction(actionConvolveImages);
@@ -2702,6 +2871,12 @@ void milxQtMain::createMenu()
     actionTile->setIcon(QIcon(":/resources/toolbar/tile.png"));
     actionTile->setText(QApplication::translate("MainWindow", "Tile", 0, QApplication::UnicodeUTF8));
     menuWindows->addAction(actionTile);
+    actionTileVertically->setIcon(QIcon(":/resources/toolbar/tilev.png"));
+    actionTileVertically->setText(QApplication::translate("MainWindow", "Tile Vertically", 0, QApplication::UnicodeUTF8));
+    menuWindows->addAction(actionTileVertically);
+    actionTileHorizontally->setIcon(QIcon(":/resources/toolbar/tileh.png"));
+    actionTileHorizontally->setText(QApplication::translate("MainWindow", "Tile Horizontally", 0, QApplication::UnicodeUTF8));
+    menuWindows->addAction(actionTileHorizontally);
     updateWindowMenu();
     connect(menuWindows, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
     ///Help
@@ -2723,6 +2898,7 @@ void milxQtMain::createMenu()
     actionCompare = new QAction(this);
     actionCompare->setText(QApplication::translate("MainWindow", "Compare", 0, QApplication::UnicodeUTF8));
     actionCompare->setShortcut(tr("Ctrl+u"));
+    actionCompare->setDisabled(true); ///\todo enable compare when fixed
     menuWindowList->setTitle(QApplication::translate("MainWindow", "Switch Window To", 0, QApplication::UnicodeUTF8));
     connect(menuWindowList, SIGNAL(aboutToShow()), this, SLOT(updateWindowListMenu()));
     importFromMenu->setTitle(QApplication::translate("MainWindow", "Import View From", 0, QApplication::UnicodeUTF8));
@@ -2784,6 +2960,8 @@ void milxQtMain::createToolBars()
 
     windowToolBar = addToolBar(tr("Window"));
     windowToolBar->addAction(actionTile);
+    windowToolBar->addAction(actionTileVertically);
+    windowToolBar->addAction(actionTileHorizontally);
     windowToolBar->addAction(actionCascade);
     windowToolBar->addAction(actionLinkWindows);
     windowToolBar->addAction(actionConsole);
@@ -2862,6 +3040,7 @@ void milxQtMain::createConnections()
     QObject::connect(actionAddImages, SIGNAL(activated()), this, SLOT(imagesAdd()));
     QObject::connect(actionAverageImages, SIGNAL(activated()), this, SLOT(imagesAverage()));
     QObject::connect(actionSubtractImages, SIGNAL(activated()), this, SLOT(imagesSubtract()));
+    QObject::connect(actionMultiplyImages, SIGNAL(activated()), this, SLOT(imagesMultiply()));
   #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
     QObject::connect(actionConvolveImages, SIGNAL(activated()), this, SLOT(imagesConvolve()));
   #endif
@@ -2870,6 +3049,8 @@ void milxQtMain::createConnections()
     //actionLinkWindows is not connected because its used as a Boolean in the transferViewToWindows() member
     QObject::connect(actionCascade, SIGNAL(activated()), this, SLOT(cascadeTab()));
     QObject::connect(actionTile, SIGNAL(activated()), this, SLOT(tileTab()));
+    QObject::connect(actionTileVertically, SIGNAL(activated()), this, SLOT(tileTabVertically()));
+    QObject::connect(actionTileHorizontally, SIGNAL(activated()), this, SLOT(tileTabHorizontally()));
     ///Help
     QObject::connect(actionContents, SIGNAL(activated()), this, SLOT(helpContents()));
     QObject::connect(actionPreferences, SIGNAL(activated()), this, SLOT(preferences()));
@@ -2911,6 +3092,10 @@ void milxQtMain::setupTooltips()
     actionCascade->setStatusTip("Cascade windows in current tab");
     actionTile->setToolTip("Tile windows in current tab");
     actionTile->setStatusTip("Tile windows in current tab");
+    actionTileVertically->setToolTip("Tile windows vertically in current tab");
+    actionTileVertically->setStatusTip("Tile windows vertically in current tab");
+    actionTileHorizontally->setToolTip("Tile windows horizontally in current tab");
+    actionTileHorizontally->setStatusTip("Tile windows horizontally in current tab");
     actionConsole->setToolTip("Hide/Show console docking window");
     actionConsole->setStatusTip("Hide/Show console docking window");
     actionLinkWindows->setToolTip("Link the view in all windows");
@@ -2948,6 +3133,8 @@ void milxQtMain::contextMenuEvent(QContextMenuEvent *currentEvent)
     contextMenu->addSeparator();
     contextMenu->addAction(actionCascade);
     contextMenu->addAction(actionTile);
+    contextMenu->addAction(actionTileVertically);
+    contextMenu->addAction(actionTileHorizontally);
     contextMenu->addSeparator();
     contextMenu->addAction(actionExit);
 

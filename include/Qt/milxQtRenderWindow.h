@@ -276,6 +276,22 @@ public:
         return lookupTable;
     }
     /*!
+        \fn milxQtRenderWindow::SetScalarBar(vtkScalarBarActor* bar)
+        \brief Get the scalar bar of the display window.
+    */
+    inline void SetScalarBar(vtkScalarBarActor* bar)
+    {
+        scalarBar->SetScalarBarActor(bar);
+    }
+    /*!
+        \fn milxQtRenderWindow::GetScalarBar()
+        \brief Get the scalar bar of the display window.
+    */
+    inline vtkScalarBarActor* GetScalarBar()
+    {
+      return scale;
+    }
+    /*!
         \fn milxQtRenderWindow::GetBackground(double &red, double &green, double &blue)
         \brief Get the background of the display window.
     */
@@ -386,6 +402,11 @@ public slots:
     */
     inline void importViewFrom(milxQtRenderWindow *windowToImportFrom)
     {   importFrom(windowToImportFrom);   }
+    /*!
+      \fn milxQtRenderWindow::updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
+      \brief Update any text actors in display to current slice.
+    */
+    virtual void updateTextActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command);
     /*!
       \fn milxQtRenderWindow::updateImageActor(vtkObject * obj, unsigned long, void * client_data, void *, vtkCommand * command)
       \brief Update any image actors in display to current slice when slice number changes.
@@ -653,6 +674,11 @@ public slots:
     */
     virtual void colourMapToGray(double minRange = 0.0, double maxRange = 0.0);
     /*!
+        \fn milxQtRenderWindow::colourMapToSeismic(double minRange = 0.0, double maxRange = 0.0)
+        \brief Change the colour map to Seismic
+    */
+    virtual void colourMapToSeismic(double minRange = 0.0, double maxRange = 0.0);
+    /*!
         \fn milxQtRenderWindow::colourMapToLogGray(double minRange = 0.0, double maxRange = 0.0)
         \brief Change the colour map to Logarithmic (base 10) Gray
     */
@@ -722,6 +748,11 @@ public slots:
         \brief Change the colour map to CubeHelix
     */
     virtual void colourMapToCubeHelix(double minRange = 0.0, double maxRange = 0.0);
+    /*!
+        \fn milxQtRenderWindow::colourMapToHSV(double minRange = 0.0, double maxRange = 0.0)
+        \brief Change the colour map to HSV
+    */
+    virtual void colourMapToHSV(double minRange = 0.0, double maxRange = 0.0);
     /*!
         \fn milxQtRenderWindow::updateLookupTable()
         \brief Implement this into your derived class to ensure the new colourmap is passed on to your viewing data (image, model etc.)
@@ -860,6 +891,7 @@ protected:
     QAction* actionRainbow; //!< Default colours
     QAction* actionInvRainbow; //!< Inv Default colours
     LabelledAction* actionGray; //!< Gray colours
+    LabelledAction* actionSeismic; //!< Gray2 colours
     QAction* actionLogGray; //!< Logarithmic Gray colours
     QAction* actionNIH; //!< NIH colours
     QAction* actionNIH_FIRE; //!< NIH_FIRE colours
@@ -873,6 +905,7 @@ protected:
     LabelledAction* actionSpectral; //!< Spectral colours
     LabelledAction* actionGNUPlot; //!< GNUPlot colours
     LabelledAction* actionCubeHelix; //!< Cube Helix colours
+    LabelledAction* actionHSV; //!< Cube Helix colours
 
     //Actions
     QAction* resetAct; //!< Action for refreshing the display

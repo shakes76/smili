@@ -1,3 +1,34 @@
+# SMILI Release v1.0 RC 1
+
+
+# SMILI Release v1.0 Beta 2
+Updated the apps that were out of date.
+Fixed distance widget and others that were not working before.
+Replaced crosshairs icon.
+Fixed toolbar buttons not working for recent changes. Fixed human glyph preferences bug. Fixed instant display of crosshairs when enabled. Fixed window level reset in refresh for images.
+Added refresh and cursors buttons for all windows in tab
+Fixed VTK 5 compile errors. Added initial crosshair icon to be used later.
+Added working linked and tracked cursors. Updated callback to invoke modified event for cursors. Added necessary API changes to access cursor components.
+Added replacement cursor using ResliceCursor. Replaced Cursor3D with better looking one. Updated image class and main class to account for this. Added action for cursor.
+Added copying of cursor position to other windows. Doesn't work but almost there I think.
+Removed unused code for picking.
+Added working version of an image cursor.
+Added initial version of the cursor. Not working but code done.
+Updated dev notes for recent changes.
+Cleaned up auto level code for images. Removed Otsu version.
+Completed working version of the auto level feature.
+Properly reverted Otsu. Not great, needs fixing.
+Added more code to do auto levelling using ITK. Still not working and reverted to Otsu levelling.
+Added message for interpolator in orientation.
+Merge branch 'topic-vtk6.3' into experimental
+Fixed VTK 6 bug for orientation and output type. Added better histogram without zeros but doesn't make difference.
+Added Otsu based level with autoLevel function. Augments previous approach with stats based approach.
+Added notes and tweaked window leveling in autoLevel.
+Completed working auto leveling and button. Levelling now works properly from inter-quartile ranges.
+Added auto level button and better auto leveller. Moved info member to own section in image class. No code change. Moved histogram variable to class as needed throughout.
+Fixed another VTK float type issue from 6.3. Need to check if change to float causes more issues.
+Fixed render class for VTK 6.3 changes.
+
 # SMILI Release v1.0 Beta 1
 Fixed recent change to track view for multi-view. Replaced tracking with MMB instead of LMB.
 Made the Setup Widgets member virtual for derived classes to redefine widgets.

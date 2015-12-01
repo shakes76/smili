@@ -25,7 +25,7 @@
 #include <vtkProperty.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRendererCollection.h>
-#include <vtkWorldPointPicker.h>
+#include <vtkPointPicker.h>
 #include <vtkImageActor.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #if(VTK_MAJOR_VERSION > 5)
@@ -148,6 +148,7 @@ public:
 
       this->IV->SetColorWindow(newWindow);
       this->IV->SetColorLevel(newLevel);
+      std::cout << "Window: " << newWindow << ", Level: " << newLevel << std::endl;
       this->IV->Render();
     }
 
@@ -160,6 +161,16 @@ class vtkImageViewer3CursorCallback : public vtkCommand
 {
 public:
   static vtkImageViewer3CursorCallback *New() { return new vtkImageViewer3CursorCallback; }
+  vtkImageViewer3CursorCallback() : vtkCommand()
+  {
+    dataPicker = vtkPointPicker::New();
+  }
+
+  ~vtkImageViewer3CursorCallback()
+  {
+    if (dataPicker)
+      dataPicker->Delete();
+  }
 
   void Execute(vtkObject *caller,
     unsigned long event,
@@ -178,26 +189,31 @@ public:
 
     if (this->IV->GetCursorEnabled())
     {
-      isi->GetInteractor()->GetPicker()->Pick(isi->GetInteractor()->GetEventPosition()[0],
+      if (dataPicker->Pick(isi->GetInteractor()->GetEventPosition()[0],
         isi->GetInteractor()->GetEventPosition()[1],
         0,  // always zero.
-        isi->GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
-      double picked[3];
-      isi->GetInteractor()->GetPicker()->GetPickPosition(picked);
-    #if(VTK_MAJOR_VERSION > 5)
-      this->IV->GetCursor()->SetCenter(picked[0], picked[1], picked[2]);
-    #else
-      this->IV->GetCursor()->SetModelBounds(this->IV->GetImageActor()->GetBounds());
-      this->IV->GetCursor()->SetFocalPoint(picked[0], picked[1], picked[2]);
-    #endif
-      this->IV->GetCursor()->Update();
-      this->IV->GetRenderWindow()->Modified();
+        isi->GetInteractor()->GetRenderWindow()->GetRenderers()->GetFirstRenderer()))
+      {
+        double picked[3];
+        dataPicker->GetMapperPosition(picked);
+        //isi->GetInteractor()->GetPicker()->GetPickPosition(picked);
+      #if(VTK_MAJOR_VERSION > 5)
+        this->IV->GetCursor()->SetCenter(picked[0], picked[1], picked[2]);
+      #else
+        this->IV->GetCursor()->SetModelBounds(this->IV->GetInput()->GetBounds());
+        this->IV->GetCursor()->SetFocalPoint(picked[0], picked[1], picked[2]);
+      #endif
+        this->IV->GetCursor()->Update();
+        this->IV->GetRenderWindow()->Modified();
+        this->IV->UpdateDisplayExtent();
+      }
     }
 
     this->IV->Render();
   }
 
   vtkImageViewer3 *IV;
+  vtkPointPicker *dataPicker;
 };
 
 //ImageViewer
@@ -369,7 +385,7 @@ void vtkImageViewer3::EnableCursor()
     cursor = vtkResliceCursor::New();
   cursor->SetImage(this->GetInput());
   cursor->SetThickMode(0);
-  cursor->SetThickness(2, 2, 2);
+  cursor->SetThickness(1, 1, 1);
   if(!CursorEnabled)
     {
       //Set as center of image to initialise
@@ -386,7 +402,7 @@ void vtkImageViewer3::EnableCursor()
 #else
   if (!cursor)
     cursor = vtkCursor3D::New();
-  cursor->SetModelBounds(this->GetImageActor()->GetBounds());
+  cursor->SetModelBounds(this->GetInput()->GetBounds());
   cursor->AllOn();
   cursor->OutlineOff();
 
@@ -403,6 +419,7 @@ void vtkImageViewer3::EnableCursor()
 
   this->Renderer->AddActor(cursorActor);
   this->Modified();
+  this->GetRenderWindow()->Modified();
   this->UpdateDisplayExtent();
   this->Render();
   CursorEnabled = true;

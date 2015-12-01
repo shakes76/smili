@@ -20,6 +20,8 @@
         <file>resources/toolbar/close.png</file>
         <file>resources/toolbar/close_all.png</file>
         <file>resources/toolbar/tile.png</file>
+        <file>resources/toolbar/tilev.png</file>
+        <file>resources/toolbar/tileh.png</file>
         <file>resources/toolbar/cascade.png</file>
         <file>resources/toolbar/console.png</file>
         <file>resources/toolbar/link.png</file>
@@ -59,6 +61,8 @@
         <file>resources/cmaps/cm_nih.png</file>
         <file>resources/cmaps/cm_nih_fire.png</file>
         <file>resources/cmaps/cm_vtk.png</file>
+        <file>resources/cmaps/cm_hsv.png</file>
+        <file>resources/cmaps/cm_seismic.png</file>
         <file>resources/paper/figs/layers.png</file>
         <file>resources/index.html</file>
         <file>resources/about.html</file>
