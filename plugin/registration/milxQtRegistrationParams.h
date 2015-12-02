@@ -21,6 +21,8 @@ class milxQtRegistrationParams
 public:
     milxQtRegistrationParams();
     ~milxQtRegistrationParams();
+    void reset();
+
 
     RegType type;
     QString referenceName;

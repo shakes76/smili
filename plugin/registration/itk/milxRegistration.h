@@ -690,7 +690,7 @@ public:
     bool RegisterMilxNonRigid(std::string dataFile, std::string atlasFile, std::string outputName, bool Invert);
     bool RegisterAffineITK(std::string dataFile, std::string atlasFile, std::string outputPrefix, bool Invert, std::string dataMaskFile, std::string atlasMaskFile );
     bool RegisterNonRigidBsplineITK(std::string dataFile, std::string atlasFile, std::string outputPrefix, bool Invert, std::string dataMaskFile, std::string atlasMaskFile );
-
+    double NmiITK(std::string dataFile, std::string atlasFile);
 
     void LoadTRSF(std::string filename1, std::string filename2, double * array, bool invert);
     void LoadTRSF(std::string filename, double * array, bool invert);

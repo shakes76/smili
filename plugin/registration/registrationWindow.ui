@@ -18,7 +18,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
      <item>
       <widget class="QLabel" name="labelAlgo">
        <property name="text">
@@ -255,6 +255,27 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="checkBoxCreateAtlas">
+       <property name="text">
+        <string>Create Atlas</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxSimilarities">
+       <property name="text">
+        <string>Compute Similarities</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxOpenResults">
+       <property name="text">
+        <string>Open results in SMILI</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -268,13 +289,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBoxCreateAtlas">
-       <property name="text">
-        <string>Create Atlas</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="verticalSpacer_6">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -286,13 +300,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="checkBoxOpenResults">
-       <property name="text">
-        <string>Open results in SMILI</string>
-       </property>
-      </widget>
      </item>
      <item>
       <spacer name="verticalSpacer_7">

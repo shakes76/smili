@@ -8,6 +8,18 @@
 #include <QObject>
 #include <QFile>
 
+/*!
+\class milxQtSimilarities
+\brief Contain all the values of similarity measurement
+*/
+class milxQtSimilarities
+{
+public:
+    double nmi; //!< Normalize mutual information
+    double ssd; //!< Sum Squared Difference
+    double ncc; //!< Normalized Cross Correlation
+    double lncc; //!< Localy Normalized Cross Correlation
+};
 
 /*!
     \class milxQtRegistration
@@ -86,14 +98,14 @@ public:
     void setOutputFolder(QString);
 
     /*!
-        \fn milxQtRegistration::milxQtRegistration()
+        \fn milxQtRegistration::isOpened()
         \brief Is the image open in SMILi
     */
     bool isOpened();
 
     /*!
-        \fn milxQtRegistration::milxQtRegistration()
-        \brief Start the registration
+        \fn milxQtRegistration::startRegistration()
+        \brief Start the registrationf
     */
     int startRegistration();
 
@@ -145,6 +157,20 @@ public:
     */
     QString createAtlasFile();
 
+
+    /*!
+        \fn milxQtRegistration::createSimilarityFileAfter()
+        \brief Create the similarity file containing the similarity after the registration was performed and return the filepath
+    */
+    QString createSimilarityFileAfter();
+
+    /*!
+    \fn milxQtRegistration::createSimilarityFileBefore()
+    \brief Create the similarity file containing the similarity after the registration was performed and return the filepath
+    */
+    QString createSimilarityFileBefore();
+
+
     /*!
         \fn milxQtRegistration::isWorkDone()
         \brief Is the registration/deformation field calculation completed
@@ -152,12 +178,46 @@ public:
     bool isWorkDone();
 
     /*!
-    \fn milxQtRegistration::getAlgoName()
-    \brief Return the name of the current algorithm
+        \fn milxQtRegistration::getAlgoName()
+        \brief Return the name of the current algorithm
     */
     QString getAlgoName();
 
+    /*!
+        \fn milxQtRegistration::setIsRef(bool)
+        \brief Set the image as the reference
+    */
+    void setIsRef(bool);
+
+    /*!
+    	\fn milxQtRegistration::setComputeSimilarities(bool)
+    	\brief Set if we should compute the similarities
+    */
+    void setComputeSimilarities(bool);
+
+    /*!
+        \fn milxQtRegistration::isRef()
+        \brief Is the image the reference image
+    */
+    bool isRef();
+
+    /*!
+        \fn milxQtRegistration::getDuration()
+        \brief Return the duration of the registration in milliseconds
+    */
+    qint64 getDuration();
+
+
+    /*!
+        \fn milxQtRegistration::reset()
+    	\brief Reset the class (It will be like no registration happened)
+    */
+    void reset();
+
     milxQtRegistrationParams params; //!< Parameters for registration
+    milxQtSimilarities similarities_before; //!< Similarities before the registration
+    milxQtSimilarities similarities_after; //!< Similarities after the registration
+    milxQtRegistration * reference; //!< Reference image for the registration
 
 signals:
 
@@ -168,10 +228,11 @@ signals:
     void done();
 
     /*!
-    \fn milxQtRegistration::error(QString functionName, QString errorMsg)
-    \brief The registration and transformations have been done
+    	\fn milxQtRegistration::error(QString functionName, QString errorMsg)
+    	\brief The registration and transformations have been done
     */
     void error(QString functionName, QString errorMsg);
+
 
 public slots:
 
@@ -182,29 +243,24 @@ public slots:
     void registrationCompleted();
 
     /*!
-        \fn milxQtRegistration::cpp2defCompleted()
-        \brief The transformation to deformation field is completed
-    */
-    void cpp2defCompleted();
-
-
-    /*!
-    \fn milxQtRegistration::algoError(QString functionName, QString errorMsg);
-    \brief The registration and transformations have been done
+    	\fn milxQtRegistration::algoError(QString functionName, QString errorMsg);
+    	\brief The registration and transformations have been done
     */
     void algoError(QString functionName, QString errorMsg);
 
+#ifdef USE_NIFTI_REG
     /*!
-        \fn milxQtRegistration::setIsRef(bool)
-        \brief Set the image as the reference
+    \fn milxQtRegistration::cpp2defCompleted()
+    \brief The transformation to deformation field is completed
     */
-    void setIsRef(bool);
+    void cpp2defCompleted();
 
     /*!
-        \fn milxQtRegistration::isRef()
-        \brief Is the image the reference image
+       \fn milxQtRegistration::similaritiesComputed();
+       \brief The similarities have been computed
     */
-    bool isRef();
+    void similaritiesComputed();
+#endif
 
 protected:
     /*!
@@ -222,9 +278,14 @@ protected:
     bool workDone; //!< Is the registration done
     bool isRefImg; //!< Is this image the reference image
     RegType type; //!< Type of the registration
-    milxQtRegistration * reference; //!< Reference image for the registration
     milxQtRegistrationAlgos * regAlgos; //!< Class containing the algorithms for the registration
     milxQtMain *MainWindow; //!< Main window of SMILI
+
+    // Statistics
+    qint64 startTime; //!< Time start of the registration
+    qint64 stopTime; //!< Time the registration ended
+
+    bool computeSimilarities; //!< Do we have to compute similarities
 
 };
 
