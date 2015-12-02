@@ -146,14 +146,15 @@ public:
     */
     QString getDefaultOutputFolder();
 
+
+
+#ifdef USE_NIFTI_REG
     /*
     \fn milxQtRegistrationWindow::writeSimilarities()
     \brief Write the similarities file
     */
     void writeSimilarities();
 
-
-#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationWindow::computeAtlas()
         \brief Compute the average (Atlas) of all the registrations

@@ -140,8 +140,8 @@ int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
         nifti_image *tempImage = reg_io_ReadImageHeader(arguments[2]);
         if (tempImage == NULL) {
             // fprintf(stderr, "The following image can not be read: %s\n", arguments[2]);
-            for (int i = 0; i < nbargs; i++) {
-                free(arguments[i]);
+            for (int j = 0; j < nbargs; j++) {
+                free(arguments[j]);
             }
             free(arguments);
             emit error("average()", "Error while computing average, the following image can not be read: \"" + QString(arguments[2]) + "\".");
@@ -168,8 +168,8 @@ int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
             nifti_image *tempImage = reg_io_ReadImageFile(arguments[i]);
             if (tempImage == NULL) {
                 //fprintf(stderr, "[!] The following image can not be read: %s\n", arguments[i]);
-                for (int i = 0; i < nbargs; i++) {
-                    free(arguments[i]);
+                for (int j = 0; j < nbargs; j++) {
+                    free(arguments[j]);
                 }
                 free(arguments);
                 emit error("average()", "Error while computing average, the following image can not be read: \"" + QString(arguments[i]) + "\".");
@@ -181,8 +181,8 @@ int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
             else reg_tools_changeDatatype<float>(tempImage);
             if (averageImage->nvox != tempImage->nvox) {
                 //fprintf(stderr, "[!] All images must have the same size. Error when processing: %s\n", arguments[i]);
-                for (int i = 0; i < nbargs; i++) {
-                    free(arguments[i]);
+                for (int j = 0; j < nbargs; j++) {
+                    free(arguments[j]);
                 }
                 free(arguments);
                 emit error("average()", "Error while computing average, all images must have the same size. Error when processing: \"" + QString(arguments[i]) + "\".");
@@ -204,8 +204,8 @@ int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
     else
     {
         // Free variables
-        for (int i = 0; i < nbargs; i++) {
-            free(arguments[i]);
+        for (int j = 0; j < nbargs; j++) {
+            free(arguments[j]);
         }
         free(arguments);
         emit error("average()", "Error while computing average, invalid filetype input (check accepted file extensions: .nii, .nii.gz, .hdr, .img, .img.gz)");
@@ -213,8 +213,8 @@ int milxQtRegistrationAlgos::average(QString outputName, QStringList filenames)
     }
 
     // Free variables
-    for (int i = 0; i < nbargs; i++) {
-        free(arguments[i]);
+    for (int j = 0; j < nbargs; j++) {
+        free(arguments[j]);
     }
     free(arguments);
     emit averageCompleted();
@@ -819,7 +819,7 @@ int milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
         int *refMask = NULL;
         int refMaskVoxNumber = refImage->nx*refImage->ny*refImage->nz;
         refMask = (int *)calloc(refMaskVoxNumber, sizeof(int));
-        for (int i = 0; i<refMaskVoxNumber; ++i) refMask[i] = i;
+        for (int j = 0; j<refMaskVoxNumber; ++j) refMask[j] = j;
 
 
         /* Create the warped floating image */
@@ -905,8 +905,8 @@ int milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
         /* Compute the LNCC if required */
         {
             reg_lncc *lncc_object = new reg_lncc();
-            for (int i = 0; i < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++i)
-                lncc_object->SetActiveTimepoint(i);
+            for (int j = 0; j < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++j)
+                lncc_object->SetActiveTimepoint(j);
             lncc_object->InitialiseMeasure(refImage,
                                            warpedFloImage,
                                            refMask,
@@ -922,7 +922,7 @@ int milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
         /* Compute the NMI if required */
         {
             reg_nmi *nmi_object = new reg_nmi();
-            for (int i = 0; i < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++i)
+            for (int j = 0; j < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++j)
                 nmi_object->SetActiveTimepoint(i);
             nmi_object->InitialiseMeasure(refImage,
                                           warpedFloImage,
@@ -939,7 +939,7 @@ int milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
         /* Compute the SSD if required */
         {
             reg_ssd *ssd_object = new reg_ssd();
-            for (int i = 0; i < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++i)
+            for (int j = 0; j < (refImage->nt < warpedFloImage->nt ? refImage->nt : warpedFloImage->nt); ++j)
                 ssd_object->SetActiveTimepoint(i);
             ssd_object->InitialiseMeasure(refImage,
                                           warpedFloImage,

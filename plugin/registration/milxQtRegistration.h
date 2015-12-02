@@ -243,22 +243,24 @@ public slots:
     void registrationCompleted();
 
     /*!
-        \fn milxQtRegistration::cpp2defCompleted()
-        \brief The transformation to deformation field is completed
-    */
-    void cpp2defCompleted();
-
-    /*!
     	\fn milxQtRegistration::algoError(QString functionName, QString errorMsg);
     	\brief The registration and transformations have been done
     */
     void algoError(QString functionName, QString errorMsg);
+
+#ifdef USE_NIFTI_REG
+    /*!
+    \fn milxQtRegistration::cpp2defCompleted()
+    \brief The transformation to deformation field is completed
+    */
+    void cpp2defCompleted();
 
     /*!
        \fn milxQtRegistration::similaritiesComputed();
        \brief The similarities have been computed
     */
     void similaritiesComputed();
+#endif
 
 protected:
     /*!

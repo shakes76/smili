@@ -74,6 +74,7 @@ void milxQtRegistrationWindow::initUI()
 #ifndef USE_NIFTI_REG
     this->ui.checkBoxCreateAtlas->setVisible(false);
     this->ui.checkBoxDeformationF->setVisible(false);
+    this->ui.checkBoxSimilarities->setVisible(false);
 #endif
 }
 
@@ -486,7 +487,11 @@ void milxQtRegistrationWindow::createConnections()
     connect(this->ui.btnUnselectAll, SIGNAL(clicked()), this, SLOT(unselectAllClicked()));
     connect(this->ui.btnBrowse, SIGNAL(clicked()), this, SLOT(browseBtnClicked()));
     connect(this->ui.clearList, SIGNAL(clicked()), this, SLOT(clearList()));
+
+#ifdef USE_NIFTI_REG
     connect(this->regAlgos, SIGNAL(averageCompleted()), this, SLOT(averageComputed()));
+#endif
+
     connect(this->regAlgos, SIGNAL(error(QString, QString)), this, SLOT(regError(QString, QString)));
 }
 
@@ -774,11 +779,16 @@ void milxQtRegistrationWindow::performRegistrations()
     // If all the registration are done
     if (i == images.size())
     {
+
+#ifdef USE_NIFTI_REG
         // If we have to write the similarities
         if (this->ui.checkBoxSimilarities->isChecked())
         {
+
             writeSimilarities();
         }
+#endif
+
 
         // If we have to compute the average
         if (computeAverage)
@@ -795,6 +805,9 @@ void milxQtRegistrationWindow::performRegistrations()
     }
 
 }
+
+
+#ifdef USE_NIFTI_REG
 
 // Write the similarities file
 void milxQtRegistrationWindow::writeSimilarities()
@@ -867,7 +880,6 @@ void milxQtRegistrationWindow::writeSimilarities()
 }
 
 
-#ifdef USE_NIFTI_REG
 // compute the average of all the registrations
 void milxQtRegistrationWindow::computeAtlas()
 {

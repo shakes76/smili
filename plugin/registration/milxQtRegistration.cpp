@@ -321,6 +321,8 @@ void milxQtRegistration::algoError(QString functionName, QString errorMsg)
     emit error(functionName, errorMsg);
 }
 
+#ifdef USE_NIFTI_REG
+
 void milxQtRegistration::cpp2defCompleted()
 {
     MainWindow->printInfo("Deformation field computed\n");
@@ -339,7 +341,6 @@ void milxQtRegistration::cpp2defCompleted()
     emit done();
 }
 
-
 void milxQtRegistration::similaritiesComputed()
 {
     MainWindow->printInfo("Similarities computed\n");
@@ -351,7 +352,7 @@ void milxQtRegistration::similaritiesComputed()
     deleteTmpFiles();
     emit done();
 }
-
+#endif
 
 milxQtRegistration::milxQtRegistration(QObject * parent, milxQtImage * imageWindow, milxQtMain * mainW) : QObject(parent)
 {
