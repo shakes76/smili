@@ -226,10 +226,15 @@ void milxQtRegistrationWindow::updateOpenImages()
             // We only handle float images
             if (win->isFloatingPointImage())
             {
-                // If not in the list we add the image
-                if (!isImageInList(win->getName()))
+                // If the image is a .nii file
+                QFileInfo fileinfo(win->getName());
+                if (fileinfo.suffix() == "nii")
                 {
-                    addImage(new milxQtRegistration(this, win, MainWindow));
+                    // If the image is not in the list we add the image
+                    if (!isImageInList(win->getName()))
+                    {
+                        addImage(new milxQtRegistration(this, win, MainWindow));
+                    }
                 }
             }
         }
@@ -544,7 +549,7 @@ void milxQtRegistrationWindow::addImageClicked()
 {
     QFileDialog fileOpener;
     fileOpener.setFileMode(QFileDialog::ExistingFiles);
-    QStringList filenames = fileOpener.getOpenFileNames(this, tr("Select Files"));
+    QStringList filenames = fileOpener.getOpenFileNames(this, "Add File(s)", QString(), "Nifti (*.nii)");
 
     for (int i = 0; i < filenames.size(); i++)
     {
