@@ -12,6 +12,9 @@ int milxQtRegistration::startRegistration()
     // Start the registration
     workDone = false;
 
+    // Keep the time of start
+    this->startTime = QDateTime::currentMSecsSinceEpoch();
+
     if (this->type == AffineItk)
     {
         MainWindow->printInfo("New Itk Affine registration started.\n");
@@ -22,7 +25,7 @@ int milxQtRegistration::startRegistration()
         MainWindow->printInfo("New Itk Demon registration started.\n");
         this->regAlgos->demon_async(params);
     }
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     else if (this->type == AladinNifti)
     {
         MainWindow->printInfo("New Nifti Aladin registration started.\n");
@@ -145,6 +148,20 @@ QString milxQtRegistration::createAtlasFile()
     return createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_atlas_XXXXXX.nii");
 }
 
+// Create the similarity file containing the similarity after the registration was performed and return the filepath
+QString milxQtRegistration::createSimilarityFileAfter()
+{
+    QString filename = QFileInfo(path).baseName();
+    return createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_similarities_XXXXXX.csv");
+}
+
+// Create the similarity file containing the similarity before the registration was performed and return the filepath
+QString milxQtRegistration::createSimilarityFileBefore()
+{
+    QString filename = QFileInfo(path).baseName();
+    return createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_similarities_before_XXXXXX.csv");
+}
+
 // Copy a path from a QString to a char *
 void milxQtRegistration::copyPath(char dest[FILENAME_MAX], QString src)
 {
@@ -166,6 +183,19 @@ bool milxQtRegistration::isRef()
 {
     return this->isRefImg;
 }
+
+
+void milxQtRegistration::setComputeSimilarities(bool value)
+{
+    this->computeSimilarities = value;
+}
+
+// Return the duration of the registration
+qint64 milxQtRegistration::getDuration()
+{
+    return (this->stopTime - this->startTime);
+}
+
 
 // Copy and replace
 void milxQtRegistration::copyAndReplace(QString src, QString dst)
@@ -239,13 +269,16 @@ void milxQtRegistration::registrationCompleted()
 {
     MainWindow->printInfo("---------- Registration Completed ----------\n");
 
+    // Keep the time of completition
+    this->stopTime = QDateTime::currentMSecsSinceEpoch();
+
     // We open the result
     if (openResults)
     {
         MainWindow->loadFile(params.outputName);
     }
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     // If we have to calculate the cpp2def, we start it
     if (this->type == F3DNifti && params.cpp2Def)
     {
@@ -254,6 +287,12 @@ void milxQtRegistration::registrationCompleted()
         // Start cpp2def
         this->regAlgos->cpp2def_async(params);
 
+        return;
+    }
+
+    if (computeSimilarities)
+    {
+        this->regAlgos->similarities_async(this);
         return;
     }
 #endif
@@ -282,9 +321,17 @@ void milxQtRegistration::algoError(QString functionName, QString errorMsg)
     emit error(functionName, errorMsg);
 }
 
+#ifdef USE_NIFTI_REG
+
 void milxQtRegistration::cpp2defCompleted()
 {
     MainWindow->printInfo("Deformation field computed\n");
+
+    if (computeSimilarities)
+    {
+        this->regAlgos->similarities_async(this);
+        return;
+    }
 
     // Once done we mark it as done and we unchecked the image
     this->workDone = true;
@@ -293,6 +340,19 @@ void milxQtRegistration::cpp2defCompleted()
     deleteTmpFiles();
     emit done();
 }
+
+void milxQtRegistration::similaritiesComputed()
+{
+    MainWindow->printInfo("Similarities computed\n");
+
+    // Once done we mark it as done and we unchecked the image
+    this->workDone = true;
+    this->checked = false;
+
+    deleteTmpFiles();
+    emit done();
+}
+#endif
 
 milxQtRegistration::milxQtRegistration(QObject * parent, milxQtImage * imageWindow, milxQtMain * mainW) : QObject(parent)
 {
@@ -329,19 +389,50 @@ void milxQtRegistration::init(QString filepath)
     workDone = false;
     openResults = false;
     isRefImg = false;
-    this->type = None;
+    type = None;
     outputFolder = QFileInfo(filepath).absolutePath();
     regAlgos = new milxQtRegistrationAlgos(this);
-
+    startTime = 0;
+    stopTime = 0;
+    similarities_after.lncc = 0;
+    similarities_after.ncc = 0;
+    similarities_after.nmi = 0;
+    similarities_after.ssd = 0;
+    similarities_before.lncc = 0;
+    similarities_before.ncc = 0;
+    similarities_before.nmi = 0;
+    similarities_before.ssd = 0;
+    computeSimilarities = false;
 
     // Add a listener (registration completed)
     connect(this->regAlgos, SIGNAL(registrationCompleted()), this, SLOT(registrationCompleted()));
     connect(this->regAlgos, SIGNAL(error(QString, QString)), this, SLOT(algoError(QString, QString)));
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     // Add a listener (cpp2def completed) if we have nifti library
     connect(this->regAlgos, SIGNAL(cpp2defCompleted()), this, SLOT(cpp2defCompleted()));
+
+    // Add a listener for the similarities
+    connect(this->regAlgos, SIGNAL(similaritiesComputed()), this, SLOT(similaritiesComputed()));
 #endif
+}
+
+void milxQtRegistration::reset()
+{
+    params.reset();
+    checked = false;
+    workDone = false;
+    startTime = 0;
+    stopTime = 0;
+    computeSimilarities = false;
+    similarities_after.lncc = 0;
+    similarities_after.ncc = 0;
+    similarities_after.nmi = 0;
+    similarities_after.ssd = 0;
+    similarities_before.lncc = 0;
+    similarities_before.ncc = 0;
+    similarities_before.nmi = 0;
+    similarities_before.ssd = 0;
 }
 
 void milxQtRegistration::setOutputFolder(QString folder)

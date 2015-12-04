@@ -24,7 +24,9 @@
 #include "milxQtRegistrationParams.h"
 #include "milxRegistration.h"
 
-#ifdef USE_NIFTI
+class milxQtRegistration;
+
+#ifdef USE_NIFTI_REG
 #include "_reg_ReadWriteImage.h"
 #include "_reg_f3d2.h"
 #include "_reg_ReadWriteImage.h"
@@ -85,12 +87,6 @@ public:
     milxQtRegistrationAlgos(QObject * parent);
 
     /*!
-    \fn milxQtRegistrationAlgos::nmi(char ref[FILENAME_MAX + 1], char img[FILENAME_MAX + 1])
-    \brief Calculate the normalise mutual information between two images using ITK
-    */
-    double nmi(char ref[FILENAME_MAX + 1], char img[FILENAME_MAX + 1]);
-
-    /*!
     \fn milxQtRegistrationAlgos::affine(milxQtRegistrationParams params)
     \brief Perform a ITK affine registration
     */
@@ -115,7 +111,7 @@ public:
     */
     void demon_async(milxQtRegistrationParams params);
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationAlgos::cpp2def(milxQtRegistrationParams params)
         \brief Cpp to deformation field transformation using Nifti Reg Library
@@ -141,6 +137,12 @@ public:
     int average(QString outputName, QStringList filenames);
 
     /*!
+    	\fn milxQtRegistrationAlgos::similarities(milxQtRegistration * image)
+    	\brief Perform similarities calculation
+    */
+    int similarities(milxQtRegistration * image);
+
+    /*!
         \fn milxQtRegistrationAlgos::cpp2def_async(milxQtRegistrationParams params)
         \brief Perform a transformation from cpp to deformation field asynchroniously
     */
@@ -163,6 +165,12 @@ public:
         \brief Perform the average of a list of images asynchroniously
     */
     void average_async(QString outputName, QStringList filenames);
+
+    /*!
+    	\fn milxQtRegistrationAlgos::similarities_async(milxQtRegistration * image)
+    	\brief Perform similarities calculation asynchroniously
+    */
+    void similarities_async(milxQtRegistration * image);
 #endif
 
 
@@ -199,7 +207,7 @@ signals:
     */
     void error(QString functionName, QString errorMsg);
 
-#ifdef USE_NIFTI
+#ifdef USE_NIFTI_REG
     /*!
         \fn milxQtRegistrationAlgos::cpp2defCompleted()
         \brief The transformation from cpp to deformation field has been completed
@@ -211,6 +219,12 @@ signals:
         \brief The average of the images has been completed
     */
     void averageCompleted();
+
+    /*!
+    \fn milxQtRegistrationAlgos::similaritiesComputed()
+    \brief similarity of the image has been computed
+    */
+    void similaritiesComputed();
 
 #endif
 
