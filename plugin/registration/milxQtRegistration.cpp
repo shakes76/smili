@@ -1,4 +1,5 @@
 #include "milxQtRegistration.h"
+#include "milxQtFile.h"
 
 
 int milxQtRegistration::startRegistration()
@@ -59,11 +60,11 @@ int milxQtRegistration::createFiles()
     QString filename = QFileInfo(path).baseName();
 
     // Create the tmp files
-    params.floatingName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_img_XXXXXX.nii");
-    params.referenceName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_ref_XXXXXX.nii");
+    params.floatingName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_img_XXXXXX.nii.gz");
+    params.referenceName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_ref_XXXXXX.nii.gz");
 
     // Output path
-    params.outputName = createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_registered_XXXXXX.nii");
+    params.outputName = createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_registered_XXXXXX.nii.gz");
 
     // If the file were not created properly
     if (params.referenceName == "" || params.floatingName == "" || params.outputName == "")
@@ -75,7 +76,7 @@ int milxQtRegistration::createFiles()
     if (this->type == F3DNifti)
     {
         // tmp file for nifti
-        params.cppOutputName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_cpp_XXXXXX.nii");
+        params.cppOutputName = createFile(QDir::tempPath() + QDir::separator() + "smili_reg_cpp_XXXXXX.nii.gz");
         if (params.cppOutputName == "")
         {
             return EXIT_FAILURE;
@@ -84,7 +85,7 @@ int milxQtRegistration::createFiles()
         // cpp output file for nifti
         if (params.cpp2Def)
         {
-            params.defOutputName = createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_deffield_XXXXXX.nii");
+            params.defOutputName = createFile(this->outputFolder + QDir::separator() + filename + "_" + this->getAlgoName() + "_deffield_XXXXXX.nii.gz");
             if (params.defOutputName == "")
             {
                 return EXIT_FAILURE;
@@ -121,8 +122,14 @@ int milxQtRegistration::createFiles()
     }
 
     // Copy the reference image and the image to register
-    copyAndReplace(this->path, params.floatingName);
-    copyAndReplace(this->reference->getPath(), params.referenceName);
+    if(this->window->isLoaded())
+        copyAndReplace(this->window, params.floatingName);
+    else
+        copyAndReplace(this->path, params.floatingName);
+    if(this->reference->getImage()->isLoaded())
+        copyAndReplace(this->reference->getImage(), params.referenceName);
+    else
+        copyAndReplace(this->reference->getPath(), params.referenceName);
 
     return EXIT_SUCCESS;
 }
@@ -200,12 +207,19 @@ qint64 milxQtRegistration::getDuration()
 // Copy and replace
 void milxQtRegistration::copyAndReplace(QString src, QString dst)
 {
-    if (QFile::exists(dst))
-    {
-        QFile::remove(dst);
-    }
+    milxQtFile inFile, outFile;
+    milxQtImage *srcImage;
 
-    QFile::copy(src, dst);
+    inFile.openImage(src, srcImage);
+
+    outFile.saveImage(dst, srcImage);
+}
+
+void milxQtRegistration::copyAndReplace(milxQtImage *src, QString dst)
+{
+    milxQtFile outFile;
+
+    outFile.saveImage(dst, src);
 }
 
 // Create a temporary file and store the path in a char array

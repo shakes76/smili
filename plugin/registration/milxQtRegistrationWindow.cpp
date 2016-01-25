@@ -219,7 +219,6 @@ void milxQtRegistrationWindow::updateOpenImages()
 
     MainWindow->initialiseWindowTraversal();
     for (int i = 0; i < MainWindow->getNumberOfWindows(); i ++)
-//      for (int i = 0; i < MainWindow->getNumberOfImageWindows(); i ++)
     {
         milxQtImage *img = MainWindow->nextImage();
         // We only handle float images
@@ -540,7 +539,7 @@ void milxQtRegistrationWindow::addImageClicked()
 {
     QFileDialog fileOpener;
     fileOpener.setFileMode(QFileDialog::ExistingFiles);
-    QStringList filenames = fileOpener.getOpenFileNames(this, "Add File(s)", QString(), "Nifti (*.nii)");
+    QStringList filenames = fileOpener.getOpenFileNames(this, "Add File(s)", QString(), "Nifti (*.nii *.nii.gz)");
 
     for (int i = 0; i < filenames.size(); i++)
     {
