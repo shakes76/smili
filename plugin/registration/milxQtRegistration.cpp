@@ -210,7 +210,7 @@ void milxQtRegistration::copyAndReplace(QString src, QString dst)
     milxQtFile inFile, outFile;
     milxQtImage *srcImage;
 
-    printDebug("Converting image to Nifti format");
+    MainWindow->printDebug("Converting image to Nifti format");
     inFile.openImage(src, srcImage);
 
     outFile.saveImage(dst, srcImage);
@@ -220,7 +220,7 @@ void milxQtRegistration::copyAndReplace(milxQtImage *src, QString dst)
 {
     milxQtFile outFile;
 
-    printDebug("Saving image to Nifti format");
+    MainWindow->printDebug("Saving image to Nifti format");
     outFile.saveImage(dst, src);
 }
 
