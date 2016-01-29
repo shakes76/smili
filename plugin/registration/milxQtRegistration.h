@@ -132,12 +132,20 @@ public:
         \brief Copy and replace
     */
     void copyAndReplace(QString src, QString dst);
+    void copyAndReplace(milxQtImage *src, QString dst);
 
     /*!
         \fn milxQtRegistration::setOpenResults(bool open)
         \brief Open the results after the registration
     */
     void setOpenResults(bool open);
+
+    /*!
+        \fn milxQtRegistration::getImage()
+        \brief Return the image object for registration
+    */
+    milxQtImage* getImage()
+    {   return window;    }
 
     /*!
         \fn milxQtRegistration::getOutputPath()

@@ -217,26 +217,16 @@ void milxQtRegistrationWindow::updateOpenImages()
     QWidgetList windows;
     windows = MainWindow->getListOfWindows();
 
-    for (int i = 0; i < windows.size(); i++)
+    MainWindow->initialiseWindowTraversal();
+    for (int i = 0; i < MainWindow->getNumberOfWindows(); i ++)
     {
-        if (MainWindow->isImage(windows[i]))
+        milxQtImage *img = MainWindow->nextImage();
+        // We only handle float images
+        if (img->isFloatingPointImage())
         {
-            milxQtImage * win = qobject_cast<milxQtImage *>(windows[i]);
-
-            // We only handle float images
-            if (win->isFloatingPointImage())
-            {
-                // If the image is a .nii file
-                QFileInfo fileinfo(win->getName());
-                if (fileinfo.suffix() == "nii")
-                {
-                    // If the image is not in the list we add the image
-                    if (!isImageInList(win->getName()))
-                    {
-                        addImage(new milxQtRegistration(this, win, MainWindow));
-                    }
-                }
-            }
+            // If the image is not in the list we add the image
+            if (!isImageInList(img->getName()))
+                addImage(new milxQtRegistration(this, img, MainWindow));
         }
     }
 }
@@ -549,7 +539,7 @@ void milxQtRegistrationWindow::addImageClicked()
 {
     QFileDialog fileOpener;
     fileOpener.setFileMode(QFileDialog::ExistingFiles);
-    QStringList filenames = fileOpener.getOpenFileNames(this, "Add File(s)", QString(), "Nifti (*.nii)");
+    QStringList filenames = fileOpener.getOpenFileNames(this, "Add File(s)", QString(), "Nifti (*.nii *.nii.gz)");
 
     for (int i = 0; i < filenames.size(); i++)
     {

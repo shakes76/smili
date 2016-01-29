@@ -482,7 +482,7 @@ int milxQtRegistrationAlgos::f3d(milxQtRegistrationParams params)
 
     // Save the control point result
     nifti_image *outputControlPointGridImage = REG->GetControlPointPositionImage();
-    if (cppOutputName[0] == '\0') strcpy(cppOutputName, "outputCPP.nii");
+    if (cppOutputName[0] == '\0') strcpy(cppOutputName, "outputCPP.nii.gz");
     memset(outputControlPointGridImage->descrip, 0, 80);
     strcpy(outputControlPointGridImage->descrip, "Control point position from NiftyReg (reg_f3d)");
     if (strcmp("NiftyReg F3D2", REG->GetExecutableName()) == 0)
@@ -749,7 +749,7 @@ int milxQtRegistrationAlgos::aladin(milxQtRegistrationParams params)
 
     // The warped image is saved
     nifti_image *outputResultImage = REG->GetFinalWarpedImage();
-    if (!outputResultFlag) strcpy(outputName, "outputResult.nii");
+    if (!outputResultFlag) strcpy(outputName, "outputResult.nii.gz");
     reg_io_WriteImageFile(outputResultImage, outputName);
     nifti_image_free(outputResultImage);
 
