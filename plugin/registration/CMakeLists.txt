@@ -28,7 +28,6 @@ IF(USE_NIFTI_REG)
 	IF(UNIX)
 		set(NIFTI_REG_DIR /usr/local CACHE PATH "NIFTI REG - Base Directory")
 	ENDIF(UNIX)
-	MARK_AS_ADVANCED(NIFTI_REG_DIR)
 	message("Using NIFTI REG from ${NIFTI_REG_DIR}")
 	set(NIFTI_REG_LIBS _reg_aladin _reg_blockMatching _reg_dti _reg_f3d _reg_femTransformation _reg_globalTransformation _reg_KLdivergence _reg_lncc _reg_localTransformation _reg_maths _reg_nmi _reg_optimiser _reg_ReadWriteImage _reg_resampling _reg_ssd _reg_thinPlateSpline _reg_tools reg_nifti reg_nrrd reg_NrrdIO reg_png z png)
 
