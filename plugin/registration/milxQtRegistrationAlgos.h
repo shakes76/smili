@@ -36,6 +36,7 @@ class milxQtRegistration;
 #include "_reg_tools.h"
 #include "_reg_thinPlateSpline.h"
 #include "_reg_aladin.h"
+#include "_reg_aladin_sym.h"
 #include <fstream>
 #include <vector>
 #include <iostream>

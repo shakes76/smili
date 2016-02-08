@@ -123,7 +123,7 @@ void milxQtRegistrationAdvancedOptions::reset(RegType algo)
 
         ui.checkBoxAffDirect->setChecked(settings.value("aladin/aF3Direct", false).toBool());
         ui.checkBoxRigOnly->setChecked(settings.value("aladin/rigOnly", false).toBool());
-        ui.checkBoxSym->setChecked(settings.value("aladin/sym", false).toBool());
+        ui.checkBoxSym->setChecked(settings.value("aladin/sym", true).toBool());
     }
 
     else if (algo == ElastixAffine || algo == ElastixBSpline)

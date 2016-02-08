@@ -634,8 +634,8 @@ int milxQtRegistrationAlgos::aladin(milxQtRegistrationParams params)
     char *referenceMaskName = NULL;
     int referenceMaskFlag = 0;
 
-    char *floatingMaskName = NULL;
-    int floatingMaskFlag = 0;
+//    char *floatingMaskName = NULL;
+//    int floatingMaskFlag = 0;
 
     float inlierLts=50.0f;
     int alignCentre=1;
@@ -650,27 +650,28 @@ int milxQtRegistrationAlgos::aladin(milxQtRegistrationParams params)
     }
 
     reg_aladin<PrecisionTYPE> *REG;
-#ifdef _BUILD_NR_DEV
+//#ifdef _BUILD_NR_DEV ///using git version 83d8d1182ed4c227ce4764f1fdab3b1797eecd8d
     if (symFlag)
     {
         REG = new reg_aladin_sym<PrecisionTYPE>;
-        if ((referenceMaskFlag && !floatingMaskName) || (!referenceMaskFlag && floatingMaskName))
-        {
+        fprintf(stdout, "Using symmetric Aladin\n");
+//        if ((referenceMaskFlag && !floatingMaskName) || (!referenceMaskFlag && floatingMaskName))
+//        {
             //fprintf(stderr, "[NiftyReg Warning] You have one image mask option turned on but not the other.\n");
             //fprintf(stderr, "[NiftyReg Warning] This will affect the degree of symmetry achieved.\n");
-        }
+//        }
     }
     else
     {
-#endif
+//#endif
         REG = new reg_aladin<PrecisionTYPE>;
-#ifdef _BUILD_NR_DEV
-        if (floatingMaskFlag)
-        {
+//#ifdef _BUILD_NR_DEV
+//        if (floatingMaskFlag)
+//        {
             //fprintf(stderr, "Note: Floating mask flag only used in symmetric method. Ignoring this option\n");
-        }
+//        }
     }
-#endif
+//#endif
     REG->SetMaxIterations(maxIter);
     REG->SetNumberOfLevels(nLevels);
     REG->SetLevelsToPerform(levelsToPerform);
