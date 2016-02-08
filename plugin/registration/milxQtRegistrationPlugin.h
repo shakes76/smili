@@ -228,7 +228,7 @@ protected:
     QAction* actionElastixBSpline; //!< Elastix BSpline action
 #endif
 
-    milxQtRegistrationWindow * regWindow; //!< registration window
+    QPointer<milxQtRegistrationWindow> regWindow; //!< registration window
 
     void createActions();
     void createMenu();

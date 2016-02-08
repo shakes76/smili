@@ -13,8 +13,6 @@ milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent) : milxQtP
     extension = true;
     pluginName = "Registration";
 
-    regWindow = new milxQtRegistrationWindow(MainWindow);
-
     createActions();
     createMenu();
     createConnections();
@@ -22,7 +20,6 @@ milxQtRegistrationPlugin::milxQtRegistrationPlugin(QObject *theParent) : milxQtP
 
 milxQtRegistrationPlugin::~milxQtRegistrationPlugin()
 {
-    delete regWindow;
     if(isRunning() && threaded)
         quit();
     cout << "Registration Plugin Destroyed." << endl;
@@ -206,6 +203,7 @@ void milxQtRegistrationPlugin::createConnections()
 // Itk Affine Registration slot
 void milxQtRegistrationPlugin::ItkAffineRegistrationSlot()
 {
+    regWindow = new milxQtRegistrationWindow(MainWindow);
     regWindow->setAlgo(AffineItk);
     regWindow->show();
 }
@@ -213,6 +211,7 @@ void milxQtRegistrationPlugin::ItkAffineRegistrationSlot()
 // Itk Demon Registration slot
 void milxQtRegistrationPlugin::ItkDemonRegistrationSlot()
 {
+    regWindow = new milxQtRegistrationWindow(MainWindow);
     regWindow->setAlgo(DemonItk);
     regWindow->show();
 }
@@ -221,6 +220,7 @@ void milxQtRegistrationPlugin::ItkDemonRegistrationSlot()
 // F3DNifti Registration slot
 void milxQtRegistrationPlugin::F3DNiftiRegistrationSlot()
 {
+    regWindow = new milxQtRegistrationWindow(MainWindow);
     regWindow->setAlgo(F3DNifti);
     regWindow->show();
 }
@@ -228,6 +228,7 @@ void milxQtRegistrationPlugin::F3DNiftiRegistrationSlot()
 // AladinNifti Registration slot
 void milxQtRegistrationPlugin::AladinNiftiRegistrationSlot()
 {
+    regWindow = new milxQtRegistrationWindow(MainWindow);
     regWindow->setAlgo(AladinNifti);
     regWindow->show();
 }
