@@ -1,0 +1,17 @@
+This document contains additional information about building elements within SMILI. For general intructions, see the build videos on the SMILI YouTube channel:
+https://www.youtube.com/channel/UCD-hU6IF2qGlz7roexAUj1Q
+
+Registration plugin
+================
+Ubuntu 12.04
+I used the following build steps for Ubuntu 12.04:
+- Checked out experimental branch where the registration plugin stable code is located.
+- mkdir build-experimental, cd build-experimental
+- ccmake ..
+- Assigned ITK directory, in my case ITK 4.8.2
+- Enabled Plugins
+- Enabled DICOM and Registration plugins
+- Enabled USE_NIFTI_REG
+- Set NIFTI_REG_DIR to where I installed NiftyReg
+- Configure and Generate
+- make -j <whatever cores you have>
