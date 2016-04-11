@@ -861,13 +861,15 @@ void milxQtMain::saveScreen(QString filename)
             return;
 
         //Ensure GUI doesnt interfere
-        windowVTK->GetRenderWindow()->OffScreenRenderingOn();
+//        windowVTK->GetRenderWindow()->StereoRenderOff();
+//        windowVTK->GetRenderWindow()->OffScreenRenderingOn();
 //        windowVTK->GetRenderWindow()->SetAlphaBitPlanes(1); //Use alpha channel
         windowVTK->GetRenderWindow()->Render();
 
         windowToImage->SetInput(windowVTK->GetRenderWindow());
         windowToImage->SetMagnification(magnifyFactor);
 //        windowToImage->SetInputBufferTypeToRGBA(); //also record the alpha (transparency) channel
+        windowToImage->ReadFrontBufferOff();
         windowToImage->Update();
 
         if(filename.isEmpty())
@@ -887,7 +889,7 @@ void milxQtMain::saveScreen(QString filename)
         printDebug("Screenshot Size: " + QString::number(extent[1]-extent[0]) + ", " + QString::number(extent[3]-extent[2]) + ", " + QString::number(extent[5]-extent[4]));
         bool success = writer->saveImage(filename, windowToImage->GetOutput());
 
-        windowVTK->GetRenderWindow()->OffScreenRenderingOff();
+//        windowVTK->GetRenderWindow()->OffScreenRenderingOff();
         windowVTK->GetRenderWindow()->Render(); //Restore rendering
 
         if(!success)
