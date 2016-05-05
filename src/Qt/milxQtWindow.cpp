@@ -18,6 +18,9 @@
 #include "milxQtWindow.h"
 
 #include <QFileDialog>
+#include <QMenu>
+#include <QInputDialog>
+#include <QLineEdit>
 ///VTK Includes
 #include <vtkRenderWindow.h>
 

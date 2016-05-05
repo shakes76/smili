@@ -17,6 +17,11 @@
 =========================================================================*/
 #include "milxQtImage.h"
 
+#include <QMenu>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+
 //ITK
 //#include <itkImageToHistogramFilter.h>
 //VTK Libraries
@@ -3873,176 +3878,176 @@ void milxQtImage::createActions()
 {
     //Filters
     operateMenu = new QMenu(this);
-    operateMenu->setTitle(QApplication::translate("Image", "Operations", 0, QApplication::UnicodeUTF8));
+    operateMenu->setTitle(tr("Image", "Operations", 0));
     rescaleAct = new QAction(this);
-    rescaleAct->setText(QApplication::translate("Image", "Rescale Intensities", 0, QApplication::UnicodeUTF8));
+    rescaleAct->setText(tr("Image", "Rescale Intensities", 0));
     rescaleAct->setShortcut(tr("Alt+r"));
     equaliseAct = new QAction(this);
-    equaliseAct->setText(QApplication::translate("Image", "Histogram Equalisation", 0, QApplication::UnicodeUTF8));
+    equaliseAct->setText(tr("Image", "Histogram Equalisation", 0));
     equaliseAct->setShortcut(tr("Alt+h"));
     computeContourAct = new QAction(this);
-    computeContourAct->setText(QApplication::translate("Image", "Compute Contour", 0, QApplication::UnicodeUTF8));
+    computeContourAct->setText(tr("Image", "Compute Contour", 0));
     computeContourAct->setShortcut(tr("Alt+m"));
     smoothAct = new QAction(this);
-    smoothAct->setText(QApplication::translate("Image", "Smooth via Anisotropic Diffusion", 0, QApplication::UnicodeUTF8));
+    smoothAct->setText(tr("Image", "Smooth via Anisotropic Diffusion", 0));
     smoothAct->setShortcut(tr("Alt+s"));
     gaussianAct = new QAction(this);
-    gaussianAct->setText(QApplication::translate("Image", "Smooth via Gaussian Convolution", 0, QApplication::UnicodeUTF8));
+    gaussianAct->setText(tr("Image", "Smooth via Gaussian Convolution", 0));
     gaussianAct->setShortcut(tr("Alt+c"));
     bilateralAct = new QAction(this);
-    bilateralAct->setText(QApplication::translate("Image", "Smooth via Bilateral Filter", 0, QApplication::UnicodeUTF8));
+    bilateralAct->setText(tr("Image", "Smooth via Bilateral Filter", 0));
     bilateralAct->setShortcut(tr("Alt+b"));
     medianAct = new QAction(this);
-    medianAct->setText(QApplication::translate("Image", "Smooth via Median", 0, QApplication::UnicodeUTF8));
+    medianAct->setText(tr("Image", "Smooth via Median", 0));
     medianAct->setShortcut(tr("Shift+Alt+s"));
     gradMagAct = new QAction(this);
-    gradMagAct->setText(QApplication::translate("Image", "Gradient Magnitude", 0, QApplication::UnicodeUTF8));
+    gradMagAct->setText(tr("Image", "Gradient Magnitude", 0));
     gradMagAct->setShortcut(tr("Alt+g"));
     sobelAct = new QAction(this);
-    sobelAct->setText(QApplication::translate("Image", "Sobel Edge Detection", 0, QApplication::UnicodeUTF8));
+    sobelAct->setText(tr("Image", "Sobel Edge Detection", 0));
     sobelAct->setShortcut(tr("Alt+e"));
     cannyAct = new QAction(this);
-    cannyAct->setText(QApplication::translate("Image", "Canny Edge Detection", 0, QApplication::UnicodeUTF8));
+    cannyAct->setText(tr("Image", "Canny Edge Detection", 0));
     cannyAct->setShortcut(tr("Shift+Alt+e"));
     laplacianAct = new QAction(this);
-    laplacianAct->setText(QApplication::translate("Image", "Apply Laplacian", 0, QApplication::UnicodeUTF8));
+    laplacianAct->setText(tr("Image", "Apply Laplacian", 0));
     laplacianAct->setShortcut(tr("Alt+l"));
     highPassAct = new QAction(this);
-    highPassAct->setText(QApplication::translate("Image", "Butterworth High-Pass Filter", 0, QApplication::UnicodeUTF8));
+    highPassAct->setText(tr("Image", "Butterworth High-Pass Filter", 0));
     highPassAct->setShortcut(tr("Shift+Alt+b"));
     normAct = new QAction(this);
-    normAct->setText(QApplication::translate("Image", "Normalize", 0, QApplication::UnicodeUTF8));
+    normAct->setText(tr("Image", "Normalize", 0));
     normAct->setShortcut(tr("Alt+n"));
     invertAct = new QAction(this);
-    invertAct->setText(QApplication::translate("Image", "Invert Intensities", 0, QApplication::UnicodeUTF8));
+    invertAct->setText(tr("Image", "Invert Intensities", 0));
     invertAct->setShortcut(tr("Alt+v"));
     relabelAct = new QAction(this);
-    relabelAct->setText(QApplication::translate("Image", "Relabel", 0, QApplication::UnicodeUTF8));
+    relabelAct->setText(tr("Image", "Relabel", 0));
     relabelAct->setShortcut(tr("Shift+Alt+l"));
     //Transform
     transformMenu = new QMenu(this);
-    transformMenu->setTitle(QApplication::translate("Image", "Transforms", 0, QApplication::UnicodeUTF8));
+    transformMenu->setTitle(tr("Image", "Transforms", 0));
     matchAct = new QAction(this);
-    matchAct->setText(QApplication::translate("Image", "Match Information to ...", 0, QApplication::UnicodeUTF8));
+    matchAct->setText(tr("Image", "Match Information to ...", 0));
     matchAct->setShortcut(tr("Shift+Alt+i"));
     matchHistAct = new QAction(this);
-    matchHistAct->setText(QApplication::translate("Image", "Match Histogram to ...", 0, QApplication::UnicodeUTF8));
+    matchHistAct->setText(tr("Image", "Match Histogram to ...", 0));
     matchHistAct->setShortcut(tr("Shift+Alt+h"));
     resampleSpacingAct = new QAction(this);
-    resampleSpacingAct->setText(QApplication::translate("Image", "Resample to spacing ...", 0, QApplication::UnicodeUTF8));
+    resampleSpacingAct->setText(tr("Image", "Resample to spacing ...", 0));
     resampleSpacingAct->setShortcut(tr("Ctrl+Alt+r"));
     resampleAct = new QAction(this);
-    resampleAct->setText(QApplication::translate("Image", "Resample Image to ...", 0, QApplication::UnicodeUTF8));
+    resampleAct->setText(tr("Image", "Resample Image to ...", 0));
     resampleAct->setShortcut(tr("Shift+Alt+r"));
     resampleLabelAct = new QAction(this);
-    resampleLabelAct->setText(QApplication::translate("Image", "Resample as Labelled Image to ...", 0, QApplication::UnicodeUTF8));
+    resampleLabelAct->setText(tr("Image", "Resample as Labelled Image to ...", 0));
     resampleLabelAct->setShortcut(tr("Shift+Alt+l"));
     subsampleAct = new QAction(this);
-    subsampleAct->setText(QApplication::translate("Image", "Subsample Image", 0, QApplication::UnicodeUTF8));
+    subsampleAct->setText(tr("Image", "Subsample Image", 0));
     subsampleAct->setShortcut(tr("Shift+Alt+s"));
     transformAct = new QAction(this);
-    transformAct->setText(QApplication::translate("Image", "Transform via File ...", 0, QApplication::UnicodeUTF8));
+    transformAct->setText(tr("Image", "Transform via File ...", 0));
     transformAct->setShortcut(tr("Shift+Alt+t"));
     maskAct = new QAction(this);
-    maskAct->setText(QApplication::translate("Image", "Mask Image with ...", 0, QApplication::UnicodeUTF8));
+    maskAct->setText(tr("Image", "Mask Image with ...", 0));
     maskAct->setShortcut(tr("Shift+Alt+m"));
     cropAct = new QAction(this);
-    cropAct->setText(QApplication::translate("Image", "Mask and Crop Image with ...", 0, QApplication::UnicodeUTF8));
+    cropAct->setText(tr("Image", "Mask and Crop Image with ...", 0));
     cropAct->setShortcut(tr("Shift+Alt+a"));
     checkerAct = new QAction(this);
-    checkerAct->setText(QApplication::translate("Image", "Compare as Checkboard to ...", 0, QApplication::UnicodeUTF8));
+    checkerAct->setText(tr("Image", "Compare as Checkboard to ...", 0));
     checkerAct->setShortcut(tr("Shift+Alt+c"));
     distMapAct = new QAction(this);
-    distMapAct->setText(QApplication::translate("Image", "Distance Map", 0, QApplication::UnicodeUTF8));
+    distMapAct->setText(tr("Image", "Distance Map", 0));
     distMapAct->setShortcut(tr("Alt+d"));
     flipAct = new QAction(this);
-    flipAct->setText(QApplication::translate("Image", "Flip", 0, QApplication::UnicodeUTF8));
+    flipAct->setText(tr("Image", "Flip", 0));
     flipAct->setShortcut(tr("Alt+f"));
     //Threshold
     thresholdMenu = new QMenu(this);
-    thresholdMenu->setTitle(QApplication::translate("Image", "Thresholds", 0, QApplication::UnicodeUTF8));
+    thresholdMenu->setTitle(tr("Image", "Thresholds", 0));
     otsuAct = new QAction(this);
-    otsuAct->setText(QApplication::translate("Image", "Otsu Threshold", 0, QApplication::UnicodeUTF8));
+    otsuAct->setText(tr("Image", "Otsu Threshold", 0));
     otsuAct->setShortcut(tr("Alt+u"));
     otsuMultipleAct = new QAction(this);
-    otsuMultipleAct->setText(QApplication::translate("Image", "Otsu Multiple Threshold", 0, QApplication::UnicodeUTF8));
+    otsuMultipleAct->setText(tr("Image", "Otsu Multiple Threshold", 0));
     otsuMultipleAct->setShortcut(tr("Shift+Alt+u"));
     binaryAct = new QAction(this);
-    binaryAct->setText(QApplication::translate("Image", "Binary Threshold", 0, QApplication::UnicodeUTF8));
+    binaryAct->setText(tr("Image", "Binary Threshold", 0));
     binaryAct->setShortcut(tr("Shift+Alt+b"));
     bandAct = new QAction(this);
-    bandAct->setText(QApplication::translate("Image", "Threshold Outside Band", 0, QApplication::UnicodeUTF8));
+    bandAct->setText(tr("Image", "Threshold Outside Band", 0));
     bandAct->setShortcut(tr("Alt+t"));
     aboveAct = new QAction(this);
-    aboveAct->setText(QApplication::translate("Image", "Threshold Above", 0, QApplication::UnicodeUTF8));
+    aboveAct->setText(tr("Image", "Threshold Above", 0));
     aboveAct->setShortcut(tr("Shift+Alt+a"));
     belowAct = new QAction(this);
-    belowAct->setText(QApplication::translate("Image", "Threshold Below", 0, QApplication::UnicodeUTF8));
+    belowAct->setText(tr("Image", "Threshold Below", 0));
     belowAct->setShortcut(tr("Shift+Alt+b"));
     //Vector imaging
     vectorMenu = new QMenu(this);
-    vectorMenu->setTitle(QApplication::translate("Image", "Complex/Vector/4D Imaging", 0, QApplication::UnicodeUTF8));
+    vectorMenu->setTitle(tr("Image", "Complex/Vector/4D Imaging", 0));
     vectorMenu->setDisabled(false);
     vectorMagnitudeAct = new QAction(this);
-    vectorMagnitudeAct->setText(QApplication::translate("Image", "Display Magnitude", 0, QApplication::UnicodeUTF8));
+    vectorMagnitudeAct->setText(tr("Image", "Display Magnitude", 0));
     vectorMagnitudeAct->setShortcut(tr("Alt+m"));
     vectorComponentAct = new QAction(this);
-    vectorComponentAct->setText(QApplication::translate("Image", "Display Component ...", 0, QApplication::UnicodeUTF8));
+    vectorComponentAct->setText(tr("Image", "Display Component ...", 0));
     vectorComponentAct->setShortcut(tr("Alt+c"));
     pseudoImageAct = new QAction(this);
-    pseudoImageAct->setText(QApplication::translate("Image", "Display Pseudo-Image", 0, QApplication::UnicodeUTF8));
+    pseudoImageAct->setText(tr("Image", "Display Pseudo-Image", 0));
     pseudoImageAct->setShortcut(tr("Alt+p"));
     vectorFieldAct = new QAction(this);
-    vectorFieldAct->setText(QApplication::translate("Image", "Display Vector/Tensor Field", 0, QApplication::UnicodeUTF8));
+    vectorFieldAct->setText(tr("Image", "Display Vector/Tensor Field", 0));
     vectorFieldAct->setShortcut(tr("Alt+f"));
     streamLinesAct = new QAction(this);
-    streamLinesAct->setText(QApplication::translate("Image", "Display Streamlines from Slice", 0, QApplication::UnicodeUTF8));
+    streamLinesAct->setText(tr("Image", "Display Streamlines from Slice", 0));
     streamLinesAct->setShortcut(tr("Shift+Alt+s"));
 
     //Display
     levelAct = new QAction(this);
-    levelAct->setText(QApplication::translate("Image", "Auto-Level Display", 0, QApplication::UnicodeUTF8));
+    levelAct->setText(tr("Image", "Auto-Level Display", 0));
     levelAct->setShortcut(tr("Alt+o"));
     overlayAct = new QAction(this);
-    overlayAct->setText(QApplication::translate("Image", "Overlay Labelled Image from ...", 0, QApplication::UnicodeUTF8));
+    overlayAct->setText(tr("Image", "Overlay Labelled Image from ...", 0));
     overlayAct->setShortcut(tr("Alt+o"));
     overlayContourAct = new QAction(this);
-    overlayContourAct->setText(QApplication::translate("Image", "Overlay Labelled Image as Contour from ...", 0, QApplication::UnicodeUTF8));
+    overlayContourAct->setText(tr("Image", "Overlay Labelled Image as Contour from ...", 0));
     overlayContourAct->setShortcut(tr("Shift+Alt+o"));
     blendAct = new QAction(this);
-    blendAct->setText(QApplication::translate("Image", "Blend Image with ...", 0, QApplication::UnicodeUTF8));
+    blendAct->setText(tr("Image", "Blend Image with ...", 0));
     blendAct->setShortcut(tr("Shift+Alt+b"));
     volRenderAct = new QAction(this);
-    volRenderAct->setText(QApplication::translate("Image", "Display as Volume Rendering", 0, QApplication::UnicodeUTF8));
+    volRenderAct->setText(tr("Image", "Display as Volume Rendering", 0));
     volRenderAct->setShortcut(tr("Alt+v"));
     histogramAct = new QAction(this);
-    histogramAct->setText(QApplication::translate("Image", "Display Histogram", 0, QApplication::UnicodeUTF8));
+    histogramAct->setText(tr("Image", "Display Histogram", 0));
     histogramAct->setShortcut(tr("Alt+h"));
     surfacePlotAct = new QAction(this);
-    surfacePlotAct->setText(QApplication::translate("Image", "Display Slice Surface Plot", 0, QApplication::UnicodeUTF8));
+    surfacePlotAct->setText(tr("Image", "Display Slice Surface Plot", 0));
     surfacePlotAct->setShortcut(tr("Alt+s"));
     surfaceAct = new QAction(this);
-    surfaceAct->setText(QApplication::translate("Image", "Display Iso-surface", 0, QApplication::UnicodeUTF8));
+    surfaceAct->setText(tr("Image", "Display Iso-surface", 0));
     surfaceAct->setShortcut(tr("Shift+Alt+s"));
     polyDataAct = new QAction(this);
-    polyDataAct->setText(QApplication::translate("Image", "Generate Polygonal Data", 0, QApplication::UnicodeUTF8));
+    polyDataAct->setText(tr("Image", "Generate Polygonal Data", 0));
     polyDataAct->setShortcut(tr("Shift+Alt+p"));
     polyDataAct->setDisabled(true); //!< \todo Disabled because feature is broken, fix
     infoAct = new QAction(this);
-    infoAct->setText(QApplication::translate("Image", "Image Information", 0, QApplication::UnicodeUTF8));
+    infoAct->setText(tr("Image", "Image Information", 0));
     infoAct->setShortcut(tr("Alt+i"));
     interpolateAct = new QAction(this);
-    interpolateAct->setText(QApplication::translate("Image", "Interpolation", 0, QApplication::UnicodeUTF8));
+    interpolateAct->setText(tr("Image", "Interpolation", 0));
     interpolateAct->setShortcut(tr("Shift+Alt+i"));
     interpolateAct->setCheckable(true);
     interpolateAct->setChecked(true);
     orientAct = new QAction(this);
-    orientAct->setText(QApplication::translate("Image", "Apply Orientation", 0, QApplication::UnicodeUTF8));
+    orientAct->setText(tr("Image", "Apply Orientation", 0));
     orientAct->setShortcut(tr("Shift+Alt+o"));
     orientAct->setCheckable(true);
     orientAct->setChecked(true);
     cursorAct = new QAction(this);
-    cursorAct->setText(QApplication::translate("Image", "Show Cursor", 0, QApplication::UnicodeUTF8));
+    cursorAct->setText(tr("Image", "Show Cursor", 0));
     cursorAct->setShortcut(tr("Shift+Alt+c"));
     cursorAct->setCheckable(true);
     cursorAct->setChecked(false);
@@ -4143,7 +4148,7 @@ void milxQtImage::contextMenuEvent(QContextMenuEvent *currentEvent)
 QMenu* milxQtImage::basicContextMenu()
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Imaging", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(tr("MainWindow", "Imaging", 0));
 
     foreach(QAction *currAct, milxQtWindow::actionsToAdd)
     {

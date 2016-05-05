@@ -18,7 +18,8 @@
 #include <limits>
 
 #include "milxQtUnifiedWindow.h"
-#include <QDebug>
+#include <QMenu>
+//#include <QDebug>
 //ITK
 #include <itkLinearInterpolateImageFunction.h>
 //VTK
@@ -404,21 +405,21 @@ void milxQtUnifiedWindow::createActions()
 {
     //Modes
     unionAct = new QAction(this);
-    unionAct->setText(QApplication::translate("Unified", "&Union of Data", 0, QApplication::UnicodeUTF8));
+    unionAct->setText(tr("Unified", "&Union of Data", 0));
     unionAct->setShortcut(tr("Alt+u"));
     unionAct->setCheckable(true);
     unionAct->setChecked(true);
     geoDifferenceAct = new QAction(this);
-    geoDifferenceAct->setText(QApplication::translate("Unified", "&Surface (Hausdoff) Distance", 0, QApplication::UnicodeUTF8));
+    geoDifferenceAct->setText(tr("Unified", "&Surface (Hausdoff) Distance", 0));
     geoDifferenceAct->setShortcut(tr("Alt+d"));
     geoDifferenceAct->setCheckable(true);
     scalarDifferenceAct = new QAction(this);
-    scalarDifferenceAct->setText(QApplication::translate("Unified", "&Scalar Difference", 0, QApplication::UnicodeUTF8));
+    scalarDifferenceAct->setText(tr("Unified", "&Scalar Difference", 0));
     scalarDifferenceAct->setShortcut(tr("Alt+s"));
     scalarDifferenceAct->setCheckable(true);
     scalarDifferenceAct->setDisabled(true);
     checkerBoardAct = new QAction(this);
-    checkerBoardAct->setText(QApplication::translate("Unified", "&Checkerboard", 0, QApplication::UnicodeUTF8));
+    checkerBoardAct->setText(tr("Unified", "&Checkerboard", 0));
     checkerBoardAct->setShortcut(tr("Alt+c"));
     checkerBoardAct->setCheckable(true);
     checkerBoardAct->setDisabled(true);

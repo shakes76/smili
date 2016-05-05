@@ -20,6 +20,10 @@
 #include <zlib.h>
 
 #include <QFileInfo>
+#include <QDialog>
+#include <QFileDialog>
+#include <QComboBox>
+#include <QPushButton>
 //VTK
 #include <vtkImageFlip.h>
 #include <vtkImageCast.h>

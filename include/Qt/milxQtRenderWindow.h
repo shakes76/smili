@@ -20,6 +20,11 @@
 
 #include "milxQtWindow.h"
 
+#include <QWidgetAction>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QStatusBar>
+
 #include <vtkSmartPointer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>

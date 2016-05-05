@@ -17,6 +17,11 @@
 =========================================================================*/
 #include "milxQtPlot.h"
 
+#include <QMenu>
+#include <QDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+
 #include <vtkContextView.h>
 #include <vtkPlotPoints.h>
 #include <vtkContextScene.h>
@@ -904,23 +909,23 @@ void milxQtPlot::createActions()
 {
     //axes
     xAxisName = new QAction(this);
-    xAxisName->setText(QApplication::translate("Plot", "Rename &Axes", 0, QApplication::UnicodeUTF8));
+    xAxisName->setText(tr("Plot", "Rename &Axes", 0));
     xAxisName->setShortcut(tr("Alt+x"));
     titleName = new QAction(this);
-    titleName->setText(QApplication::translate("Plot", "Rename &Title", 0, QApplication::UnicodeUTF8));
+    titleName->setText(tr("Plot", "Rename &Title", 0));
     titleName->setShortcut(tr("Alt+t"));
     legendAct = new QAction(this);
-    legendAct->setText(QApplication::translate("Plot", "Legend", 0, QApplication::UnicodeUTF8));
+    legendAct->setText(tr("Plot", "Legend", 0));
     legendAct->setShortcut(tr("Alt+l"));
     legendAct->setCheckable(true);
     legendAct->setChecked(true);
     pointsAct = new QAction(this);
-    pointsAct->setText(QApplication::translate("Plot", "Show Points", 0, QApplication::UnicodeUTF8));
+    pointsAct->setText(tr("Plot", "Show Points", 0));
     pointsAct->setShortcut(tr("Shift+Alt+l"));
     pointsAct->setCheckable(true);
     pointsAct->setChecked(true);
     logScaleAct = new QAction(this);
-    logScaleAct->setText(QApplication::translate("Plot", "Log Scale", 0, QApplication::UnicodeUTF8));
+    logScaleAct->setText(tr("Plot", "Log Scale", 0));
     logScaleAct->setShortcut(tr("Alt+s"));
     logScaleAct->setCheckable(true);
     logScaleAct->setChecked(false);
@@ -942,7 +947,7 @@ void milxQtPlot::createConnections()
 void milxQtPlot::contextMenuEvent(QContextMenuEvent *currentEvent)
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Plotting", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(tr("MainWindow", "Plotting", 0));
 
     createMenu(contextMenu);
 
