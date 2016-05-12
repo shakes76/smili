@@ -18,6 +18,8 @@
 #ifndef MILXQTPreferencesFORM_H
 #define MILXQTPreferencesFORM_H
 
+#include <QSpinBox>
+
 #include "ui_preferences.h"
 #include "milxQtMain.h"
 

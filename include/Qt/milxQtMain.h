@@ -21,9 +21,14 @@
 #include <QPointer>
 #include <QMainWindow>
 #include <QTabWidget>
-#include <QWorkspace>
+#include <QMdiArea>
 #include <QList>
-#include <QWebView>
+#include <QSlider>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QtWebKitWidgets/QWebView>
 //VTK
 #include <vtkEventQtSlotConnect.h>
 //Displays
@@ -31,6 +36,8 @@
 #include "milxQtModel.h"
 #include "milxQtUnifiedWindow.h"
 #include "milxQtPluginInterface.h"
+
+typedef QMdiArea WorkspaceType;
 
 /*!
     \class milxQtMain
@@ -458,7 +465,7 @@ public slots:
     */
     inline void closeTabActiveWindow()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->closeActiveWindow();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeActiveSubWindow();
     }
     /*!
         \fn milxQtMain::closeTabAllWindows()
@@ -466,7 +473,7 @@ public slots:
     */
     inline void closeTabAllWindows()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->closeAllWindows();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeAllSubWindows();
     }
     /*!
         \fn milxQtMain::cascadeTab()
@@ -474,7 +481,7 @@ public slots:
     */
     inline void cascadeTab()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->cascade();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->cascadeSubWindows();
     }
     /*!
         \fn milxQtMain::tileTab()
@@ -482,7 +489,7 @@ public slots:
     */
     inline void tileTab()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->tile();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->tileSubWindows();
     }
     /*!
         \fn milxQtMain::tileTabVertically()
@@ -632,9 +639,9 @@ public slots:
         \fn milxQtMain::getListOfWindows()
         \brief Get a list of widgets/windows that are in the current tab
     */
-    inline QWidgetList getListOfWindows()
+    inline QList<QMdiSubWindow*> getListOfWindows()
     {
-        return qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
+        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     }
     /**
         \fn milxQtMain::getNumberOfWindows()
@@ -642,7 +649,7 @@ public slots:
     */
     inline int getNumberOfWindows()
     {
-        return qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList().size();
+        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList().size();
     }
     /**
         \fn milxQtMain::getNumberOfImageWindows()

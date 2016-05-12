@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QGroupBox>
+#include <QDesktopWidget>
 
 milxQtPreferencesForm::milxQtPreferencesForm(milxQtMain *theParent) : QDialog(theParent)
 {
