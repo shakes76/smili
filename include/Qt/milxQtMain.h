@@ -28,7 +28,11 @@
 #include <QProgressBar>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QtWebKitWidgets/QWebView>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+  #include <QtWebKitWidgets/QWebView>
+#else
+  #include <QWebView>
+#endif
 //VTK
 #include <vtkEventQtSlotConnect.h>
 //Displays
