@@ -23,14 +23,16 @@ ENDIF (WIN32)
 
 #--------------------------------------------------------------------------------
 # this command finds Qt4 libraries and sets all required variables
-# note that it's Qt4, not QT4 or qt4
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebKitWidgets REQUIRED QUIET)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+  FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
+  # QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to
+  # a CMake script that sets up this directory for building with Qt4
+  INCLUDE( ${QT_USE_FILE} )
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 #--------------------------------------------------------------------------------
-# QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to
-# a CMake script that sets up this directory for building with Qt4
-INCLUDE( ${QT_USE_FILE} )
-
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
@@ -63,6 +65,9 @@ ELSE(WIN32)
 ENDIF (WIN32)
 
 ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  qt5_use_modules(smilx Core Gui Widgets WebKitWidgets)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(smilx milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 # expand the command line wild-cards in msvc

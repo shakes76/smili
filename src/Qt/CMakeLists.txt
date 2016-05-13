@@ -71,6 +71,10 @@ link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
 
 add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
 
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  qt5_use_modules(milx-Qt Core Gui Widgets WebKitWidgets)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+
 # Set the build version (VERSION) and the API version (SOVERSION)
 SET_TARGET_PROPERTIES(milx-Qt
                       PROPERTIES

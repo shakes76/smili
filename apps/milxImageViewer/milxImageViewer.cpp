@@ -18,6 +18,9 @@
 //Qt
 #include <QApplication>
 #include <QMainWindow>
+#include <QMenuBar>
+#include <QMenu>
+#include <QDesktopWidget>
 
 #include "milxQtFile.h"
 #include "milxQtImage.h"
