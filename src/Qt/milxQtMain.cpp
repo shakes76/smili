@@ -137,6 +137,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Style
 
     update();
+    printDebug("Main Window Setup Complete");
 }
 
 milxQtMain::~milxQtMain()
@@ -222,13 +223,13 @@ QString milxQtMain::activeNamePrefix()
 
 void milxQtMain::newTab()
 {
-    WorkspaceType *tmpPtr = new WorkspaceType; ///\todo Workspace class is deprecated. Update to MdiArea.
+    WorkspaceType *tmpPtr = new WorkspaceType;
     workspaces->addTab(tmpPtr, tr("Empty"));
     workspaces->setCurrentWidget(tmpPtr); //Hierachy deletion
     tmpPtr->setAttribute(Qt::WA_DeleteOnClose);
 
-    connect(tmpPtr, SIGNAL(windowActivated(QWidget *)), this, SLOT(setTabName(QWidget *)));
-    connect(tmpPtr, SIGNAL(windowActivated(QWidget *)), this, SLOT(redirectWindowActivated(QWidget *)));
+    connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(setTabName(QMdiSubWindow *)));
+    connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(redirectWindowActivated(QMdiSubWindow *)));
 }
 
 void milxQtMain::addRender(milxQtRenderWindow *rnd)
@@ -913,6 +914,14 @@ void milxQtMain::saveScreen(QString filename)
     }
 }
 
+void milxQtMain::setTabName(QMdiSubWindow *fromWindow)
+{
+    if(!fromWindow)
+        return;
+
+    setTabName(fromWindow->widget());
+}
+
 void milxQtMain::setTabName(QWidget *fromWindow)
 {
     QString tabTitle = activeNamePrefix();
@@ -938,7 +947,7 @@ void milxQtMain::closeTab(int index)
     if(workspaces->count() > 1 || index > 0)
     {
         WorkspaceType *tmpWorkspace = qobject_cast<WorkspaceType *>(workspaces->widget(index));
-        disconnect(tmpWorkspace, SIGNAL(windowActivated(QWidget *)), 0, 0);
+        disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
         tmpWorkspace->closeAllSubWindows();
         tmpWorkspace->close();
 
@@ -962,10 +971,10 @@ void milxQtMain::tileTabVertically()
     }
     int wHeight = wrkSpc->height() / windows.count();
     int y = 0;
-    foreach(QWidget *widget, windows)
+    foreach(QMdiSubWindow *widget, windows)
     {
-        widget->parentWidget()->resize(wrkSpc->width(), wHeight);
-        widget->parentWidget()->move(0, y);
+        widget->widget()->parentWidget()->resize(wrkSpc->width(), wHeight);
+        widget->widget()->parentWidget()->move(0, y);
         y += wHeight;
     }
 }
@@ -980,10 +989,10 @@ void milxQtMain::tileTabHorizontally()
     }
     int wWidth = wrkSpc->width() / windows.count();
     int x = 0;
-    foreach(QWidget *widget, windows)
+    foreach(QMdiSubWindow *widget, windows)
     {
-        widget->parentWidget()->resize(wWidth, wrkSpc->height());
-        widget->parentWidget()->move(x, 0);
+        widget->widget()->parentWidget()->resize(wWidth, wrkSpc->height());
+        widget->widget()->parentWidget()->move(x, 0);
         x += wWidth;
     }
 }
@@ -1714,12 +1723,12 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
     QActionGroup *winGp = new QActionGroup(this);
     QString text;
 
-    foreach(QWidget *currentWindow, windows)
+    foreach(QMdiSubWindow *currentWindow, windows)
     {
         if(!currentWindow)
             continue;
 
-        win = qobject_cast<milxQtWindow *>(currentWindow);
+        win = qobject_cast<milxQtWindow *>(currentWindow->widget());
 
         if(win == 0)
             continue;
@@ -1788,7 +1797,7 @@ milxQtWindow* milxQtMain::currentWindow()
     milxQtWindow *win = NULL;
 
     if(windowIterator < windows.size())
-        win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
+        win = qobject_cast<milxQtWindow *>(windows[windowIterator]->widget());
 
     return win;
 }
@@ -1800,7 +1809,7 @@ milxQtWindow* milxQtMain::nextWindow()
 
     if(windowIterator < windows.size())
     {
-        win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
+        win = qobject_cast<milxQtWindow *>(windows[windowIterator]->widget());
         windowIterator ++;
     }
 
@@ -1816,7 +1825,7 @@ milxQtRenderWindow* milxQtMain::nextRenderWindow()
     {
         if(isRender(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtRenderWindow *>(windows[windowIterator]);
+            win = qobject_cast<milxQtRenderWindow *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -1836,7 +1845,7 @@ milxQtModel* milxQtMain::nextModel()
     {
         if(isModel(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtModel *>(windows[windowIterator]);
+            win = qobject_cast<milxQtModel *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -1857,7 +1866,7 @@ milxQtImage* milxQtMain::nextImage()
     {
         if(isImage(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtImage *>(windows[windowIterator]);
+            win = qobject_cast<milxQtImage *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -3037,41 +3046,41 @@ void milxQtMain::createConnections()
     QObject::connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveWindow(QWidget *)));
     ///Actions
     ///File
-    QObject::connect(actionNewTab, SIGNAL(activated()), this, SLOT(newTab()));
-    QObject::connect(actionOpen, SIGNAL(activated()), this, SLOT(open()));
-    QObject::connect(actionOpenSeries, SIGNAL(activated()), this, SLOT(openSeries()));
-    QObject::connect(actionOpenCollect, SIGNAL(activated()), this, SLOT(openCollection()));
-    QObject::connect(actionSave, SIGNAL(activated()), this, SLOT(save()));
-    QObject::connect(actionSaveScreen, SIGNAL(activated()), this, SLOT(saveScreen()));
-    QObject::connect(actionCloseActive, SIGNAL(activated()), this, SLOT(closeTabActiveWindow()));
-    QObject::connect(actionCloseAll, SIGNAL(activated()), this, SLOT(closeTabAllWindows()));
-    QObject::connect(actionExit, SIGNAL(activated()), this, SLOT(close()));
+    QObject::connect(actionNewTab, SIGNAL(triggered()), this, SLOT(newTab()));
+    QObject::connect(actionOpen, SIGNAL(triggered()), this, SLOT(open()));
+    QObject::connect(actionOpenSeries, SIGNAL(triggered()), this, SLOT(openSeries()));
+    QObject::connect(actionOpenCollect, SIGNAL(triggered()), this, SLOT(openCollection()));
+    QObject::connect(actionSave, SIGNAL(triggered()), this, SLOT(save()));
+    QObject::connect(actionSaveScreen, SIGNAL(triggered()), this, SLOT(saveScreen()));
+    QObject::connect(actionCloseActive, SIGNAL(triggered()), this, SLOT(closeTabActiveWindow()));
+    QObject::connect(actionCloseAll, SIGNAL(triggered()), this, SLOT(closeTabAllWindows()));
+    QObject::connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
     ///Data
     QObject::connect(menuData, SIGNAL(aboutToShow()), this, SLOT(dataMenu()));
     ///Images
-    QObject::connect(actionBlendImages, SIGNAL(activated()), this, SLOT(imagesMix()));
-    QObject::connect(actionAddImages, SIGNAL(activated()), this, SLOT(imagesAdd()));
-    QObject::connect(actionAverageImages, SIGNAL(activated()), this, SLOT(imagesAverage()));
-    QObject::connect(actionSubtractImages, SIGNAL(activated()), this, SLOT(imagesSubtract()));
-    QObject::connect(actionMultiplyImages, SIGNAL(activated()), this, SLOT(imagesMultiply()));
+    QObject::connect(actionBlendImages, SIGNAL(triggered()), this, SLOT(imagesMix()));
+    QObject::connect(actionAddImages, SIGNAL(triggered()), this, SLOT(imagesAdd()));
+    QObject::connect(actionAverageImages, SIGNAL(triggered()), this, SLOT(imagesAverage()));
+    QObject::connect(actionSubtractImages, SIGNAL(triggered()), this, SLOT(imagesSubtract()));
+    QObject::connect(actionMultiplyImages, SIGNAL(triggered()), this, SLOT(imagesMultiply()));
   #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
-    QObject::connect(actionConvolveImages, SIGNAL(activated()), this, SLOT(imagesConvolve()));
+    QObject::connect(actionConvolveImages, SIGNAL(triggered()), this, SLOT(imagesConvolve()));
   #endif
-    QObject::connect(actionMergeLabels, SIGNAL(activated()), this, SLOT(imagesMergeLabels()));
+    QObject::connect(actionMergeLabels, SIGNAL(triggered()), this, SLOT(imagesMergeLabels()));
     ///Windows
     //actionLinkWindows is not connected because its used as a Boolean in the transferViewToWindows() member
-    QObject::connect(actionCascade, SIGNAL(activated()), this, SLOT(cascadeTab()));
-    QObject::connect(actionTile, SIGNAL(activated()), this, SLOT(tileTab()));
-    QObject::connect(actionTileVertically, SIGNAL(activated()), this, SLOT(tileTabVertically()));
-    QObject::connect(actionTileHorizontally, SIGNAL(activated()), this, SLOT(tileTabHorizontally()));
+    QObject::connect(actionCascade, SIGNAL(triggered()), this, SLOT(cascadeTab()));
+    QObject::connect(actionTile, SIGNAL(triggered()), this, SLOT(tileTab()));
+    QObject::connect(actionTileVertically, SIGNAL(triggered()), this, SLOT(tileTabVertically()));
+    QObject::connect(actionTileHorizontally, SIGNAL(triggered()), this, SLOT(tileTabHorizontally()));
     ///Help
-    QObject::connect(actionContents, SIGNAL(activated()), this, SLOT(helpContents()));
-    QObject::connect(actionPreferences, SIGNAL(activated()), this, SLOT(preferences()));
-    QObject::connect(actionControls, SIGNAL(activated()), this, SLOT(controls()));
-    QObject::connect(actionAbout, SIGNAL(activated()), this, SLOT(about()));
+    QObject::connect(actionContents, SIGNAL(triggered()), this, SLOT(helpContents()));
+    QObject::connect(actionPreferences, SIGNAL(triggered()), this, SLOT(preferences()));
+    QObject::connect(actionControls, SIGNAL(triggered()), this, SLOT(controls()));
+    QObject::connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
     ///Common actions
-    QObject::connect(actionCompare, SIGNAL(activated()), this, SLOT(unify()));
+    QObject::connect(actionCompare, SIGNAL(triggered()), this, SLOT(unify()));
 }
 
 void milxQtMain::createProgressBar()

@@ -11,12 +11,6 @@ if("${ITK_VERSION_MAJOR}" LESS 4)
     message("DICOM Plugin requires ITK 4 or above for DICOM RT support. Disabling structure set support.")
 endif("${ITK_VERSION_MAJOR}" LESS 4)
 
-#~ FIND_PACKAGE(VTK REQUIRED)
-#~ INCLUDE(${VTK_USE_FILE})
-
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-INCLUDE(${QT_USE_FILE})
-
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
 # Add Headers into List
@@ -36,7 +30,11 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
 #~ ADD_DEFINITIONS (-DvtkFiltering_EXPORTS)
 
 # this moc's the above variable and appends to the cxx sources
-QT4_WRAP_CPP(SSM_MOCS milxQtDICOMPlugin.h)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  QT5_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+  QT4_WRAP_CPP(SSM_MOCS milxQtDICOMPlugin.h)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(DICOMPlugin SHARED milxQtDICOMPlugin.cpp ${SSM_MOCS})
 TARGET_LINK_LIBRARIES(DICOMPlugin milx-SMILI milx-Qt ${QT_LIBRARIES})

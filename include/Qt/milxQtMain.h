@@ -22,6 +22,7 @@
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QMdiArea>
+#include <QMdiSubWindow>
 #include <QList>
 #include <QSlider>
 #include <QPushButton>
@@ -448,6 +449,11 @@ public slots:
     */
     void saveScreen(QString filename = "");
 
+    /*!
+        \fn milxQtMain::setTabName(QMdiSubWindow *window)
+        \brief Set the tab name.
+    */
+    void setTabName(QMdiSubWindow *fromWindow);
     /*!
         \fn milxQtMain::setTabName(QWidget *window)
         \brief Set the tab name.
@@ -918,12 +924,12 @@ public slots:
 
 protected slots:
     /*!
-        \fn milxQtMain::redirectWindowActivated(QWidget *win)
+        \fn milxQtMain::redirectWindowActivated(QMdiSubWindow *win)
         \brief Redirect the workspace signal to milxQtMain object level.
     */
-    inline void redirectWindowActivated(QWidget *win)
+    inline void redirectWindowActivated(QMdiSubWindow *win)
     {
-        emit windowActivated(win);
+        emit windowActivated(win->widget());
     }
     /*!
         \fn milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *client_data, void *, vtkCommand *command)
