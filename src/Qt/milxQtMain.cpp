@@ -303,9 +303,14 @@ bool milxQtMain::isActiveRender()
 
 milxQtRenderWindow* milxQtMain::activeRender()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
+    if(activeWin)
         return qobject_cast<milxQtRenderWindow *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isImage(QWidget *win)
@@ -326,9 +331,13 @@ bool milxQtMain::isActiveImage()
 
 milxQtImage* milxQtMain::activeImage()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtImage *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isModel(QWidget *win)
@@ -349,9 +358,13 @@ bool milxQtMain::isActiveModel()
 
 milxQtModel* milxQtMain::activeModel()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtModel *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isPlot(QWidget *win)
@@ -372,9 +385,13 @@ bool milxQtMain::isActivePlot()
 
 milxQtModel* milxQtMain::activePlot()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtPlot *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isUnifiedWindow(QWidget *win)
@@ -395,9 +412,13 @@ bool milxQtMain::isActiveUnifiedWindow()
 
 milxQtUnifiedWindow* milxQtMain::activeUnifiedWindow()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtUnifiedWindow *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isActiveWebView()
@@ -410,9 +431,13 @@ bool milxQtMain::isActiveWebView()
 
 QWebView* milxQtMain::activeWebView()
 {
-    if(QWidget *activeWin = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget())
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<QWebView *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 void milxQtMain::setActiveWindow(QWidget *currentWindow)
