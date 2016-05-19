@@ -535,6 +535,9 @@ bool milxQtMain::loadFile(const QString &filename)
     if (filename.isEmpty())
         return success;
 
+    //Convert string to native paths
+    QString nativeFilename = QDir::toNativeSeparators(filename);
+
     ///Check filename with plugins
     printDebug("Check Plugins if they can open the file.");
     foreach (QPointer<milxQtPluginInterface> loadedPlugin, plugins)
@@ -561,7 +564,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 else ///if not then use serial methods
                 {
                     printInfo("Using standard opening for plugin.");
-                    loadedPlugin->open(filename);
+                    loadedPlugin->open(nativeFilename);
                 }
 
                 QPointer<milxQtRenderWindow> renWin = loadedPlugin->genericResult();
@@ -609,7 +612,7 @@ bool milxQtMain::loadFile(const QString &filename)
         {
             printInfo("Loaded File via Plugin, now Updating");
             loadedPlugin->update();
-            setCurrentFile(filename);
+            setCurrentFile(nativeFilename);
             return success;
         }
     }
@@ -621,7 +624,7 @@ bool milxQtMain::loadFile(const QString &filename)
     {
         printDebug("Opening Model.");
         QPointer<milxQtModel> model = new milxQtModel; //list deletion
-        success = reader->openModel(filename, model);
+        success = reader->openModel(nativeFilename, model);
 
         if(success)
         {
@@ -637,7 +640,7 @@ bool milxQtMain::loadFile(const QString &filename)
         //Load the vertex table from CSV file
         vtkSmartPointer<vtkTable> table;
         QPointer<milxQtPlot> plot = new milxQtPlot;
-        success = milx::File::OpenDelimitedText(filename.toStdString(), table);
+        success = milx::File::OpenDelimitedText(nativeFilename.toStdString(), table);
 
         int surfaceRet = QMessageBox::No, dimensionRet = QMessageBox::No;
         int xCol = 0, yCol = 1, zCol = 2;
@@ -702,7 +705,7 @@ bool milxQtMain::loadFile(const QString &filename)
         QPointer<milxQtImage> img = new milxQtImage;  //list deletion
 
         printDebug("Supported Image formats: " + reader->supportedImageFormats());
-        success = reader->openImage(filename, img);
+        success = reader->openImage(nativeFilename, img);
 
         printInfo("Image Pixel Type: " + reader->getPixelType());
         printInfo("Image Component Type: " + reader->getComponentType());
@@ -722,7 +725,7 @@ bool milxQtMain::loadFile(const QString &filename)
     }
 
     if(success)
-        setCurrentFile(filename);
+        setCurrentFile(nativeFilename);
 
     return success;
 }
@@ -737,6 +740,9 @@ void milxQtMain::save(QString filename)
 
     if(!activeWindow)
         return;
+
+    //Convert string to native paths
+    filename = QDir::toNativeSeparators(filename);
 
     QFileDialog *fileSaver = new QFileDialog(this);
 
@@ -848,6 +854,9 @@ void milxQtMain::saveScreen(QString filename)
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
     QWidget *activeWindow = qobject_cast<QWorkspace *>(workspaces->currentWidget())->activeWindow();
+
+    //Convert string to native paths
+    filename = QDir::toNativeSeparators(filename);
 
     if(!activeWindow)
         return;
@@ -1638,10 +1647,8 @@ void milxQtMain::updateWindowsWithCursors()
     while (currentWindow())
     {
         milxQtWindow *win = currentWindow();
-        cout << "Weeee1: " << win->strippedBaseName().toStdString() << endl;
         if (isImage(win))
         {
-            cout << "Weeee2: " << win->strippedBaseName().toStdString() << endl;
             milxQtImage *img = qobject_cast<milxQtImage *>(win);
             img->enableCrosshair();
         }
