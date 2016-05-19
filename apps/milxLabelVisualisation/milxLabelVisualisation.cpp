@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
     ValueArg<std::string> loadViewFileArg("", "loadviewfile", "Load saved view from file (use onscreen mode to save view files)", false, "camera.cam", "Load View File");
     ValueArg<float> aboveArg("", "above", "Add above value to thresholding of the labels. Controls max of scalar range of colourmap also.", false, 255, "Above");
     ValueArg<float> belowArg("", "below", "Add below value to thresholding of the labels. Controls min of scalar range of colourmap also.", false, 0, "Below");
+    ValueArg<float> opacityArg("", "opacity", "Set the opacity of the surface", false, 0.5, "Opacity");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> linearDivisionArg("", "lineardivision", "Evenly space the label values across N to get full use of colourmap.", false, 16, "Linear Division");
@@ -70,9 +71,11 @@ int main(int argc, char* argv[])
     SwitchArg processArg("", "postprocess", "Process the resulting surfaces from labels to reduce vertices and smooth etc.", false);
     SwitchArg volumeArg("", "volume", "Display using volume rendering instead of marching cude iso-surfaces.", false);
     SwitchArg lineariseArg("", "linearise", "Evenly space the label values to get full use of colourmap.", false);
+    SwitchArg wireframeArg("", "wireframe", "Display surface as a wireframe model.", false);
     ///Colourmaps
     SwitchArg jetArg("", "jet", "Change colourmap of the scalars to the Jet map (default)", false);
     SwitchArg vtkArg("", "vtk", "Change colourmap of the scalars to blue-red (rainbow VTK) map", false);
+    SwitchArg hsvArg("", "hsv", "Change colourmap of the scalars to blue-red (rainbow HSV) map", false);
     SwitchArg rainbowArg("", "rainbow", "Change colourmap of the scalars to the rainbow map", false);
     SwitchArg nihArg("", "NIH", "Change colourmap of the scalars to NIH", false);
     SwitchArg fireArg("", "NIH_FIRE", "Change colourmap of the scalars to NIH Fire", false);
@@ -87,6 +90,7 @@ int main(int argc, char* argv[])
     cmd.add( loadViewFileArg );
     cmd.add( aboveArg );
     cmd.add( belowArg );
+    cmd.add( opacityArg );
     cmd.add( heightArg );
     cmd.add( widthArg );
     cmd.add( linearDivisionArg );
@@ -100,9 +104,11 @@ int main(int argc, char* argv[])
     cmd.add( processArg );
     cmd.add( volumeArg );
     cmd.add( lineariseArg );
+    cmd.add( wireframeArg );
 
     cmd.add( jetArg );
     cmd.add( vtkArg );
+    cmd.add( hsvArg );
     cmd.add( rainbowArg );
     cmd.add( nihArg );
     cmd.add( fireArg );
@@ -120,6 +126,7 @@ int main(int argc, char* argv[])
     const std::string loadViewName = loadViewFileArg.getValue();
     const float aboveValue = aboveArg.getValue();
     const float belowValue = belowArg.getValue();
+    const float opacity = opacityArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     int N = linearDivisionArg.getValue();
@@ -236,6 +243,8 @@ if(volumeArg.isSet())
         label->colourMapToJet(belowValue, aboveValue); //default
     if(vtkArg.isSet())
         label->colourMapToVTK(belowValue, aboveValue);
+    if(hsvArg.isSet())
+        label->colourMapToHSV(belowValue, aboveValue);
     if(rainbowArg.isSet())
         label->colourMapToRainbow(belowValue, aboveValue);
     if(nihArg.isSet())
@@ -286,6 +295,8 @@ else
         model->colourMapToJet(belowValue, aboveValue); //default
     if(vtkArg.isSet())
         model->colourMapToVTK(belowValue, aboveValue);
+    if(hsvArg.isSet())
+        model->colourMapToHSV(belowValue, aboveValue);
     if(rainbowArg.isSet())
         model->colourMapToRainbow(belowValue, aboveValue);
     if(nihArg.isSet())
@@ -325,6 +336,10 @@ else
         cout << ">> Overlaying surface" << endl;
         surface->setName(surfaceName.c_str());
         surface->generateModel();
+        if(wireframeArg.isSet())
+            surface->generateWireframe();
+        if(opacityArg.isSet()) //needs to be after generate Model
+            surface->SetOpacity(opacity);
 
         model->AddActor(surface->GetActor());
     }

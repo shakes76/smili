@@ -21,6 +21,7 @@
 // vtk includes
 #include <vtkSmartPointer.h>
 #include <vtkPolyData.h>
+#include <vtkMultiThreader.h>
 #include <vtkPolyDataCollection.h>
 #include <vtkTransformCollection.h>
 // SMILI
@@ -35,7 +36,7 @@ typedef unsigned char charPixelType;
 typedef itk::Image<charPixelType, milx::imgDimension> charImageType;
 
 //Supported operations
-enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smooth, laplacian, thresholdscalars, flip, diffscalars, copyscalars, diffscalarspairs, statscalars, removescalars, mse, procrustes, icp,
+enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smooth, laplacian, thresholdscalars, flip, diffscalars, copyscalars, diffscalarspairs, statscalars, removescalars, mse, procrustes, icp, clip,
                 voxelise, orient, flat};
 
 /**
@@ -55,6 +56,21 @@ enum operations {none = 0, convert, duplicate, cat, split, scale, decimate, smoo
   \verbatim
   milxModelApp --split combined_new_weights.vtk --component Atlas_MRI_surface_R_ace.vtk --component Atlas_MRI_surface_R_fem.vtk -p split_ 
   \endverbatim
+
+  Copy scalars from atlas mesh to other meshes in directory and output to another directory with same names
+  \verbatim
+  milxModelApp --scalarcopy focus_atlases/focus_bladder_atlas.vtk results/bladder/asm_bladder_*.vtk -p results_scalars/bladder/
+  \endverbatim
+
+  Clip meshes in directory keeping only parts with value of 1 and output to another directory with same names
+  \verbatim
+  milxModelApp --clip 1 results_scalars/bladder/asm_bladder_*.vtk -p results_clipped/bladder/
+  \endverbatim
+
+  Compute scalars stats (mean, variance etc. per point) of meshes in directory and output single mesh (of first mesh) with stats as arrays in mesh
+  \verbatim
+  milxModelApp --scalarstats Hausdorff/bladder/bladder__*.vtk -o bladder_stats.vtk
+  \endverbatim
 */
 int main(int argc, char *argv[])
 {
@@ -73,17 +89,19 @@ int main(int argc, char *argv[])
   CmdLine cmd("A diagnostic tool for deformable models/surface operations", ' ', milx::NumberToString(milx::Version));
 
   ///Optional
+  ValueArg<size_t> threadsArg("", "threads", "Set he number of global threads to use.", false, milx::NumberOfProcessors(), "Threads");
   ValueArg<std::string> outputArg("o", "output", "Output Surface", false, "result.vtk", "Output");
   ValueArg<std::string> prefixArg("p", "prefix", "Output prefix for multiple output", false, "surface_", "Output Prefix");
-  ValueArg<std::string> outputFormatArg("", "outputformat", "Specify the default output format for multiple outputs (vtk, vtp, ply, stl etc., default: same as input)", false, "vtk", "Output format");
+  ValueArg<std::string> outputFormatArg("", "outputformat", "Specify the default output format for multiple outputs (vtk, vtp, ply, stl, default: same as input)", false, "vtk", "Output format");
 //  MultiArg<std::string> altmultinames("s", "altsurfaces", "Another set of surfaces to be used in operation", false, "AltSurfaces");
-  ValueArg<float> decimateArg("d", "decimate", "Decimate all the meshes provided using the Quadric Decimate algorithm", false, 0.5, "Decimate");
-  ValueArg<float> smoothArg("", "smooth", "Smooth all the meshes provided using the Windowed Sinc Algorithm.", false, 18, "Smooth");
-  ValueArg<float> laplacianArg("", "laplacian", "Smooth all the meshes provided using the Laplacian Algorithm.", false, 18, "Laplacian");
-  ValueArg<float> scaleArg("s", "scale", "Scale the coordinates of the point", false, 0.9, "Scale");
-  ValueArg<float> thresholdAboveArg("", "thresholdabove", "Thresold scalars above value", false, 0.0, "Above");
-  ValueArg<float> thresholdBelowArg("", "thresholdbelow", "Thresold scalars below value", false, 0.0, "Below");
-  MultiArg<std::string> componentsArg("", "component", "Surface is a component of the surfaces", false, "Component");
+  ValueArg<float> decimateArg("d", "decimate", "Decimate all the meshes provided using the Quadric Decimate algorithm with decimation factor.", false, 0.5, "Decimate");
+  ValueArg<float> smoothArg("", "smooth", "Smooth all the meshes provided using the Windowed Sinc Algorithm with iterations.", false, 18, "Smooth");
+  ValueArg<float> laplacianArg("", "laplacian", "Smooth all the meshes provided using the Laplacian Algorithm with iterations.", false, 18, "Laplacian");
+  ValueArg<float> scaleArg("s", "scale", "Scale the coordinates of the points by scale.", false, 0.9, "Scale");
+  ValueArg<float> thresholdAboveArg("", "thresholdabove", "Thresold scalars above value.", false, 0.0, "Above");
+  ValueArg<float> thresholdBelowArg("", "thresholdbelow", "Thresold scalars below value.", false, 0.0, "Below");
+  ValueArg<float> clipArg("", "clip", "Clip model based on scalars value (keeping only parts with value).", false, 1.0, "Clip");
+  MultiArg<std::string> componentsArg("", "component", "Surface is a component of the surfaces.", false, "Component");
   ///Clamped Optional
   std::vector<size_t> axesAllowed;
   axesAllowed.push_back(0);
@@ -94,18 +112,18 @@ int main(int argc, char *argv[])
   ///Switches
   SwitchArg partitionArg("", "partitionList", "Partition the list of surfaces provided into two for operating on one vs the other", false);
   ///XOR Switches
-  SwitchArg duplicateArg("", "duplicate", "Simply open and save the input file(s). Work with single (-o) or multiple (-p) input", false);
-  SwitchArg convertArg("c", "convert", "Convert the image from current format to the one given at output.", false);
-  SwitchArg concatenateArg("", "cat", "Concatenate surfaces provided", false);
-  SwitchArg colourConcatenateArg("", "colourcat", "Concatenate surfaces provided and colour them", false);
-  SwitchArg splitArg("", "split", "Split each surface given components", false);
-  SwitchArg diffScalarArg("", "scalardiff", "Difference in Scalars", false);
-  SwitchArg statsScalarArg("", "scalarstats", "Statistics of Scalars", false);
-  SwitchArg removeScalarArg("", "scalarremove", "Remove the Scalars", false);
+  SwitchArg duplicateArg("", "duplicate", "Simply open and save the input file(s). Supports single (-o) or multiple (-p) input.", false);
+  SwitchArg convertArg("c", "convert", "Convert the model from the current format to the one given at output (from file extension). Supports single (-o) or multiple (-p) input.", false);
+  SwitchArg concatenateArg("", "cat", "Concatenate N surfaces into single mesh with filename provided.", false);
+  SwitchArg colourConcatenateArg("", "colourcat", "Concatenate N surfaces into single mesh with filename provided and colour them.", false);
+  SwitchArg splitArg("", "split", "Split each surface given components.", false);
+  SwitchArg diffScalarArg("", "scalardiff", "Compute the differences in Scalars.", false);
+  SwitchArg statsScalarArg("", "scalarstats", "Compute statistics of scalars (mean, variance etc. per point) output mesh with stats as arrays.", false);
+  SwitchArg removeScalarArg("", "scalarremove", "Remove the scalars.", false);
   SwitchArg copyScalarArg("", "scalarcopy", "Copy the Scalars from first mesh to all others while removing existing ones.", false);
-  SwitchArg mseArg("", "mse", "Mean Squared Error of Points in models", false);
+  SwitchArg mseArg("", "mse", "Mean Squared Error of Points in models.", false);
   SwitchArg procrustesArg("", "procrustes", "Similarity alignment of surfaces assuming points have correspondence. Use --rigid if rigid alignment is required.", false);
-  SwitchArg rigidArg("", "rigid", "Rigid alignment of surfaces assuming points have correspondence.", false);
+  SwitchArg rigidArg("", "rigid", "Rigid alignment of surfaces assuming points have correspondence. Use with procrustes or other registration arguments.", false);
   SwitchArg icpArg("", "icp", "Iterative Closest Points alignment of surfaces assuming points don't have correspondence. Last surface in list is used as the reference 'fixed' surface.", false);
   SwitchArg saveTransformsArg("", "savetransforms", "Save the transformation matrix after surface alignment. For use with --icp", false);
 
@@ -118,6 +136,7 @@ int main(int argc, char *argv[])
   ValueArg<size_t> flatArg("", "flatten", "Flatten a model to either a sphere (0) or plane (1). Needs to be a genus zero (no topological hole) mesh.", false, 0, "Flatten");
 
   ///Add argumnets
+  cmd.add( threadsArg );
   cmd.add( multinames );
 //  cmd.add( altmultinames );
   cmd.add( outputArg );
@@ -149,6 +168,7 @@ int main(int argc, char *argv[])
   xorlist.push_back(&icpArg);
   xorlist.push_back(&thresholdAboveArg);
   xorlist.push_back(&thresholdBelowArg);
+  xorlist.push_back(&clipArg);
   xorlist.push_back(&flipArg);
   ///Deformable model args
   xorlist.push_back(&voxeliseArg);
@@ -162,6 +182,7 @@ int main(int argc, char *argv[])
   cmd.parse( argc, argv );
 
   ///Get the value parsed by each arg.
+  const size_t threads = threadsArg.getValue();
   //Filenames of surfaces
   std::vector<std::string> filenames = multinames.getValue();
 //  std::vector<std::string> altfilenames = altmultinames.getValue();
@@ -174,8 +195,13 @@ int main(int argc, char *argv[])
   const float laplacianIterations = laplacianArg.getValue();
   float thresholdAbove = thresholdAboveArg.getValue();
   float thresholdBelow = thresholdBelowArg.getValue();
+  float clipValue = clipArg.getValue();
   size_t flipAxis = flipArg.getValue();
   std::vector<std::string> componentNames = componentsArg.getValue();
+
+  ///Setup ITK Threads
+  vtkMultiThreader::SetGlobalDefaultNumberOfThreads(threads);
+  milx::PrintInfo("Threads to use: " + milx::NumberToString(threads));
 
   ///Deformable model value parsed by each arg.
   const float voxelSpacing = voxeliseArg.getValue();
@@ -193,19 +219,7 @@ int main(int argc, char *argv[])
   }
   if(convertArg.isSet())
   {
-    if(!outputArg.isSet())
-    {
-      milx::PrintError("Argument Error: Use Output (-o) for conversion.");
-      milx::PrintError("Re-run with the output name set.");
-      exit(EXIT_FAILURE);
-    }
-    if(filenames.size() != 1)
-    {
-      milx::PrintError("Argument Error: Only one output is supported for conversion.");
-      milx::PrintError("Re-run with the correct number of inputs.");
-      exit(EXIT_FAILURE);
-    }
-
+    //Info
     milx::PrintInfo("Converting surfaces: ");
 
     //Info
@@ -253,48 +267,24 @@ int main(int argc, char *argv[])
   }
   if(scaleArg.isSet())
   {
-    if(!prefixArg.isSet())
-    {
-      milx::PrintError("Scale Argument Error: Output Prefix (-p) must be provided.");
-      milx::PrintError("Re-run with the prefix name set.");
-      exit(EXIT_FAILURE);
-    }
     //Scale
     milx::PrintInfo("Scaling coordinates of each point in the surfaces: ");
     operation = scale;
   }
   if(smoothArg.isSet())
   {
-    if(!prefixArg.isSet())
-    {
-      milx::PrintError("Smooth Argument Error: Output Prefix (-p) must be provided.");
-      milx::PrintError("Re-run with the prefix name set.");
-      exit(EXIT_FAILURE);
-    }
     //Smooth
     milx::PrintInfo("Smoothing points in the surfaces: ");
     operation = smooth;
   }
   if(laplacianArg.isSet())
   {
-    if(!prefixArg.isSet())
-    {
-      milx::PrintError("Laplacian Argument Error: Output Prefix (-p) must be provided.");
-      milx::PrintError("Re-run with the prefix name set.");
-      exit(EXIT_FAILURE);
-    }
-    //Smooth
+    //Smooth Laplacian
     milx::PrintInfo("Laplacian smoothing points in the surfaces: ");
     operation = laplacian;
   }
   if(decimateArg.isSet())
   {
-    if(!prefixArg.isSet())
-    {
-      milx::PrintError("Decimate Argument Error: Output Prefix (-p) must be provided.");
-      milx::PrintError("Re-run with the prefix name set.");
-      exit(EXIT_FAILURE);
-    }
     //Smooth
     milx::PrintInfo("Decimating number of points in the surfaces: ");
     operation = decimate;
@@ -320,6 +310,12 @@ int main(int argc, char *argv[])
     //threshold
     milx::PrintInfo("Thresholding Scalars of surfaces: ");
     operation = thresholdscalars;
+  }
+  if(clipArg.isSet())
+  {
+    //Scale
+    milx::PrintInfo("Clipping surfaces: ");
+    operation = clip;
   }
   if(diffScalarArg.isSet())
   {
@@ -550,30 +546,37 @@ int main(int argc, char *argv[])
   milx::DeformableModel Model;
   bool outputRequired = true;
   bool multiOutputRequired = false;
+  bool standardOperation = false;
   bool imageOutputRequired = false;
   vtkSmartPointer<vtkPolyDataCollection> resultCollections;
   std::vector< itk::SmartPointer<charImageType> > imgCollection;
+
+  if (collection->GetNumberOfItems() == 1)
+  {
+    outputRequired = true;
+    multiOutputRequired = false;
+  }
+  else
+  {
+    outputRequired = false;
+    multiOutputRequired = true;
+  }
+
   std::cerr << "Applying... ";
   switch(operation)
   {
-    case duplicate:
-      if (collection->GetNumberOfItems() == 1) {
-        collection->InitTraversal();
-        Model.Result() = collection->GetNextItem();
-      } else {
-        outputRequired = false;
-        multiOutputRequired = true;
-      }
+    case duplicate: //Tested 04/2016
+      standardOperation = true;
       break;
 
-    case convert:
-      outputRequired = true;
-      collection->InitTraversal();
-      Model.Result() = collection->GetNextItem();
+    case convert: //Tested 04/2016
+      standardOperation = true; //requires user to set output format
       break;
 
-    case cat: //--------------------------------
+    case cat: //Tested 04/2016
       Model.ConcatenateCollection(collection);
+      outputRequired = true;
+      multiOutputRequired = false;
       break;
 
     case mse: //--------------------------------
@@ -613,39 +616,40 @@ int main(int argc, char *argv[])
       multiOutputRequired = false;
       break;
 
-    case scale:
+    case scale: //Tested 04/2016
       Model.ScaleCollection(collection, scaleFactor);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
       break;
 
-    case smooth:
+    case smooth: //Tested 04/2016
       Model.SmoothCollection(collection, smoothIterations);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
       break;
 
-    case laplacian:
+    case laplacian: //Tested 04/2016
       Model.LaplacianCollection(collection, laplacianIterations);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
       break;
 
-    case decimate:
+    case decimate: //Tested 04/2016
       Model.DecimateCollection(collection, decimateFactor);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
       break;
 
     case thresholdscalars:
       Model.ScalarThresholdCollection(collection, thresholdAbove, thresholdBelow);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
+      break;
+
+    case clip:
+      Model.ClipCollection(collection, clipValue, clipValue);
+
+      standardOperation = true;
       break;
 
     case flip:
@@ -658,8 +662,8 @@ int main(int argc, char *argv[])
         else
           xAxis = true;
         Model.FlipCollection(collection, xAxis, yAxis, zAxis);
-        outputRequired = false;
-        multiOutputRequired = true;
+
+        standardOperation = true;
         break;
       }
 
@@ -671,8 +675,7 @@ int main(int argc, char *argv[])
       resultCollections = vtkSmartPointer<vtkPolyDataCollection>::New();
       Model.ScalarDifferenceCollection(collection, altcollection, resultCollections);
 
-      outputRequired = false;
-      multiOutputRequired = true;
+      standardOperation = true;
       collection = resultCollections;
       break;
 
@@ -683,13 +686,7 @@ int main(int argc, char *argv[])
     case removescalars:
       Model.ScalarRemoveCollection(collection);
     
-      if (collection->GetNumberOfItems() == 1) {
-          collection->InitTraversal();
-          Model.Result() = collection->GetNextItem();
-        } else {
-          outputRequired = false;
-          multiOutputRequired = true;
-        }
+      standardOperation = true;
       break;
 
     case copyscalars:
@@ -704,10 +701,7 @@ int main(int argc, char *argv[])
         Model.SetInput(collection->GetNextItem());
       }
       else
-      {
-        outputRequired = false;
-        multiOutputRequired = true;
-      }
+        standardOperation = true;
       break;
 
     case procrustes:
@@ -724,8 +718,7 @@ int main(int argc, char *argv[])
     case icp:
       collection = Model.IterativeClosestPointsAlignCollection(collection, rigidArg.isSet(), transformCollection);
 
-      outputRequired = false; //write mean
-      multiOutputRequired = true; //write collection
+      standardOperation = true; //write collection
       break;
 
     ///Deformable Model ops
@@ -756,6 +749,12 @@ int main(int argc, char *argv[])
       break;
   }
   std::cerr << "Done" << std::endl;
+
+  if (collection->GetNumberOfItems() == 1 && standardOperation)
+  {
+    collection->InitTraversal();
+    Model.Result() = collection->GetNextItem();
+  }
 
   //---------------------------
   ///Write result
