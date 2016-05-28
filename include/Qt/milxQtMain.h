@@ -450,6 +450,12 @@ public slots:
     void saveScreen(QString filename = "");
 
     /*!
+        \fn milxQtMain::close()
+        \brief Closes window but ensures all windows and tabs are porperly disposed of
+    */
+    void close();
+
+    /*!
         \fn milxQtMain::setTabName(QMdiSubWindow *window)
         \brief Set the tab name.
     */

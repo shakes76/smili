@@ -234,11 +234,15 @@ void milxQtMain::newTab()
 
 void milxQtMain::addRender(milxQtRenderWindow *rnd)
 {
-    qobject_cast<WorkspaceType *>(workspaces->currentWidget())->addSubWindow(rnd);
+    QMdiSubWindow *subWindow = new QMdiSubWindow;
+    subWindow->setWidget(rnd);
+    qobject_cast<WorkspaceType *>(workspaces->currentWidget())->addSubWindow(subWindow);
 
     commonChildProperties(rnd);
 
     rnd->enableUpdates(statusBar());
+    rnd->setMinimumSize(subWindowSize, subWindowSize);
+    rnd->refresh();
 
     connect(rnd, SIGNAL(nameChanged(const QString &)), this, SLOT(setTabName(const QString &)));
     connect(rnd, SIGNAL(working(int)), this, SLOT(working(int)));
@@ -937,6 +941,13 @@ void milxQtMain::saveScreen(QString filename)
 
         printInfo("Write Complete.");
     }
+}
+
+void milxQtMain::close()
+{
+    printDebug("Closing Main Window");
+
+    QMainWindow::close();
 }
 
 void milxQtMain::setTabName(QMdiSubWindow *fromWindow)
@@ -3218,7 +3229,18 @@ void milxQtMain::dropEvent(QDropEvent *currentEvent)
 
 void milxQtMain::closeEvent(QCloseEvent *event)
 {
+    //All but first tab
+    for(size_t j = 1; j < workspaces->count(); j ++)
+        closeTab(j);
+
+    //first tab
+    WorkspaceType *tmpWorkspace = qobject_cast<WorkspaceType *>(workspaces->widget(0));
+    disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
+    tmpWorkspace->closeAllSubWindows();
+    tmpWorkspace->close();
+
     writeSettings();
+
     event->accept();
 }
 
