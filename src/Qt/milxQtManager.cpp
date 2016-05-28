@@ -192,13 +192,13 @@ void milxQtManager::addTreeItem(int tabIndex, QStringList topLevelName, QList<QS
 void milxQtManager::createActions()
 {
     actionExportTab = new QAction(this);
-    actionExportTab->setText(tr("Manager", "Export Contents ...", 0));
+    actionExportTab->setText(tr("Export Contents ...", 0));
     actionExportTab->setShortcut(tr("Alt+e"));
     actionClearTab = new QAction(this);
-    actionClearTab->setText(tr("Manager", "Clear Tab", 0));
+    actionClearTab->setText(tr("Clear Tab", 0));
     actionClearTab->setShortcut(tr("Alt+t"));
     actionClear = new QAction(this);
-    actionClear->setText(tr("Manager", "Clear Manager", 0));
+    actionClear->setText(tr("Clear Manager", 0));
     actionClear->setShortcut(tr("Alt+c"));
 }
 

@@ -1026,12 +1026,12 @@ void milxQtModel::undoProcessing()
 
     if(!undidProcess)
     {
-        doAct->setText(tr("Model", "&Redo Last Processing", 0));
+        doAct->setText(tr("&Redo Last Processing", 0));
         undidProcess = true;
     }
     else
     {
-        doAct->setText(tr("Model", "&Undo Last Processing", 0));
+        doAct->setText(tr("&Undo Last Processing", 0));
         undidProcess = false;
     }
 
@@ -2578,144 +2578,144 @@ void milxQtModel::createActions()
 {
     //Generate
     generateMenu = new QMenu(this);
-    generateMenu->setTitle(tr("Model", "Generate", 0));
+    generateMenu->setTitle(tr("Generate", 0));
     genModelAct = new QAction(this);
-    genModelAct->setText(tr("Model", "Model", 0));
+    genModelAct->setText(tr(0));
     genModelAct->setShortcut(tr("Shift+Alt+m"));
     genVerticesAct = new QAction(this);
-    genVerticesAct->setText(tr("Model", "Vertices (Vertex Glyphs)", 0));
+    genVerticesAct->setText(tr("Vertices (Vertex Glyphs)", 0));
     genVerticesAct->setShortcut(tr("Shift+Alt+v"));
     genNormalsAct = new QAction(this);
-    genNormalsAct->setText(tr("Model", "Normals", 0));
+    genNormalsAct->setText(tr("Normals", 0));
     genNormalsAct->setShortcut(tr("Shift+Alt+n"));
     genVectorsAct = new QAction(this);
-    genVectorsAct->setText(tr("Model", "Vector Field", 0));
+    genVectorsAct->setText(tr("Vector Field", 0));
     genVectorsAct->setShortcut(tr("Shift+Alt+v"));
     genTensorsAct = new QAction(this);
-    genTensorsAct->setText(tr("Model", "Tensor Field", 0));
+    genTensorsAct->setText(tr("Tensor Field", 0));
     genTensorsAct->setShortcut(tr("Shift+Alt+t"));
     genHedgehogAct = new QAction(this);
-    genHedgehogAct->setText(tr("Model", "Hedgehog Field", 0));
+    genHedgehogAct->setText(tr("Hedgehog Field", 0));
     genHedgehogAct->setShortcut(tr("Shift+Alt+h"));
     genDelaunayAct = new QAction(this);
-    genDelaunayAct->setText(tr("Model", "Delaunay Graph", 0));
+    genDelaunayAct->setText(tr("Delaunay Graph", 0));
     genDelaunayAct->setShortcut(tr("Shift+Alt+g"));
     genDelaunayTri2DAct = new QAction(this);
-    genDelaunayTri2DAct->setText(tr("Model", "Delaunay 2D Triangulation", 0));
+    genDelaunayTri2DAct->setText(tr("Delaunay 2D Triangulation", 0));
     genDelaunayTri2DAct->setShortcut(tr("Shift+Ctrl+t"));
     genDelaunayTriAct = new QAction(this);
-    genDelaunayTriAct->setText(tr("Model", "Delaunay Triangulation", 0));
+    genDelaunayTriAct->setText(tr("Delaunay Triangulation", 0));
     genDelaunayTriAct->setShortcut(tr("Shift+Alt+t"));
     genDelaunayTriAct->setCheckable(true);
     genDelaunayTriAct->setChecked(false);
     genPointModelAct = new QAction(this);
-    genPointModelAct->setText(tr("Model", "Point Model", 0));
+    genPointModelAct->setText(tr("Point Model", 0));
     genPointModelAct->setShortcut(tr("Shift+Alt+p"));
     genLabelsAct = new QAction(this);
-    genLabelsAct->setText(tr("Model", "Vertex Labels", 0));
+    genLabelsAct->setText(tr("Vertex Labels", 0));
     genLabelsAct->setShortcut(tr("Shift+Alt+l"));
     genPointIDsAct = new QAction(this);
-    genPointIDsAct->setText(tr("Model", "Point ID Scalars", 0));
+    genPointIDsAct->setText(tr("Point ID Scalars", 0));
     genPointIDsAct->setShortcut(tr("Shift+Alt+i"));
     genSamplesAct = new QAction(this);
-    genSamplesAct->setText(tr("Model", "Sampled Points", 0));
+    genSamplesAct->setText(tr("Sampled Points", 0));
     genSamplesAct->setShortcut(tr("Shift+Alt+s"));
     genKmeansAct = new QAction(this);
-    genKmeansAct->setText(tr("Model", "K-Means Point Clustering", 0));
+    genKmeansAct->setText(tr("K-Means Point Clustering", 0));
     genKmeansAct->setShortcut(tr("Shift+Alt+k"));
     genQuantiseAct = new QAction(this);
-    genQuantiseAct->setText(tr("Model", "Snap/Quantise Points to a Grid", 0));
+    genQuantiseAct->setText(tr("Snap/Quantise Points to a Grid", 0));
     genQuantiseAct->setShortcut(tr("Shift+Alt+q"));
     genCapBoundaries = new QAction(this);
-    genCapBoundaries->setText(tr("Model", "Cap the Boundaries of Model", 0));
+    genCapBoundaries->setText(tr("Cap the Boundaries of Model", 0));
     genCapBoundaries->setShortcut(tr("Shift+Alt+c"));
     genRegionLabels = new QAction(this);
-    genRegionLabels->setText(tr("Model", "Label Unconnected Regions", 0));
+    genRegionLabels->setText(tr("Label Unconnected Regions", 0));
     genRegionLabels->setShortcut(tr("Shift+Alt+u"));
     genElevation = new QAction(this);
-    genElevation->setText(tr("Model", "Elevation", 0));
+    genElevation->setText(tr("Elevation", 0));
     genElevation->setShortcut(tr("Shift+Alt+e"));
     genReebGraph = new QAction(this);
-    genReebGraph->setText(tr("Model", "Reeb Graph", 0));
+    genReebGraph->setText(tr("Reeb Graph", 0));
     genReebGraph->setShortcut(tr("Shift+Alt+r"));
     genReebGraph->setDisabled(true); //Not working so disable tmp
 
     //Operations
     operateMenu = new QMenu(this);
-    operateMenu->setTitle(tr("Model", "Operations", 0));
+    operateMenu->setTitle(tr("Operations", 0));
     cleanAct = new QAction(this);
-    cleanAct->setText(tr("Model", "&Clean Mesh", 0));
+    cleanAct->setText(tr("&Clean Mesh", 0));
     cleanAct->setShortcut(tr("Alt+c"));
     triAct = new QAction(this);
-    triAct->setText(tr("Model", "&Triangulate", 0));
+    triAct->setText(tr("&Triangulate", 0));
     triAct->setShortcut(tr("Alt+t"));
     decimateAct = new QAction(this);
-    decimateAct->setText(tr("Model", "&Decimate Mesh", 0));
+    decimateAct->setText(tr("&Decimate Mesh", 0));
     decimateAct->setShortcut(tr("Alt+d"));
     quadricDecimateAct = new QAction(this);
-    quadricDecimateAct->setText(tr("Model", "&Quadric Decimate Mesh", 0));
+    quadricDecimateAct->setText(tr("&Quadric Decimate Mesh", 0));
     quadricDecimateAct->setShortcut(tr("Alt+q"));
     clusterDecimateAct = new QAction(this);
-    clusterDecimateAct->setText(tr("Model", "&Quadric Cluster Decimate Mesh", 0));
+    clusterDecimateAct->setText(tr("&Quadric Cluster Decimate Mesh", 0));
     clusterDecimateAct->setShortcut(tr("Shift+Alt+q"));
     smoothAct = new QAction(this);
-    smoothAct->setText(tr("Model", "Smooth/&Fair (Laplacian) Mesh", 0));
+    smoothAct->setText(tr("Smooth/&Fair (Laplacian) Mesh", 0));
     smoothAct->setShortcut(tr("Alt+f"));
     smoothSincAct = new QAction(this);
-    smoothSincAct->setText(tr("Model", "Smooth/&Fair (Windowed Sinc) Mesh", 0));
+    smoothSincAct->setText(tr("Smooth/&Fair (Windowed Sinc) Mesh", 0));
     smoothSincAct->setShortcut(tr("Shift+Alt+f"));
     curvatureAct = new QAction(this);
-    curvatureAct->setText(tr("Model", "Mean Curvature", 0));
+    curvatureAct->setText(tr("Mean Curvature", 0));
     curvatureAct->setShortcut(tr("Shift+Alt+c"));
 
     //Transform
     transformMenu = new QMenu(this);
-    transformMenu->setTitle(tr("Model", "Transforms", 0));
+    transformMenu->setTitle(tr("Transforms", 0));
     transformAct = new QAction(this);
-    transformAct->setText(tr("Model", "Transform (via File) from ...", 0));
+    transformAct->setText(tr("Transform (via File) from ...", 0));
     transformAct->setShortcut(tr("Alt+i"));
     matchAct = new QAction(this);
-    matchAct->setText(tr("Model", "&Match Info to ...", 0));
+    matchAct->setText(tr("&Match Info to ...", 0));
     matchAct->setShortcut(tr("Alt+a"));
     registerAct = new QAction(this);
-    registerAct->setText(tr("Model", "&Register (via ICP) to ...", 0));
+    registerAct->setText(tr("&Register (via ICP) to ...", 0));
     registerAct->setShortcut(tr("Alt+r"));
     registerLandmarkAct = new QAction(this);
-    registerLandmarkAct->setText(tr("Model", "&Register (via Landmarks) to ...", 0));
+    registerLandmarkAct->setText(tr("&Register (via Landmarks) to ...", 0));
     registerLandmarkAct->setShortcut(tr("Shift+Alt+r"));
     voxeliseAct = new QAction(this);
-    voxeliseAct->setText(tr("Model", "&Voxelise Model", 0));
+    voxeliseAct->setText(tr("&Voxelise Model", 0));
     voxeliseAct->setShortcut(tr("Alt+v"));
 
     //Scalars
     scalarMenu = new QMenu(this);
-    scalarMenu->setTitle(tr("Model", "Scalar Operations", 0));
+    scalarMenu->setTitle(tr("Scalar Operations", 0));
     renameScalarsAct = new QAction(this);
-    renameScalarsAct->setText(tr("Model", "Rename Scalars", 0));
+    renameScalarsAct->setText(tr("Rename Scalars", 0));
     renameScalarsAct->setShortcut(tr("Shift+Alt+r"));
     thresholdAct = new QAction(this);
-    thresholdAct->setText(tr("Model", "Clip Mesh based on Scalar Threshold", 0));
+    thresholdAct->setText(tr("Clip Mesh based on Scalar Threshold", 0));
     thresholdAct->setShortcut(tr("Shift+Alt+t"));
     thresholdScalarsAct = new QAction(this);
-    thresholdScalarsAct->setText(tr("Model", "Threshold Scalar Values", 0));
+    thresholdScalarsAct->setText(tr("Threshold Scalar Values", 0));
     thresholdScalarsAct->setShortcut(tr("Shift+Ctrl+t"));
     thresholdScalarsBinaryAct = new QAction(this);
-    thresholdScalarsBinaryAct->setText(tr("Model", "Binary Threshold Scalar Values", 0));
+    thresholdScalarsBinaryAct->setText(tr("Binary Threshold Scalar Values", 0));
     thresholdScalarsBinaryAct->setShortcut(tr("Shift+Ctrl+b"));
     maskScalarsAct = new QAction(this);
-    maskScalarsAct->setText(tr("Model", "Mask Scalar Values", 0));
+    maskScalarsAct->setText(tr("Mask Scalar Values", 0));
     maskScalarsAct->setShortcut(tr("Shift+Ctrl+m"));
     gradientAct = new QAction(this);
-    gradientAct->setText(tr("Model", "Scalar Gradient Field", 0));
+    gradientAct->setText(tr("Scalar Gradient Field", 0));
     gradientAct->setShortcut(tr("Shift+Alt+c"));
     removeScalarsAct = new QAction(this);
-    removeScalarsAct->setText(tr("Model", "&Remove All Scalars", 0));
+    removeScalarsAct->setText(tr("&Remove All Scalars", 0));
     removeScalarsAct->setShortcut(tr("Shift+Alt+x"));
     scalarsAct = new QAction(this);
-    scalarsAct->setText(tr("Model", "&Load Scalars from ...", 0));
+    scalarsAct->setText(tr("&Load Scalars from ...", 0));
     scalarsAct->setShortcut(tr("Shift+Alt+s"));
     outScalarsAct = new QAction(this);
-    outScalarsAct->setText(tr("Model", "&Output Scalars as CSV File", 0));
+    outScalarsAct->setText(tr("&Output Scalars as CSV File", 0));
     outScalarsAct->setShortcut(tr("Shift+Alt+o"));
     scalarsGroup = new QActionGroup(this);
     scalarsGroup->addAction(renameScalarsAct);
@@ -2728,32 +2728,32 @@ void milxQtModel::createActions()
 
     //Misc
     doAct = new QAction(this);
-    doAct->setText(tr("Model", "&Undo Last Processing", 0));
+    doAct->setText(tr("&Undo Last Processing", 0));
     doAct->setShortcut(tr("Alt+u"));
     infoAct = new QAction(this);
-    infoAct->setText(tr("Model", "&Model Information", 0));
+    infoAct->setText(tr("&Model Information", 0));
     infoAct->setShortcut(tr("Alt+m"));
     textureAct = new QAction(this);
-    textureAct->setText(tr("Model", "&Extract Texture", 0));
+    textureAct->setText(tr("&Extract Texture", 0));
     textureAct->setShortcut(tr("Alt+t"));
     flipAct = new QAction(this);
-    flipAct->setText(tr("Model", "Flip Model", 0));
+    flipAct->setText(tr("Flip Model", 0));
     flipAct->setShortcut(tr("Ctrl+Alt+f"));
     rotateAct = new QAction(this);
-    rotateAct->setText(tr("Model", "Rotate Model", 0));
+    rotateAct->setText(tr("Rotate Model", 0));
     rotateAct->setShortcut(tr("Ctrl+Alt+r"));
 
     //View as
     pointsAct = new QAction(this);
-    pointsAct->setText(tr("Model", "&Points", 0));
+    pointsAct->setText(tr("&Points", 0));
     pointsAct->setShortcut(tr("Alt+p"));
     pointsAct->setCheckable(true);
     wireframeAct = new QAction(this);
-    wireframeAct->setText(tr("Model", "&Wireframe", 0));
+    wireframeAct->setText(tr("&Wireframe", 0));
     wireframeAct->setShortcut(tr("Alt+w"));
     wireframeAct->setCheckable(true);
     surfaceAct = new QAction(this);
-    surfaceAct->setText(tr("Model", "&Surface", 0));
+    surfaceAct->setText(tr("&Surface", 0));
     surfaceAct->setShortcut(tr("Alt+s"));
     surfaceAct->setCheckable(true);
     displayGroup = new QActionGroup(this);
@@ -2762,43 +2762,43 @@ void milxQtModel::createActions()
     displayGroup->addAction(surfaceAct);
 
     colourAct = new QAction(this);
-    colourAct->setText(tr("Model", "Change Mesh &Colour/Transparency", 0));
+    colourAct->setText(tr("Change Mesh &Colour/Transparency", 0));
     colourAct->setShortcut(tr("Alt+c"));
     interpAct = new QAction(this);
-    interpAct->setText(tr("Model", "Best (Phong) Shading", 0));
+    interpAct->setText(tr("Best (Phong) Shading", 0));
     interpAct->setShortcut(tr("Alt+g"));
     interpAct->setCheckable(true);
     interpAct->setChecked(false);
 
     normalsAct = new QAction(this);
-    normalsAct->setText(tr("Model", "Show Normals", 0));
+    normalsAct->setText(tr("Show Normals", 0));
     normalsAct->setShortcut(tr("Alt+n"));
     normalsAct->setCheckable(true);
     normalsAct->setChecked(false);
     centroidAct = new QAction(this);
-    centroidAct->setText(tr("Model", "Show Centroid", 0));
+    centroidAct->setText(tr("Show Centroid", 0));
     centroidAct->setShortcut(tr("Alt+m"));
     centroidAct->setCheckable(true);
     centroidAct->setChecked(false);
     outlineAct = new QAction(this);
-    outlineAct->setText(tr("Model", "Show Outline Box", 0));
+    outlineAct->setText(tr("Show Outline Box", 0));
     outlineAct->setShortcut(tr("Alt+b"));
     outlineAct->setCheckable(true);
     outlineAct->setChecked(false);
     cubeAxesAct = new QAction(this);
-    cubeAxesAct->setText(tr("Model", "Show Cube (Plot) Axes", 0));
+    cubeAxesAct->setText(tr("Show Cube (Plot) Axes", 0));
     cubeAxesAct->setShortcut(tr("Alt+a"));
     cubeAxesAct->setCheckable(true);
     cubeAxesAct->setChecked(false);
     overlaysAct = new QAction(this);
-    overlaysAct->setText(tr("Model", "Remove Overlays/Actors", 0));
+    overlaysAct->setText(tr("Remove Overlays/Actors", 0));
     overlaysAct->setShortcut(tr("Alt+o"));
 
     //Contour
     selectPointsAct = new QAction(this);
-    selectPointsAct->setText(tr("Model", "Select Points within Contour", 0));
+    selectPointsAct->setText(tr("Select Points within Contour", 0));
     weightAct = new QAction(this);
-    weightAct->setText(tr("Model", "Gaussian Weights from Contour", 0));
+    weightAct->setText(tr("Gaussian Weights from Contour", 0));
 }
 
 void milxQtModel::createConnections()
@@ -3049,12 +3049,12 @@ QMenu* milxQtModel::arraysMenu()
 {
     arrayGroup = new QActionGroup(this);
     arrayMenu = new QMenu(this);
-    arrayMenu->setTitle(tr("Model", "&Load Array as Scalars/Vectors", 0));
+    arrayMenu->setTitle(tr("&Load Array as Scalars/Vectors", 0));
 
     for(int j = 0; j < model.Result()->GetPointData()->GetNumberOfArrays(); j ++)
     {
         QAction *act = new QAction(this);
-        act->setText(tr("Model", model.Result()->GetPointData()->GetArrayName(j), 0));
+        act->setText(tr(model.Result()->GetPointData()->GetArrayName(j), 0));
         arrayMenu->addAction(act);
         arrayGroup->addAction(act);
     }

@@ -2838,40 +2838,40 @@ void milxQtMain::createMenu()
     ///Setup Exit Action and File Menus
     ///File
     menuBar->addAction(menuFile->menuAction());
-    menuFile->setTitle(tr("MainWindow", "File", 0));
+    menuFile->setTitle(tr("File", 0));
     actionNewTab->setIcon(QIcon(":/resources/toolbar/new_tab.png"));
-    actionNewTab->setText(tr("MainWindow", "New Tab", 0));
+    actionNewTab->setText(tr("New Tab", 0));
     actionNewTab->setShortcut(tr("Ctrl+t"));
     menuFile->addAction(actionNewTab);
     actionOpen->setIcon(QIcon(":/resources/toolbar/open.png"));
-    actionOpen->setText(tr("MainWindow", "Open", 0));
+    actionOpen->setText(tr("Open", 0));
     actionOpen->setShortcut(tr("Ctrl+o"));
     menuFile->addAction(actionOpen);
     actionOpenSeries->setIcon(QIcon(":/resources/toolbar/open_series.png"));
-    actionOpenSeries->setText(tr("MainWindow", "Open DICOM Series", 0));
+    actionOpenSeries->setText(tr("Open DICOM Series", 0));
     actionOpenSeries->setShortcut(tr("Ctrl+Alt+o"));
     menuFile->addAction(actionOpenSeries);
     actionOpenCollect->setIcon(QIcon(":/resources/toolbar/open_collection.png"));
-    actionOpenCollect->setText(tr("MainWindow", "Open Model Collection", 0));
+    actionOpenCollect->setText(tr("Open Model Collection", 0));
     actionOpenCollect->setShortcut(tr("Ctrl+Shift+o"));
     menuFile->addAction(actionOpenCollect);
     actionSave->setIcon(QIcon(":/resources/toolbar/save.png"));
-    actionSave->setText(tr("MainWindow", "Save", 0));
+    actionSave->setText(tr("Save", 0));
     actionSave->setShortcut(tr("Ctrl+s"));
     menuFile->addAction(actionSave);
     actionSaveScreen->setIcon(QIcon(":/resources/toolbar/screenshot.png"));
-    actionSaveScreen->setText(tr("MainWindow", "Save Screenshot", 0));
+    actionSaveScreen->setText(tr("Save Screenshot", 0));
     actionSaveScreen->setShortcut(tr("Shift+Ctrl+s"));
     menuFile->addAction(actionSaveScreen);
     menuFile->addSeparator();
     //Closing
     menuFile->addAction(actionCloseActive);
     actionCloseActive->setIcon(QIcon(":/resources/toolbar/close.png"));
-    actionCloseActive->setText(tr("MainWindow", "Close", 0));
+    actionCloseActive->setText(tr("Close", 0));
     actionCloseActive->setShortcut(tr("Ctrl+w"));
     menuFile->addAction(actionCloseActive);
     actionCloseAll->setIcon(QIcon(":/resources/toolbar/close_all.png"));
-    actionCloseAll->setText(tr("MainWindow", "Close All", 0));
+    actionCloseAll->setText(tr("Close All", 0));
     actionCloseAll->setShortcut(tr("Ctrl+Shift+w"));
     menuFile->addAction(actionCloseAll);
     menuFile->addSeparator();
@@ -2883,83 +2883,83 @@ void milxQtMain::createMenu()
     //Exit
     menuFile->addAction(actionPreferences);
     actionPreferences->setIcon(QIcon(":/resources/toolbar/settings.png"));
-    actionPreferences->setText(tr("MainWindow", "Preferences ...", 0));
+    actionPreferences->setText(tr("Preferences ...", 0));
     actionPreferences->setShortcut(tr("Ctrl+p"));
     actionExit->setIcon(QIcon(":/resources/toolbar/exit.png"));
-    actionExit->setText(tr("MainWindow", "Exit", 0));
+    actionExit->setText(tr("Exit", 0));
     actionExit->setShortcut(tr("Ctrl+x"));
     menuFile->addAction(actionExit);
     ///Data
     menuBar->addAction(menuData->menuAction());
-    menuData->setTitle(tr("MainWindow", "Data", 0));
+    menuData->setTitle(tr("Data", 0));
     ///Images
-    menuImages->setTitle(tr("MainWindow", "Images", 0));
+    menuImages->setTitle(tr("Images", 0));
     menuBar->addAction(menuImages->menuAction());
-    actionBlendImages->setText(tr("MainWindow", "Blend Images", 0));
+    actionBlendImages->setText(tr("Blend Images", 0));
     actionBlendImages->setShortcut(tr("Ctrl+b"));
     menuImages->addAction(actionBlendImages);
-    actionAddImages->setText(tr("MainWindow", "Add Images", 0));
+    actionAddImages->setText(tr("Add Images", 0));
     actionAddImages->setShortcut(tr("Ctrl+a"));
     menuImages->addAction(actionAddImages);
-    actionAverageImages->setText(tr("MainWindow", "Average Images", 0));
+    actionAverageImages->setText(tr("Average Images", 0));
     actionAverageImages->setShortcut(tr("Ctrl+Shift+a"));
     menuImages->addAction(actionAverageImages);
-    actionSubtractImages->setText(tr("MainWindow", "Difference Images", 0));
+    actionSubtractImages->setText(tr("Difference Images", 0));
     actionSubtractImages->setShortcut(tr("Ctrl+d"));
     menuImages->addAction(actionSubtractImages);
-    actionMultiplyImages->setText(tr("MainWindow", "Multiply Images", 0));
+    actionMultiplyImages->setText(tr("Multiply Images", 0));
     actionMultiplyImages->setShortcut(tr("Ctrl+d"));
     menuImages->addAction(actionMultiplyImages);
-    actionConvolveImages->setText(tr("MainWindow", "Convolve Images", 0));
+    actionConvolveImages->setText(tr("Convolve Images", 0));
     actionConvolveImages->setShortcut(tr("Ctrl+c"));
     menuImages->addAction(actionConvolveImages);
-    actionMergeLabels->setText(tr("MainWindow", "Merge Labels", 0));
+    actionMergeLabels->setText(tr("Merge Labels", 0));
     actionMergeLabels->setShortcut(tr("Ctrl+l"));
     menuImages->addAction(actionMergeLabels);
     ///Windows
     menuBar->addAction(menuWindows->menuAction());
-    menuWindows->setTitle(tr("MainWindow", "Windows", 0));
-    actionLinkWindows->setText(tr("MainWindow", "Link All Windows", 0));
+    menuWindows->setTitle(tr("Windows", 0));
+    actionLinkWindows->setText(tr("Link All Windows", 0));
     actionLinkWindows->setIcon(QIcon(":/resources/toolbar/link.png"));
     actionLinkWindows->setCheckable(true);
     menuWindows->addAction(actionLinkWindows);
     actionCascade->setIcon(QIcon(":/resources/toolbar/cascade.png"));
-    actionCascade->setText(tr("MainWindow", "Cascade", 0));
+    actionCascade->setText(tr("Cascade", 0));
     menuWindows->addAction(actionCascade);
     actionTile->setIcon(QIcon(":/resources/toolbar/tile.png"));
-    actionTile->setText(tr("MainWindow", "Tile", 0));
+    actionTile->setText(tr("Tile", 0));
     menuWindows->addAction(actionTile);
     actionTileVertically->setIcon(QIcon(":/resources/toolbar/tilev.png"));
-    actionTileVertically->setText(tr("MainWindow", "Tile Vertically", 0));
+    actionTileVertically->setText(tr("Tile Vertically", 0));
     menuWindows->addAction(actionTileVertically);
     actionTileHorizontally->setIcon(QIcon(":/resources/toolbar/tileh.png"));
-    actionTileHorizontally->setText(tr("MainWindow", "Tile Horizontally", 0));
+    actionTileHorizontally->setText(tr("Tile Horizontally", 0));
     menuWindows->addAction(actionTileHorizontally);
     updateWindowMenu();
     connect(menuWindows, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
     ///Help
-    menuHelp->setTitle(tr("MainWindow", "Help", 0));
+    menuHelp->setTitle(tr("Help", 0));
     menuBar->addAction(menuHelp->menuAction());
-    actionContents->setText(tr("MainWindow", "sMILX Help Contents", 0));
+    actionContents->setText(tr("sMILX Help Contents", 0));
     actionContents->setIcon(QIcon(":/resources/toolbar/help.png"));
     actionContents->setShortcut(tr("F1"));
     menuHelp->addAction(actionContents);
-    actionControls->setText(tr("MainWindow", "Controls", 0));
+    actionControls->setText(tr("Controls", 0));
     actionControls->setShortcut(tr("F2"));
     actionControls->setIcon(QIcon(":/resources/toolbar/controls.png"));
     menuHelp->addAction(actionControls);
-    actionAbout->setText(tr("MainWindow", "About", 0));
+    actionAbout->setText(tr("About", 0));
     actionAbout->setShortcut(tr("Ctrl+h"));
     menuHelp->addAction(actionAbout);
 
     ///Common Actions/Menus
     actionCompare = new QAction(this);
-    actionCompare->setText(tr("MainWindow", "Compare", 0));
+    actionCompare->setText(tr("Compare", 0));
     actionCompare->setShortcut(tr("Ctrl+u"));
     actionCompare->setDisabled(true); ///\todo enable compare when fixed
-    menuWindowList->setTitle(tr("MainWindow", "Switch Window To", 0));
+    menuWindowList->setTitle(tr("Switch Window To", 0));
     connect(menuWindowList, SIGNAL(aboutToShow()), this, SLOT(updateWindowListMenu()));
-    importFromMenu->setTitle(tr("MainWindow", "Import View From", 0));
+    importFromMenu->setTitle(tr("Import View From", 0));
     connect(importFromMenu, SIGNAL(aboutToShow()), this, SLOT(updateImportFromMenu()));
 
 #if !(ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
@@ -2969,7 +2969,7 @@ void milxQtMain::createMenu()
 
     ///Image Toolbar actions
     actionImageText = new QAction(this);
-    actionImageText->setText(tr("MainWindow", "Text", 0));
+    actionImageText->setText(tr("Text", 0));
     actionImageText->setShortcut(tr("Ctrl+Alt+t"));
 
     statusBar()->showMessage(tr("Ready"));

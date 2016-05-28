@@ -405,21 +405,21 @@ void milxQtUnifiedWindow::createActions()
 {
     //Modes
     unionAct = new QAction(this);
-    unionAct->setText(tr("Unified", "&Union of Data", 0));
+    unionAct->setText(tr("&Union of Data", 0));
     unionAct->setShortcut(tr("Alt+u"));
     unionAct->setCheckable(true);
     unionAct->setChecked(true);
     geoDifferenceAct = new QAction(this);
-    geoDifferenceAct->setText(tr("Unified", "&Surface (Hausdoff) Distance", 0));
+    geoDifferenceAct->setText(tr("&Surface (Hausdoff) Distance", 0));
     geoDifferenceAct->setShortcut(tr("Alt+d"));
     geoDifferenceAct->setCheckable(true);
     scalarDifferenceAct = new QAction(this);
-    scalarDifferenceAct->setText(tr("Unified", "&Scalar Difference", 0));
+    scalarDifferenceAct->setText(tr("&Scalar Difference", 0));
     scalarDifferenceAct->setShortcut(tr("Alt+s"));
     scalarDifferenceAct->setCheckable(true);
     scalarDifferenceAct->setDisabled(true);
     checkerBoardAct = new QAction(this);
-    checkerBoardAct->setText(tr("Unified", "&Checkerboard", 0));
+    checkerBoardAct->setText(tr("&Checkerboard", 0));
     checkerBoardAct->setShortcut(tr("Alt+c"));
     checkerBoardAct->setCheckable(true);
     checkerBoardAct->setDisabled(true);
