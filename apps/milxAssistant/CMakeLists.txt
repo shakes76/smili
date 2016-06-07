@@ -28,7 +28,7 @@ endif(VTK_QT_VERSION VERSION_GREATER "4")
 #Iconing and APP variable for fixup, needs to be before ADD_EXECUTABLE for Windows
 ADD_EXECUTABLE(milxAssistant WIN32 MACOSX_BUNDLE milxAssistant.cpp ${MILXQT_RCCS}) #no MACOSX_BUNDLE since custom one created
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-  qt5_use_modules(milxAssistant Core Gui Widgets WebKitWidgets)
+  qt5_use_modules(milxAssistant Core Gui Widgets WebView)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(milxAssistant ${QT_LIBRARIES})
 
