@@ -16,7 +16,7 @@ IF(BUILD_MILXQT)
   #--------------------------------------------------------------------------------
   # this command finds Qt4 libraries and sets all required variables
   IF(VTK_QT_VERSION VERSION_GREATER "4")
-    FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebView REQUIRED QUIET)
+    FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebKitWidgets REQUIRED QUIET)
   ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
     # QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to

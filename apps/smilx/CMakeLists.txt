@@ -24,7 +24,7 @@ ENDIF (WIN32)
 #--------------------------------------------------------------------------------
 # this command finds Qt4 libraries and sets all required variables
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebView REQUIRED QUIET)
+  FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebKitWidgets REQUIRED QUIET)
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
   # QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to
@@ -66,7 +66,7 @@ ENDIF (WIN32)
 
 ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-  qt5_use_modules(smilx Core Gui Widgets WebView)
+  qt5_use_modules(smilx Core Gui Widgets WebKitWidgets)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(smilx milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
