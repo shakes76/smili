@@ -243,8 +243,12 @@ void milxQtDICOMPlugin::viewTags()
         {
             qApp->processEvents();
             std::string caseID;
+            std::string echoID = "";
+            std::string seriesID = "";
+            std::string acqID = "";
+            std::string instanceID = "";
             std::vector< std::pair<std::string, std::string> > tags;
-            if (!milx::File::GetDICOMTags<floatImageType>(relPath.toStdString(), tags, UIDs[j], caseID))
+            if (!milx::File::GetDICOMTags<floatImageType>(relPath.toStdString(), tags, UIDs[j], caseID, echoID, seriesID, acqID, instanceID))
               continue;
 
             QStringList entryName;
@@ -306,9 +310,13 @@ void milxQtDICOMPlugin::openSeries()
   {
     qApp->processEvents();
     std::string caseID;
+    std::string echoID = "";
+    std::string seriesID = "";
+    std::string acqID = "";
+    std::string instanceID = "";
     floatImageType::Pointer floatImg;
     std::vector< std::pair<std::string, std::string> > tags;
-    if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(directoryPath.toStdString(), floatImg, tags, UIDs[j], caseID))
+    if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(directoryPath.toStdString(), floatImg, tags, UIDs[j], caseID, echoID, seriesID, acqID, instanceID))
       continue;
 
     QStringList entryName;
@@ -473,6 +481,10 @@ void milxQtDICOMPlugin::convert()
 
             //Open image using relevant type
             std::string caseID;
+            std::string echoID = "";
+            std::string seriesID = "";
+            std::string acqID = "";
+            std::string instanceID = "";
             itk::SmartPointer<vectorImageType> vectorImage;
             itk::SmartPointer<charImageType> labelledImage;
             itk::SmartPointer<shortImageType> shortImage;
@@ -485,7 +497,7 @@ void milxQtDICOMPlugin::convert()
             if (pixelType == "vector" || dimensions > 3) ///\todo handle 4D images here properly
             {
                 milx::PrintInfo("Detected vector images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<vectorImageType>(relPath.toStdString(), vectorImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<vectorImageType>(relPath.toStdString(), vectorImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                   milx::PrintError("Failed Reading Vector Images. Skipping.");
                   continue;
@@ -495,7 +507,7 @@ void milxQtDICOMPlugin::convert()
             else if (componentType == "unsigned_char" || componentType == "unsigned char")
             {
                 milx::PrintInfo("Detected labelled images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<charImageType>(relPath.toStdString(), labelledImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<charImageType>(relPath.toStdString(), labelledImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                   milx::PrintError("Failed Reading Labelled Images. Skipping.");
                   continue;
@@ -505,7 +517,7 @@ void milxQtDICOMPlugin::convert()
             else if (componentType == "short" || componentType == "int16")
             {
                 milx::PrintInfo("Detected short images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<shortImageType>(relPath.toStdString(), shortImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<shortImageType>(relPath.toStdString(), shortImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                     milx::PrintError("Failed Reading Short Images. Skipping.");
                     continue;
@@ -515,7 +527,7 @@ void milxQtDICOMPlugin::convert()
             else if (componentType == "unsigned_short" || componentType == "unsigned short")
             {
                 milx::PrintInfo("Detected unsigned short images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<ushortImageType>(relPath.toStdString(), ushortImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<ushortImageType>(relPath.toStdString(), ushortImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                     milx::PrintError("Failed Reading Unsigned Short Images. Skipping.");
                     continue;
@@ -525,7 +537,7 @@ void milxQtDICOMPlugin::convert()
             else if (componentType == "int" || componentType == "signed" || componentType == "int32" || componentType == "int64")
             {
                 milx::PrintInfo("Detected integer images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<intImageType>(relPath.toStdString(), intImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<intImageType>(relPath.toStdString(), intImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                   milx::PrintError("Failed Reading Integer Images. Skipping.");
                   continue;
@@ -535,7 +547,7 @@ void milxQtDICOMPlugin::convert()
             else if (componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "unsigned")
             {
                 milx::PrintInfo("Detected unsigned int images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<uintImageType>(relPath.toStdString(), uintImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<uintImageType>(relPath.toStdString(), uintImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                   milx::PrintError("Failed Reading Unsigned Integer Images. Skipping.");
                   continue;
@@ -545,7 +557,7 @@ void milxQtDICOMPlugin::convert()
             else
             {
                 milx::PrintInfo("Detected floating point images.");
-                if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(relPath.toStdString(), floatImage, tags, seriesNames[j], caseID)) //Error NOT printed inside
+                if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(relPath.toStdString(), floatImage, tags, seriesNames[j], caseID, echoID, seriesID, acqID, instanceID)) //Error NOT printed inside
                 {
                   milx::PrintError("Failed Reading Images. Skipping.");
                   continue;
