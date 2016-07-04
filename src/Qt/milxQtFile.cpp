@@ -457,8 +457,12 @@ bool milxQtFile::openImageSeries(milxQtImage* data, QString directoryPath)
 
   cout << "Reading series as float images" << endl;
   std::string caseID;
+  std::string echoID = "";
+  std::string seriesID = "";
+  std::string acqID = "";
+  std::string instanceID = "";
   floatImageType::Pointer floatImg;
-  milx::File::OpenDICOMSeries<floatImageType>(directoryPath.toStdString(), floatImg, seriesName, caseID);
+  milx::File::OpenDICOMSeries<floatImageType>(directoryPath.toStdString(), floatImg, seriesName, caseID, echoID, seriesID, acqID, instanceID);
   data->SetInput(floatImg, false);
   data->setName(seriesName.c_str());
   cout << "Completed Reading Series: " << seriesName << endl;

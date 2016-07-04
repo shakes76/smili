@@ -240,8 +240,8 @@ public:
   */
   static vtkSmartPointer<vtkImageData> ConvertITKVectorImageToVTKImage(itk::SmartPointer<TImage> img);
 
-  template<typename TPrecision>
-  static itk::SmartPointer<TImage> ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY = true, const bool ignoreDirection = false);
+  template<typename TRefImage, class TPrecision>
+  static itk::SmartPointer<TImage> ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TRefImage> refImage, const bool labelledImage, const bool flipY = true, const bool ignoreDirection = false);
 #ifndef ITK_ONLY //Requires VTK
   /*!
     \fn Image:: ApplyOrientationToVTKImage(vtkSmartPointer<vtkImageData> img, itk::SmartPointer<TImage> refImage, vtkSmartPointer<vtkMatrix4x4> &transformMatrix, const bool labelledImage, const bool flipY = true)
@@ -930,8 +930,8 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ConvertITKVectorImageToVTKImage(itk
 }
 
 template<class TImage>
-template<typename TPrecision>
-itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY, const bool ignoreDirection)
+template<class TRefImage, class TPrecision>
+itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TRefImage> refImage, const bool labelledImage, const bool flipY, const bool ignoreDirection)
 {
   typename TImage::DirectionType direction = refImage->GetDirection();
   typename TImage::PointType origin = refImage->GetOrigin();
@@ -943,6 +943,10 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   else
     interpolator = itk::LinearInterpolateImageFunction<TImage, TPrecision>::New();
 
+  typedef itk::IdentityTransform<TPrecision, 3> TransformType;
+  typename TransformType::Pointer identityTransform = TransformType::New();
+
+  /*
   typename TImage::DirectionType identityMatrix;
   identityMatrix.SetIdentity();
 //  typename TImage::PointType axesOrigin;
@@ -991,91 +995,19 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
 //    new_origin[i] = matrix2->GetElement(i,3);
     offset[i] = matrix2->GetElement(i,3);
   }
-  matrix2->Print(cout);
+  matrix2->Print(cout);*/
 
   typedef itk::ResampleImageFilter<TImage, TImage, TPrecision> ResampleImageFilterType;
-  /*typename ResampleImageFilterType::Pointer stripInfo = ResampleImageFilterType::New();
-    stripInfo->SetInput(img);
-    stripInfo->SetDefaultPixelValue(0.0);
-    stripInfo->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
-//    stripInfo->SetOutputOrigin(  axesOrigin );
-    stripInfo->SetOutputSpacing( refImage->GetSpacing() );
-//    stripInfo->SetOutputDirection( identityMatrix ); // 1 1 1 direction
-    stripInfo->SetInterpolator(interpolator);
-    stripInfo->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-
-  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
-  typedef typename AffineTransformType::Pointer AffineTransformPointer;
-  AffineTransformPointer stripTransform = AffineTransformType::New();
-  stripTransform->SetIdentity();
-  typename TImage::DirectionType matrix = direction.GetInverse();
-  stripTransform->SetMatrix(matrix);
-  stripTransform->Translate(origin.GetVectorFromOrigin());
-//  stripTransform->SetCenter(axesOrigin);
-//  stripTransform->SetTranslation(origin.GetVectorFromOrigin());
-  AffineTransformPointer stripInvTransform = AffineTransformType::New();
-  stripInvTransform->GetInverse(stripTransform);
-
-  stripInfo->SetTransform(stripInvTransform);*/
-
-  typename TImage::SizeType inputSize = refImage->GetLargestPossibleRegion().GetSize();
-  typename TImage::SizeType outputSize;
-  typedef typename TImage::SizeType::SizeValueType SizeValueType;
-  outputSize[0] = static_cast<SizeValueType>(inputSize[0] * 1);
-  outputSize[1] = static_cast<SizeValueType>(inputSize[1] * 1);
-  outputSize[2] = static_cast<SizeValueType>(inputSize[2] * 1);
-
   typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
-    resample->SetInput(stripInfo->GetOutput());
-//    resample->SetInput(img);
+    resample->SetInput(img);
     resample->SetDefaultPixelValue(0.0);
-    resample->SetSize( outputSize );
-    resample->SetOutputStartIndex( refImage->GetLargestPossibleRegion().GetIndex() );
-//    resample->SetOutputOrigin(  refImage->GetOrigin() );
-    resample->SetOutputSpacing( refImage->GetSpacing() );
+    resample->SetTransform(identityTransform);
+    resample->SetSize(refImage->GetLargestPossibleRegion().GetSize());
+//    resample->SetOutputOrigin(  axesOrigin );
+    resample->SetOutputSpacing(refImage->GetSpacing());
+//    resample->SetOutputDirection( identityMatrix ); // 1 1 1 direction
     resample->SetInterpolator(interpolator);
     resample->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-
-  ///Up cast transform to correct type
-  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
-  typedef typename AffineTransformType::Pointer AffineTransformPointer;
-  AffineTransformPointer affineTransform = AffineTransformType::New();
-  affineTransform->SetIdentity();
-
-  ///Transform
-//  typename TImage::DirectionType matrix;
-//  if(ignoreDirection)
-//    matrix = identityMatrix;
-//  else
-//    matrix = direction.GetInverse();
-//  if(flipY)
-//    matrix(1,1) *= -1; //flip y
-//  affineTransform->SetMatrix(matrix);
-  affineTransform->SetMatrix(orientMatrix);
-
-  affineTransform->SetOffset(offset);
-//  affineTransform->SetCenter(origin);
-//  affineTransform->SetTranslation(origin.GetVectorFromOrigin());
-
-//  AffineTransformPointer invTransform = AffineTransformType::New();
-//  invTransform->GetInverse(affineTransform);
-
-  ///Origin
-  AffineTransformPointer affineTransform2 = AffineTransformType::New();
-  affineTransform2->SetIdentity();
-//  typename TImage::DirectionType invOrientMatrix(orientMatrix.GetInverse());
-//  affineTransform2->SetMatrix(invOrientMatrix);
-  affineTransform2->SetMatrix(orientMatrix);
-  //get zeroth point
-  typename TImage::IndexType originIndex;
-  originIndex.Fill(0);
-  typename TImage::PointType old_origin;
-  refImage->TransformIndexToPhysicalPoint(originIndex, old_origin);
-  typename TImage::PointType new_origin = affineTransform2->TransformPoint(old_origin);
-  resample->SetOutputOrigin(new_origin);
-//  resample->SetOutputOrigin(origin);
-
-  resample->SetTransform(affineTransform);
 
   try
   {
@@ -1089,8 +1021,6 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   }
 
   return resample->GetOutput();
-//  stripInfo->Update();
-//  return stripInfo->GetOutput();
 }
 
 #ifndef ITK_ONLY //Requires VTK

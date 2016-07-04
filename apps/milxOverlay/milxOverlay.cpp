@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
     ValueArg<float> redArg("", "redbackground", "Set the redness value (0-1) for the background.", false, 1.0, "Red Component");
     ValueArg<float> greenArg("", "greenbackground", "Set the greenness value (0-1) for the background.", false, 1.0, "Green Component");
     ValueArg<float> blueArg("", "bluebackground", "Set the blueness value (0-1) for the background.", false, 1.0, "Blue Component");
+    ValueArg<float> zoomArg("", "zoom", "Zoom in on the current view by given factor.", false, 2.0, "Zoom");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> axialSliceArg("", "axialslice", "Set the axial slice of the image.", false, 0, "Axial Slice");
@@ -143,6 +144,7 @@ int main(int argc, char* argv[])
     cmd.add( redArg );
     cmd.add( greenArg );
     cmd.add( blueArg );
+    cmd.add( zoomArg );
     cmd.add( opacityArg );
     cmd.add( isoValueArg );
     cmd.add( loadScalarsArg );
@@ -207,6 +209,7 @@ int main(int argc, char* argv[])
     const float redValue = redArg.getValue();
     const float greenValue = greenArg.getValue();
     const float blueValue = blueArg.getValue();
+    const float zoomFactor = zoomArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     const int axialSliceNumber = axialSliceArg.getValue();
@@ -607,6 +610,12 @@ int main(int argc, char* argv[])
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
+    //Zoom
+    if(zoomArg.isSet())
+    {
+      vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
+      camera->Zoom(zoomFactor);
+    }
 
     cout << ">> Overlay: Rendering" << endl;
     if(!onscreenArg.isSet())

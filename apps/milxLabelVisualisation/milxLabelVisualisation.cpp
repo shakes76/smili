@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
     ValueArg<float> aboveArg("", "above", "Add above value to thresholding of the labels. Controls max of scalar range of colourmap also.", false, 255, "Above");
     ValueArg<float> belowArg("", "below", "Add below value to thresholding of the labels. Controls min of scalar range of colourmap also.", false, 0, "Below");
     ValueArg<float> opacityArg("", "opacity", "Set the opacity of the surface", false, 0.5, "Opacity");
+    ValueArg<float> zoomArg("", "zoom", "Zoom in on the current view by given factor.", false, 2.0, "Zoom");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> linearDivisionArg("", "lineardivision", "Evenly space the label values across N to get full use of colourmap.", false, 16, "Linear Division");
@@ -72,6 +73,9 @@ int main(int argc, char* argv[])
     SwitchArg volumeArg("", "volume", "Display using volume rendering instead of marching cude iso-surfaces.", false);
     SwitchArg lineariseArg("", "linearise", "Evenly space the label values to get full use of colourmap.", false);
     SwitchArg wireframeArg("", "wireframe", "Display surface as a wireframe model.", false);
+    SwitchArg axialArg("", "axial", "Show axial view based on position of first surface.", false);
+    SwitchArg coronalArg("", "coronal", "Show coronal view based on position of first surface.", false);
+    SwitchArg saggitalArg("", "saggital", "Show saggital view based on position of first surface.", false);
     ///Colourmaps
     SwitchArg jetArg("", "jet", "Change colourmap of the scalars to the Jet map (default)", false);
     SwitchArg vtkArg("", "vtk", "Change colourmap of the scalars to blue-red (rainbow VTK) map", false);
@@ -91,6 +95,7 @@ int main(int argc, char* argv[])
     cmd.add( aboveArg );
     cmd.add( belowArg );
     cmd.add( opacityArg );
+    cmd.add( zoomArg );
     cmd.add( heightArg );
     cmd.add( widthArg );
     cmd.add( linearDivisionArg );
@@ -105,6 +110,9 @@ int main(int argc, char* argv[])
     cmd.add( volumeArg );
     cmd.add( lineariseArg );
     cmd.add( wireframeArg );
+    cmd.add( axialArg );
+    cmd.add( coronalArg );
+    cmd.add( saggitalArg );
 
     cmd.add( jetArg );
     cmd.add( vtkArg );
@@ -127,6 +135,7 @@ int main(int argc, char* argv[])
     const float aboveValue = aboveArg.getValue();
     const float belowValue = belowArg.getValue();
     const float opacity = opacityArg.getValue();
+    const float zoomFactor = zoomArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     int N = linearDivisionArg.getValue();
@@ -214,6 +223,7 @@ int main(int argc, char* argv[])
 
 if(volumeArg.isSet())
 {
+    cout << ">> Overlay: Volume Rendering" << endl;
 //    float minVolumeValue = numeric_limits<float>::max();
 //    float maxVolumeValue = numeric_limits<float>::min();
     std::vector<float> colourValuesAsFloat, opacityValuesAsFloat;
@@ -267,6 +277,7 @@ if(volumeArg.isSet())
 }
 else
 {
+    cout << ">> Overlay: Isosurfacing" << endl;
     const float linearScale = (aboveValue-belowValue)/N;
     for(size_t j = 0; j < values.size(); j ++)
     {
@@ -320,6 +331,7 @@ else
         isoSurfaces.push_back(mdl); //prevent deletion
     }
 }
+    cout << ">> Overlay: Generating Scene" << endl;
     model->generateRender();
 
     ///Overlay surface if requested
@@ -351,10 +363,22 @@ else
         model->disableOrient();
     if(whiteArg.isSet())
         model->background(true);
+    if(axialArg.isSet())
+        model->viewToAxial();
+    if(coronalArg.isSet())
+        model->viewToCoronal();
+    if(saggitalArg.isSet())
+        model->viewToSagittal();
     if(loadViewArg.isSet())
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
+    //Zoom
+    if(zoomArg.isSet())
+    {
+        vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
+        camera->Zoom(zoomFactor);
+    }
     cout << ">> Overlay: Rendering" << endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
@@ -364,20 +388,22 @@ else
     //Update view
     model->GetRenderWindow()->Render();
     qApp->processEvents();
-
-    ///Take screenshot
-    vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
+    cout << ">> Complete" << endl;
+        
+    if(!onscreenArg.isSet())
+    {
+        ///Take screenshot
+        vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
         windowToImage->SetInput(model->GetRenderWindow());
         windowToImage->Update();
 
-    QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
-    model->GetRenderWindow()->Render();
-    writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
-    cout << ">> Complete" << endl;
+        QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
+        model->GetRenderWindow()->Render();
+        writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
 
-    model->OffScreenRenderingOff(); //Required to prevent double-free
-    if(!onscreenArg.isSet())
+        model->OffScreenRenderingOff(); //Required to prevent double-free
         return EXIT_SUCCESS;
+    }
     else
         return app.exec();
 }

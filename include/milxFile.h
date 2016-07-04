@@ -26,6 +26,7 @@
 #include <sys/stat.h> //exists check
 //ITK
 #ifndef VTK_ONLY
+  #include <itksys/SystemTools.hxx>
   #include <itkImage.h>
   #include <itkImageFileReader.h>
   #include <itkImageSeriesReader.h>
@@ -204,52 +205,55 @@ public:
   */
   static std::vector<std::string> GetDICOMSeriesUIDs(const std::string directoryPath, bool recursive = false);
   /*!
-  \fn File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName)
+  \fn File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName, bool recursive = false)
   \brief Returns the filenames for a given UID/Series name for a given directory.
 
   This function simply returns only filenames and nothing is actually read as an image.
 
   Returns an empty list if an error was encountered.
   */
-  static std::vector<std::string> GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName);
+  static std::vector<std::string> GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName, bool recursive = false);
   /*!
-  \fn File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+  \fn File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false)
   \brief Opens a DICOM series and returns the image meta data read by ITK/GDCM, i.e. the DICOM tags from the header, as well as the image data.
+
+  Only the series name and case ID is guaranteed to exist. Initialise other IDs to empty just in case they are not in the series and will remain unchanged.
 
   You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. This does not read the whole image data and is faster for a quick query.
   */
   template<class TImage>
-  static bool GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID);
+  static bool GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false);
   /*!
-  \fn File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID = "")
+  \fn File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false)
   \brief Opens a DICOM series and returns the image meta data read by ITK/GDCM, i.e. the DICOM tags from the header.
 
   You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. This does not read the whole image data and is faster for a quick query.
   */
   template<class TImage>
-  static bool GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID);
+  static bool GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false);
   /*!
-  \fn File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+  \fn File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false)
   \brief Opens a DICOM series and returns the DICOM tags read by ITK/GDCM, i.e. the DICOM tags from the header, as a list of string pairs.
 
   You can get the UIDs via the GetDICOMSeriesUIDs() member and the meta data via GetDICOMMetaData(), which are read from the filenames.
   */
   template<class TImage>
-  static bool GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID);
+  static bool GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false);
   template<class TImage>
   static bool GetDICOMTags(const itk::MetaDataDictionary dictionary, std::vector< std::pair<std::string, std::string> > &tags);
   /*!
-  \fn File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID)
+  \fn File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false)
   \brief Opens a DICOM series from the path given. Returns the image volume from the series read by ITK/GDCM.
 
   You can get the UIDs via the GetDICOMSeriesUIDs() member, which is read from the filenames. The DICOM tags are read and seriesName and caseID is replaced with DICOM tag values.
+  Only the series name and case ID is guaranteed to exist. Initialise other IDs to empty just in case they are not in the series and will remain unchanged.
 
   Returns true if successful. Image is also NOT flipped for VTK.
   */
   template<class TImage>
-  static bool OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID);
+  static bool OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false);
   template<class TImage>
-  static bool OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID);
+  static bool OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive = false);
 #endif
 
 #ifndef ITK_ONLY
@@ -483,6 +487,17 @@ public:
     return false;
   }
 
+#ifndef VTK_ONLY
+  /*!
+    \fn File::MakeDirectory(std::string name)
+    \brief Creates directory (using ITK) if none exists.
+  */
+  static inline void MakeDirectory(std::string name)
+  {
+    itksys::SystemTools::MakeDirectory( itksys::SystemTools::GetRealPath(name) );
+  }
+#endif
+
 protected:
 
 private:
@@ -641,12 +656,12 @@ bool File::SaveImages(std::vector<std::string> &filenames, const std::vector< ty
 
 //DICOM related
 template<class TImage>
-bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive)
 {
   typedef itk::ImageSeriesReader<TImage> ReaderType;
   typedef itk::GDCMImageIO ImageIOType;
 
-  const std::vector<std::string> filenames = GetDICOMSeriesFilenames(directoryPath, seriesName);
+  const std::vector<std::string> filenames = GetDICOMSeriesFilenames(directoryPath, seriesName, recursive);
 
   ImageIOType::Pointer gdcmIO = ImageIOType::New();
   typename ReaderType::Pointer reader = ReaderType::New();
@@ -669,12 +684,18 @@ bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPoin
   std::string series_type_id("0008|103e");
   itk::MetaDataDictionary & dic = gdcmIO->GetMetaDataDictionary();
   itk::MetaDataDictionary::ConstIterator series_type_itr = dic.Find(series_type_id);
-
   std::string caseId = "0010|0020";
   itk::MetaDataDictionary::ConstIterator case_itr = dic.Find(caseId);
-
   std::string echoNumber = "0018|0086";
   itk::MetaDataDictionary::ConstIterator echoNumber_itr = dic.Find(echoNumber);
+  std::string seriesNumber = "0020|0011";
+  itk::MetaDataDictionary::ConstIterator seriesNumber_itr = dic.Find(seriesNumber);
+  std::string acqNumber = "0020|0012";
+  itk::MetaDataDictionary::ConstIterator acqNumber_itr = dic.Find(acqNumber);
+  std::string instanceNumber = "0020|0013";
+  itk::MetaDataDictionary::ConstIterator instanceNumber_itr = dic.Find(instanceNumber);
+  std::string itemNumber = "0020|0019";
+  itk::MetaDataDictionary::ConstIterator itemNumber_itr = dic.Find(itemNumber);
 
   MetaDataStringType::ConstPointer entryValue = dynamic_cast<const MetaDataStringType *>(series_type_itr->second.GetPointer());
   if (entryValue)
@@ -692,7 +713,35 @@ bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPoin
   if (dic.HasKey(echoNumber))
   {
     entryValue3 = dynamic_cast<const MetaDataStringType *>(echoNumber_itr->second.GetPointer());
+    echoID = entryValue3->GetMetaDataObjectValue();
     std::cout << "Echo Number: " << entryValue3->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue4;
+  if (dic.HasKey(seriesNumber))
+  {
+    entryValue4 = dynamic_cast<const MetaDataStringType *>(seriesNumber_itr->second.GetPointer());
+    seriesID = entryValue4->GetMetaDataObjectValue();
+    std::cout << "Series Number: " << entryValue4->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue5;
+  if (dic.HasKey(acqNumber))
+  {
+    entryValue5 = dynamic_cast<const MetaDataStringType *>(acqNumber_itr->second.GetPointer());
+    acqID = entryValue5->GetMetaDataObjectValue();
+    std::cout << "Acquisition Number: " << entryValue5->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue6;
+  if (dic.HasKey(instanceNumber))
+  {
+    entryValue6 = dynamic_cast<const MetaDataStringType *>(instanceNumber_itr->second.GetPointer());
+    instanceID = entryValue6->GetMetaDataObjectValue();
+    std::cout << "Instance Number: " << entryValue6->GetMetaDataObjectValue() << std::endl;
+  }
+  MetaDataStringType::ConstPointer entryValue7;
+  if (dic.HasKey(itemNumber))
+  {
+    entryValue7 = dynamic_cast<const MetaDataStringType *>(itemNumber_itr->second.GetPointer());
+    std::cout << "Item Number: " << entryValue7->GetMetaDataObjectValue() << std::endl;
   }
 
   ///Return Meta Data as dictionary
@@ -704,23 +753,23 @@ bool File::GetDICOMData(const std::string directoryPath, typename itk::SmartPoin
 }
 
 template<class TImage>
-bool File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID)
+bool File::GetDICOMMetaData(const std::string directoryPath, itk::MetaDataDictionary &dict, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive)
 {
   typename itk::SmartPointer<TImage> data;
 
-  if (!GetDICOMData<TImage>(directoryPath, data, dict, seriesName, caseID))
+  if (!GetDICOMData<TImage>(directoryPath, data, dict, seriesName, caseID, echoID, seriesID, acqID, instanceID, recursive))
     return false;
 
   return true;
 }
 
 template<class TImage>
-bool File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+bool File::GetDICOMTags(const std::string directoryPath, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive)
 {
   typedef itk::MetaDataObject< std::string > MetaDataStringType;
   typedef itk::MetaDataDictionary DictionaryType;
   DictionaryType dictionary;
-  if (!GetDICOMMetaData<TImage>(directoryPath, dictionary, seriesName, caseID))
+  if (!GetDICOMMetaData<TImage>(directoryPath, dictionary, seriesName, caseID, echoID, seriesID, acqID, instanceID, recursive))
     return false;
 
   DictionaryType::ConstIterator itr = dictionary.Begin();
@@ -768,24 +817,24 @@ bool File::GetDICOMTags(const itk::MetaDataDictionary dictionary, std::vector< s
 }
 
 template<class TImage>
-bool File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID)
+bool File::OpenDICOMSeries(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive)
 {
   typedef itk::MetaDataDictionary DictionaryType;
   DictionaryType dictionary;
 
-  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID))
+  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID, echoID, seriesID, acqID, instanceID, recursive))
     return false;
 
   return true;
 }
 
 template<class TImage>
-bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID)
+bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk::SmartPointer<TImage> &data, std::vector< std::pair<std::string, std::string> > &tags, std::string &seriesName, std::string &caseID, std::string &echoID, std::string &seriesID, std::string &acqID, std::string &instanceID, bool recursive)
 {
   typedef itk::MetaDataDictionary DictionaryType;
   DictionaryType dictionary;
 
-  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID))
+  if (!GetDICOMData<TImage>(directoryPath, data, dictionary, seriesName, caseID, echoID, seriesID, acqID, instanceID, recursive))
     return false;
 
   if (!milx::File::GetDICOMTags<TImage>(dictionary, tags))

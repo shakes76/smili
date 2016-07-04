@@ -948,6 +948,36 @@ void milxQtImage::updateData(const bool orient)
         floatImageType::PointType origin;
         floatImageType::SpacingType spacing;
         vtkSmartPointer<vtkImageData> newImageData = vtkSmartPointer<vtkImageData>::New();
+        /*if(eightbit)
+        {
+            /// ITK to VTK image (unsigned char)
+            if(orient)
+                imageChar = milx::Image<charImageType>::ApplyOrientationToITKImage<charImageType, float>(imageChar, imageChar, true, flipped);
+            imageData->DeepCopy(milx::Image<charImageType>::ConvertITKImageToVTKImage(imageChar));
+            direction = imageChar->GetDirection();
+            origin = imageChar->GetOrigin();
+            spacing = imageChar->GetSpacing();
+        }
+        else if(rgb)
+        {
+            /// ITK to VTK image (RGB)
+            if(orient)
+                imageRGB = milx::Image<rgbImageType>::ApplyOrientationToITKImage<rgbImageType, float>(imageRGB, imageRGB, true, flipped);
+            imageData->DeepCopy(milx::Image<rgbImageType>::ConvertITKImageToVTKImage(imageRGB));
+            direction = imageRGB->GetDirection();
+            origin = imageRGB->GetOrigin();
+            spacing = imageRGB->GetSpacing();
+        }
+        else //if float and/or vector (which also generates float magnitude image)
+        {
+            /// ITK to VTK image (Float)
+            if(orient)
+                imageFloat = milx::Image<floatImageType>::ApplyOrientationToITKImage<floatImageType, float>(imageFloat, imageFloat, true, flipped);
+            imageData->DeepCopy(milx::Image<floatImageType>::ConvertITKImageToVTKImage(imageFloat));
+            direction = imageFloat->GetDirection();
+            origin = imageFloat->GetOrigin();
+            spacing = imageFloat->GetSpacing();
+        }*/
         if(eightbit)
         {
             /// ITK to VTK image (unsigned char)
@@ -3544,7 +3574,7 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
     double range[2];
     imageData->GetScalarRange(range);
 
-    int ret = QMessageBox::Yes;
+    int ret = QMessageBox::No;
     if(plotHistogram)
     {
         ///ask user number of bins

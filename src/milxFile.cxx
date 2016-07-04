@@ -116,10 +116,17 @@ namespace milx
     typedef itk::GDCMSeriesFileNames GeneratorType;
     GeneratorType::Pointer nameGenerator = GeneratorType::New();
     nameGenerator->SetUseSeriesDetails(true);
-    nameGenerator->AddSeriesRestriction("0008|0021");
-    nameGenerator->SetDirectory(directoryPath.c_str());
     if(recursive)
-        nameGenerator->RecursiveOn();
+      nameGenerator->RecursiveOn(); //order important
+    nameGenerator->AddSeriesRestriction("0020|0010"); //StudyID
+    nameGenerator->AddSeriesRestriction("0018|0024"); //SeriesName
+    nameGenerator->AddSeriesRestriction("0018|0086"); //EchoNumber
+    nameGenerator->AddSeriesRestriction("0008|0021"); //SeriesDate
+    nameGenerator->AddSeriesRestriction("0020|0011"); //SeriesNumber
+    nameGenerator->AddSeriesRestriction("0020|0012"); //AcquisitionNumber
+//    nameGenerator->AddSeriesRestriction("300A,0282"); //ChannelNumber
+//    nameGenerator->AddSeriesRestriction("0020|0013"); //InstanceNumber
+    nameGenerator->SetDirectory(directoryPath.c_str());
     nameGenerator->AddObserver(itk::ProgressEvent(), ProgressUpdates);
   #if (ITK_VERSION_MAJOR > 3)
     try
@@ -139,13 +146,22 @@ namespace milx
     return UIDs;
   }
 
-  std::vector<std::string> File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName)
+  std::vector<std::string> File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName, bool recursive)
   {
     std::vector<std::string> filenames;
     typedef itk::GDCMSeriesFileNames GeneratorType;
     GeneratorType::Pointer nameGenerator = GeneratorType::New();
     nameGenerator->SetUseSeriesDetails(true);
-    nameGenerator->AddSeriesRestriction("0008|0021");
+    if(recursive)
+      nameGenerator->RecursiveOn(); //order important
+    nameGenerator->AddSeriesRestriction("0020|0010"); //StudyID
+    nameGenerator->AddSeriesRestriction("0018|0024"); //SeriesName
+    nameGenerator->AddSeriesRestriction("0018|0086"); //EchoNumber
+    nameGenerator->AddSeriesRestriction("0008|0021"); //SeriesDate
+    nameGenerator->AddSeriesRestriction("0020|0011"); //SeriesNumber
+    nameGenerator->AddSeriesRestriction("0020|0012"); //AcquisitionNumber
+//    nameGenerator->AddSeriesRestriction("300A,0282"); //ChannelNumber
+//    nameGenerator->AddSeriesRestriction("0020|0013"); //InstanceNumber
     nameGenerator->SetDirectory(directoryPath.c_str());
     nameGenerator->AddObserver(itk::ProgressEvent(), ProgressUpdates);
   #if (ITK_VERSION_MAJOR > 3)
