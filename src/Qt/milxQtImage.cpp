@@ -3501,6 +3501,7 @@ void milxQtImage::scaleDisplay(const bool forceDisplay)
     Render();
 }
 
+#if VTK_MAJOR_VERSION > 5
 void milxQtImage::resliceMode(const bool quietly)
 {
     if(resliceAct->isChecked())
@@ -3511,6 +3512,7 @@ void milxQtImage::resliceMode(const bool quietly)
     if(!quietly)
         emit modified(this);
 }
+#endif
 
 void milxQtImage::showCrosshair(const bool quietly)
 {
@@ -4087,6 +4089,9 @@ void milxQtImage::createActions()
     resliceAct->setShortcut(tr("Shift+Ctrl+s"));
     resliceAct->setCheckable(true);
     resliceAct->setChecked(false);
+#if VTK_MAJOR_VERSION <= 5
+    resliceAct->setDisabled(true);
+#endif
     cursorAct = new QAction(this);
     cursorAct->setText(QApplication::translate("Image", "Show Cursor", 0, QApplication::UnicodeUTF8));
     cursorAct->setShortcut(tr("Shift+Alt+c"));
@@ -4172,7 +4177,9 @@ void milxQtImage::createConnections()
     connect(infoAct, SIGNAL(triggered()), this, SLOT(imageInformation()));
     connect(interpolateAct, SIGNAL(triggered()), this, SLOT(interpolateDisplay()));
     connect(orientAct, SIGNAL(triggered()), this, SLOT(applyOrientDisplay()));
+#if VTK_MAJOR_VERSION > 5
     connect(resliceAct, SIGNAL(triggered()), this, SLOT(resliceMode()));
+#endif
     connect(cursorAct, SIGNAL(triggered()), this, SLOT(showCrosshair()));
     connect(milxQtRenderWindow::refreshAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(milxQtRenderWindow::resetAct, SIGNAL(triggered()), this, SLOT(reset()));

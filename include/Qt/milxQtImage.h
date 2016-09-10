@@ -1099,6 +1099,7 @@ public slots:
         viewer->GetRenderWindow()->SetCurrentCursor(0);
         crosshairAct->setChecked(false);
     }
+#if VTK_MAJOR_VERSION > 5
     /*!
         \fn milxQtImage::resliceMode()
         \brief Apply different slice modes (oblique or axis based). Image must be generated before calling.
@@ -1123,6 +1124,7 @@ public slots:
         viewer->GetInteractorStyle()->SetInteractionModeToImageSlicing();
         resliceAct->setChecked(false);
     }
+#endif
     /*!
         \fn milxQtImage::setView(int viewMode)
         \brief Change view to view mode identified by number.
