@@ -39,6 +39,8 @@
   #include <vtkPLYReader.h>
   #include <vtkPLYWriter.h>
   #include <vtkPolyDataReader.h>
+  #include <vtkUnstructuredGridReader.h>
+  #include <vtkGeometryFilter.h>
   #include <vtkPolyDataWriter.h>
   #include <vtkXMLPolyDataReader.h>
   #include <vtkXMLPolyDataWriter.h>
@@ -503,15 +505,49 @@ bool File::OpenModel(const std::string filename, vtkSmartPointer<vtkPolyData> &d
   vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
   if (legacy)
   {
-    vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
-    reader->SetFileName(filename.c_str());
-    reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-    reader->Update();
+    //Check legacy data type
+    vtkSmartPointer<vtkDataReader> dreader = vtkSmartPointer<vtkDataReader>::New();
+    dreader->SetFileName(filename.c_str());
+    dreader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+    dreader->OpenVTKFile();
+    dreader->ReadHeader();
+    dreader->CloseVTKFile();
 
-    if (!errorObserver->ReportsFailure())
+    if(dreader->IsFilePolyData())
     {
-      data = reader->GetOutput();
-      return true;
+      PrintDebug("Found Poly Data.");
+      vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
+      reader->SetFileName(filename.c_str());
+      reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+      reader->Update();
+
+      if(!errorObserver->ReportsFailure())
+      {
+        data = reader->GetOutput();
+        return true;
+      }
+    }
+    else if(dreader->IsFileUnstructuredGrid())
+    {
+      PrintDebug("Found Unstructured Grid Data.");
+      vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+      reader->SetFileName(filename.c_str());
+      reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+      reader->Update();
+
+      vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
+      geometryFilter->SetInputConnection(reader->GetOutputPort());
+      geometryFilter->Update();
+
+      if(!errorObserver->ReportsFailure())
+      {
+        data = geometryFilter->GetOutput();
+        return true;
+      }
+    }
+    else
+    {
+      PrintError("VTK Legacy Data Type Not Supported.");
     }
   }
   else if (wavefront)

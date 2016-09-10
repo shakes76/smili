@@ -3501,12 +3501,23 @@ void milxQtImage::scaleDisplay(const bool forceDisplay)
     Render();
 }
 
+void milxQtImage::resliceMode(const bool quietly)
+{
+    if(resliceAct->isChecked())
+        enableResliceMode();
+    else
+        disableResliceMode();
+
+    if(!quietly)
+        emit modified(this);
+}
+
 void milxQtImage::showCrosshair(const bool quietly)
 {
     if(cursorAct->isChecked())
-      enableCrosshair();
+        enableCrosshair();
     else
-      disableCrosshair();
+        disableCrosshair();
 
     if(!quietly)
         emit modified(this);
@@ -4071,6 +4082,11 @@ void milxQtImage::createActions()
     orientAct->setShortcut(tr("Shift+Alt+o"));
     orientAct->setCheckable(true);
     orientAct->setChecked(true);
+    resliceAct = new QAction(this);
+    resliceAct->setText(QApplication::translate("Image", "3D Slice View Mode", 0, QApplication::UnicodeUTF8));
+    resliceAct->setShortcut(tr("Shift+Ctrl+s"));
+    resliceAct->setCheckable(true);
+    resliceAct->setChecked(false);
     cursorAct = new QAction(this);
     cursorAct->setText(QApplication::translate("Image", "Show Cursor", 0, QApplication::UnicodeUTF8));
     cursorAct->setShortcut(tr("Shift+Alt+c"));
@@ -4156,6 +4172,7 @@ void milxQtImage::createConnections()
     connect(infoAct, SIGNAL(triggered()), this, SLOT(imageInformation()));
     connect(interpolateAct, SIGNAL(triggered()), this, SLOT(interpolateDisplay()));
     connect(orientAct, SIGNAL(triggered()), this, SLOT(applyOrientDisplay()));
+    connect(resliceAct, SIGNAL(triggered()), this, SLOT(resliceMode()));
     connect(cursorAct, SIGNAL(triggered()), this, SLOT(showCrosshair()));
     connect(milxQtRenderWindow::refreshAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(milxQtRenderWindow::resetAct, SIGNAL(triggered()), this, SLOT(reset()));
@@ -4202,6 +4219,7 @@ QMenu* milxQtImage::basicContextMenu()
     contextMenu->addAction(infoAct);
     contextMenu->addAction(interpolateAct);
     contextMenu->addAction(orientAct);
+    contextMenu->addAction(resliceAct);
     contextMenu->addAction(cursorAct);
     contextMenu->addAction(milxQtRenderWindow::humanAct);
     ///Change View of Volume

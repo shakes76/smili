@@ -30,6 +30,8 @@
 #include <vtkSTLReader.h>
 #include <vtkSTLWriter.h>
 #include <vtkPolyDataReader.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkGeometryFilter.h>
 #include <vtkPolyDataWriter.h>
 #include <vtkXMLPolyDataReader.h>
 #include <vtkXMLPolyDataWriter.h>
@@ -694,19 +696,53 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
     vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
     if(legacy)
     {
-        vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
-        reader->SetFileName(filename.toStdString().c_str());
-        reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-        linkProgressEventOf(reader);
-        reader->Update();
+        //Check legacy data type
+        vtkSmartPointer<vtkDataReader> dreader = vtkSmartPointer<vtkDataReader>::New();
+        dreader->SetFileName(filename.toStdString().c_str());
+        dreader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+        linkProgressEventOf(dreader);
+        dreader->OpenVTKFile();
+        dreader->ReadHeader();
+        dreader->CloseVTKFile();
 
-        if(!errorObserver->ReportsFailure())
-            data->DeepCopy(reader->GetOutput());
+        if(dreader->IsFileUnstructuredGrid())
+        {
+            vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+            reader->SetFileName(filename.toStdString().c_str());
+            reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+            linkProgressEventOf(reader);
+            reader->Update();
+
+            vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
+            geometryFilter->SetInputConnection(reader->GetOutputPort());
+            linkProgressEventOf(geometryFilter);
+            geometryFilter->Update();
+
+            if(!errorObserver->ReportsFailure())
+              data->DeepCopy(geometryFilter->GetOutput());
+            else
+            {
+              cerr << "Reader Encountered the following error." << endl;
+              cerr << errorObserver->GetMessage() << endl;
+              return false;
+            }
+        }
         else
         {
-            cerr << "Reader Encountered the following error." << endl;
-            cerr << errorObserver->GetMessage() << endl;
-            return false;
+            vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
+            reader->SetFileName(filename.toStdString().c_str());
+            reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+            linkProgressEventOf(reader);
+            reader->Update();
+
+            if(!errorObserver->ReportsFailure())
+                data->DeepCopy(reader->GetOutput());
+            else
+            {
+                cerr << "Reader Encountered the following error." << endl;
+                cerr << errorObserver->GetMessage() << endl;
+                return false;
+            }
         }
     }
     else if(wavefront)
@@ -798,19 +834,53 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
     vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
     if(legacy)
     {
-        vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
-        reader->SetFileName(filename.toStdString().c_str());
-        reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-        linkProgressEventOf(reader);
-        reader->Update();
+        //Check legacy data type
+        vtkSmartPointer<vtkDataReader> dreader = vtkSmartPointer<vtkDataReader>::New();
+        dreader->SetFileName(filename.toStdString().c_str());
+        dreader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+        linkProgressEventOf(dreader);
+        dreader->OpenVTKFile();
+        dreader->ReadHeader();
+        dreader->CloseVTKFile();
 
-        if(!errorObserver->ReportsFailure())
-            data->SetInput(reader->GetOutput());
+        if(dreader->IsFileUnstructuredGrid())
+        {
+            vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
+            reader->SetFileName(filename.toStdString().c_str());
+            reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+            linkProgressEventOf(reader);
+            reader->Update();
+
+            vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
+            geometryFilter->SetInputConnection(reader->GetOutputPort());
+            linkProgressEventOf(geometryFilter);
+            geometryFilter->Update();
+
+            if(!errorObserver->ReportsFailure())
+                data->SetInput(geometryFilter->GetOutput());
+            else
+            {
+                cerr << "Reader Encountered the following error." << endl;
+                cerr << errorObserver->GetMessage() << endl;
+                return false;
+            }
+        }
         else
         {
-            cerr << "Reader Encountered the following error." << endl;
-            cerr << errorObserver->GetMessage() << endl;
-            return false;
+            vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
+            reader->SetFileName(filename.toStdString().c_str());
+            reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+            linkProgressEventOf(reader);
+            reader->Update();
+
+            if(!errorObserver->ReportsFailure())
+                data->SetInput(reader->GetOutput());
+            else
+            {
+                cerr << "Reader Encountered the following error." << endl;
+                cerr << errorObserver->GetMessage() << endl;
+                return false;
+            }
         }
     }
     else if(wavefront)

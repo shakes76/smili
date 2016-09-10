@@ -1100,6 +1100,30 @@ public slots:
         crosshairAct->setChecked(false);
     }
     /*!
+        \fn milxQtImage::resliceMode()
+        \brief Apply different slice modes (oblique or axis based). Image must be generated before calling.
+    */
+    virtual void resliceMode(const bool quietly = false);
+    /*!
+        \fn milxQtImage::enableResliceMode()
+        \brief Enables oblique slicing. Scene must be rendered before calling.
+    */
+    virtual inline void enableResliceMode()
+    {
+        printDebug("Oblique slicing enabled. Use Shift + Left Mouse.");
+        viewer->GetInteractorStyle()-> SetInteractionModeToImage3D();
+        resliceAct->setChecked(true);
+    }
+    /*!
+        \fn milxQtImage::disableResliceMode()
+        \brief Restores axis slicing.
+    */
+    virtual inline void disableResliceMode()
+    {
+        viewer->GetInteractorStyle()->SetInteractionModeToImageSlicing();
+        resliceAct->setChecked(false);
+    }
+    /*!
         \fn milxQtImage::setView(int viewMode)
         \brief Change view to view mode identified by number.
         0-axial, 1-coronal, 2-sagittal
@@ -1390,6 +1414,7 @@ protected:
     QAction* infoAct; //!< Action for displaying information about the image.
     QAction* interpolateAct; //!< Interpolate image?
     QAction* orientAct; //!< Orient image?
+    QAction* resliceAct; //!< Reslice mode?
     QAction* cursorAct; //!< Show cursor?
 
     /*!
