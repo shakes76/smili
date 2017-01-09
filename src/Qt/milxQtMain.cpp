@@ -241,6 +241,7 @@ void milxQtMain::addRender(milxQtRenderWindow *rnd)
     commonChildProperties(rnd);
 
     rnd->enableUpdates(statusBar());
+    rnd->GetRenderWindow()->SetSize(subWindowSize, subWindowSize);
     rnd->setMinimumSize(subWindowSize, subWindowSize);
     rnd->refresh();
 

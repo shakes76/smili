@@ -24,6 +24,7 @@
 */
 //Qt
 #include <QApplication>
+#include <QMainWindow>
 
 #include "milxQtAnimateModel.h"
 #include "milxQtImage.h"

@@ -351,12 +351,23 @@ void milxQtImage::generateImage(const bool quietly)
             printDebug("Setting up viewer");
             linkProgressEventOf(viewer);
             milxQtRenderWindow::SetRenderer(viewer->GetRenderer());
-            printDebug("Size of Image window: " + QString::number(milxQtRenderWindow::GetRenderWindow()->GetSize()[0]) + "x" + QString::number(milxQtRenderWindow::GetRenderWindow()->GetSize()[1]));
             QVTKWidget::SetRenderWindow(viewer->GetRenderWindow());
             viewer->SetupInteractor(QVTKWidget::GetInteractor());
             SetupWidgets(viewer->GetRenderWindow()->GetInteractor());
             if(volume)
                 viewer->SetSlice(bounds[5]/2); //show middle of volume
+
+            if(QVTKWidget::size().height() < minWindowSize || QVTKWidget::size().width() < minWindowSize)
+            {
+                QVTKWidget::GetRenderWindow()->SetSize(minWindowSize, minWindowSize);
+                printDebug("Resized to minimum size");
+            }
+            else
+                QVTKWidget::GetRenderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+
+            int *winSize = QVTKWidget::GetRenderWindow()->GetSize();
+            QVTKWidget::resize(winSize[0], winSize[1]);
+            printDebug("Size of Image window: " + QString::number(milxQtRenderWindow::GetRenderWindow()->GetSize()[0]) + "x" + QString::number(milxQtRenderWindow::GetRenderWindow()->GetSize()[1]));
 
             //Remove VTK events for the right mouse button for Qt context menu
             QVTKWidget::GetInteractor()->RemoveObservers(vtkCommand::RightButtonPressEvent);
