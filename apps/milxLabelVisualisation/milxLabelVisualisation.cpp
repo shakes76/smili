@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
     ValueArg<std::string> labelledImageArg("l", "labels", "Labelled image to visualise", true, "seg.nii.gz", "Labels");
     ///Optional
     ValueArg<std::string> outputArg("o", "output", "Output Screenshot name", false, "screenshot.png", "Output");
+    ValueArg<std::string> saveArg("", "save", "Save the mesh generated with name. Only for non-volume output.", false, "surface.vtk", "Save");
     ValueArg<std::string> surfaceArg("s", "surface", "Surface to overlay with labelled image", false, "surface.vtk", "Surface");
     ValueArg<std::string> transformArg("t", "transform", "Transform (ITK Format) to apply to objects being rendered", false, "rigid.txt", "Transform");
     ValueArg<std::string> loadViewFileArg("", "loadviewfile", "Load saved view from file (use onscreen mode to save view files)", false, "camera.cam", "Load View File");
@@ -70,6 +71,7 @@ int main(int argc, char* argv[])
     SwitchArg loadViewArg("", "loadview", "Load saved view (use smilx or onscreen render mode to view and save with Right Click->View->Save View", false);
     SwitchArg humanArg("", "nohuman", "Disable human orientation glyph.", false);
     SwitchArg processArg("", "postprocess", "Process the resulting surfaces from labels to reduce vertices and smooth etc.", false);
+    SwitchArg oversmoothArg("", "oversmooth", "Process the resulting surfaces from labels with oversmoothing. Option is for Postprocess argument.", false);
     SwitchArg volumeArg("", "volume", "Display using volume rendering instead of marching cude iso-surfaces.", false);
     SwitchArg lineariseArg("", "linearise", "Evenly space the label values to get full use of colourmap.", false);
     SwitchArg wireframeArg("", "wireframe", "Display surface as a wireframe model.", false);
@@ -81,6 +83,7 @@ int main(int argc, char* argv[])
     SwitchArg vtkArg("", "vtk", "Change colourmap of the scalars to blue-red (rainbow VTK) map", false);
     SwitchArg hsvArg("", "hsv", "Change colourmap of the scalars to blue-red (rainbow HSV) map", false);
     SwitchArg rainbowArg("", "rainbow", "Change colourmap of the scalars to the rainbow map", false);
+    SwitchArg spectralArg("", "spectral", "Change colourmap of the scalars to the spectral map", false);
     SwitchArg nihArg("", "NIH", "Change colourmap of the scalars to NIH", false);
     SwitchArg fireArg("", "NIH_FIRE", "Change colourmap of the scalars to NIH Fire", false);
     SwitchArg aalArg("", "AAL", "Change colourmap of the scalars to AAL", false);
@@ -89,6 +92,7 @@ int main(int argc, char* argv[])
     ///Add arguments
     cmd.add( labelledImageArg );
     cmd.add( outputArg );
+    cmd.add( saveArg );
     cmd.add( surfaceArg );
     cmd.add( transformArg );
     cmd.add( loadViewFileArg );
@@ -107,6 +111,7 @@ int main(int argc, char* argv[])
     cmd.add( loadViewArg );
     cmd.add( humanArg );
     cmd.add( processArg );
+    cmd.add( oversmoothArg );
     cmd.add( volumeArg );
     cmd.add( lineariseArg );
     cmd.add( wireframeArg );
@@ -118,6 +123,7 @@ int main(int argc, char* argv[])
     cmd.add( vtkArg );
     cmd.add( hsvArg );
     cmd.add( rainbowArg );
+    cmd.add( spectralArg );
     cmd.add( nihArg );
     cmd.add( fireArg );
     cmd.add( aalArg );
@@ -129,6 +135,7 @@ int main(int argc, char* argv[])
     ///Save argument values
     const std::string labelsName = labelledImageArg.getValue();
     const std::string screenName = outputArg.getValue();
+    const std::string fileName = saveArg.getValue();
     const std::string surfaceName = surfaceArg.getValue();
     const std::string transformName = transformArg.getValue();
     const std::string loadViewName = loadViewFileArg.getValue();
@@ -257,6 +264,8 @@ if(volumeArg.isSet())
         label->colourMapToHSV(belowValue, aboveValue);
     if(rainbowArg.isSet())
         label->colourMapToRainbow(belowValue, aboveValue);
+    if(spectralArg.isSet())
+        label->colourMapToSpectral(belowValue, aboveValue);
     if(nihArg.isSet())
         label->colourMapToNIH(belowValue, aboveValue);
     if(fireArg.isSet())
@@ -295,8 +304,11 @@ else
             mdl->generateIsoSurface(label->GetOutput(), 0, 0.5);
         if(processArg.isSet())
         {
-            mdl->quadricDecimate(0.5);
-            mdl->smoothSinc(15);
+            mdl->quadricDecimate(0.25);
+            if(oversmoothArg.isSet())
+                mdl->smooth(500);
+            else
+                mdl->smoothSinc(15);
         }
         if(transformArg.isSet())
             mdl->SetTransform(transform);
@@ -304,20 +316,22 @@ else
 
         //Colour maps
         model->colourMapToJet(belowValue, aboveValue); //default
-    if(vtkArg.isSet())
-        model->colourMapToVTK(belowValue, aboveValue);
-    if(hsvArg.isSet())
-        model->colourMapToHSV(belowValue, aboveValue);
-    if(rainbowArg.isSet())
-        model->colourMapToRainbow(belowValue, aboveValue);
-    if(nihArg.isSet())
-        model->colourMapToNIH(belowValue, aboveValue);
-    if(fireArg.isSet())
-        model->colourMapToNIH_Fire(belowValue, aboveValue);
-    if(aalArg.isSet())
-        model->colourMapToAAL(belowValue, aboveValue);
-    if(hotArg.isSet())
-        model->colourMapToHOT(belowValue, aboveValue);
+        if(vtkArg.isSet())
+            model->colourMapToVTK(belowValue, aboveValue);
+        if(hsvArg.isSet())
+            model->colourMapToHSV(belowValue, aboveValue);
+        if(rainbowArg.isSet())
+            model->colourMapToRainbow(belowValue, aboveValue);
+        if(spectralArg.isSet())
+            model->colourMapToSpectral(belowValue, aboveValue);
+        if(nihArg.isSet())
+            model->colourMapToNIH(belowValue, aboveValue);
+        if(fireArg.isSet())
+            model->colourMapToNIH_Fire(belowValue, aboveValue);
+        if(aalArg.isSet())
+            model->colourMapToAAL(belowValue, aboveValue);
+        if(hotArg.isSet())
+            model->colourMapToHOT(belowValue, aboveValue);
 
         ///Get Colour
         double colour[3];
@@ -329,6 +343,24 @@ else
 
         model->AddActor(mdl->GetActor());
         isoSurfaces.push_back(mdl); //prevent deletion
+    }
+    
+    if(saveArg.isSet())
+    {
+        QSharedPointer<milxQtModel> labelMesh(new milxQtModel);
+        for(size_t j = 0; j < isoSurfaces.size(); j ++)
+        {
+            vtkSmartPointer<vtkPolyData> labelPolyData = vtkSmartPointer<vtkPolyData>::New();
+            labelPolyData->DeepCopy(isoSurfaces[j].data()->GetOutput());
+            vtkSmartPointer<vtkFloatArray> labelValueArray = vtkSmartPointer<vtkFloatArray>::New();
+            labelValueArray->SetNumberOfComponents(1);
+            labelValueArray->SetNumberOfTuples(labelPolyData->GetNumberOfPoints());
+            labelValueArray->FillComponent(0, values[j]);
+            labelPolyData->GetPointData()->SetScalars(labelValueArray);
+            labelMesh->AddInput(labelPolyData);
+        }
+        labelMesh->generateModel();
+        milx::File::SaveModel(fileName, labelMesh.data()->GetOutput());
     }
 }
     cout << ">> Overlay: Generating Scene" << endl;

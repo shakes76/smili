@@ -2597,7 +2597,7 @@ itk::SmartPointer<TImage> Image<TImage>::MaskImage(itk::SmartPointer<TImage> img
   typename MaskFilterType::Pointer maskFilter = MaskFilterType::New();
   maskFilter->SetInput(img);
   maskFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-#if ITK_MAJOR_VERSION > 3
+#if ITK_VERSION_MAJOR > 3
   maskFilter->SetCoordinateTolerance(CoordinateTolerance);
   maskFilter->SetDirectionTolerance(DirectionTolerance);
   maskFilter->SetMaskImage(maskImg);

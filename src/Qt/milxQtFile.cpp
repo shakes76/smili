@@ -76,7 +76,7 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
 {
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
-    bool integerFormat = false, vtkFormat = false, medical = true;
+    bool charFormat = false, integerFormat = false, vtkFormat = false, medical = true;
     int bounds[6];
 
     const QString charStr = "unsigned char";
@@ -84,14 +84,16 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
 
     if(extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp")
     {
-        integerFormat = true;
+        charFormat = true;
         medical = false;
     }
     else if(typeStr == charStr)
     {
-        integerFormat = true;
+        charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
     }
+    if(typeStr == "unsigned" || typeStr == "unsigned_short" || typeStr == "short" || typeStr == "unsigned short" || typeStr == "unsigned_int" || typeStr == "unsigned int" || typeStr == "int") //16-bit or 32-bit integers
+        integerFormat = true;
     else if(extension == "vti")
     {
         vtkFormat = true;
@@ -103,7 +105,7 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
     vtkSmartPointer<vtkImageFlip> imageReorient = vtkSmartPointer<vtkImageFlip>::New();
     vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
 
-    if(integerFormat)
+    if(charFormat)
     {
         if(!medical)
         {
@@ -155,6 +157,20 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
             return false;
         }
     }
+    else if(integerFormat)
+    {
+      intImageType::Pointer intImg = milx::File::ReadImageUsingITK<intImageType>(filename.toStdString());
+
+      if(!intImg)
+        return false;
+
+      ///Export to VTK and flip
+#if VTK_MAJOR_VERSION <=5
+      imageReorient->SetInput(milx::Image<intImageType>::ConvertITKImageToVTKImage(intImg));
+#else
+      imageReorient->SetInputData(milx::Image<intImageType>::ConvertITKImageToVTKImage(intImg));
+#endif // VTK_MAJOR_VERSION
+    }
     else
     {
         floatImageType::Pointer floatImg = milx::File::ReadImageUsingITK<floatImageType>(filename.toStdString());
@@ -194,7 +210,7 @@ QString milxQtFile::supportedImageFormats()
   return exts;
 }
 
-bool milxQtFile::isIntegerFormat(const QString filename, bool &errorEncountered)
+bool milxQtFile::is8BitFormat(const QString filename, bool &errorEncountered)
 {
   std::string pixelType, componentType;
   errorEncountered = false;
@@ -211,6 +227,27 @@ bool milxQtFile::isIntegerFormat(const QString filename, bool &errorEncountered)
 
   if(componentType == "unsigned_char")
       return true;
+
+  return false;
+}
+
+bool milxQtFile::is32BitFormat(const QString filename, bool &errorEncountered)
+{
+  std::string pixelType, componentType;
+  errorEncountered = false;
+
+  //Check type of medical image
+  if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
+  {
+    cerr << "Failed reading header of image. File may not be an image. Exiting" << endl;
+    errorEncountered = true;
+    return false;
+  }
+  dataPixelType = pixelType.c_str();
+  dataComponentType = componentType.c_str();
+
+  if(componentType == "unsigned" || componentType == "unsigned_short" || componentType == "short" || componentType == "unsigned short" || componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "int")
+    return true;
 
   return false;
 }
@@ -240,7 +277,7 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 {
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
-    bool integerFormat = false, vtkFormat = false, deformField = false, rgbImage = false, pnmImage = false;
+    bool charFormat = false, integerFormat = false, vtkFormat = false, deformField = false, rgbImage = false, pnmImage = false;
 
     if(extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp")
     {
@@ -273,9 +310,9 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
         dataComponentType = componentType.c_str();
 
         if(componentType == "unsigned_char" && pixelType == "scalar")
+            charFormat = true;
+        if(componentType == "unsigned" || componentType == "unsigned_short" || componentType == "short" || componentType == "unsigned short" || componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "int") //16-bit or 32-bit integers
             integerFormat = true;
-        if(componentType == "unsigned_short") //PNG etc. maybe 16-bit integers
-            integerFormat = false;
         if(pixelType == "vector")
             deformField = true;
         if( (pixelType == "rgb" || pixelType == "rgba") && componentType == "unsigned_char" )
@@ -286,7 +323,7 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
 //    cerr << "Open Image" << endl;
     vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
-    if(integerFormat)
+    if(charFormat)
     {
         charImageType::Pointer charImg;
 
@@ -294,6 +331,15 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
             return false;
 
         data->SetInput(charImg, true);
+    }
+    if(integerFormat)
+    {
+      intImageType::Pointer intImg;
+
+      if(!milx::File::OpenImage<intImageType>(filename.toStdString(), intImg))
+        return false;
+
+      data->SetInput(intImg, true);
     }
     else if(vtkFormat)
     {
@@ -463,9 +509,9 @@ bool milxQtFile::openImageSeries(milxQtImage* data, QString directoryPath)
   std::string seriesID = "";
   std::string acqID = "";
   std::string instanceID = "";
-  floatImageType::Pointer floatImg;
-  milx::File::OpenDICOMSeries<floatImageType>(directoryPath.toStdString(), floatImg, seriesName, caseID, echoID, seriesID, acqID, instanceID);
-  data->SetInput(floatImg, false);
+  intImageType::Pointer intImg;
+  milx::File::OpenDICOMSeries<intImageType>(directoryPath.toStdString(), intImg, seriesName, caseID, echoID, seriesID, acqID, instanceID);
+  data->SetInput(intImg, false);
   data->setName(seriesName.c_str());
   cout << "Completed Reading Series: " << seriesName << endl;
 
@@ -480,7 +526,7 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
 {
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
-    bool integerFormat = false, medical = true, vtkFormat = false, success = false;
+    bool charFormat = false, integerFormat = false, medical = true, vtkFormat = false, success = false;
     int bounds[6];
 
     const QString charStr = "unsigned char";
@@ -488,13 +534,17 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
 
     if(extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp")
     {
-        integerFormat = true;
+        charFormat = true;
         medical = false;
     }
     else if(typeStr == charStr)
     {
-        integerFormat = true;
+        charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
+    }
+    else if(typeStr == "unsigned" || typeStr == "unsigned_short" || typeStr == "short" || typeStr == "unsigned short" || typeStr == "unsigned_int" || typeStr == "unsigned int" || typeStr == "int")
+    {
+        integerFormat = true;
     }
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float, 3>::New() );
@@ -517,7 +567,7 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
         linkProgressEventOf(imageReorient);
         imageReorient->Update();
 
-    if(integerFormat)
+    if(charFormat)
     {
         if(!medical)
         {
@@ -561,12 +611,19 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
             else
                 success = true;
     }
-    else
+    else if(integerFormat)
     {
         ///Export to ITK
-        floatImageType::Pointer floatImg = milx::Image<floatImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
+        intImageType::Pointer intImg = milx::Image<intImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
 
-        success = milx::File::WriteImageUsingITK<floatImageType>(filename.toStdString(), floatImg);
+        success = milx::File::WriteImageUsingITK<intImageType>(filename.toStdString(), intImg);
+    }
+    else
+    {
+      ///Export to ITK
+      floatImageType::Pointer floatImg = milx::Image<floatImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
+
+      success = milx::File::WriteImageUsingITK<floatImageType>(filename.toStdString(), floatImg);
     }
 
     return success;
@@ -576,17 +633,21 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
 {
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
-    bool integerFormat = false, medical = true, rgbFormat = false, vtkFormat = false, success = false;
+    bool charFormat = false, integerFormat = false, medical = true, rgbFormat = false, vtkFormat = false, success = false;
 
     if(extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp")
     {
-        integerFormat = true;
+        charFormat = true;
         medical = false;
     }
     else if(data->is8BitImage())
     {
-        integerFormat = true;
+        charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char,3>::New() );
+    }
+    else if(data->is32BitImage())
+    {
+        integerFormat = true;
     }
     else if(data->isRGBImage())
     {
@@ -649,7 +710,7 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
             else
                 success = true;
     }
-    else if(integerFormat)
+    else if(charFormat)
     {
         if(!medical)
         {
@@ -661,6 +722,10 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
         }
 
         success = milx::File::WriteImageUsingITK<charImageType>(filename.toStdString(), data->GetCharImage());
+    }
+    else if(integerFormat)
+    {
+        success = milx::File::WriteImageUsingITK<intImageType>(filename.toStdString(), data->GetIntImage());
     }
     else if(rgbFormat)
     {

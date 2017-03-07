@@ -46,7 +46,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     maxProcessors = milx::NumberOfProcessors();
     if(maxProcessors > 1)
       maxProcessors = milx::NumberOfProcessors()/2;
-    magnifyFactor = 2;
+    magnifyFactor = 1;
     timestamping = true;
     interpolationImages = true;
     orientationImages = true;

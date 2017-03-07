@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
   SwitchArg instanceArg("", "instance", "Add Instance ID to filename if found.", false);
   SwitchArg echoArg("", "echo", "Add Echo ID to filename if found.", false);
   SwitchArg acquisitionArg("", "acquisition", "Add Acquisition ID to filename if found.", true);
+  SwitchArg nocaseIDArg("", "nocase", "Ignore case ID in filename etc.", false);
 
   ///Mandatory
   UnlabeledMultiArg<std::string> multinames("series", "DICOM Image series to operate on", true, "Series");
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
   cmd.add( instanceArg );
   cmd.add( echoArg );
   cmd.add( acquisitionArg );
+  cmd.add( nocaseIDArg );
   ///XOR args
   std::vector<Arg*> xorlist;
   xorlist.push_back(&infoArg);
@@ -322,6 +324,8 @@ int main(int argc, char *argv[])
 
       //Create directories
       std::string path = caseID + "/" + *name;
+      if(nocaseIDArg.isSet())
+        path = *name;
       if(!echoID.empty())
         path += "_" + echoID;
       if (prefixArg.isSet())
@@ -331,6 +335,8 @@ int main(int argc, char *argv[])
 
       //create filename if needed
       std::string filename = path + "/" + caseID + "_" + *name;
+      if(nocaseIDArg.isSet())
+        filename = path + "/" + *name;
       if(!echoID.empty() && echoArg.isSet())
         filename += "_" + echoID;
       if(!acqID.empty() && acquisitionArg.isSet())

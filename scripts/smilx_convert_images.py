@@ -17,40 +17,35 @@
   limitations under the License.
 ========================================================================='''
 '''
-This script opens a model one at a time from the path provided and processes it. The processing is
+This script opens a model one at a time from the path provided and processes it. The processing is 
 Clean, Smooth, Decimate by 25%, Smooth, Decimate by 25%, Smooth.
 The resulting model is then saved to disk with naming convention provided.
 '''
+import os
+
 # Load the joints and mydata module into smilx first
 execfile("filenames.py")
- 
-meshPath = "/home/cha588/data/parameterisations/pluim_surf/"
- 
-outputPath = "/home/cha588/data/parameterisations/pluim_surf_ldc/"
-outputExt = ".vtk"
-outputPrefix = "prostate_pluim_"
- 
-dirs = os.listdir(meshPath)
-for file in dirs:
-    MainWindow.loadFile(meshPath + file) # load mean mesh
-     
-    currentModel = MainWindow.activeModel() # get the loaded mesh
-     
-    #find case id in filename and remember it
-    case = getCaseID(file, 0)
-     
-    outputName = outputPrefix + str(case) + outputExt
- 
-    #process model
-    currentModel.clean()
-    currentModel.smoothSinc(20) #windowed sinc
-    currentModel.decimate(0.25)
-    currentModel.smoothSinc(20) #windowed sinc
-    currentModel.decimate(0.25)
-    currentModel.smoothSinc(20) #windowed sinc
-     
-    milxQtFile.saveModel(outputPath+outputName, currentModel) # save result
-     
-    currentModel.close() # close (since its delete on close)
-     
+
+parent = '../'
+outputExt = "vti"
+imagePath = parent+'t2maps/'
+outputPath = parent+'t2maps_'+outputExt+'/'
+outputPrefix = ""
+prepend_full_path = True
+
+imageList, caseList = getSortedFileListAndCases(imagePath, 0, '*.vtk', prepend_full_path)
+
+for image, case in zip(imageList, caseList):
+    filename, fileExt = os.path.splitext(image)
+    if fileExt == 'gz':
+        filename, fileExt = os.path.splitext(image)
+    
+    #load mesh
+#    MainWindow.loadFile(image) # load mean mesh
+#    currentMesh = MainWindow.activeModel() # get the loaded meshs
+    
+    outputName = outputPrefix + filename + "." + outputExt
+#    milxQtFile.saveImage(outputPath+outputName, currentResult) # save result
+    
+    MainWindow.closeTabAllWindows()
 print "Processing Done"
