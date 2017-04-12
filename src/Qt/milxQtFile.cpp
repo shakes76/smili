@@ -311,11 +311,14 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
         if((componentType == "unsigned_char" && pixelType == "scalar") || (componentType == "unsigned char" && pixelType == "scalar"))
         {
-          cout << "Found 8-bit image ..." << endl;
-          charFormat = true;
+            cout << "Found 8-bit image ..." << endl;
+            charFormat = true;
         }
         else if(componentType == "unsigned" || componentType == "unsigned_short" || componentType == "short" || componentType == "unsigned short" || componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "int") //16-bit or 32-bit integers
+        {
+            cout << "Found integer-type image ..." << endl;
             integerFormat = true;
+        }
         else if(pixelType == "vector")
             deformField = true;
         else if( (pixelType == "rgb" || pixelType == "rgba") && componentType == "unsigned_char" )
