@@ -569,7 +569,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtRenderWindow> renWin = loadedPlugin->genericResult();
                 if(renWin)
                 {
-                    printInfo("Loading Generic Result");
+                    printInfo("Loading Plugin Generic Result");
                     if(renWin->getName() == "")
                         renWin->setName(filename);
                     renWin->setConsole(console);
@@ -581,7 +581,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtModel> model = loadedPlugin->modelResult();
                 if(model)
                 {
-                    printInfo("Loading Model Result");
+                    printInfo("Loading Plugin Model Result");
                     if(model->getName() == "")
                         model->setName(filename);
                     model->setConsole(console);
@@ -593,7 +593,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtImage> image = loadedPlugin->imageResult();
                 if(image)
                 {
-                    printInfo("Loading Image Result");
+                    printInfo("Loading Plugin Image Result");
                     if(image->getName() == "")
                         image->setName(filename);
                     image->setConsole(console);

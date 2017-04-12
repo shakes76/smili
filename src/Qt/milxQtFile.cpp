@@ -92,7 +92,7 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
         charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
     }
-    if(typeStr == "unsigned" || typeStr == "unsigned_short" || typeStr == "short" || typeStr == "unsigned short" || typeStr == "unsigned_int" || typeStr == "unsigned int" || typeStr == "int") //16-bit or 32-bit integers
+    else if(typeStr == "unsigned" || typeStr == "unsigned_short" || typeStr == "short" || typeStr == "unsigned short" || typeStr == "unsigned_int" || typeStr == "unsigned int" || typeStr == "int") //16-bit or 32-bit integers
         integerFormat = true;
     else if(extension == "vti")
     {
@@ -298,16 +298,16 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
     if(!vtkFormat && !pnmImage)
     {
-      cout << "Trying to read image header ..." << endl;
-      //Check type of medical image
-      std::string pixelType, componentType;
-      if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
-      {
-        cerr << "Failed reading header of image. File may not be an image. Exiting" << endl;
-        return false;
-      }
-      dataPixelType = pixelType.c_str();
-      dataComponentType = componentType.c_str();
+        cout << "Trying to read image header ..." << endl;
+        //Check type of medical image
+        std::string pixelType, componentType;
+        if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
+        {
+          cerr << "Failed reading header of image. File may not be an image. Exiting" << endl;
+          return false;
+        }
+        dataPixelType = pixelType.c_str();
+        dataComponentType = componentType.c_str();
 
         if((componentType == "unsigned_char" && pixelType == "scalar") || (componentType == "unsigned char" && pixelType == "scalar"))
         {
@@ -338,7 +338,7 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
         data->SetInput(charImg, true);
     }
-    if(integerFormat)
+    else if(integerFormat)
     {
       intImageType::Pointer intImg;
 
