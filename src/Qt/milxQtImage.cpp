@@ -138,16 +138,16 @@ void milxQtImage::setData(charImageType::Pointer newImg, const bool flipY)
 
 void milxQtImage::setData(intImageType::Pointer newImg, const bool flipY)
 {
-  imageInt = milx::Image<intImageType>::DuplicateImage(newImg);
+    imageInt = milx::Image<intImageType>::DuplicateImage(newImg);
 
-  flipped = flipY;
+    flipped = flipY;
 
-  loaded = true;
-  eightbit = false;
-  integer = true;
-  rgb = false;
-  vectorised = false;
-  usingVTKImage = false;
+    loaded = true;
+    eightbit = false;
+    integer = true;
+    rgb = false;
+    vectorised = false;
+    usingVTKImage = false;
 }
 
 void milxQtImage::setData(rgbImageType::Pointer newImg, const bool flipY)

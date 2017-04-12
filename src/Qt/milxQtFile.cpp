@@ -87,7 +87,7 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
         charFormat = true;
         medical = false;
     }
-    else if(typeStr == charStr)
+    else if(typeStr == charStr || typeStr == "unsigned_char")
     {
         charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
@@ -225,7 +225,7 @@ bool milxQtFile::is8BitFormat(const QString filename, bool &errorEncountered)
   dataPixelType = pixelType.c_str();
   dataComponentType = componentType.c_str();
 
-  if(componentType == "unsigned_char")
+  if(componentType == "unsigned_char" || componentType == "unsigned char")
       return true;
 
   return false;
@@ -298,24 +298,27 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
     if(!vtkFormat && !pnmImage)
     {
-        cerr << "Trying to read image header ..." << endl;
-        //Check type of medical image
-        std::string pixelType, componentType;
-        if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
-        {
-            cerr << "Failed reading header of image. File may not be an image. Exiting" << endl;
-            return false;
-        }
-        dataPixelType = pixelType.c_str();
-        dataComponentType = componentType.c_str();
+      cout << "Trying to read image header ..." << endl;
+      //Check type of medical image
+      std::string pixelType, componentType;
+      if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
+      {
+        cerr << "Failed reading header of image. File may not be an image. Exiting" << endl;
+        return false;
+      }
+      dataPixelType = pixelType.c_str();
+      dataComponentType = componentType.c_str();
 
-        if(componentType == "unsigned_char" && pixelType == "scalar")
-            charFormat = true;
-        if(componentType == "unsigned" || componentType == "unsigned_short" || componentType == "short" || componentType == "unsigned short" || componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "int") //16-bit or 32-bit integers
+        if((componentType == "unsigned_char" && pixelType == "scalar") || (componentType == "unsigned char" && pixelType == "scalar"))
+        {
+          cout << "Found 8-bit image ..." << endl;
+          charFormat = true;
+        }
+        else if(componentType == "unsigned" || componentType == "unsigned_short" || componentType == "short" || componentType == "unsigned short" || componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "int") //16-bit or 32-bit integers
             integerFormat = true;
-        if(pixelType == "vector")
+        else if(pixelType == "vector")
             deformField = true;
-        if( (pixelType == "rgb" || pixelType == "rgba") && componentType == "unsigned_char" )
+        else if( (pixelType == "rgb" || pixelType == "rgba") && componentType == "unsigned_char" )
             rgbImage = true;
 
         data->setActualNumberOfDimensions(dataDimensions);
@@ -537,7 +540,7 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
         charFormat = true;
         medical = false;
     }
-    else if(typeStr == charStr)
+    else if(typeStr == charStr || typeStr == "unsigned_char")
     {
         charFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
