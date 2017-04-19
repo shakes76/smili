@@ -73,7 +73,7 @@ ENDIF(MSVC)
 #--------------------------------------------------------------------------------
 #Packaging
 SET(CPACK_PACKAGE_NAME "sMILX")
-SET(CPACK_PACKAGE_VENDOR "AeHRC")
+SET(CPACK_PACKAGE_VENDOR "UQ/CSIRO")
 SET(CPACK_PACKAGE_VERSION_MAJOR "${SMILX_VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${SMILX_VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${SMILX_VERSION_PATCH}")
@@ -231,20 +231,31 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
     ENDIF(BUILD_FTL_PLUGIN)
     
     #Install ITK libraries
-    IF(ITK_VERSION_MAJOR GREATER 3)
-      FILE(GLOB itkFiles "${ITK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-    ELSE(ITK_VERSION_MAJOR GREATER 3)
-      FILE(GLOB itkFiles "${ITK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-    ENDIF(ITK_VERSION_MAJOR GREATER 3)
-    INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
+    #USING PACKAGE MANAGER VERSION - Ubuntu 16.04
+#~     IF(ITK_VERSION_MAJOR GREATER 3)
+#~       FILE(GLOB itkFiles "${ITK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+#~     ELSE(ITK_VERSION_MAJOR GREATER 3)
+#~       FILE(GLOB itkFiles "${ITK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+#~     ENDIF(ITK_VERSION_MAJOR GREATER 3)
+#~     INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
+#~     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    
+    # Install VTK files 
+    IF(VTK_MAJOR_VERSION GREATER 5)
+      FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    ELSE(VTK_MAJOR_VERSION GREATER 5)
+      FILE(GLOB vtkFiles "${VTK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    ENDIF(VTK_MAJOR_VERSION GREATER 5)
+    INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
     
     #Debian
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <Shekhar.Chandra@csiro.au>")
+    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <shakes76@users.sf.net>")
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #10.04
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libinsighttoolkit3.20, libpythonqt2.0, libfftw3-3") #12.04
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
+#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libinsighttoolkit4.9, libfftw3-3") #Ubuntu 16.04
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
 
     #RPM
@@ -255,9 +266,6 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
     SET(CPACK_RPM_PACKAGE_LICENSE "CSIRO BSD License")
     #SET(CPACK_RPM_PACKAGE_REQUIRES "libqt4, vtk, vtk-qt, libfftw3-3") #opensuse 12.3 and 13.1
     SET(CPACK_RPM_PACKAGE_REQUIRES "qt, vtk, vtk-qt, InsightToolkit, pythonqt, fftw3") #Fedora 21
-    
-    # Install VTK files 
-    #USING PACKAGE MANAGER VERSION
     
     #Install startup scripts
     install(FILES "${PROJECT_BINARY_DIR}/smilx" DESTINATION "../../bin" 

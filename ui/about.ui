@@ -59,7 +59,7 @@
     <item>
      <widget class="QLabel" name="lblAuthor">
       <property name="text">
-       <string>Chandra et al., 2013</string>
+       <string>Chandra et al., 2017</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -69,7 +69,7 @@
     <item>
      <widget class="QLabel" name="lblCentre">
       <property name="text">
-       <string>Australian e-Health Research Centre</string>
+       <string>University of Queensland, Australia</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
