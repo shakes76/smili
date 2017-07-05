@@ -990,7 +990,7 @@ itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
   typedef itk::ImageFileReader<TImage, itk::DefaultConvertPixelTraits<typename TImage::InternalPixelType> > ImageReader; //InternalPixelType != PixelType for vector images
   typename ImageReader::Pointer reader = ImageReader::New();
   reader->SetFileName(filename.c_str());
-  reader->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  reader->AddObserver(itk::ProgressEvent(), milx::ProgressUpdates);
   try
   {
     reader->Update();
@@ -1012,7 +1012,7 @@ bool File::WriteImageUsingITK(const std::string filename, itk::SmartPointer<TIma
   typename ImageWriter::Pointer writer = ImageWriter::New();
   writer->SetFileName(filename.c_str());
   writer->SetInput(data);
-  writer->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  writer->AddObserver(itk::ProgressEvent(), milx::ProgressUpdates);
   try
   {
     writer->Update();

@@ -285,6 +285,7 @@ void milxQtModel::refresh()
     #else
         modelMapper->SetInputData(model.Result());
     #endif
+        resetScalarRange();
         modelMapper->Update();
         milxQtRenderWindow::refresh();
     }

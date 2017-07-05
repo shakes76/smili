@@ -21,6 +21,7 @@
 //ITK
 #include <itkVectorImage.h>
 #include <itkImageDuplicator.h>
+#include <itkSpatialOrientationAdapter.h>
 #include <itkRescaleIntensityImageFilter.h>
 #include <itkAdaptiveHistogramEqualizationImageFilter.h>
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
@@ -439,6 +440,11 @@ public:
   \brief Returns the minimum pixel value of an image.
   */
   static double ImageMinimum(itk::SmartPointer<TImage> img);
+  /*!
+  \fn Image::ImageOrientation(itk::SmartPointer<TImage> img)
+  \brief Returns the orientation flag of an image.
+  */
+  static std::string ImageOrientation(itk::SmartPointer<TImage> img);
 
   //Filters
   /*!
@@ -2089,6 +2095,7 @@ void Image<TImage>::Information(itk::SmartPointer<TImage> img)
     }
     std::cout << " |" << std::endl;
   }
+  std::cout << "\nOrientation Flag: " << ImageOrientation(img) << std::endl;
 }
 
 template<class TImage>
@@ -2113,6 +2120,67 @@ double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
   imageCalculatorFilter->Compute();
 
   return imageCalculatorFilter->GetMinimum();
+}
+
+template<class TImage>
+std::string Image<TImage>::ImageOrientation(itk::SmartPointer<TImage> img)
+{
+  std::map<itk::SpatialOrientation::ValidCoordinateOrientationFlags, std::string> codeToString;
+
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIL] = "AIL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASL] = "ASL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAI] = "RAI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAI] = "LAI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPS] = "RPS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPS] = "LPS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIP] = "RIP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIP] = "LIP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSP] = "RSP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSP] = "LSP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIA] = "RIA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIA] = "LIA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA] = "RSA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA] = "LSA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRP] = "IRP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILP] = "ILP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRP] = "SRP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLP] = "SLP";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRA] = "IRA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILA] = "ILA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRA] = "SRA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLA] = "SLA";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPI] = "RPI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPI] = "LPI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAS] = "RAS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAS] = "LAS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRI] = "PRI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLI] = "PLI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARI] = "ARI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALI] = "ALI";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRS] = "PRS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLS] = "PLS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARS] = "ARS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALS] = "ALS";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPR] = "IPR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPR] = "SPR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAR] = "IAR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAR] = "SAR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPL] = "IPL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPL] = "SPL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAL] = "IAL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAL] = "SAL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIR] = "PIR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSR] = "PSR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIR] = "AIR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
+  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
+
+  itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
+  std::string orientFlagStr = codeToString[orientFlag];
+
+  return orientFlagStr;
 }
 
 //Filters

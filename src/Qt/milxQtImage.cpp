@@ -1523,6 +1523,17 @@ void milxQtImage::imageInformation()
         printInfo("|" + QString::number(direction(0,0)) + ", " + QString::number(direction(0,1)) + ", " + QString::number(direction(0,2)) + "|");
         printInfo("|" + QString::number(direction(1,0)) + ", " + QString::number(direction(1,1)) + ", " + QString::number(direction(1,2)) + "|");
         printInfo("|" + QString::number(direction(2,0)) + ", " + QString::number(direction(2,1)) + ", " + QString::number(direction(2,2)) + "|");
+        
+        QString orientFlagStr;
+        if(eightbit)
+          orientFlagStr = milx::Image<charImageType>::ImageOrientation(imageChar).c_str();
+        else if(integer)
+          orientFlagStr = milx::Image<intImageType>::ImageOrientation(imageInt).c_str();
+        else if(rgb)
+          orientFlagStr = milx::Image<rgbImageType>::ImageOrientation(imageRGB).c_str();
+        else
+          orientFlagStr = milx::Image<floatImageType>::ImageOrientation(imageFloat).c_str();
+        printInfo("Orientation Flag: " + orientFlagStr);
     }
 
     emit done(-1);

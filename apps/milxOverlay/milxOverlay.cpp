@@ -117,6 +117,7 @@ int main(int argc, char* argv[])
     SwitchArg wireframeArg("", "wireframe", "Display initial surface as a wireframe model.", false);
     SwitchArg wireframesArg("", "wireframes", "Display all surfaces as a wireframe models.", false);
     SwitchArg humanArg("", "nohuman", "Disable human orientation glyph.", false);
+    SwitchArg specularArg("", "nospecular", "Disable specular lighting for the rendered view.", false);
 
     ///Mandatory
     UnlabeledMultiArg<std::string> multinames("surfaces", "Surfaces to overlay", true, "Surfaces");
@@ -184,6 +185,7 @@ int main(int argc, char* argv[])
     cmd.add( wireframeArg );
     cmd.add( wireframesArg );
     cmd.add( humanArg );
+    cmd.add( specularArg );
 
     ///Parse the argv array.
     cmd.parse( argc, argv );
@@ -610,6 +612,8 @@ int main(int argc, char* argv[])
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
+    if(specularArg.isSet())
+        model->disableSpecularDisplay();
     //Zoom
     if(zoomArg.isSet())
     {
