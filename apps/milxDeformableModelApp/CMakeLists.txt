@@ -1,21 +1,26 @@
-cmake_minimum_required(VERSION 2.6)
+# CMAKE FILE FOR MILXDEFORMABLEMODELAPP
+cmake_minimum_required(VERSION 3.9)
 
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(milxDeformableModelApp)
+cmake_policy(SET CMP0020 NEW)
 
-#find libraries
+# Find libraries
 include(find)
 
 INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
-
 link_directories(${VTK_LIBRARY_DIRS} ${SMILI_BINARY_DIR}/lib)
 
 #~ ADD_DEFINITIONS(-DSMILI_DLL)
 
+#######################
+# Handle UNIX support #
+#######################
 ADD_EXECUTABLE(milxDeformableModelApp MACOSX_BUNDLE milxDeformableModelApp.cxx)
 TARGET_LINK_LIBRARIES(milxDeformableModelApp ${VTK_LIBRARIES} ${ITK_LIBRARIES} milx-SMILI)
+
 
 IF(UNIX)
   configure_file(milxDeformableModelApp.in "milxDeformableModelApp" @ONLY)
@@ -24,11 +29,16 @@ IF(UNIX)
     PERMISSIONS WORLD_READ WORLD_EXECUTE)
 ENDIF(UNIX)
 
-# expand the command line wild-cards in msvc
+##############################################
+# Expand the command line wild-cards in MSVC #
+##############################################
 IF(MSVC)
   SET_TARGET_PROPERTIES(milxDeformableModelApp PROPERTIES LINK_FLAGS "setargv.obj")
 ENDIF(MSVC)
 
+##########################
+# Install the executable #
+##########################
 INSTALL(TARGETS milxDeformableModelApp 
     BUNDLE DESTINATION . COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
