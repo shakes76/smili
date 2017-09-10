@@ -22,7 +22,8 @@
 //Qt
 #include <QApplication>
 #include <QMainWindow>
-#include <QWebView>
+#include <QWebEngineView>
+#include <QWebEnginePage>
 #include <QFile>
 #include <QToolBar>
 #include <QDebug>
@@ -30,9 +31,9 @@
 int main(int argc, char* argv[])
 {
     QApplication app(argc,argv);
-    QMainWindow Main;
+	QMainWindow Main;
     Q_INIT_RESOURCE(smili);
-    QWebView *assistantView = new QWebView(&Main);
+	QWebEngineView *assistantView = new QWebEngineView(&Main);
 
     QFile file(":/resources/index.html");
     if(file.open(QIODevice::ReadOnly))
@@ -49,10 +50,10 @@ int main(int argc, char* argv[])
 
     //Quick setup toolbar
     QToolBar *toolBar = Main.addToolBar(QObject::tr("Navigation"));
-    toolBar->addAction(assistantView->pageAction(QWebPage::Back));
-    toolBar->addAction(assistantView->pageAction(QWebPage::Forward));
-    toolBar->addAction(assistantView->pageAction(QWebPage::Reload));
-    toolBar->addAction(assistantView->pageAction(QWebPage::Stop));
+    toolBar->addAction(assistantView->pageAction(QWebEnginePage::Back));
+    toolBar->addAction(assistantView->pageAction(QWebEnginePage::Forward));
+    toolBar->addAction(assistantView->pageAction(QWebEnginePage::Reload));
+    toolBar->addAction(assistantView->pageAction(QWebEnginePage::Stop));
 
     Main.setWindowTitle("SMILI Assistant");
     Main.show();
