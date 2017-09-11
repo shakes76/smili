@@ -199,6 +199,12 @@ int main(int argc, char* argv[])
         eightBitImage = labelledImage.data();
         milx::PrintInfo("Detected labelled images.");
     }
+    else if(componentType == "int" || componentType == "unsigned int" || componentType == "unsigned short" || componentType == "short")
+    {
+        milx::PrintWarning("Integer image found and will be cast to 8-bit image for visualisation.");
+        eightBitImage = new milxQtImage(labelledImage.data());
+        eightBitImage->setData( milx::Image<intImageType>::CastImage<charImageType>(labelledImage->GetIntImage()) );
+    }
     else
     {
         milx::PrintWarning("8-bit image not found and will be cast to 8-bit image for visualisation.");
