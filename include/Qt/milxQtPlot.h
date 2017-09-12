@@ -24,6 +24,11 @@
 #include <vtkVolume.h>
 
 #include "milxQtModel.h"
+#include <QSlider>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QApplication>
 
 /**
     \class milxQtPlot

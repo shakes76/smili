@@ -68,7 +68,7 @@ milxQtDICOMPlugin::~milxQtDICOMPlugin()
 {
     if(isRunning() && threaded)
         quit();
-    cout << "DICOM Plugin Destroyed." << endl;
+    cout << "DICOM Plugin Destroyed.";// << endl;
 }
 
 QString milxQtDICOMPlugin::name()
@@ -256,7 +256,7 @@ void milxQtDICOMPlugin::viewTags()
             QStringList entryName;
             entryName << UIDs[j].c_str() << ""; //!< Case Browser
 
-            //cout << "Loading tags into browser." << endl;
+            //cout << "Loading tags into browser.";// << endl;
             QList<QStringList> entryList;
             for(int k = 0; k < tags.size(); k ++)
             {
@@ -324,7 +324,7 @@ void milxQtDICOMPlugin::openSeries()
     QStringList entryName;
     entryName << UIDs[j].c_str() << ""; //!< Case Browser
 
-    //cout << "Loading tags into browser." << endl;
+    //cout << "Loading tags into browser.";// << endl;
     QList<QStringList> entryList;
     for (int k = 0; k < tags.size(); k++)
     {
@@ -355,7 +355,7 @@ void milxQtDICOMPlugin::openSeries()
 
 void milxQtDICOMPlugin::openStructureSet()
 {
-    cout << "Opening DICOM-RT" << endl;
+    cout << "Opening DICOM-RT";// << endl;
     //use wizaed to ask
     wizardRT.restart();
 
@@ -403,7 +403,7 @@ void milxQtDICOMPlugin::openStructureSet()
 
 void milxQtDICOMPlugin::convert()
 {
-    cout << "Converting DICOMs" << endl;
+    cout << "Converting DICOMs";// << endl;
     //use wizaed to ask
     wizard.restart();
 
@@ -610,7 +610,7 @@ void milxQtDICOMPlugin::convert()
 
 void milxQtDICOMPlugin::anonymize()
 {
-  cout << "Anonymizing DICOMs" << endl;
+  cout << "Anonymizing DICOMs";// << endl;
   typedef itk::GDCMSeriesFileNames      NamesGeneratorType;
   typedef std::vector< std::string >    FileNamesContainer;
   typedef std::vector< std::string >    SeriesIdContainer;
@@ -846,31 +846,31 @@ void milxQtDICOMPlugin::createActions()
 {
     actionOpenSeries = new QAction(MainWindow);
     actionOpenSeries->setIcon(QIcon(":/resources/toolbar/open_series.png"));
-    actionOpenSeries->setText(QApplication::translate("MainWindow", "Open Series", 0, QApplication::UnicodeUTF8));
+    actionOpenSeries->setText(QApplication::translate("MainWindow", "Open Series", 0));
     actionOpenSeries->setShortcut(tr("Ctrl+Alt+o"));
     actionTags = new QAction(MainWindow);
     actionTags->setIcon(QIcon(":/resources/toolbar/search.png"));
-    actionTags->setText(QApplication::translate("MainWindow", "View Tags", 0, QApplication::UnicodeUTF8));
+    actionTags->setText(QApplication::translate("MainWindow", "View Tags", 0));
     actionTags->setShortcut(tr("Ctrl+Alt+t"));
     actionConvertStructure = new QAction(MainWindow);
-    actionConvertStructure->setText(QApplication::translate("DICOMPlugin", "Convert RT/Structure Set ...", 0, QApplication::UnicodeUTF8));
+    actionConvertStructure->setText(QApplication::translate("DICOMPlugin", "Convert RT/Structure Set ...", 0));
     actionConvertStructure->setShortcut(tr("Ctrl+Alt+s"));
     actionConvertStructure->setDisabled(true);
 #if (ITK_VERSION_MAJOR > 3) //Review only members
     actionConvertStructure->setDisabled(false);
 #endif // (ITK_VERSION_MAJOR > 3)
     actionConvert = new QAction(MainWindow);
-    actionConvert->setText(QApplication::translate("DICOMPlugin", "Convert ...", 0, QApplication::UnicodeUTF8));
+    actionConvert->setText(QApplication::translate("DICOMPlugin", "Convert ...", 0));
     actionConvert->setShortcut(tr("Ctrl+Alt+c"));
     actionAnonymize = new QAction(MainWindow);
-    actionAnonymize->setText(QApplication::translate("DICOMPlugin", "Anonymize ...", 0, QApplication::UnicodeUTF8));
+    actionAnonymize->setText(QApplication::translate("DICOMPlugin", "Anonymize ...", 0));
     actionAnonymize->setShortcut(tr("Ctrl+Alt+a"));
 }
 
 void milxQtDICOMPlugin::createMenu()
 {
     menuDICOM = new QMenu(MainWindow);
-    menuDICOM->setTitle(QApplication::translate("DICOMPlugin", "DICOM", 0, QApplication::UnicodeUTF8));
+    menuDICOM->setTitle(QApplication::translate("DICOMPlugin", "DICOM", 0));
     menuDICOM->addAction(actionOpenSeries);
     menuDICOM->addAction(actionTags);
     menuDICOM->addAction(actionConvertStructure);
@@ -1683,6 +1683,3 @@ void milxQtDICOMPlugin::affectValues()
     else
         outputInitID = 1;
 }
-
-Q_EXPORT_PLUGIN2(DICOMPlugin, milxQtDICOMPluginFactory);
-

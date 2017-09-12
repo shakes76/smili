@@ -19,6 +19,7 @@
 #define MILXQTMODEL_H
 
 #include "milxQtRenderWindow.h"
+#include <QFormLayout>
 
 #include <vtkPoints.h>
 #include <vtkCellArray.h>

@@ -27,6 +27,7 @@
 #include <vtkPolyDataNormals.h>
 #include <vtkAxis.h>
 #include <vtkTextProperty.h>
+
 //Volume Rendering
 #include <vtkColorTransferFunction.h>
 #include <vtkPiecewiseFunction.h>
@@ -71,7 +72,7 @@ milxQtPlot::~milxQtPlot()
 
 void milxQtPlot::createMenu(QMenu *menu)
 {
-    cout << "Creating Plot Menu 1" << endl;
+    cout << "Creating Plot Menu 1";// << endl;
     if(!menu)
         return;
 
@@ -79,7 +80,7 @@ void milxQtPlot::createMenu(QMenu *menu)
     if(plotTypeSurface || plotType3D)
         menu->addMenu(milxQtModel::basicContextMenu()); ///Have all the basic model options
 
-    cout << "Creating Plot Menu 2" << endl;
+    cout << "Creating Plot Menu 2";// << endl;
     if(plotTypeVolume)
     {
       foreach(QAction *currAct, actionsToAdd)
@@ -91,7 +92,7 @@ void milxQtPlot::createMenu(QMenu *menu)
           menu->addMenu(currMenu);
       }
     }
-    menu->addSeparator()->setText(tr("Plotting"));
+    menu->addSeparator->setText(tr("Plotting"));
     menu->addAction(xAxisName);
     if(plotType2D)
     {
@@ -169,7 +170,7 @@ void milxQtPlot::generatePlot()
 
     if(table->GetNumberOfColumns() == 1) //bar chart
     {
-        cerr << "One column is not supported yet." << endl;
+        cerr << "One column is not supported yet.";// << endl;
     }
     else if(table->GetNumberOfColumns() == 2) //2D scatter
     {
@@ -912,23 +913,23 @@ void milxQtPlot::createActions()
 {
     //axes
     xAxisName = new QAction(this);
-    xAxisName->setText(QApplication::translate("Plot", "Rename &Axes", 0, QApplication::UnicodeUTF8));
+    xAxisName->setText(QApplication::translate("Plot", "Rename &Axes", 0));
     xAxisName->setShortcut(tr("Alt+x"));
     titleName = new QAction(this);
-    titleName->setText(QApplication::translate("Plot", "Rename &Title", 0, QApplication::UnicodeUTF8));
+    titleName->setText(QApplication::translate("Plot", "Rename &Title", 0));
     titleName->setShortcut(tr("Alt+t"));
     legendAct = new QAction(this);
-    legendAct->setText(QApplication::translate("Plot", "Legend", 0, QApplication::UnicodeUTF8));
+    legendAct->setText(QApplication::translate("Plot", "Legend", 0));
     legendAct->setShortcut(tr("Alt+l"));
     legendAct->setCheckable(true);
     legendAct->setChecked(true);
     pointsAct = new QAction(this);
-    pointsAct->setText(QApplication::translate("Plot", "Show Points", 0, QApplication::UnicodeUTF8));
+    pointsAct->setText(QApplication::translate("Plot", "Show Points", 0));
     pointsAct->setShortcut(tr("Shift+Alt+l"));
     pointsAct->setCheckable(true);
     pointsAct->setChecked(true);
     logScaleAct = new QAction(this);
-    logScaleAct->setText(QApplication::translate("Plot", "Log Scale", 0, QApplication::UnicodeUTF8));
+    logScaleAct->setText(QApplication::translate("Plot", "Log Scale", 0));
     logScaleAct->setShortcut(tr("Alt+s"));
     logScaleAct->setCheckable(true);
     logScaleAct->setChecked(false);
@@ -950,7 +951,7 @@ void milxQtPlot::createConnections()
 void milxQtPlot::contextMenuEvent(QContextMenuEvent *currentEvent)
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Plotting", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(QApplication::translate("MainWindow", "Plotting", 0));
 
     createMenu(contextMenu);
 

@@ -21,6 +21,7 @@
 */
 //Qt
 #include <QApplication>
+#include <QSplashScreen>
 
 #include "milxQtMain.h"
 

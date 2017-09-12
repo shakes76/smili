@@ -58,7 +58,7 @@ void milxQtPreferencesForm::setupPages()
         humanCheckBox->setChecked(MainWindow->isHumanGlyphPreferred());
     ///Window size (text)
     QLabel *windowSizeLabel = new QLabel(tr("Preferred Window Size:"));
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    QSize desktopSize = qApp->desktop->availableGeometry().size();
     windowSizeEdit = new QSpinBox;
         windowSizeEdit->setMinimum(minWindowSize);
         windowSizeEdit->setMaximum(milx::Maximum<int>(desktopSize.width(), desktopSize.height()));

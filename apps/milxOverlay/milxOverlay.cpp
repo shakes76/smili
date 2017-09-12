@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << endl;
+            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument.";// << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
     {
         if(!imageArg.isSet())
         {
-            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << endl;
+            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument.";// << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
     {
         if(!isoArg.isSet())
         {
-            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << endl;
+            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument.";// << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -253,12 +253,12 @@ int main(int argc, char* argv[])
     bool success = false;
 
     //Read model
-    cout << ">> Overlay: Reading Models" << endl;
+    cout << ">> Overlay: Reading Models";// << endl;
     vtkSmartPointer<vtkPolyDataCollection> collection;
     success = milx::File::OpenModelCollection(filenames, collection);
     if(!success) //Error printed inside
     {
-        cerr << "Error reading models!" << endl;
+        cerr << "Error reading models!";// << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
 
     if(n < 1)
     {
-        cerr << "At least one model must be provided!" << endl;
+        cerr << "At least one model must be provided!";// << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -351,7 +351,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(vectorsName.c_str(), modelVectors.data());
       if(success)
       {
-          cout << ">> Applying Vectors" << endl;
+          cout << ">> Applying Vectors";// << endl;
           modelVectors->setName(vectorsName.c_str());
           modelVectors->generateModel();
           modelVectors->generateVectorField();
@@ -368,7 +368,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(scalarMaskName.c_str(), modelMask.data());
       if(success)
       {
-          cout << ">> Overlay: Applying Mask" << endl;
+          cout << ">> Overlay: Applying Mask";// << endl;
           modelMask->setName(scalarMaskName.c_str());
           modelMask->generateModel();
 
@@ -385,7 +385,7 @@ int main(int argc, char* argv[])
 
           if(model->GetNumberOfPoints() == 0)
           {
-              cerr << "Error using scalar mask. Model no longer has any points!" << endl;
+              cerr << "Error using scalar mask. Model no longer has any points!";// << endl;
               exit(EXIT_FAILURE);
           }
       }
@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtImage> imgIso(new milxQtImage);  //smart deletion
     if(isoArg.isSet())
     {
-        cout << ">> Overlay: Applying Isosurface" << endl;
+        cout << ">> Overlay: Applying Isosurface";// << endl;
         success = reader->openImage(isoName.c_str(), imgIso.data());
             imgIso->setName(isoName.c_str());
             imgIso->generateImage();
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
 
     if(errorReading)
     {
-        cerr << "Error Reading one or more of the input files. Exiting." << endl;
+        cerr << "Error Reading one or more of the input files. Exiting.";// << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -432,7 +432,7 @@ int main(int argc, char* argv[])
         transform2->PostMultiply();
     if(imageArg.isSet())
     {
-        cout << ">> Overlay: Reading Image" << endl;
+        cout << ">> Overlay: Reading Image";// << endl;
         errorReading = false;
         success = reader->openImage(imageName.c_str(), img.data());
 
@@ -492,7 +492,7 @@ int main(int argc, char* argv[])
 
         if(errorReading)
         {
-            cerr << "Error Reading the image file. Exiting." << endl;
+            cerr << "Error Reading the image file. Exiting.";// << endl;
             exit(EXIT_FAILURE);
         }
 
@@ -502,7 +502,7 @@ int main(int argc, char* argv[])
         orientTransform->Invert();
         transform2->Concatenate(orientTransform);
 //        transform2->Concatenate(transform->GetMatrix());
-        cout << ">> Overlay: Transforming Actors" << endl;
+        cout << ">> Overlay: Transforming Actors";// << endl;
     }
 
     ///Display
@@ -532,7 +532,7 @@ int main(int argc, char* argv[])
     }
 
     //Colour maps
-    cout << ">>> Overlay: Setting Colourmap" << endl;
+    cout << ">>> Overlay: Setting Colourmap";// << endl;
     if(jetArg.isSet())
         model->colourMapToJet();
     if(vtkArg.isSet())
@@ -621,7 +621,7 @@ int main(int argc, char* argv[])
       camera->Zoom(zoomFactor);
     }
 
-    cout << ">> Overlay: Rendering" << endl;
+    cout << ">> Overlay: Rendering";// << endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -639,7 +639,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
     model->GetRenderWindow()->Render();
     writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
-    cout << ">> Complete" << endl;
+    cout << ">> Complete";// << endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
     if(!onscreenArg.isSet())

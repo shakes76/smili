@@ -20,6 +20,11 @@
 
 #include <QFile>
 #include <QPointer>
+#include <QLabel>
+#include <QComboBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+
 //VTK
 #include <vtkSmartPointer.h>
 #include <vtkPolyData.h>

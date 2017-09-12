@@ -21,9 +21,20 @@
 #include <QPointer>
 #include <QMainWindow>
 #include <QTabWidget>
-#include <QWorkspace>
+#include <QMdiArea>
 #include <QList>
-#include <QWebView>
+#include <QSlider>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QWebEngineView>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QCheckBox>
+#include <QMenuBar>
+#include <QSignalMapper>
+#include <QApplication>
+#include <QPluginLoader>
+
 //VTK
 #include <vtkEventQtSlotConnect.h>
 //Displays
@@ -276,7 +287,7 @@ public slots:
         \fn milxQtMain::activeWebView()
         \brief Returns the QWebView object, returns 0 if active window is not a QWebView object
     */
-    QWebView* activeWebView();
+    QWebEngineView* activeWebView();
     /*!
         \fn milxQtMain::setActiveWindow(QWidget *window)
         \brief Makes the window the active window.
@@ -418,7 +429,7 @@ public slots:
     */
     inline void closeTabActiveWindow()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->closeActiveWindow();
+		qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeActiveSubWindow();
     }
     /*!
         \fn milxQtMain::closeTabAllWindows()
@@ -426,7 +437,7 @@ public slots:
     */
     inline void closeTabAllWindows()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->closeAllWindows();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeAllSubWindows();
     }
     /*!
         \fn milxQtMain::cascadeTab()
@@ -434,7 +445,7 @@ public slots:
     */
     inline void cascadeTab()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->cascade();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->cascadeSubWindows();
     }
     /*!
         \fn milxQtMain::tileTab()
@@ -442,7 +453,7 @@ public slots:
     */
     inline void tileTab()
     {
-        qobject_cast<QWorkspace *>(workspaces->currentWidget())->tile();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->tileSubWindows();
     }
     /*!
         \fn milxQtMain::tileTabVertically()
@@ -592,9 +603,9 @@ public slots:
         \fn milxQtMain::getListOfWindows()
         \brief Get a list of widgets/windows that are in the current tab
     */
-    inline QWidgetList getListOfWindows()
+    inline QList<QMdiSubWindow *> getListOfWindows()
     {
-        return qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList();
+        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
     }
     /**
         \fn milxQtMain::getNumberOfWindows()
@@ -602,7 +613,7 @@ public slots:
     */
     inline int getNumberOfWindows()
     {
-        return qobject_cast<QWorkspace *>(workspaces->currentWidget())->windowList().size();
+        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList().size();
     }
     /**
         \fn milxQtMain::getNumberOfImageWindows()
@@ -1012,7 +1023,7 @@ protected:
     QPushButton* cursorButton; //!< crosshairs button
 
     //Workspaces (hierarchical deletion)
-    QTabWidget* workspaces; //!< Pointer to the Workspace environment for the user.
+    QTabWidget *workspaces; //!< Pointer to the Workspace environment for the user.
     QSignalMapper *windowMapper; //!< Mapper of mulit-connections
     //Plugins (Smart Pointer deletion)
     QList< QPointer<milxQtPluginInterface> > plugins; //!< List of plugins loaded succesfully.

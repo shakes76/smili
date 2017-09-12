@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << endl;
+            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument.";// << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
 
 if(volumeArg.isSet())
 {
-    cout << ">> Overlay: Volume Rendering" << endl;
+    cout << ">> Overlay: Volume Rendering";// << endl;
 //    float minVolumeValue = numeric_limits<float>::max();
 //    float maxVolumeValue = numeric_limits<float>::min();
     std::vector<float> colourValuesAsFloat, opacityValuesAsFloat;
@@ -286,7 +286,7 @@ if(volumeArg.isSet())
 }
 else
 {
-    cout << ">> Overlay: Isosurfacing" << endl;
+    cout << ">> Overlay: Isosurfacing";// << endl;
     const float linearScale = (aboveValue-belowValue)/N;
     for(size_t j = 0; j < values.size(); j ++)
     {
@@ -363,7 +363,7 @@ else
         milx::File::SaveModel(fileName, labelMesh.data()->GetOutput());
     }
 }
-    cout << ">> Overlay: Generating Scene" << endl;
+    cout << ">> Overlay: Generating Scene";// << endl;
     model->generateRender();
 
     ///Overlay surface if requested
@@ -377,7 +377,7 @@ else
             exit(EXIT_FAILURE);
         }
 
-        cout << ">> Overlaying surface" << endl;
+        cout << ">> Overlaying surface";// << endl;
         surface->setName(surfaceName.c_str());
         surface->generateModel();
         if(wireframeArg.isSet())
@@ -411,7 +411,7 @@ else
         vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
         camera->Zoom(zoomFactor);
     }
-    cout << ">> Overlay: Rendering" << endl;
+    cout << ">> Overlay: Rendering";// << endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -420,7 +420,7 @@ else
     //Update view
     model->GetRenderWindow()->Render();
     qApp->processEvents();
-    cout << ">> Complete" << endl;
+    cout << ">> Complete";// << endl;
         
     if(!onscreenArg.isSet())
     {

@@ -18,11 +18,17 @@
 #ifndef MILXQTSUBWINDOW_H
 #define MILXQTSUBWINDOW_H
 
-#include <QtGui/QtGui>
+#include <QInputDialog>
+#include <QMenu>
+#include <QCloseEvent>
+#include <QApplication>
+#include <QFileInfo>
+
 //VTK Headers
 #include <QVTKWidget.h>
 #include <vtkSmartPointer.h>
 #include <vtkPointPicker.h>
+
 //milxQt Specific
 #include "milxQtAliases.h"
 #include "milxQtConsole.h"

@@ -1017,12 +1017,12 @@ void milxQtModel::undoProcessing()
 
     if(!undidProcess)
     {
-        doAct->setText(QApplication::translate("Model", "&Redo Last Processing", 0, QApplication::UnicodeUTF8));
+        doAct->setText(QApplication::translate("Model", "&Redo Last Processing", 0));
         undidProcess = true;
     }
     else
     {
-        doAct->setText(QApplication::translate("Model", "&Undo Last Processing", 0, QApplication::UnicodeUTF8));
+        doAct->setText(QApplication::translate("Model", "&Undo Last Processing", 0));
         undidProcess = false;
     }
 
@@ -1540,8 +1540,8 @@ void milxQtModel::modelInfo()
     if(!loaded)
         return;
 
-    cout << "Centroid: " << centroid() << " with Size: " << centroidSize() << endl;
-    cout << "Covariance Matrix: " << endl << covarianceMatrix() << endl;
+    cout << "Centroid: " << centroid() << " with Size: " << centroidSize();// << endl;
+    cout << "Covariance Matrix: " << endl << covarianceMatrix();// << endl;
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPoints()) + " points.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPolys()) + " polygons.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfLines()) + " lines.");
@@ -2595,144 +2595,144 @@ void milxQtModel::createActions()
 {
     //Generate
     generateMenu = new QMenu(this);
-    generateMenu->setTitle(QApplication::translate("Model", "Generate", 0, QApplication::UnicodeUTF8));
+    generateMenu->setTitle(QApplication::translate("Model", "Generate", 0));
     genModelAct = new QAction(this);
-    genModelAct->setText(QApplication::translate("Model", "Model", 0, QApplication::UnicodeUTF8));
+    genModelAct->setText(QApplication::translate("Model", "Model", 0));
     genModelAct->setShortcut(tr("Shift+Alt+m"));
     genVerticesAct = new QAction(this);
-    genVerticesAct->setText(QApplication::translate("Model", "Vertices (Vertex Glyphs)", 0, QApplication::UnicodeUTF8));
+    genVerticesAct->setText(QApplication::translate("Model", "Vertices (Vertex Glyphs)", 0));
     genVerticesAct->setShortcut(tr("Shift+Alt+v"));
     genNormalsAct = new QAction(this);
-    genNormalsAct->setText(QApplication::translate("Model", "Normals", 0, QApplication::UnicodeUTF8));
+    genNormalsAct->setText(QApplication::translate("Model", "Normals", 0));
     genNormalsAct->setShortcut(tr("Shift+Alt+n"));
     genVectorsAct = new QAction(this);
-    genVectorsAct->setText(QApplication::translate("Model", "Vector Field", 0, QApplication::UnicodeUTF8));
+    genVectorsAct->setText(QApplication::translate("Model", "Vector Field", 0));
     genVectorsAct->setShortcut(tr("Shift+Alt+v"));
     genTensorsAct = new QAction(this);
-    genTensorsAct->setText(QApplication::translate("Model", "Tensor Field", 0, QApplication::UnicodeUTF8));
+    genTensorsAct->setText(QApplication::translate("Model", "Tensor Field", 0));
     genTensorsAct->setShortcut(tr("Shift+Alt+t"));
     genHedgehogAct = new QAction(this);
-    genHedgehogAct->setText(QApplication::translate("Model", "Hedgehog Field", 0, QApplication::UnicodeUTF8));
+    genHedgehogAct->setText(QApplication::translate("Model", "Hedgehog Field", 0));
     genHedgehogAct->setShortcut(tr("Shift+Alt+h"));
     genDelaunayAct = new QAction(this);
-    genDelaunayAct->setText(QApplication::translate("Model", "Delaunay Graph", 0, QApplication::UnicodeUTF8));
+    genDelaunayAct->setText(QApplication::translate("Model", "Delaunay Graph", 0));
     genDelaunayAct->setShortcut(tr("Shift+Alt+g"));
     genDelaunayTri2DAct = new QAction(this);
-    genDelaunayTri2DAct->setText(QApplication::translate("Model", "Delaunay 2D Triangulation", 0, QApplication::UnicodeUTF8));
+    genDelaunayTri2DAct->setText(QApplication::translate("Model", "Delaunay 2D Triangulation", 0));
     genDelaunayTri2DAct->setShortcut(tr("Shift+Ctrl+t"));
     genDelaunayTriAct = new QAction(this);
-    genDelaunayTriAct->setText(QApplication::translate("Model", "Delaunay Triangulation", 0, QApplication::UnicodeUTF8));
+    genDelaunayTriAct->setText(QApplication::translate("Model", "Delaunay Triangulation", 0));
     genDelaunayTriAct->setShortcut(tr("Shift+Alt+t"));
     genDelaunayTriAct->setCheckable(true);
     genDelaunayTriAct->setChecked(false);
     genPointModelAct = new QAction(this);
-    genPointModelAct->setText(QApplication::translate("Model", "Point Model", 0, QApplication::UnicodeUTF8));
+    genPointModelAct->setText(QApplication::translate("Model", "Point Model", 0));
     genPointModelAct->setShortcut(tr("Shift+Alt+p"));
     genLabelsAct = new QAction(this);
-    genLabelsAct->setText(QApplication::translate("Model", "Vertex Labels", 0, QApplication::UnicodeUTF8));
+    genLabelsAct->setText(QApplication::translate("Model", "Vertex Labels", 0));
     genLabelsAct->setShortcut(tr("Shift+Alt+l"));
     genPointIDsAct = new QAction(this);
-    genPointIDsAct->setText(QApplication::translate("Model", "Point ID Scalars", 0, QApplication::UnicodeUTF8));
+    genPointIDsAct->setText(QApplication::translate("Model", "Point ID Scalars", 0));
     genPointIDsAct->setShortcut(tr("Shift+Alt+i"));
     genSamplesAct = new QAction(this);
-    genSamplesAct->setText(QApplication::translate("Model", "Sampled Points", 0, QApplication::UnicodeUTF8));
+    genSamplesAct->setText(QApplication::translate("Model", "Sampled Points", 0));
     genSamplesAct->setShortcut(tr("Shift+Alt+s"));
     genKmeansAct = new QAction(this);
-    genKmeansAct->setText(QApplication::translate("Model", "K-Means Point Clustering", 0, QApplication::UnicodeUTF8));
+    genKmeansAct->setText(QApplication::translate("Model", "K-Means Point Clustering", 0));
     genKmeansAct->setShortcut(tr("Shift+Alt+k"));
     genQuantiseAct = new QAction(this);
-    genQuantiseAct->setText(QApplication::translate("Model", "Snap/Quantise Points to a Grid", 0, QApplication::UnicodeUTF8));
+    genQuantiseAct->setText(QApplication::translate("Model", "Snap/Quantise Points to a Grid", 0));
     genQuantiseAct->setShortcut(tr("Shift+Alt+q"));
     genCapBoundaries = new QAction(this);
-    genCapBoundaries->setText(QApplication::translate("Model", "Cap the Boundaries of Model", 0, QApplication::UnicodeUTF8));
+    genCapBoundaries->setText(QApplication::translate("Model", "Cap the Boundaries of Model", 0));
     genCapBoundaries->setShortcut(tr("Shift+Alt+c"));
     genRegionLabels = new QAction(this);
-    genRegionLabels->setText(QApplication::translate("Model", "Label Unconnected Regions", 0, QApplication::UnicodeUTF8));
+    genRegionLabels->setText(QApplication::translate("Model", "Label Unconnected Regions", 0));
     genRegionLabels->setShortcut(tr("Shift+Alt+u"));
     genElevation = new QAction(this);
-    genElevation->setText(QApplication::translate("Model", "Elevation", 0, QApplication::UnicodeUTF8));
+    genElevation->setText(QApplication::translate("Model", "Elevation", 0));
     genElevation->setShortcut(tr("Shift+Alt+e"));
     genReebGraph = new QAction(this);
-    genReebGraph->setText(QApplication::translate("Model", "Reeb Graph", 0, QApplication::UnicodeUTF8));
+    genReebGraph->setText(QApplication::translate("Model", "Reeb Graph", 0));
     genReebGraph->setShortcut(tr("Shift+Alt+r"));
     genReebGraph->setDisabled(true); //Not working so disable tmp
 
     //Operations
     operateMenu = new QMenu(this);
-    operateMenu->setTitle(QApplication::translate("Model", "Operations", 0, QApplication::UnicodeUTF8));
+    operateMenu->setTitle(QApplication::translate("Model", "Operations", 0));
     cleanAct = new QAction(this);
-    cleanAct->setText(QApplication::translate("Model", "&Clean Mesh", 0, QApplication::UnicodeUTF8));
+    cleanAct->setText(QApplication::translate("Model", "&Clean Mesh", 0));
     cleanAct->setShortcut(tr("Alt+c"));
     triAct = new QAction(this);
-    triAct->setText(QApplication::translate("Model", "&Triangulate", 0, QApplication::UnicodeUTF8));
+    triAct->setText(QApplication::translate("Model", "&Triangulate", 0));
     triAct->setShortcut(tr("Alt+t"));
     decimateAct = new QAction(this);
-    decimateAct->setText(QApplication::translate("Model", "&Decimate Mesh", 0, QApplication::UnicodeUTF8));
+    decimateAct->setText(QApplication::translate("Model", "&Decimate Mesh", 0));
     decimateAct->setShortcut(tr("Alt+d"));
     quadricDecimateAct = new QAction(this);
-    quadricDecimateAct->setText(QApplication::translate("Model", "&Quadric Decimate Mesh", 0, QApplication::UnicodeUTF8));
+    quadricDecimateAct->setText(QApplication::translate("Model", "&Quadric Decimate Mesh", 0));
     quadricDecimateAct->setShortcut(tr("Alt+q"));
     clusterDecimateAct = new QAction(this);
-    clusterDecimateAct->setText(QApplication::translate("Model", "&Quadric Cluster Decimate Mesh", 0, QApplication::UnicodeUTF8));
+    clusterDecimateAct->setText(QApplication::translate("Model", "&Quadric Cluster Decimate Mesh", 0));
     clusterDecimateAct->setShortcut(tr("Shift+Alt+q"));
     smoothAct = new QAction(this);
-    smoothAct->setText(QApplication::translate("Model", "Smooth/&Fair (Laplacian) Mesh", 0, QApplication::UnicodeUTF8));
+    smoothAct->setText(QApplication::translate("Model", "Smooth/&Fair (Laplacian) Mesh", 0));
     smoothAct->setShortcut(tr("Alt+f"));
     smoothSincAct = new QAction(this);
-    smoothSincAct->setText(QApplication::translate("Model", "Smooth/&Fair (Windowed Sinc) Mesh", 0, QApplication::UnicodeUTF8));
+    smoothSincAct->setText(QApplication::translate("Model", "Smooth/&Fair (Windowed Sinc) Mesh", 0));
     smoothSincAct->setShortcut(tr("Shift+Alt+f"));
     curvatureAct = new QAction(this);
-    curvatureAct->setText(QApplication::translate("Model", "Mean Curvature", 0, QApplication::UnicodeUTF8));
+    curvatureAct->setText(QApplication::translate("Model", "Mean Curvature", 0));
     curvatureAct->setShortcut(tr("Shift+Alt+c"));
 
     //Transform
     transformMenu = new QMenu(this);
-    transformMenu->setTitle(QApplication::translate("Model", "Transforms", 0, QApplication::UnicodeUTF8));
+    transformMenu->setTitle(QApplication::translate("Model", "Transforms", 0));
     transformAct = new QAction(this);
-    transformAct->setText(QApplication::translate("Model", "Transform (via File) from ...", 0, QApplication::UnicodeUTF8));
+    transformAct->setText(QApplication::translate("Model", "Transform (via File) from ...", 0));
     transformAct->setShortcut(tr("Alt+i"));
     matchAct = new QAction(this);
-    matchAct->setText(QApplication::translate("Model", "&Match Info to ...", 0, QApplication::UnicodeUTF8));
+    matchAct->setText(QApplication::translate("Model", "&Match Info to ...", 0));
     matchAct->setShortcut(tr("Alt+a"));
     registerAct = new QAction(this);
-    registerAct->setText(QApplication::translate("Model", "&Register (via ICP) to ...", 0, QApplication::UnicodeUTF8));
+    registerAct->setText(QApplication::translate("Model", "&Register (via ICP) to ...", 0));
     registerAct->setShortcut(tr("Alt+r"));
     registerLandmarkAct = new QAction(this);
-    registerLandmarkAct->setText(QApplication::translate("Model", "&Register (via Landmarks) to ...", 0, QApplication::UnicodeUTF8));
+    registerLandmarkAct->setText(QApplication::translate("Model", "&Register (via Landmarks) to ...", 0));
     registerLandmarkAct->setShortcut(tr("Shift+Alt+r"));
     voxeliseAct = new QAction(this);
-    voxeliseAct->setText(QApplication::translate("Model", "&Voxelise Model", 0, QApplication::UnicodeUTF8));
+    voxeliseAct->setText(QApplication::translate("Model", "&Voxelise Model", 0));
     voxeliseAct->setShortcut(tr("Alt+v"));
 
     //Scalars
     scalarMenu = new QMenu(this);
-    scalarMenu->setTitle(QApplication::translate("Model", "Scalar Operations", 0, QApplication::UnicodeUTF8));
+    scalarMenu->setTitle(QApplication::translate("Model", "Scalar Operations", 0));
     renameScalarsAct = new QAction(this);
-    renameScalarsAct->setText(QApplication::translate("Model", "Rename Scalars", 0, QApplication::UnicodeUTF8));
+    renameScalarsAct->setText(QApplication::translate("Model", "Rename Scalars", 0));
     renameScalarsAct->setShortcut(tr("Shift+Alt+r"));
     thresholdAct = new QAction(this);
-    thresholdAct->setText(QApplication::translate("Model", "Clip Mesh based on Scalar Threshold", 0, QApplication::UnicodeUTF8));
+    thresholdAct->setText(QApplication::translate("Model", "Clip Mesh based on Scalar Threshold", 0));
     thresholdAct->setShortcut(tr("Shift+Alt+t"));
     thresholdScalarsAct = new QAction(this);
-    thresholdScalarsAct->setText(QApplication::translate("Model", "Threshold Scalar Values", 0, QApplication::UnicodeUTF8));
+    thresholdScalarsAct->setText(QApplication::translate("Model", "Threshold Scalar Values", 0));
     thresholdScalarsAct->setShortcut(tr("Shift+Ctrl+t"));
     thresholdScalarsBinaryAct = new QAction(this);
-    thresholdScalarsBinaryAct->setText(QApplication::translate("Model", "Binary Threshold Scalar Values", 0, QApplication::UnicodeUTF8));
+    thresholdScalarsBinaryAct->setText(QApplication::translate("Model", "Binary Threshold Scalar Values", 0));
     thresholdScalarsBinaryAct->setShortcut(tr("Shift+Ctrl+b"));
     maskScalarsAct = new QAction(this);
-    maskScalarsAct->setText(QApplication::translate("Model", "Mask Scalar Values", 0, QApplication::UnicodeUTF8));
+    maskScalarsAct->setText(QApplication::translate("Model", "Mask Scalar Values", 0));
     maskScalarsAct->setShortcut(tr("Shift+Ctrl+m"));
     gradientAct = new QAction(this);
-    gradientAct->setText(QApplication::translate("Model", "Scalar Gradient Field", 0, QApplication::UnicodeUTF8));
+    gradientAct->setText(QApplication::translate("Model", "Scalar Gradient Field", 0));
     gradientAct->setShortcut(tr("Shift+Alt+c"));
     removeScalarsAct = new QAction(this);
-    removeScalarsAct->setText(QApplication::translate("Model", "&Remove All Scalars", 0, QApplication::UnicodeUTF8));
+    removeScalarsAct->setText(QApplication::translate("Model", "&Remove All Scalars", 0));
     removeScalarsAct->setShortcut(tr("Shift+Alt+x"));
     scalarsAct = new QAction(this);
-    scalarsAct->setText(QApplication::translate("Model", "&Load Scalars from ...", 0, QApplication::UnicodeUTF8));
+    scalarsAct->setText(QApplication::translate("Model", "&Load Scalars from ...", 0));
     scalarsAct->setShortcut(tr("Shift+Alt+s"));
     outScalarsAct = new QAction(this);
-    outScalarsAct->setText(QApplication::translate("Model", "&Output Scalars as CSV File", 0, QApplication::UnicodeUTF8));
+    outScalarsAct->setText(QApplication::translate("Model", "&Output Scalars as CSV File", 0));
     outScalarsAct->setShortcut(tr("Shift+Alt+o"));
     scalarsGroup = new QActionGroup(this);
     scalarsGroup->addAction(renameScalarsAct);
@@ -2745,32 +2745,32 @@ void milxQtModel::createActions()
 
     //Misc
     doAct = new QAction(this);
-    doAct->setText(QApplication::translate("Model", "&Undo Last Processing", 0, QApplication::UnicodeUTF8));
+    doAct->setText(QApplication::translate("Model", "&Undo Last Processing", 0));
     doAct->setShortcut(tr("Alt+u"));
     infoAct = new QAction(this);
-    infoAct->setText(QApplication::translate("Model", "&Model Information", 0, QApplication::UnicodeUTF8));
+    infoAct->setText(QApplication::translate("Model", "&Model Information", 0));
     infoAct->setShortcut(tr("Alt+m"));
     textureAct = new QAction(this);
-    textureAct->setText(QApplication::translate("Model", "&Extract Texture", 0, QApplication::UnicodeUTF8));
+    textureAct->setText(QApplication::translate("Model", "&Extract Texture", 0));
     textureAct->setShortcut(tr("Alt+t"));
     flipAct = new QAction(this);
-    flipAct->setText(QApplication::translate("Model", "Flip Model", 0, QApplication::UnicodeUTF8));
+    flipAct->setText(QApplication::translate("Model", "Flip Model", 0));
     flipAct->setShortcut(tr("Ctrl+Alt+f"));
     rotateAct = new QAction(this);
-    rotateAct->setText(QApplication::translate("Model", "Rotate Model", 0, QApplication::UnicodeUTF8));
+    rotateAct->setText(QApplication::translate("Model", "Rotate Model", 0));
     rotateAct->setShortcut(tr("Ctrl+Alt+r"));
 
     //View as
     pointsAct = new QAction(this);
-    pointsAct->setText(QApplication::translate("Model", "&Points", 0, QApplication::UnicodeUTF8));
+    pointsAct->setText(QApplication::translate("Model", "&Points", 0));
     pointsAct->setShortcut(tr("Alt+p"));
     pointsAct->setCheckable(true);
     wireframeAct = new QAction(this);
-    wireframeAct->setText(QApplication::translate("Model", "&Wireframe", 0, QApplication::UnicodeUTF8));
+    wireframeAct->setText(QApplication::translate("Model", "&Wireframe", 0));
     wireframeAct->setShortcut(tr("Alt+w"));
     wireframeAct->setCheckable(true);
     surfaceAct = new QAction(this);
-    surfaceAct->setText(QApplication::translate("Model", "&Surface", 0, QApplication::UnicodeUTF8));
+    surfaceAct->setText(QApplication::translate("Model", "&Surface", 0));
     surfaceAct->setShortcut(tr("Alt+s"));
     surfaceAct->setCheckable(true);
     displayGroup = new QActionGroup(this);
@@ -2779,48 +2779,48 @@ void milxQtModel::createActions()
     displayGroup->addAction(surfaceAct);
 
     colourAct = new QAction(this);
-    colourAct->setText(QApplication::translate("Model", "Change Mesh &Colour/Transparency", 0, QApplication::UnicodeUTF8));
+    colourAct->setText(QApplication::translate("Model", "Change Mesh &Colour/Transparency", 0));
     colourAct->setShortcut(tr("Alt+c"));
     interpAct = new QAction(this);
-    interpAct->setText(QApplication::translate("Model", "Best (Phong) Shading", 0, QApplication::UnicodeUTF8));
+    interpAct->setText(QApplication::translate("Model", "Best (Phong) Shading", 0));
     interpAct->setShortcut(tr("Alt+g"));
     interpAct->setCheckable(true);
     interpAct->setChecked(false);
     specularAct = new QAction(this);
-    specularAct->setText(QApplication::translate("Model", "Specular Lighting", 0, QApplication::UnicodeUTF8));
+    specularAct->setText(QApplication::translate("Model", "Specular Lighting", 0));
     specularAct->setShortcut(tr("Ctrl+Alt+s"));
     specularAct->setCheckable(true);
     specularAct->setChecked(false);
 
     normalsAct = new QAction(this);
-    normalsAct->setText(QApplication::translate("Model", "Show Normals", 0, QApplication::UnicodeUTF8));
+    normalsAct->setText(QApplication::translate("Model", "Show Normals", 0));
     normalsAct->setShortcut(tr("Alt+n"));
     normalsAct->setCheckable(true);
     normalsAct->setChecked(false);
     centroidAct = new QAction(this);
-    centroidAct->setText(QApplication::translate("Model", "Show Centroid", 0, QApplication::UnicodeUTF8));
+    centroidAct->setText(QApplication::translate("Model", "Show Centroid", 0));
     centroidAct->setShortcut(tr("Alt+m"));
     centroidAct->setCheckable(true);
     centroidAct->setChecked(false);
     outlineAct = new QAction(this);
-    outlineAct->setText(QApplication::translate("Model", "Show Outline Box", 0, QApplication::UnicodeUTF8));
+    outlineAct->setText(QApplication::translate("Model", "Show Outline Box", 0));
     outlineAct->setShortcut(tr("Alt+b"));
     outlineAct->setCheckable(true);
     outlineAct->setChecked(false);
     cubeAxesAct = new QAction(this);
-    cubeAxesAct->setText(QApplication::translate("Model", "Show Cube (Plot) Axes", 0, QApplication::UnicodeUTF8));
+    cubeAxesAct->setText(QApplication::translate("Model", "Show Cube (Plot) Axes", 0));
     cubeAxesAct->setShortcut(tr("Alt+a"));
     cubeAxesAct->setCheckable(true);
     cubeAxesAct->setChecked(false);
     overlaysAct = new QAction(this);
-    overlaysAct->setText(QApplication::translate("Model", "Remove Overlays/Actors", 0, QApplication::UnicodeUTF8));
+    overlaysAct->setText(QApplication::translate("Model", "Remove Overlays/Actors", 0));
     overlaysAct->setShortcut(tr("Alt+o"));
 
     //Contour
     selectPointsAct = new QAction(this);
-    selectPointsAct->setText(QApplication::translate("Model", "Select Points within Contour", 0, QApplication::UnicodeUTF8));
+    selectPointsAct->setText(QApplication::translate("Model", "Select Points within Contour", 0));
     weightAct = new QAction(this);
-    weightAct->setText(QApplication::translate("Model", "Gaussian Weights from Contour", 0, QApplication::UnicodeUTF8));
+    weightAct->setText(QApplication::translate("Model", "Gaussian Weights from Contour", 0));
 }
 
 void milxQtModel::createConnections()
@@ -2945,7 +2945,7 @@ void milxQtModel::contextMenuEvent(QContextMenuEvent *currentEvent)
 QMenu* milxQtModel::basicContextMenu()
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Modelling", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(QApplication::translate("MainWindow", "Modelling", 0));
 
     foreach(QAction *currAct, milxQtWindow::actionsToAdd)
     {
@@ -3075,12 +3075,12 @@ QMenu* milxQtModel::arraysMenu()
 {
     arrayGroup = new QActionGroup(this);
     arrayMenu = new QMenu(this);
-    arrayMenu->setTitle(QApplication::translate("Model", "&Load Array as Scalars/Vectors", 0, QApplication::UnicodeUTF8));
+    arrayMenu->setTitle(QApplication::translate("Model", "&Load Array as Scalars/Vectors", 0));
 
     for(int j = 0; j < model.Result()->GetPointData()->GetNumberOfArrays(); j ++)
     {
         QAction *act = new QAction(this);
-        act->setText(QApplication::translate("Model", model.Result()->GetPointData()->GetArrayName(j), 0, QApplication::UnicodeUTF8));
+        act->setText(QApplication::translate("Model", model.Result()->GetPointData()->GetArrayName(j), 0));
         arrayMenu->addAction(act);
         arrayGroup->addAction(act);
     }

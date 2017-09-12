@@ -19,6 +19,11 @@
 #define MILXQTIMAGE_H
 
 #include <QStatusBar>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QMenu>
+#include <QApplication>
+#include <QFileDialog>
 
 //VTK Headers
 #include <vtkSmartPointer.h>

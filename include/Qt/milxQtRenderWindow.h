@@ -19,6 +19,18 @@
 #define MILXQTRENDERWINDOW_H
 
 #include "milxQtWindow.h"
+#include <QWidgetAction>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QSettings>
+#include <QStatusBar>
+#include <QApplication>
+#include <QDragEnterEvent>
+#include <QDrag>
+#include <QTextStream>
+#include <QMimeData>
 
 #include <vtkSmartPointer.h>
 #include <vtkRenderWindow.h>
@@ -34,6 +46,7 @@
 #include <vtkEventQtSlotConnect.h>
 #include <vtkTable.h>
 #include <vtkScalarBarActor.h>
+
 //Widgets
 #include <vtkScalarBarWidget.h>
 #include <vtkContourWidget.h>
@@ -86,8 +99,8 @@ public:
 private:
     QLabel *pLabel;
     QLabel *pPixmapLabel;
-    QWidget* pWidget;
-    QHBoxLayout* pLayout;
+    QWidget *pWidget;
+    QHBoxLayout *pLayout;
 };
 
 /*!

@@ -21,6 +21,8 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
+#include <QMutex>
+
 //VTK
 #include <vtkPolyDataCollection.h>
 

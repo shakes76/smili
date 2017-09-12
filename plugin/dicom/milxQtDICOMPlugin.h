@@ -21,6 +21,9 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
+#include <QWizardPage>
+#include <QGroupBox>
+
 //ITK
 #include <itkImageSeriesReader.h>
 #include <itkGDCMImageIO.h>
