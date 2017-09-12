@@ -52,6 +52,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     orientationImages = true;
     interpolationModels = false;
     scalarBarModels = false;
+	resettingInterface = false;
 
     progressCallCount = 0;
     windowIterator = 0;
@@ -3179,7 +3180,8 @@ void milxQtMain::dropEvent(QDropEvent *currentEvent)
 
 void milxQtMain::closeEvent(QCloseEvent *event)
 {
-    writeSettings();
+	if(!resettingInterface)
+		writeSettings();
     event->accept();
 }
 
@@ -3313,7 +3315,6 @@ void milxQtMain::writeSettings()
     QSettings settings("Shekhar Chandra", "milxQt");
 
     settings.beginGroup("milxQtMain");
-
     settings.setValue("size", size());
     settings.setValue("pos", pos());
     settings.setValue("geometry", saveGeometry());
@@ -3332,8 +3333,43 @@ void milxQtMain::writeSettings()
     settings.setValue("orientationImages", orientationImages);
     settings.setValue("interpolationModels", interpolationModels);
     settings.setValue("scalarBarModels", scalarBarModels);
-
     settings.endGroup();
+
+	//resettingInterface = false;
+}
+
+void milxQtMain::resetSettings()
+{
+	QSettings settings("Shekhar Chandra", "milxQt");
+
+	//New defaults
+	QSize desktopSize = qApp->desktop()->availableGeometry().size();
+	int newWidth = 2.0*desktopSize.width() / 3.0 + 0.5;
+	int newHeight = 4.0*desktopSize.height() / 5.0 + 0.5;
+	int xOffset = (desktopSize.width() - newWidth) / 2.0;
+	int yOffset = (desktopSize.height() - newHeight) / 2.0;
+	int defaultViewMode = 2; //axial
+	int defaultViewTypeMode = 0; //1-multi-view
+	int defaultOrientationTypeMode = 0; //radiological
+
+	settings.beginGroup("milxQtMain");
+	settings.setValue("size", QSize(newWidth, newHeight));
+	settings.setValue("pos", QPoint(xOffset, yOffset));
+	settings.remove("geometry");
+	settings.remove("windowState");
+	settings.setValue("defaultView", defaultViewMode);
+	settings.setValue("defaultViewType", defaultViewTypeMode);
+	settings.setValue("defaultOrientationType", defaultOrientationTypeMode);
+	settings.endGroup();
+
+	printInfo("Toolbars, window positions etc. have been reset.");
+	resettingInterface = true;
+
+	QMessageBox msgBox;
+	msgBox.setText("Need to restart");
+	msgBox.setInformativeText("You need to restart the application for the changes to take effect.");
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	int ret = msgBox.exec();
 }
 
 void milxQtMain::readSettings()
@@ -3373,6 +3409,7 @@ void milxQtMain::readSettings()
     ///Handle saving dock positions/areas etc.
     restoreDockWidget(console->dockWidget());
     console->setTimestamps(timestamping);
+	//resettingInterface = false;
 
     settings.endGroup();
 }

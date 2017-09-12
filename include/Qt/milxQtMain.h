@@ -803,6 +803,11 @@ public slots:
         \brief Write the necessary GUI settings/state for the main class.
     */
     void writeSettings();
+	/*!
+	\fn milxQtMain::resetSettings()
+	\brief Reset the necessary GUI settings/state for the main class.
+	*/
+	void resetSettings();
     /*!
         \fn milxQtMain::readSettings()
         \brief Load the necessary GUI settings/state for the main class.
@@ -939,6 +944,7 @@ protected:
     bool orientationImages; //!< Prefer applying orientation to images?
     bool interpolationModels; //!< Prefer applying interpolation to models?
     bool scalarBarModels; //!< Show scalar bar for models?
+	bool resettingInterface; //!< Flag if reseting interface, ignore write settings on close
 
     enum { MaxRecentFiles = 10 };
     //Menus (hierarchical deletion)
