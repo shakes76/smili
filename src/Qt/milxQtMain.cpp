@@ -3180,8 +3180,7 @@ void milxQtMain::dropEvent(QDropEvent *currentEvent)
 
 void milxQtMain::closeEvent(QCloseEvent *event)
 {
-	if(!resettingInterface)
-		writeSettings();
+	writeSettings();
     event->accept();
 }
 
@@ -3314,6 +3313,9 @@ void milxQtMain::writeSettings()
 {
     QSettings settings("Shekhar Chandra", "milxQt");
 
+	if(resettingInterface)
+		return;
+
     settings.beginGroup("milxQtMain");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
@@ -3366,8 +3368,8 @@ void milxQtMain::resetSettings()
 	resettingInterface = true;
 
 	QMessageBox msgBox;
-	msgBox.setText("Need to restart");
-	msgBox.setInformativeText("You need to restart the application for the changes to take effect.");
+	msgBox.setText("Need to restart to take effect");
+	msgBox.setInformativeText("Other changes to the preferences have been ignored.");
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	int ret = msgBox.exec();
 }
@@ -3409,7 +3411,7 @@ void milxQtMain::readSettings()
     ///Handle saving dock positions/areas etc.
     restoreDockWidget(console->dockWidget());
     console->setTimestamps(timestamping);
-	//resettingInterface = false;
+	resettingInterface = false;
 
     settings.endGroup();
 }

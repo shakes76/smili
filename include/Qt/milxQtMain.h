@@ -800,7 +800,7 @@ public slots:
     void update();
     /*!
         \fn milxQtMain::writeSettings()
-        \brief Write the necessary GUI settings/state for the main class.
+        \brief Write the necessary GUI settings/state for the main class. If the settings have been reset, no settings are written until re-read.
     */
     void writeSettings();
 	/*!
