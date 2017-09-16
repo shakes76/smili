@@ -1249,6 +1249,7 @@ void milxQtImage::overlay(QString filename)
     emit done(-1);
 
     eightbit = false;
+    integer = false;
     rgb = true;
     generateImage();
 }
@@ -1310,6 +1311,7 @@ void milxQtImage::overlayContour(QString filename)
     emit done(-1);
 
     eightbit = false;
+    integer = false;
     rgb = true;
     generateImage();
 }

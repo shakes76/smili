@@ -2348,10 +2348,16 @@ void milxQtMain::imagesMix()
     {
         QMessageBox msgBox;
         msgBox.setText("Colormap not set?");
-        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Setting to a default map.");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.exec();
+
+		//Use default cmap
+		if (firstImg->is8BitImage())
+			firstImg->colourMapToHSV();
+		else
+			firstImg->colourMapToGray();
     }
 
     for(int j = 1; j < n; j ++) //!< For all windows, do operation
@@ -2362,10 +2368,16 @@ void milxQtMain::imagesMix()
         {
             QMessageBox msgBox;
             msgBox.setText("Colormap not set?");
-            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Setting to a default map.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);
             msgBox.exec();
+
+			//Use default cmap
+			if (secondImg->is8BitImage() || secondImg->is32BitImage()) //follow up images expected to be a label
+				secondImg->colourMapToHSV();
+			else
+				secondImg->colourMapToGray(); 
         }
 
         QVBoxLayout *layout = new QVBoxLayout(this);
