@@ -22,6 +22,7 @@
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QMdiArea>
+#include <QMdiSubWindow>
 #include <QList>
 #include <QSlider>
 #include <QPushButton>
@@ -207,7 +208,7 @@ public slots:
         \fn milxQtMain::isRender(QWidget *win)
         \brief Returns true if window is a generic render (milxQtRenderWindow object)
     */
-    bool isRender(QWidget *win);
+    bool isRender(QMdiSubWindow *win);
     /*!
         \fn milxQtMain::isActiveRender()
         \brief Returns true if active window is a generic render (milxQtRenderWindow object)
@@ -252,7 +253,7 @@ public slots:
         \fn milxQtMain::isPlot(QWidget *win)
         \brief Returns true if window is an Plot (milxQtPlot object)
     */
-    bool isPlot(QWidget *win);
+    bool isPlot(QMdiSubWindow *win);
     /*!
         \fn milxQtMain::isActivePlot()
         \brief Returns true if active window is an Plot (milxQtPlot object)
@@ -267,7 +268,7 @@ public slots:
         \fn milxQtMain::isUnifiedWindow(QWidget *win)
         \brief Returns true if window is an UnifiedWindow (milxQtUnifiedWindow object)
     */
-    bool isUnifiedWindow(QWidget *win);
+    bool isUnifiedWindow(QMdiSubWindow *win);
     /*!
         \fn milxQtMain::isActiveUnifiedWindow()
         \brief Returns true if active window is an UnifiedWindow (milxQtUnifiedWindow object)
@@ -292,7 +293,7 @@ public slots:
         \fn milxQtMain::setActiveWindow(QWidget *window)
         \brief Makes the window the active window.
     */
-    void setActiveWindow(QWidget *currentWindow);
+    void setActiveWindow(QMdiSubWindow *currentWindow);
 
     /**
         \fn milxQtMain::newTab()
@@ -409,15 +410,26 @@ public slots:
     void saveScreen(QString filename = "");
 
     /*!
+        \fn milxQtMain::close()
+        \brief Closes window but ensures all windows and tabs are porperly disposed of
+    */
+    void close();
+
+    /*!
+        \fn milxQtMain::setTabName(QMdiSubWindow *window)
+        \brief Set the tab name.
+    */
+    void setTabName(QMdiSubWindow *fromWindow);
+    /*!
         \fn milxQtMain::setTabName(QWidget *window)
         \brief Set the tab name.
     */
-    void setTabName(QWidget *fromWindow);
+    //void setTabName(QWidget *fromWindow);
     /*!
         \fn milxQtMain::setTabName(const QString newName)
         \brief Set the tab name of the current tab.
     */
-    void setTabName(const QString newName);
+    //void setTabName(const QString newName);
     /*!
         \fn milxQtMain::closeTab(int index)
         \brief Close the tab.
@@ -596,7 +608,7 @@ public slots:
         \fn milxQtMain::cleanUpOnClose(QWidget *win)
         \brief Removes references to windows that are closed so they are no longer "open"
     */
-    void cleanUpOnClose(QWidget *win);
+    void cleanUpOnClose(QMdiSubWindow *win);
 
     //Window traversal
     /**
@@ -864,12 +876,12 @@ public slots:
 
 protected slots:
     /*!
-        \fn milxQtMain::redirectWindowActivated(QWidget *win)
+        \fn milxQtMain::redirectWindowActivated(QMdiSubWindow *win)
         \brief Redirect the workspace signal to milxQtMain object level.
     */
-    inline void redirectWindowActivated(QWidget *win)
+    inline void redirectWindowActivated(QMdiSubWindow *win)
     {
-        emit windowActivated(win);
+        emit windowActivated(win->widget());
     }
     /*!
         \fn milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *client_data, void *, vtkCommand *command)

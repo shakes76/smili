@@ -92,7 +92,7 @@ void milxQtPlot::createMenu(QMenu *menu)
           menu->addMenu(currMenu);
       }
     }
-    menu->addSeparator->setText(tr("Plotting"));
+    menu->addSeparator()->setText(tr("Plotting"));
     menu->addAction(xAxisName);
     if(plotType2D)
     {

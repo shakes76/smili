@@ -17,9 +17,15 @@
 =========================================================================*/
 #include "milxQtMain.h"
 //Qt
-#include <QToolbar>
-#include <QSplashScreen>
+#include <QMenuBar>
+#include <QFileDialog>
 #include <QMdiSubWindow>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QToolBar>
+#include <QSplashScreen>
+#include <QDesktopWidget>
+#include <QBitmap>
 
 //VTK
 #include <vtkWindowToImageFilter.h>
@@ -27,7 +33,7 @@
 #include <vtkCamera.h>
 #include <vtkLookupTable.h>
 #include <vtkImageBlend.h>
-//#include <vtkTensor.h>
+#include <vtkTensor.h>
 #include <vtkMultiThreader.h>
 #include <vtkMath.h>
 //milxQt
@@ -49,7 +55,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     maxProcessors = milx::NumberOfProcessors();
     if(maxProcessors > 1)
       maxProcessors = milx::NumberOfProcessors()/2;
-    magnifyFactor = 1;
+    magnifyFactor = 2;
     timestamping = true;
     interpolationImages = true;
     orientationImages = true;
@@ -121,6 +127,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Program Info
     printInfo("--------------------------------------------------------");
     printInfo("sMILX Visualisation Tool for Medical Imaging");
+    printInfo("Open Source Release (BSD License)");
     printInfo("(c) Copyright CSIRO, 2015.");
     printInfo("University of Queensland, Australia.");
     printInfo("Australian e-Health Research Centre, CSIRO.");
@@ -132,6 +139,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Style
 
     update();
+    printDebug("Main Window Setup Complete");
 }
 
 milxQtMain::~milxQtMain()
@@ -222,17 +230,22 @@ void milxQtMain::newTab()
     workspaces->setCurrentWidget(tmpPtr); //Hierachy deletion
     tmpPtr->setAttribute(Qt::WA_DeleteOnClose);
 
-    connect(tmpPtr, SIGNAL(windowActivated(QWidget *)), this, SLOT(setTabName(QWidget *)));
-    connect(tmpPtr, SIGNAL(windowActivated(QWidget *)), this, SLOT(redirectWindowActivated(QWidget *)));
+    connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(setTabName(QMdiSubWindow *)));
+    connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(redirectWindowActivated(QMdiSubWindow *)));
 }
 
 void milxQtMain::addRender(milxQtRenderWindow *rnd)
 {
-    qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(rnd);
+    QMdiSubWindow *subWindow = new QMdiSubWindow;
+    subWindow->setWidget(rnd);
+    qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
 
     commonChildProperties(rnd);
 
     rnd->enableUpdates(statusBar());
+    rnd->GetRenderWindow()->SetSize(subWindowSize, subWindowSize);
+    rnd->setMinimumSize(subWindowSize, subWindowSize);
+    rnd->refresh();
 
     connect(rnd, SIGNAL(nameChanged(const QString &)), this, SLOT(setTabName(const QString &)));
     connect(rnd, SIGNAL(working(int)), this, SLOT(working(int)));
@@ -256,7 +269,7 @@ void milxQtMain::addUnifiedWindow(milxQtUnifiedWindow *uni)
     addRender(uni);
 }
 
-void milxQtMain::cleanUpOnClose(QWidget *win)
+void milxQtMain::cleanUpOnClose(QMdiSubWindow *win)
 {
     if(isImage(win))
     {
@@ -279,7 +292,7 @@ void milxQtMain::cleanUpOnClose(QWidget *win)
 }
 
 //Slots
-bool milxQtMain::isRender(QWidget *win)
+bool milxQtMain::isRender(QMdiSubWindow *win)
 {
     if(qobject_cast<milxQtRenderWindow *>(win) == 0)
         return false;
@@ -297,9 +310,14 @@ bool milxQtMain::isActiveRender()
 
 milxQtRenderWindow* milxQtMain::activeRender()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
+    if(activeWin)
         return qobject_cast<milxQtRenderWindow *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isImage(QWidget *win)
@@ -320,9 +338,13 @@ bool milxQtMain::isActiveImage()
 
 milxQtImage* milxQtMain::activeImage()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtImage *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isModel(QWidget *win)
@@ -343,12 +365,16 @@ bool milxQtMain::isActiveModel()
 
 milxQtModel* milxQtMain::activeModel()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
-        return qobject_cast<milxQtModel *>(activeWin->widget);
-    return 0;
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
+        return qobject_cast<milxQtModel *>(activeWin);
+    return NULL;
 }
 
-bool milxQtMain::isPlot(QWidget *win)
+bool milxQtMain::isPlot(QMdiSubWindow *win)
 {
     if(qobject_cast<milxQtPlot *>(win) == 0)
         return false;
@@ -366,12 +392,16 @@ bool milxQtMain::isActivePlot()
 
 milxQtModel* milxQtMain::activePlot()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
-        return qobject_cast<milxQtPlot *>(activeWin->widget);
-    return 0;
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
+        return qobject_cast<milxQtPlot *>(activeWin);
+    return NULL;
 }
 
-bool milxQtMain::isUnifiedWindow(QWidget *win)
+bool milxQtMain::isUnifiedWindow(QMdiSubWindow *win)
 {
     if(qobject_cast<milxQtUnifiedWindow *>(win) == 0)
         return false;
@@ -389,9 +419,13 @@ bool milxQtMain::isActiveUnifiedWindow()
 
 milxQtUnifiedWindow* milxQtMain::activeUnifiedWindow()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<milxQtUnifiedWindow *>(activeWin);
-    return 0;
+    return NULL;
 }
 
 bool milxQtMain::isActiveWebView()
@@ -404,17 +438,25 @@ bool milxQtMain::isActiveWebView()
 
 QWebEngineView* milxQtMain::activeWebView()
 {
-    if(QMdiSubWindow *activeWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow())
+    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    if(!win)
+        return NULL;
+
+    QWidget *activeWin = win->widget();
         return qobject_cast<QWebEngineView *>(activeWin);
-    return 0;
+    return NULL;
 }
 
-void milxQtMain::setActiveWindow(QWidget *currentWindow)
+void milxQtMain::setActiveWindow(QMdiSubWindow *currentWindow)
 {
-	if (!currentWindow)
-		return;
-	else
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->setActiveSubWindow(currentWindow);
+    if(!currentWindow)
+        return;
+    else
+    {
+        QMdiSubWindow *subWindow = new QMdiSubWindow;
+        subWindow->setWidget(currentWindow);
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->setActiveSubWindow(subWindow);
+    }
 }
 
 bool milxQtMain::open()
@@ -913,7 +955,14 @@ void milxQtMain::saveScreen(QString filename)
     }
 }
 
-void milxQtMain::setTabName(QWidget *fromWindow)
+void milxQtMain::close()
+{
+    printDebug("Closing Main Window");
+
+    QMainWindow::close();
+}
+
+void milxQtMain::setTabName(QMdiSubWindow *fromWindow)
 {
     QString tabTitle = activeNamePrefix();
     int index = workspaces->currentIndex();
@@ -924,13 +973,6 @@ void milxQtMain::setTabName(QWidget *fromWindow)
         workspaces->setTabText(index, tabTitle);
 }
 
-void milxQtMain::setTabName(const QString newName)
-{
-    int index = workspaces->currentIndex();
-
-    workspaces->setTabText(index, newName);
-}
-
 void milxQtMain::closeTab(int index)
 {
     int newIndex = 0;
@@ -938,7 +980,7 @@ void milxQtMain::closeTab(int index)
     if(workspaces->count() > 1 || index > 0)
     {
         QMdiArea *tmpWorkspace = qobject_cast<QMdiArea *>(workspaces->widget(index));
-        disconnect(tmpWorkspace, SIGNAL(windowActivated(QWidget *)), 0, 0);
+        disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
         tmpWorkspace->closeAllSubWindows();
         tmpWorkspace->close();
 
@@ -955,17 +997,17 @@ void milxQtMain::closeTab(int index)
 void milxQtMain::tileTabVertically()
 {
     QMdiArea *wrkSpc = qobject_cast<QMdiArea *>(workspaces->currentWidget());
-    QList<QMdiSubWindow *> windows = wrkSpc->subWindowList();
+    QList<QMdiSubWindow*> windows = wrkSpc->subWindowList();
     if (windows.count() < 2) {
         tileTab();
         return;
     }
     int wHeight = wrkSpc->height() / windows.count();
     int y = 0;
-    foreach(QWidget *widget, windows)
+    foreach(QMdiSubWindow *widget, windows)
     {
-        widget->parentWidget()->resize(wrkSpc->width(), wHeight);
-        widget->parentWidget()->move(0, y);
+        widget->widget()->parentWidget()->resize(wrkSpc->width(), wHeight);
+        widget->widget()->parentWidget()->move(0, y);
         y += wHeight;
     }
 }
@@ -973,17 +1015,17 @@ void milxQtMain::tileTabVertically()
 void milxQtMain::tileTabHorizontally()
 {
     QMdiArea *wrkSpc = qobject_cast<QMdiArea *>(workspaces->currentWidget());
-	QList<QMdiSubWindow *> windows = wrkSpc->subWindowList();
+    QList<QMdiSubWindow*> windows = wrkSpc->subWindowList();
     if (windows.count() < 2) {
         tileTab();
         return;
     }
     int wWidth = wrkSpc->width() / windows.count();
     int x = 0;
-    foreach(QWidget *widget, windows)
+    foreach(QMdiSubWindow *widget, windows)
     {
-        widget->parentWidget()->resize(wWidth, wrkSpc->height());
-        widget->parentWidget()->move(x, 0);
+        widget->widget()->parentWidget()->resize(wWidth, wrkSpc->height());
+        widget->widget()->parentWidget()->move(x, 0);
         x += wWidth;
     }
 }
@@ -1649,8 +1691,10 @@ void milxQtMain::updateWindowsWithCursors()
     while (currentWindow())
     {
         milxQtWindow *win = currentWindow();
+		cout << "Weeee1: " << win->strippedBaseName().toStdString();// << endl;
         if (isImage(win))
         {
+			cout << "Weeee2: " << win->strippedBaseName().toStdString();// << endl;
             milxQtImage *img = qobject_cast<milxQtImage *>(win);
             img->enableCrosshair();
         }
@@ -3182,7 +3226,18 @@ void milxQtMain::dropEvent(QDropEvent *currentEvent)
 
 void milxQtMain::closeEvent(QCloseEvent *event)
 {
+    //All but first tab
+    for(size_t j = 1; j < workspaces->count(); j ++)
+        closeTab(j);
+
+    //first tab
+    QMdiArea *tmpWorkspace = qobject_cast<QMdiArea *>(workspaces->widget(0));
+    disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
+    tmpWorkspace->closeAllSubWindows();
+    tmpWorkspace->close();
+
     writeSettings();
+
     event->accept();
 }
 

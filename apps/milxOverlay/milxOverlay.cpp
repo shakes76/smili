@@ -28,6 +28,7 @@
 */
 //Qt
 #include <QApplication>
+#include <QMainWindow>
 
 #include "milxQtModel.h"
 #include "milxQtImage.h"

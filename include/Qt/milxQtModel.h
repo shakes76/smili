@@ -20,6 +20,8 @@
 
 #include "milxQtRenderWindow.h"
 #include <QFormLayout>
+#include <QDesktopWidget>
+#include <QMenuBar>
 
 #include <vtkPoints.h>
 #include <vtkCellArray.h>

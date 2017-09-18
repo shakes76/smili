@@ -1541,7 +1541,7 @@ void milxQtModel::modelInfo()
         return;
 
     cout << "Centroid: " << centroid() << " with Size: " << centroidSize();// << endl;
-    cout << "Covariance Matrix: " << endl << covarianceMatrix();// << endl;
+    cout << "Covariance Matrix: " << /*endl*/"\n" << covarianceMatrix();// << endl;
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPoints()) + " points.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPolys()) + " polygons.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfLines()) + " lines.");

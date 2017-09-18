@@ -29,6 +29,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QApplication>
+#include <QMenu>
 
 /**
     \class milxQtPlot
