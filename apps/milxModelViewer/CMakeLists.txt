@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.9)
  
 PROJECT(milxModelViewer)
- 
+cmake_policy(SET CMP0020 NEW)
+
 # Find libraries
 include(find)
 

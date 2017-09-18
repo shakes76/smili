@@ -43,8 +43,8 @@ file(GLOB MILXQT_SRC_RCCS ${SMILI_SOURCE_DIR}/*.qrc)
 #################
 # 64-bit Build? #
 #################
-#set (MILXQT_64 ON) #True
-set (MILXQT_64 OFF) #False
+set (MILXQT_64 ON) #True
+#set (MILXQT_64 OFF) #False
 
 # Win32 requirement for VTK classes in DLLs
 add_definitions (-DvtkRendering_EXPORTS)
@@ -76,6 +76,11 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 # Add link directories needed to use ITK.
 link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
 add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
+
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  message("Qt Version: ${Qt5Widgets_VERSION}")
+  qt5_use_modules(milx-Qt Core Gui Widgets WebEngineWidgets)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ###################################################################
 # Set the build version (VERSION) and the API version (SOVERSION) #

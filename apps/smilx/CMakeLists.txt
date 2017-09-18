@@ -16,6 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 PROJECT(smilx)
 cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0020 NEW)
+cmake_policy(SET CMP0043 NEW)
 
 # Find libraries
 include(find)
@@ -33,7 +34,13 @@ ENDIF (WIN32)
 ###############################
 # Find all necessary packages #
 ###############################
-find_package(Qt5 COMPONENTS Widgets REQUIRED QUIET)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+    FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED QUIET)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+    MESSAGE("REQUIRES QT VERSION 5.9.1 OR GREATER")
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+
+#--------------------------------------------------------------------------------
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) # DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) # DLL Export MILX
@@ -73,7 +80,10 @@ ENDIF (WIN32)
 # Add executable and link the libraries #
 #########################################
 ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
-TARGET_LINK_LIBRARIES(smilx milx-Qt Qt5::Widgets ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+    qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+TARGET_LINK_LIBRARIES(smilx milx-Qt Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WebEngineWidgets ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 ##############################################
 # Expand the command line wild-cards in MSVC #
@@ -253,17 +263,9 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
 #~       INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
 #~       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
     
-        # Install VTK files 
-        IF(VTK_MAJOR_VERSION GREATER 5)
-            FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-        ELSE(VTK_MAJOR_VERSION GREATER 5)
-            FILE(GLOB vtkFiles "${VTK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-        ENDIF(VTK_MAJOR_VERSION GREATER 5)
-        INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
-        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
     
         # Debian
-        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <shakes76@users.sf.net>")
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <Shekhar.Chandra@csiro.au>")
 #~        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #10.04
 #~        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libinsighttoolkit3.20, libpythonqt2.0, libfftw3-3") #12.04
 #~        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK

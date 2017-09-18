@@ -21,7 +21,6 @@ link_directories(${VTK_LIBRARY_DIRS} ${SMILI_BINARY_DIR}/lib)
 ADD_EXECUTABLE(milxDeformableModelApp MACOSX_BUNDLE milxDeformableModelApp.cxx)
 TARGET_LINK_LIBRARIES(milxDeformableModelApp ${VTK_LIBRARIES} ${ITK_LIBRARIES} milx-SMILI)
 
-
 IF(UNIX)
   configure_file(milxDeformableModelApp.in "milxDeformableModelApp" @ONLY)
   
