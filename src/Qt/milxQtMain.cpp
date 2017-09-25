@@ -3205,12 +3205,12 @@ bool milxQtMain::loadPlugins()
         pluginsDir.cdUp();
     sharedObjectSuffix = "dll"; //!<\todo use better cross-platform method here
 #elif defined(Q_OS_MAC)
-    /*if (pluginsDir.dirName() == "MacOS")
+    if (pluginsDir.dirName() == "MacOS")
     {
         pluginsDir.cdUp();
         pluginsDir.cdUp();
         pluginsDir.cdUp();
-    }*/
+    }
     sharedObjectSuffix = "dylib"; //!<\todo use better cross-platform method here
 #else
     sharedObjectSuffix = "so"; //!<\todo use better cross-platform method here
