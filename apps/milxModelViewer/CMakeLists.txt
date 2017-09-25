@@ -32,4 +32,4 @@ LINK_DIRECTORIES(${MILXQT_INSTALL_BINARY_DIR})
 # Add executable and link the libraries #
 #########################################
 ADD_EXECUTABLE(milxModelViewer milxModelViewer.cpp)
-TARGET_LINK_LIBRARIES(milxModelViewer milx-Qt ${QT_LIBRARIES} milx-SMILI ${ITK_LIBRARIES} vtk-ext ${VTK_LIBRARIES})
+TARGET_LINK_LIBRARIES(milxModelViewer milx-Qt Qt5::Widgets milx-SMILI ${ITK_LIBRARIES} vtk-ext ${VTK_LIBRARIES})

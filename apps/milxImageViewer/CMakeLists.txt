@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.9)
  
 PROJECT(milxImageViewer)
+cmake_policy(SET CMP0020 NEW)
  
 ##################
 # Find libraries #

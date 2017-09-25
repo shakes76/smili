@@ -20,12 +20,11 @@
     \author Shekhar S. Chandra, 2014
 */
 //Qt
-#include <QApplication>
 #include <QSplashScreen>
 
 #include "milxQtMain.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
     QApplication app(argc,argv);
 
@@ -38,16 +37,16 @@ int main(int argc, char* argv[])
         splash.showMessage("This software is for research purposes only and is NOT approved for clinical use", Qt::AlignBottom | Qt::AlignHCenter);
         splash.show();
     app.processEvents();
-
+	
     milxQtMain Main;
     Main.setWindowTitle("SMILX");
     Main.show();
     splash.finish(&Main);
 
-    ///Open files if provided
+    // Open files if provided
     QStringList files = app.arguments();
-        files.erase(files.begin()); //First element is the program name
-        Main.loadFiles(files);
+		files.erase(files.begin()); //First element is the program name
+		Main.loadFiles(files);
 
     return app.exec();
 }

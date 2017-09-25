@@ -10,11 +10,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
 IF(VTK_QT_VERSION VERSION_GREATER "4")
     MESSAGE("Using Qt 5 for build")
-    FIND_PACKAGE(Qt5 REQUIRED Widgets WebEngineWidgets)
-    include_directories(${Qt5Widgets_INCLUDE_DIRS})
-    add_definitions(${Qt5Widgets_DEFINITIONS})
-    qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-    set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+    FIND_PACKAGE(Qt5 REQUIRED Core Gui Widgets WebEngineWidgets)
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     message("VTK Qt Version: ${VTK_QT_VERSION}")
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
@@ -43,8 +39,8 @@ file(GLOB MILXQT_SRC_RCCS ${SMILI_SOURCE_DIR}/*.qrc)
 #################
 # 64-bit Build? #
 #################
-set (MILXQT_64 ON) #True
-#set (MILXQT_64 OFF) #False
+#set (MILXQT_64 ON) #True
+set (MILXQT_64 OFF) #False
 
 # Win32 requirement for VTK classes in DLLs
 add_definitions (-DvtkRendering_EXPORTS)
@@ -75,11 +71,10 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 
 # Add link directories needed to use ITK.
 link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
-add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
+add_library(milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
 
 IF(VTK_QT_VERSION VERSION_GREATER "4")
   message("Qt Version: ${Qt5Widgets_VERSION}")
-  qt5_use_modules(milx-Qt Core Gui Widgets WebEngineWidgets)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ###################################################################
@@ -99,7 +94,7 @@ ELSE("${VTK_MAJOR_VERSION}" LESS 6) #If VTK 6 or above
     set(VTK_QT_LIBRARIES ${VTK_LIBRARIES})
 ENDIF("${VTK_MAJOR_VERSION}" LESS 6) 
 
-TARGET_LINK_LIBRARIES(milx-Qt milx-SMILI vtk-ext ${VTK_LIBRARIES} ${VTK_QT_LIBRARIES} Qt5::Widgets Qt5::WebEngineWidgets ${ITK_LIBRARIES} ${ITK_REVIEW_LIBRARIES} ${ZLIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(milx-Qt milx-SMILI vtk-ext ${VTK_LIBRARIES} ${VTK_QT_LIBRARIES} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WebEngineWidgets ${ITK_LIBRARIES} ${ITK_REVIEW_LIBRARIES} ${ZLIB_LIBRARIES})
 
 # Installation of the Library
 # Installs the header files

@@ -6,8 +6,6 @@ cmake_minimum_required(VERSION 3.9)
 #############################
 IF(APPLE) #Assumes MAC OSX
     cmake_minimum_required(VERSION 2.8.8) #for deplotqt module
-ELSE(APPLE)
-    cmake_minimum_required(VERSION 2.8)
 ENDIF(APPLE)
 
 # Include the directory itself as a path to include directories
@@ -35,7 +33,7 @@ ENDIF (WIN32)
 # Find all necessary packages #
 ###############################
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-    FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED QUIET)
+    FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets REQUIRED QUIET)
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     MESSAGE("REQUIRES QT VERSION 5.9.1 OR GREATER")
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
@@ -80,10 +78,10 @@ ENDIF (WIN32)
 # Add executable and link the libraries #
 #########################################
 ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-    qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
-TARGET_LINK_LIBRARIES(smilx milx-Qt Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WebEngineWidgets ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+#IF(VTK_QT_VERSION VERSION_GREATER "4")
+#    qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
+#ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+TARGET_LINK_LIBRARIES(smilx milx-Qt Qt5::Core Qt5::Gui Qt5::Widgets ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 ##############################################
 # Expand the command line wild-cards in MSVC #

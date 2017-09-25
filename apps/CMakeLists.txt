@@ -18,11 +18,14 @@ IF(USE_ITK)
 ENDIF(USE_ITK)
 
 IF(BUILD_MILXQT)
-    IF(${ITK_VERSION_MAJOR} VERSION_GREATER 3 OR ITK_USE_REVIEW)
-        add_subdirectory (milxLabelVisualisation)
-    ELSE(${ITK_VERSION_MAJOR} VERSION_GREATER 3 OR ITK_USE_REVIEW)
-        message("Label Visualisation: ITK Version not sufficient to build app. Use ITK 4 or ITK 3 Review")
-    ENDIF(${ITK_VERSION_MAJOR} VERSION_GREATER 3 OR ITK_USE_REVIEW)
+  set(CMAKE_AUTOMOC ON)
+  #--------------------------------------------------------------------------------
+  # this command finds Qt4 libraries and sets all required variables
+  IF(VTK_QT_VERSION VERSION_GREATER "4")
+    FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED QUIET)
+  ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+    message("REQUIRES QT5 VERSION 5.9.1 OR GREATER")
+  ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
     add_subdirectory (milxImageViewer)
     add_subdirectory (milxModelViewer)

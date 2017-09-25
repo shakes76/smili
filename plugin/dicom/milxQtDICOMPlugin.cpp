@@ -17,8 +17,8 @@
 =========================================================================*/
 #include "milxQtDICOMPlugin.h"
 
+#include <iostream>
 #include <qplugin.h>
-
 #include <milxGlobal.h>
 
 //Image typedefs
@@ -68,7 +68,7 @@ milxQtDICOMPlugin::~milxQtDICOMPlugin()
 {
     if(isRunning() && threaded)
         quit();
-    cout << "DICOM Plugin Destroyed.";// << endl;
+    cout << "DICOM Plugin Destroyed." << std::endl;
 }
 
 QString milxQtDICOMPlugin::name()
@@ -256,7 +256,7 @@ void milxQtDICOMPlugin::viewTags()
             QStringList entryName;
             entryName << UIDs[j].c_str() << ""; //!< Case Browser
 
-            //cout << "Loading tags into browser.";// << endl;
+            //cout << "Loading tags into browser."<< std::endl;
             QList<QStringList> entryList;
             for(int k = 0; k < tags.size(); k ++)
             {
@@ -324,7 +324,7 @@ void milxQtDICOMPlugin::openSeries()
     QStringList entryName;
     entryName << UIDs[j].c_str() << ""; //!< Case Browser
 
-    //cout << "Loading tags into browser.";// << endl;
+    //cout << "Loading tags into browser."<< std::endl;
     QList<QStringList> entryList;
     for (int k = 0; k < tags.size(); k++)
     {
@@ -355,7 +355,7 @@ void milxQtDICOMPlugin::openSeries()
 
 void milxQtDICOMPlugin::openStructureSet()
 {
-    cout << "Opening DICOM-RT";// << endl;
+    cout << "Opening DICOM-RT"<< std::endl;
     //use wizaed to ask
     wizardRT.restart();
 
@@ -403,7 +403,7 @@ void milxQtDICOMPlugin::openStructureSet()
 
 void milxQtDICOMPlugin::convert()
 {
-    cout << "Converting DICOMs";// << endl;
+    cout << "Converting DICOMs"<< std::endl;
     //use wizaed to ask
     wizard.restart();
 
@@ -610,7 +610,7 @@ void milxQtDICOMPlugin::convert()
 
 void milxQtDICOMPlugin::anonymize()
 {
-  cout << "Anonymizing DICOMs";// << endl;
+  cout << "Anonymizing DICOMs"<< std::endl;
   typedef itk::GDCMSeriesFileNames      NamesGeneratorType;
   typedef std::vector< std::string >    FileNamesContainer;
   typedef std::vector< std::string >    SeriesIdContainer;
@@ -654,11 +654,11 @@ void milxQtDICOMPlugin::anonymize()
       qApp->processEvents();
       QFileInfo finfo(subjectsDir, *entry);
       
-//        std::cout << "Entry -> " << (*entry).toStdString() << std::endl;
-//        std::cout << "Processing -> " << finfo.absoluteFilePath().toStdString() << std::endl;
+//        std::cout << "Entry -> " << (*entry).toStdString() << std::std::endl;
+//        std::cout << "Processing -> " << finfo.absoluteFilePath().toStdString() << std::std::endl;
       QDir subdir(finfo.absoluteFilePath());
       QString subjectPath = subdir.absolutePath();
-//        std::cout << "Processing -> " << subjectPath.toStdString() << std::endl;
+//        std::cout << "Processing -> " << subjectPath.toStdString() << std::std::endl;
       QDir::setCurrent(subjectPath);
       
       ///Retrieve the dicom series

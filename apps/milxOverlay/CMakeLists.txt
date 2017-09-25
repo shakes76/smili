@@ -1,11 +1,14 @@
 # CMAKE FILE FOR MILXOVERLAY
 cmake_minimum_required(VERSION 3.9)
 
+PROJECT(milxOverlay)
+cmake_policy(SET CMP0020 NEW)
+
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-PROJECT(milxOverlay)
-cmake_policy(SET CMP0020 NEW)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
 
 #############################################
 # Find VTK and ITK packages and directories #
@@ -29,11 +32,7 @@ ENDIF (WIN32)
 # Detect Qt version (depends on VTK-Qt) and get required libraries #
 ####################################################################
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-    FIND_PACKAGE(Qt5Widgets REQUIRED QUIET)
-    include_directories(${Qt5Widgets_INCLUDE_DIRS})
-    add_definitions(${Qt5Widgets_DEFINITIONS})
-    qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-    set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+    FIND_PACKAGE(Qt5 COMPONENTS Widgets REQUIRED QUIET)
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     message("VTK Qt Version: ${VTK_QT_VERSION}")
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
@@ -45,9 +44,9 @@ set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
 IF(WIN32)
-	SET(MILXQT_INSTALL_BINARY_DIR "C:/Program Files/MILX/lib")
+    SET(MILXQT_INSTALL_BINARY_DIR "C:/Program Files/MILX/lib")
 ELSE(WIN32)
-	SET(MILXQT_INSTALL_BINARY_DIR /usr/local/lib)
+    SET(MILXQT_INSTALL_BINARY_DIR /usr/local/lib)
 ENDIF(WIN32)
 
 ####################
@@ -81,7 +80,7 @@ link_directories(${MILXQT_INSTALL_BINARY_DIR})
 # Add executable and link the libraries #
 #########################################
 ADD_EXECUTABLE(milxOverlay MACOSX_BUNDLE milxOverlay.cpp)
-TARGET_LINK_LIBRARIES(milxOverlay milx-Qt milx-SMILI ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+TARGET_LINK_LIBRARIES(milxOverlay milx-Qt milx-SMILI Qt5::Widgets ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 #######################
 # Handle UNIX support #
@@ -105,5 +104,4 @@ ENDIF(MSVC)
 ##########################
 INSTALL(TARGETS milxOverlay 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime
-	)
+	RUNTIME DESTINATION bin COMPONENT Runtime)
