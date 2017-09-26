@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
   SwitchArg concatenateArg("", "cat", "Concatenate N surfaces into single mesh with filename provided.", false);
   SwitchArg colourConcatenateArg("", "colourcat", "Concatenate N surfaces into single mesh with filename provided and colour them.", false);
   SwitchArg splitArg("", "split", "Split each surface given components.", false);
-  SwitchArg diffScalarArg("", "scalardiff", "Compute the differences in Scalars.", false);
+  SwitchArg diffScalarArg("", "scalardiff", "Compute the differences in Scalars to the first mesh in list.", false);
   SwitchArg statsScalarArg("", "scalarstats", "Compute statistics of scalars (mean, variance etc. per point) output mesh with stats as arrays.", false);
   SwitchArg removeScalarArg("", "scalarremove", "Remove the scalars.", false);
   SwitchArg copyScalarArg("", "scalarcopy", "Copy the Scalars from first mesh to all others while removing existing ones.", false);
@@ -591,6 +591,8 @@ int main(int argc, char *argv[])
 
     case diffscalars:
       Model.ScalarDifferenceCollection(collection);
+      outputRequired = true;
+      multiOutputRequired = false;
       break;
 
     case diffscalarspairs:
@@ -603,6 +605,8 @@ int main(int argc, char *argv[])
 
     case statscalars:
       Model.ScalarStatisticsCollection(collection);
+      outputRequired = true;
+      multiOutputRequired = false;
       break;
 
     case removescalars:

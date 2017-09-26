@@ -54,6 +54,7 @@ protected:
     QSpinBox *processorsEdit;
     QSpinBox *magnifyEdit;
     QCheckBox *timestampCheckBox;
+	QPushButton *resetButton;
     //Imaging
     QCheckBox *interpolationCheckBox;
     QCheckBox *orientationCheckBox;

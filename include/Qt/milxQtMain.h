@@ -127,121 +127,81 @@ public:
         \brief Sets whether white background is to be used whenever possible. Default: false
     */
     inline void preferWhiteBackground(const bool whiteBack)
-    {
-        whiteBackground = whiteBack;
-    }
+    {   whiteBackground = whiteBack;    }
     inline bool isWhiteBackgroundPreferred()
-    {
-        return whiteBackground;
-    }
+    {   return whiteBackground;   }
     /*!
         \fn milxQtMain::preferHumanGlyph(const bool human)
         \brief Sets whether human orientation glyph is to be shown whenever possible. Default: true
     */
     inline void preferHumanGlyph(const bool human)
-    {
-        humanGlyph = human;
-    }
+    {   humanGlyph = human;   }
     inline bool isHumanGlyphPreferred()
-    {
-        return humanGlyph;
-    }
+    {   return humanGlyph;   }
     /*!
         \fn milxQtMain::preferSubWindowSize(const int winSize)
         \brief Sets number of sub-window size is to be used whenever possible. Default: double of minWindowSize (around 512).
     */
     inline void preferSubWindowSize(const int winSize)
-    {
-        subWindowSize = winSize;
-    }
+    {   subWindowSize = winSize;   }
     inline int hasPreferredSubWindowSize()
-    {
-        return subWindowSize;
-    }
+    {   return subWindowSize;   }
     /*!
         \fn milxQtMain::preferMaximumProcessors(const int procs)
         \brief Sets number of max processors is to be used whenever possible. Default: Half of max available on CPU to a minimum of one.
     */
     inline void preferMaximumProcessors(const int procs)
-    {
-        maxProcessors = procs;
-    }
+    {   maxProcessors = procs;   }
     inline int hasMaximumProcessors()
-    {
-        return maxProcessors;
-    }
+    {   return maxProcessors;   }
     /*!
         \fn milxQtMain::preferScreenshotMagnifyFactor(const int factor)
         \brief Sets the magnify factor when saving screenshots. Default: 2.
     */
     inline void preferScreenshotMagnifyFactor(const int factor)
-    {
-        magnifyFactor = factor;
-    }
+    {   magnifyFactor = factor;   }
     inline int hasScreenshotMagnifyFactor()
-    {
-        return magnifyFactor;
-    }
+    {   return magnifyFactor;   }
     /*!
         \fn milxQtMain::preferTimestamps(const bool timestamp)
         \brief Sets whether timestamps are to be shown whenever possible. Default: true
     */
     inline void preferTimestamps(const bool timestamps)
-    {
-        timestamping = timestamps;
-    }
+    {   timestamping = timestamps;   }
     inline bool isTimestampsPreferred()
-    {
-        return timestamping;
-    }
+    {   return timestamping;   }
     /*!
         \fn milxQtMain::preferImageInterpolation(const bool interp)
         \brief Sets whether interpolation is to be shown whenever possible for images. Default: true
     */
     inline void preferImageInterpolation(const bool interp)
-    {
-        interpolationImages = interp;
-    }
+    {   interpolationImages = interp;   }
     inline bool isImageInterpolationPreferred()
-    {
-        return interpolationImages;
-    }
+    {   return interpolationImages;   }
     /*!
         \fn milxQtMain::preferOrientation(const bool orient)
         \brief Sets whether image orientation is to be applied whenever possible for images. Default: true
     */
     inline void preferOrientation(const bool orient)
-    {
-        orientationImages = orient;
-    }
+    {   orientationImages = orient;   }
     inline bool isOrientationPreferred()
-    {
-        return orientationImages;
-    }
+    {   return orientationImages;   }
     /*!
         \fn milxQtMain::preferModelInterpolation(const bool interp)
         \brief Sets whether interpolation is to be shown whenever possible for models. Default: false
     */
     inline void preferModelInterpolation(const bool interp)
-    {
-        interpolationModels = interp;
-    }
+    {   interpolationModels = interp;   }
     inline bool isModelInterpolationPreferred()
-    {
-        return interpolationModels;
-    }
+    {   return interpolationModels;   }
     /*!
         \fn milxQtMain::preferScalarBar(const bool bar)
         \brief Sets whether scalar bar is to be show whenever possible for models. Default: false
     */
     inline void preferScalarBar(const bool bar)
-    {
-        scalarBarModels = bar;
-    }
+    {   scalarBarModels = bar;   }
     inline bool isScalarBarPreferred()
-    {
-        return scalarBarModels;
-    }
+    {   return scalarBarModels;   }
 
 public slots:
     /*!
@@ -849,17 +809,13 @@ public slots:
         \brief Link all windows in the current tab. Changing one window camera updates all others.
     */
     inline void link()
-    {
-        actionLinkWindows->setChecked(true);
-    }
+    {   actionLinkWindows->setChecked(true);  }
     /**
         \fn milxQtMain::unlink()
         \brief Unlink all windows in the current tab.
     */
     inline void unlink()
-    {
-        actionLinkWindows->setChecked(false);
-    }
+    {   actionLinkWindows->setChecked(false);  }
     /**
         \fn milxQtMain::update()
         \brief Update the GUI elements, such as menus etc. to most up-to-date status.
@@ -867,9 +823,14 @@ public slots:
     void update();
     /*!
         \fn milxQtMain::writeSettings()
-        \brief Write the necessary GUI settings/state for the main class.
+        \brief Write the necessary GUI settings/state for the main class. If the settings have been reset, no settings are written until re-read.
     */
     void writeSettings();
+	/*!
+	\fn milxQtMain::resetSettings()
+	\brief Reset the necessary GUI settings/state for the main class.
+	*/
+	void resetSettings();
     /*!
         \fn milxQtMain::readSettings()
         \brief Load the necessary GUI settings/state for the main class.
@@ -886,9 +847,7 @@ public slots:
         \brief Returns a list of the loaded plugins (which are assumed to be DLLs) according to the milxQtPluginInterface.
     */
     inline QList< QPointer<milxQtPluginInterface> > getPlugins()
-    {
-        return plugins;
-    }
+    {   return plugins;   }
 
     //Print Members
     /*!
@@ -896,36 +855,28 @@ public slots:
         \brief Error message wrapper for console.
     */
     inline void printError(QString msg)
-    {
-        console->printError(msg);
-    }
+    {   console->printError(msg);   }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printWarning(QString msg)
         \brief Warning message wrapper for console.
     */
     inline void printWarning(QString msg)
-    {
-        console->printWarning(msg);
-    }
+    {   console->printWarning(msg);   }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printDebug(QString msg)
         \brief Debug message wrapper for console.
     */
     inline void printDebug(QString msg)
-    {
-        console->printDebug(msg);
-    }
+    {   console->printDebug(msg);   }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printInfo(QString msg)
         \brief Info message wrapper for console.
     */
     inline void printInfo(QString msg)
-    {
-        console->printInfo(msg);
-    }
+    {   console->printInfo(msg);   }
 //    {   cerr << msg.toStdString() << endl;   }
 
 protected slots:
@@ -1016,6 +967,7 @@ protected:
     bool orientationImages; //!< Prefer applying orientation to images?
     bool interpolationModels; //!< Prefer applying interpolation to models?
     bool scalarBarModels; //!< Show scalar bar for models?
+	bool resettingInterface; //!< Flag if reseting interface, ignore write settings on close
 
     enum { MaxRecentFiles = 10 };
     //Menus (hierarchical deletion)

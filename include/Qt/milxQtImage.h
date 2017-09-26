@@ -47,6 +47,8 @@
 //Typedefs
 typedef unsigned char charPixelType;
 typedef itk::Image<charPixelType, milx::imgDimension> charImageType;
+typedef int intPixelType;
+typedef itk::Image<intPixelType, milx::imgDimension> intImageType;
 typedef itk::RGBPixel<unsigned char> rgbPixelType;
 typedef itk::Image<rgbPixelType, milx::imgDimension> rgbImageType;
 typedef float floatPixelType;
@@ -167,6 +169,17 @@ public:
         setData(newImg, flipY);
     }
     /*!
+    \fn milxQtImage::SetInput(intImageType::Pointer newImg, const bool flipY = true)
+    \brief ITK interface function: Assigns the image data internally. Same as setData() function.
+
+    ITK has different orientation for images, so the flipY flag (not done by default) can be used to flip the image appropriately.
+    Note that the data itself is not flipped, only the display.
+    */
+    inline void SetInput(intImageType::Pointer newImg, const bool flipY = true)
+    {
+      setData(newImg, flipY);
+    }
+    /*!
         \fn milxQtImage::SetInput(rgbImageType::Pointer newImg, const bool flipY = true)
         \brief ITK interface function: Assigns the image data internally. Same as setData() function.
 
@@ -227,6 +240,14 @@ public:
         Note that the data itself is not flipped, only the display.
     */
     void setData(charImageType::Pointer newImg, const bool flipY = true);
+    /*!
+    \fn milxQtImage::setData(intImageType::Pointer newImg, const bool flipY = true)
+    \brief Assigns the ITK image data to image. You will need to call generate image after this.
+
+    ITK has different orientation for images, so the flipY flag (not done by default) can be used to flip the image appropriately.
+    Note that the data itself is not flipped, only the display.
+    */
+    void setData(intImageType::Pointer newImg, const bool flipY = true);
     /*!
         \fn milxQtImage::setData(rgbImageType::Pointer newImg, const bool flipY = true)
         \brief Assigns the ITK image data to image. You will need to call generate image after this.
@@ -292,6 +313,22 @@ public:
     inline void setSharedData(charImageType::Pointer newImg, const bool flipY = true)
     {	setDisplayData(newImg, flipY);	}
     /*!
+    \fn milxQtImage::setDisplayData(intImageType::Pointer newImg, const bool flipY = true)
+    \brief Shares the ITK image data to image. You will need to call generate image after this.
+
+    Useful when attempting to share image data just for display etc.
+
+    ITK has different orientation for images, so the flipY flag (not done by default) can be used to flip the image appropriately.
+    Note that the data itself is not flipped, only the display.
+    */
+    void setDisplayData(intImageType::Pointer newImg, const bool flipY = true);
+    /*!
+    \fn milxQtImage::setSharedData(intImageType::Pointer newImg, const bool flipY = true)
+    \brief Shares the ITK image data to image (same as setDisplayData()). You will need to call generate image after this.
+    */
+    inline void setSharedData(intImageType::Pointer newImg, const bool flipY = true)
+    { setDisplayData(newImg, flipY);  }
+    /*!
       \fn milxQtImage::setDisplayData(rgbImageType::Pointer newImg, const bool flipY = true)
       \brief Shares the ITK image data to image. You will need to call generate image after this.
 
@@ -355,6 +392,14 @@ public:
     inline charImageType::Pointer GetCharImage()
     {
         return imageChar;
+    }
+    /*!
+        \fn milxQtImage::GetIntImage()
+        \brief Returns the internal unsigned char image data.
+    */
+    inline intImageType::Pointer GetIntImage()
+    {
+        return imageInt;
     }
     /*!
         \fn milxQtImage::GetRGBImage()
@@ -492,6 +537,25 @@ public:
     inline bool is8BitImage()
     {
         return eightbit;
+    }
+    /*!
+    \fn milxQtImage::set32BitImage()
+    \brief Sets image as an 32-bit (int) image. Relevant only for when creating images, otherwise automatically set.
+    */
+    inline void set32BitImage()
+    {
+        eightbit = false;
+        integer = true;
+        rgb = false;
+        vectorised = false;
+    }
+    /*!
+    \fn milxQtImage::is32BitImage()
+    \brief Returns true if image is an 32-bit (int) image
+    */
+    inline bool is32BitImage()
+    {
+        return integer;
     }
     /*!
         \fn milxQtImage::setRGBImage()
@@ -1099,6 +1163,32 @@ public slots:
         viewer->GetRenderWindow()->SetCurrentCursor(0);
         crosshairAct->setChecked(false);
     }
+#if VTK_MAJOR_VERSION > 5
+    /*!
+        \fn milxQtImage::resliceMode()
+        \brief Apply different slice modes (oblique or axis based). Image must be generated before calling.
+    */
+    virtual void resliceMode(const bool quietly = false);
+    /*!
+        \fn milxQtImage::enableResliceMode()
+        \brief Enables oblique slicing. Scene must be rendered before calling.
+    */
+    virtual inline void enableResliceMode()
+    {
+        printDebug("Oblique slicing enabled. Use Shift + Left Mouse.");
+        viewer->GetInteractorStyle()-> SetInteractionModeToImage3D();
+        resliceAct->setChecked(true);
+    }
+    /*!
+        \fn milxQtImage::disableResliceMode()
+        \brief Restores axis slicing.
+    */
+    virtual inline void disableResliceMode()
+    {
+        viewer->GetInteractorStyle()->SetInteractionModeToImageSlicing();
+        resliceAct->setChecked(false);
+    }
+#endif
     /*!
         \fn milxQtImage::setView(int viewMode)
         \brief Change view to view mode identified by number.
@@ -1296,6 +1386,7 @@ protected:
     bool imported; //!< Imported before?
     bool appendedData; //!< Appended image data?
     bool eightbit; //!< Using eightbit data?
+    bool integer; //!< Using integer data?
     bool rgb; //!< Using RGB data?
     bool vectorised; //!< Using Vector image data?
     bool viewerSetup; //!< has the viewer/window been setup (only done initial so is to not disturb users settings)
@@ -1306,6 +1397,7 @@ protected:
     //Image Related
     //ITK
     charImageType::Pointer imageChar; //!< Up to date 8-bit greyscale image data
+    intImageType::Pointer imageInt; //!< Up to date 32-bit greyscale image data
     rgbImageType::Pointer imageRGB; //!< Up to date 32-bit image data (used only internally atm)
     floatImageType::Pointer imageFloat; //!< Up to date floating point image data
     vectorImageType::Pointer imageVector; //!< Up to date vector image data
@@ -1390,6 +1482,7 @@ protected:
     QAction* infoAct; //!< Action for displaying information about the image.
     QAction* interpolateAct; //!< Interpolate image?
     QAction* orientAct; //!< Orient image?
+    QAction* resliceAct; //!< Reslice mode?
     QAction* cursorAct; //!< Show cursor?
 
     /*!

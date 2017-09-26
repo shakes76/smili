@@ -53,12 +53,13 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     maxProcessors = milx::NumberOfProcessors();
     if(maxProcessors > 1)
       maxProcessors = milx::NumberOfProcessors()/2;
-    magnifyFactor = 2;
+    magnifyFactor = 1;
     timestamping = true;
     interpolationImages = true;
     orientationImages = true;
     interpolationModels = false;
     scalarBarModels = false;
+	resettingInterface = false;
 
     progressCallCount = 0;
     windowIterator = 0;
@@ -125,7 +126,6 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Program Info
     printInfo("--------------------------------------------------------");
     printInfo("sMILX Visualisation Tool for Medical Imaging");
-    printInfo("Open Source Release (BSD License)");
     printInfo("(c) Copyright CSIRO, 2015.");
     printInfo("University of Queensland, Australia.");
     printInfo("Australian e-Health Research Centre, CSIRO.");
@@ -577,6 +577,9 @@ bool milxQtMain::loadFile(const QString &filename)
     if (filename.isEmpty())
         return success;
 
+    //Convert string to native paths
+    QString nativeFilename = QDir::toNativeSeparators(filename);
+
     ///Check filename with plugins
     printDebug("Check Plugins if they can open the file.");
     foreach (QPointer<milxQtPluginInterface> loadedPlugin, plugins)
@@ -603,13 +606,13 @@ bool milxQtMain::loadFile(const QString &filename)
                 else ///if not then use serial methods
                 {
                     printInfo("Using standard opening for plugin.");
-                    loadedPlugin->open(filename);
+                    loadedPlugin->open(nativeFilename);
                 }
 
                 QPointer<milxQtRenderWindow> renWin = loadedPlugin->genericResult();
                 if(renWin)
                 {
-                    printInfo("Loading Generic Result");
+                    printInfo("Loading Plugin Generic Result");
                     if(renWin->getName() == "")
                         renWin->setName(filename);
                     renWin->setConsole(console);
@@ -621,7 +624,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtModel> model = loadedPlugin->modelResult();
                 if(model)
                 {
-                    printInfo("Loading Model Result");
+                    printInfo("Loading Plugin Model Result");
                     if(model->getName() == "")
                         model->setName(filename);
                     model->setConsole(console);
@@ -633,7 +636,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtImage> image = loadedPlugin->imageResult();
                 if(image)
                 {
-                    printInfo("Loading Image Result");
+                    printInfo("Loading Plugin Image Result");
                     if(image->getName() == "")
                         image->setName(filename);
                     image->setConsole(console);
@@ -651,7 +654,7 @@ bool milxQtMain::loadFile(const QString &filename)
         {
             printInfo("Loaded File via Plugin, now Updating");
             loadedPlugin->update();
-            setCurrentFile(filename);
+            setCurrentFile(nativeFilename);
             return success;
         }
     }
@@ -663,7 +666,7 @@ bool milxQtMain::loadFile(const QString &filename)
     {
         printDebug("Opening Model.");
         QPointer<milxQtModel> model = new milxQtModel; //list deletion
-        success = reader->openModel(filename, model);
+        success = reader->openModel(nativeFilename, model);
 
         if(success)
         {
@@ -679,7 +682,7 @@ bool milxQtMain::loadFile(const QString &filename)
         //Load the vertex table from CSV file
         vtkSmartPointer<vtkTable> table;
         QPointer<milxQtPlot> plot = new milxQtPlot;
-        success = milx::File::OpenDelimitedText(filename.toStdString(), table);
+        success = milx::File::OpenDelimitedText(nativeFilename.toStdString(), table);
 
         int surfaceRet = QMessageBox::No, dimensionRet = QMessageBox::No;
         int xCol = 0, yCol = 1, zCol = 2;
@@ -744,7 +747,7 @@ bool milxQtMain::loadFile(const QString &filename)
         QPointer<milxQtImage> img = new milxQtImage;  //list deletion
 
         printDebug("Supported Image formats: " + reader->supportedImageFormats());
-        success = reader->openImage(filename, img);
+        success = reader->openImage(nativeFilename, img);
 
         printInfo("Image Pixel Type: " + reader->getPixelType());
         printInfo("Image Component Type: " + reader->getComponentType());
@@ -764,7 +767,7 @@ bool milxQtMain::loadFile(const QString &filename)
     }
 
     if(success)
-        setCurrentFile(filename);
+        setCurrentFile(nativeFilename);
 
     return success;
 }
@@ -779,6 +782,9 @@ void milxQtMain::save(QString filename)
 
     if(!activeWindow)
         return;
+
+    //Convert string to native paths
+    filename = QDir::toNativeSeparators(filename);
 
     QFileDialog *fileSaver = new QFileDialog(this);
 
@@ -890,6 +896,9 @@ void milxQtMain::saveScreen(QString filename)
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
     QWidget *activeWindow = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget();
+
+    //Convert string to native paths
+    filename = QDir::toNativeSeparators(filename);
 
     if(!activeWindow)
         return;
@@ -1695,10 +1704,8 @@ void milxQtMain::updateWindowsWithCursors()
     while (currentWindow())
     {
         milxQtWindow *win = currentWindow();
-        cout << "Weeee1: " << win->strippedBaseName().toStdString() << endl;
         if (isImage(win))
         {
-            cout << "Weeee2: " << win->strippedBaseName().toStdString() << endl;
             milxQtImage *img = qobject_cast<milxQtImage *>(win);
             img->enableCrosshair();
         }
@@ -2398,10 +2405,16 @@ void milxQtMain::imagesMix()
     {
         QMessageBox msgBox;
         msgBox.setText("Colormap not set?");
-        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+        msgBox.setInformativeText("Image " + firstImg->strippedBaseName() + " has no colormap set. Setting to a default map.");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Ok);
         msgBox.exec();
+
+		//Use default cmap
+		if (firstImg->is8BitImage())
+			firstImg->colourMapToHSV();
+		else
+			firstImg->colourMapToGray();
     }
 
     for(int j = 1; j < n; j ++) //!< For all windows, do operation
@@ -2412,10 +2425,16 @@ void milxQtMain::imagesMix()
         {
             QMessageBox msgBox;
             msgBox.setText("Colormap not set?");
-            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Result could be unexpected.");
+            msgBox.setInformativeText("Image " + secondImg->strippedBaseName() + " has no colormap set. Setting to a default map.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);
             msgBox.exec();
+
+			//Use default cmap
+			if (secondImg->is8BitImage() || secondImg->is32BitImage()) //follow up images expected to be a label
+				secondImg->colourMapToHSV();
+			else
+				secondImg->colourMapToGray(); 
         }
 
         QVBoxLayout *layout = new QVBoxLayout(this);
@@ -3241,7 +3260,6 @@ void milxQtMain::closeEvent(QCloseEvent *event)
     tmpWorkspace->close();
 
     writeSettings();
-
     event->accept();
 }
 
@@ -3374,8 +3392,10 @@ void milxQtMain::writeSettings()
 {
     QSettings settings("Shekhar Chandra", "milxQt");
 
-    settings.beginGroup("milxQtMain");
+	if(resettingInterface)
+		return;
 
+    settings.beginGroup("milxQtMain");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
     settings.setValue("geometry", saveGeometry());
@@ -3394,8 +3414,43 @@ void milxQtMain::writeSettings()
     settings.setValue("orientationImages", orientationImages);
     settings.setValue("interpolationModels", interpolationModels);
     settings.setValue("scalarBarModels", scalarBarModels);
-
     settings.endGroup();
+
+	//resettingInterface = false;
+}
+
+void milxQtMain::resetSettings()
+{
+	QSettings settings("Shekhar Chandra", "milxQt");
+
+	//New defaults
+	QSize desktopSize = qApp->desktop()->availableGeometry().size();
+	int newWidth = 2.0*desktopSize.width() / 3.0 + 0.5;
+	int newHeight = 4.0*desktopSize.height() / 5.0 + 0.5;
+	int xOffset = (desktopSize.width() - newWidth) / 2.0;
+	int yOffset = (desktopSize.height() - newHeight) / 2.0;
+	int defaultViewMode = 2; //axial
+	int defaultViewTypeMode = 0; //1-multi-view
+	int defaultOrientationTypeMode = 0; //radiological
+
+	settings.beginGroup("milxQtMain");
+	settings.setValue("size", QSize(newWidth, newHeight));
+	settings.setValue("pos", QPoint(xOffset, yOffset));
+	settings.remove("geometry");
+	settings.remove("windowState");
+	settings.setValue("defaultView", defaultViewMode);
+	settings.setValue("defaultViewType", defaultViewTypeMode);
+	settings.setValue("defaultOrientationType", defaultOrientationTypeMode);
+	settings.endGroup();
+
+	printInfo("Toolbars, window positions etc. have been reset.");
+	resettingInterface = true;
+
+	QMessageBox msgBox;
+	msgBox.setText("Need to restart to take effect");
+	msgBox.setInformativeText("Other changes to the preferences have been ignored.");
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	int ret = msgBox.exec();
 }
 
 void milxQtMain::readSettings()
@@ -3435,6 +3490,7 @@ void milxQtMain::readSettings()
     ///Handle saving dock positions/areas etc.
     restoreDockWidget(console->dockWidget());
     console->setTimestamps(timestamping);
+	resettingInterface = false;
 
     settings.endGroup();
 }

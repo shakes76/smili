@@ -64,6 +64,7 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
     imported = false;
     appendedData = false;
     eightbit = false;
+    integer = false;
     rgb = false;
     vectorised = false;
     viewerSetup = false;
@@ -86,6 +87,7 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
 
     ///Allocate critical aspects
     imageChar = charImageType::New();
+    imageInt = intImageType::New();
     imageRGB = rgbImageType::New();
     imageFloat = floatImageType::New();
     imageVector = NULL; //rare so allocate as needed
@@ -115,6 +117,8 @@ void milxQtImage::setData(QPointer<milxQtImage> newImg, const bool forceDeepCopy
 {
     if(newImg->is8BitImage())
         setData(newImg->GetCharImage(), newImg->isDisplayFlipped());
+    else if(newImg->is32BitImage())
+        setData(newImg->GetIntImage(), newImg->isDisplayFlipped());
     else if(newImg->isVectorImage())
         setData(newImg->GetVectorImage(), newImg->isDisplayFlipped(), forceDeepCopy);
     else if(newImg->isRGBImage())
@@ -131,6 +135,21 @@ void milxQtImage::setData(charImageType::Pointer newImg, const bool flipY)
 
     loaded = true;
     eightbit = true;
+    integer = false;
+    rgb = false;
+    vectorised = false;
+    usingVTKImage = false;
+}
+
+void milxQtImage::setData(intImageType::Pointer newImg, const bool flipY)
+{
+    imageInt = milx::Image<intImageType>::DuplicateImage(newImg);
+
+    flipped = flipY;
+
+    loaded = true;
+    eightbit = false;
+    integer = true;
     rgb = false;
     vectorised = false;
     usingVTKImage = false;
@@ -144,6 +163,7 @@ void milxQtImage::setData(rgbImageType::Pointer newImg, const bool flipY)
 
     loaded = true;
     eightbit = false;
+    integer = false;
     rgb = true;
     vectorised = false;
     usingVTKImage = false;
@@ -157,6 +177,7 @@ void milxQtImage::setData(floatImageType::Pointer newImg, const bool flipY)
 
     loaded = true;
     eightbit = false;
+    integer = false;
     rgb = false;
     vectorised = false;
     usingVTKImage = false;
@@ -173,6 +194,7 @@ void milxQtImage::setData(vectorImageType::Pointer newImg, const bool flipY, con
 
     loaded = true;
     eightbit = false;
+    integer = false;
     rgb = false;
     vectorised = true;
     usingVTKImage = false;
@@ -190,6 +212,7 @@ void milxQtImage::setData(vnl_matrix<double> &newData)
 	printWarning("Matrix of Double type has been converted to Float type for display");
     loaded = true;
     usingVTKImage = false;
+    integer = false;
     eightbit = false;
     rgb = false;
     vectorised = false;
@@ -206,6 +229,7 @@ void milxQtImage::setData(vtkSmartPointer<vtkImageData> newImg)
 
     usingVTKImage = true;
     eightbit = false;
+    integer = false;
     if( (newImg->GetNumberOfScalarComponents() == 4 || newImg->GetNumberOfScalarComponents() == 3) && newImg->GetScalarType() == VTK_UNSIGNED_CHAR )
         rgb = true;
     else
@@ -221,6 +245,8 @@ void milxQtImage::setDisplayData(QPointer<milxQtImage> newImg)
 {
     if(newImg->is8BitImage())
     	setDisplayData(newImg->GetCharImage(), newImg->isDisplayFlipped());
+    else if(newImg->is32BitImage())
+      setDisplayData(newImg->GetIntImage(), newImg->isDisplayFlipped());
     else if(newImg->isRGBImage())
     	setDisplayData(newImg->GetRGBImage(), newImg->isDisplayFlipped());
     else if(newImg->isVectorImage())
@@ -237,9 +263,24 @@ void milxQtImage::setDisplayData(charImageType::Pointer newImg, const bool flipY
 
     loaded = true;
     eightbit = true;
+    integer = false;
     rgb = false;
     vectorised = false;
     usingVTKImage = false;
+}
+
+void milxQtImage::setDisplayData(intImageType::Pointer newImg, const bool flipY)
+{
+  imageInt = newImg;
+
+  flipped = flipY;
+
+  loaded = true;
+  eightbit = false;
+  integer = true;
+  rgb = false;
+  vectorised = false;
+  usingVTKImage = false;
 }
 
 void milxQtImage::setDisplayData(rgbImageType::Pointer newImg, const bool flipY)
@@ -250,6 +291,7 @@ void milxQtImage::setDisplayData(rgbImageType::Pointer newImg, const bool flipY)
 
     loaded = true;
     eightbit = false;
+    integer = false;
     rgb = true;
     vectorised = false;
     usingVTKImage = false;
@@ -263,6 +305,7 @@ void milxQtImage::setDisplayData(floatImageType::Pointer newImg, const bool flip
 
     loaded = true;
     eightbit = false;
+    integer = false;
     rgb = false;
     vectorised = false;
     usingVTKImage = false;
@@ -329,18 +372,10 @@ void milxQtImage::generateImage(const bool quietly)
         imageInformation();
 
         ///Ensure small images are rendered correctly using Magnify class
-        /*vtkSmartPointer<vtkImageMagnify> magnify = vtkSmartPointer<vtkImageMagnify>::New();
-        magnify->SetInput(imageData);
-        if (bounds[1]+1 < minWindowSize && bounds[3]+1 < minWindowSize)
-            magnify->SetMagnificationFactors(minWindowSize/(bounds[1]+1),minWindowSize/(bounds[3]+1),1);
-        else
-            magnify->SetMagnificationFactors(1,1,1);
-        //~ magnify->InterpolateOff();*/
         if(bounds[5] > 1)
             volume = true;
 
         ///Setup Viewer
-        //~ viewer->SetInput(magnify->GetOutput());
     #if VTK_MAJOR_VERSION <= 5
         viewer->SetInput(imageData);
     #else
@@ -964,6 +999,36 @@ void milxQtImage::updateData(const bool orient)
         floatImageType::PointType origin;
         floatImageType::SpacingType spacing;
         vtkSmartPointer<vtkImageData> newImageData = vtkSmartPointer<vtkImageData>::New();
+        /*if(eightbit)
+        {
+            /// ITK to VTK image (unsigned char)
+            if(orient)
+                imageChar = milx::Image<charImageType>::ApplyOrientationToITKImage<charImageType, float>(imageChar, imageChar, true, flipped);
+            imageData->DeepCopy(milx::Image<charImageType>::ConvertITKImageToVTKImage(imageChar));
+            direction = imageChar->GetDirection();
+            origin = imageChar->GetOrigin();
+            spacing = imageChar->GetSpacing();
+        }
+        else if(rgb)
+        {
+            /// ITK to VTK image (RGB)
+            if(orient)
+                imageRGB = milx::Image<rgbImageType>::ApplyOrientationToITKImage<rgbImageType, float>(imageRGB, imageRGB, true, flipped);
+            imageData->DeepCopy(milx::Image<rgbImageType>::ConvertITKImageToVTKImage(imageRGB));
+            direction = imageRGB->GetDirection();
+            origin = imageRGB->GetOrigin();
+            spacing = imageRGB->GetSpacing();
+        }
+        else //if float and/or vector (which also generates float magnitude image)
+        {
+            /// ITK to VTK image (Float)
+            if(orient)
+                imageFloat = milx::Image<floatImageType>::ApplyOrientationToITKImage<floatImageType, float>(imageFloat, imageFloat, true, flipped);
+            imageData->DeepCopy(milx::Image<floatImageType>::ConvertITKImageToVTKImage(imageFloat));
+            direction = imageFloat->GetDirection();
+            origin = imageFloat->GetOrigin();
+            spacing = imageFloat->GetSpacing();
+        }*/
         if(eightbit)
         {
             /// ITK to VTK image (unsigned char)
@@ -978,6 +1043,20 @@ void milxQtImage::updateData(const bool orient)
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
             printDebug("Updated Internal Char Image Data");
         }
+        else if(integer)
+        {
+          /// ITK to VTK image (RGB)
+          newImageData->DeepCopy(milx::Image<intImageType>::ConvertITKImageToVTKImage(imageInt));
+          direction = imageInt->GetDirection();
+          origin = imageInt->GetOrigin();
+          spacing = imageInt->GetSpacing();
+          if(orient)
+            imageData = milx::Image<intImageType>::ApplyOrientationToVTKImage(newImageData, imageInt, transformMatrix, true, flipped);
+          else
+            imageData = newImageData;
+          //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
+          printDebug("Updated Internal Integer Image Data");
+        }
         else if(rgb)
         {
             /// ITK to VTK image (RGB)
@@ -986,7 +1065,7 @@ void milxQtImage::updateData(const bool orient)
             origin = imageRGB->GetOrigin();
             spacing = imageRGB->GetSpacing();
             if(orient)
-                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, false, flipped);
+                imageData = milx::Image<rgbImageType>::ApplyOrientationToVTKImage(newImageData, imageRGB, transformMatrix, true, flipped);
             else
                 imageData = newImageData;
             //Labelled image flag is set as true to avoid artefacts in resampling within the ApplyOrientationToVTKImage member
@@ -1038,83 +1117,6 @@ void milxQtImage::autoLevel(float percentile)
         histogram(bins, belowValue, aboveValue, false); //above and below unused here, uses image min/max automatically
     belowValue = minValue;
     aboveValue = maxValue;
-
-    //Compute Histogram
-    //const unsigned int MeasurementVectorSize = 1; // Grayscale
-    //const unsigned int binsPerDimension = bins;
-
-    emit working(-1);
-    /*float lowLevel, maxLevel, medianValue, windowLevel, level;
-    if(eightbit)
-    {
-        printDebug("Using Float Histogram");
-        typedef itk::Statistics::ImageToHistogramFilter<charImageType> ImageToHistogramFilterType;
-        ImageToHistogramFilterType::HistogramType::MeasurementVectorType lowerBound(binsPerDimension);
-        lowerBound.Fill(belowValue);
-        ImageToHistogramFilterType::HistogramType::MeasurementVectorType upperBound(binsPerDimension);
-        upperBound.Fill(aboveValue);
-        ImageToHistogramFilterType::HistogramType::SizeType size(MeasurementVectorSize);
-        size.Fill(binsPerDimension);
-        ImageToHistogramFilterType::Pointer imageToHistogramFilter = ImageToHistogramFilterType::New();
-        imageToHistogramFilter->SetInput( imageChar );
-        //imageToHistogramFilter->SetHistogramBinMinimum( lowerBound );
-        //imageToHistogramFilter->SetHistogramBinMaximum( upperBound );
-        imageToHistogramFilter->SetAutoMinimumMaximum(true);
-        imageToHistogramFilter->SetHistogramSize( size );
-        try
-          {
-          imageToHistogramFilter->Update();
-          }
-        catch( itk::ExceptionObject & error )
-          {
-          std::cerr << "Histogram Error: " << error << std::endl;
-          return;
-          }
-
-        ImageToHistogramFilterType::HistogramType* histogram = imageToHistogramFilter->GetOutput();
-        medianValue = histogram->Quantile(0, 0.5);
-        lowLevel = histogram->Quantile(0, lowerPercentile);
-        maxLevel = histogram->Quantile(0, upperPercentile);
-    }
-    else if(rgb)
-    {
-        printError("RGB Image Histogram to be supported soon.");
-        return;
-    }
-    else
-    {
-        printDebug("Using Float Histogram");
-        typedef itk::Statistics::ImageToHistogramFilter<floatImageType> ImageToHistogramFilterType;
-        ImageToHistogramFilterType::HistogramType::MeasurementVectorType lowerBound(binsPerDimension);
-        lowerBound.Fill(belowValue);
-        ImageToHistogramFilterType::HistogramType::MeasurementVectorType upperBound(binsPerDimension);
-        upperBound.Fill(aboveValue) ;
-        ImageToHistogramFilterType::HistogramType::SizeType size(MeasurementVectorSize);
-        size.Fill(binsPerDimension);
-        ImageToHistogramFilterType::Pointer imageToHistogramFilter = ImageToHistogramFilterType::New();
-        imageToHistogramFilter->SetInput( imageFloat );
-        //imageToHistogramFilter->SetHistogramBinMinimum( lowerBound );
-        //imageToHistogramFilter->SetHistogramBinMaximum( upperBound );
-        imageToHistogramFilter->SetAutoMinimumMaximum(true);
-        imageToHistogramFilter->SetHistogramSize( size );
-        try
-          {
-          imageToHistogramFilter->Update();
-          }
-        catch( itk::ExceptionObject & error )
-          {
-          std::cerr << "Histogram Error: " << error << std::endl;
-          return;
-          }
-        ImageToHistogramFilterType::HistogramType* histogram = imageToHistogramFilter->GetOutput();
-        medianValue = histogram->Quantile(0, 0.5);
-        lowLevel = histogram->Quantile(0, lowerPercentile);
-        maxLevel = histogram->Quantile(0, upperPercentile);
-    }
-    windowLevel = maxLevel-lowLevel;
-//    level = meanValue;
-    level = medianValue;*/
-    emit done(-1);
 
     emit working(-1);
     //Compute the percentile contributions to trim levels for better contrast
@@ -1233,8 +1235,19 @@ void milxQtImage::overlay(QString filename)
     {
         if(labelledImage->is8BitImage())
             imageRGB = milx::Image<charImageType>::Overlay<charImageType>(imageChar, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<charImageType>::Overlay<intImageType>(imageChar, labelledImage->GetIntImage());
         else
             imageRGB = milx::Image<charImageType>::Overlay<floatImageType>(imageChar, labelledImage->GetFloatImage());
+    }
+    else if(integer)
+    {
+        if(labelledImage->is8BitImage())
+            imageRGB = milx::Image<intImageType>::Overlay<charImageType>(imageInt, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<intImageType>::Overlay<intImageType>(imageInt, labelledImage->GetIntImage());
+        else
+            imageRGB = milx::Image<intImageType>::Overlay<floatImageType>(imageInt, labelledImage->GetFloatImage());
     }
 //    else if(rgb)
 //        imageRGB = milx::Image::Overlay<rgbImageType>(imageRGB, labelledImage->GetRGBImage());
@@ -1242,6 +1255,8 @@ void milxQtImage::overlay(QString filename)
     {
         if(labelledImage->is8BitImage())
             imageRGB = milx::Image<floatImageType>::Overlay<charImageType>(imageFloat, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<floatImageType>::Overlay<intImageType>(imageFloat, labelledImage->GetIntImage());
         else
             imageRGB = milx::Image<floatImageType>::Overlay<floatImageType>(imageFloat, labelledImage->GetFloatImage());
     }
@@ -1250,6 +1265,7 @@ void milxQtImage::overlay(QString filename)
     emit done(-1);
 
     eightbit = false;
+    integer = false;
     rgb = true;
     generateImage();
 }
@@ -1281,8 +1297,19 @@ void milxQtImage::overlayContour(QString filename)
     {
         if(labelledImage->is8BitImage())
             imageRGB = milx::Image<charImageType>::OverlayContour<charImageType>(imageChar, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<charImageType>::OverlayContour<intImageType>(imageChar, labelledImage->GetIntImage());
         else
             imageRGB = milx::Image<charImageType>::OverlayContour<floatImageType>(imageChar, labelledImage->GetFloatImage());
+    }
+    else if(integer)
+    {
+        if(labelledImage->is8BitImage())
+            imageRGB = milx::Image<intImageType>::OverlayContour<charImageType>(imageInt, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<intImageType>::OverlayContour<intImageType>(imageInt, labelledImage->GetIntImage());
+        else
+            imageRGB = milx::Image<intImageType>::OverlayContour<floatImageType>(imageInt, labelledImage->GetFloatImage());
     }
 //    else if(rgb)
 //        imageRGB = milx::Image::OverlayContour<rgbImageType>(imageRGB, labelledImage->GetRGBImage());
@@ -1290,6 +1317,8 @@ void milxQtImage::overlayContour(QString filename)
     {
         if(labelledImage->is8BitImage())
             imageRGB = milx::Image<floatImageType>::OverlayContour<charImageType>(imageFloat, labelledImage->GetCharImage());
+        else if(labelledImage->is32BitImage())
+            imageRGB = milx::Image<floatImageType>::OverlayContour<intImageType>(imageFloat, labelledImage->GetIntImage());
         else
             imageRGB = milx::Image<floatImageType>::OverlayContour<floatImageType>(imageFloat, labelledImage->GetFloatImage());
     }
@@ -1298,6 +1327,7 @@ void milxQtImage::overlayContour(QString filename)
     emit done(-1);
 
     eightbit = false;
+    integer = false;
     rgb = true;
     generateImage();
 }
@@ -1314,6 +1344,8 @@ void milxQtImage::computeContour()
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::BinaryContour(imageChar, minValue, maxValue);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::BinaryContour(imageInt, minValue, maxValue);
     else if(rgb)
         imageRGB = milx::Image<rgbImageType>::BinaryContour(imageRGB, minValue, maxValue);
     else
@@ -1473,6 +1505,14 @@ void milxQtImage::imageInformation()
             direction = imageChar->GetDirection();
             printInfo("Image loaded as 8-bit image.");
         }
+        else if(integer)
+        {
+          origin = imageInt->GetOrigin();
+          spacing = imageInt->GetSpacing();
+          imageSize = imageInt->GetLargestPossibleRegion().GetSize();
+          direction = imageInt->GetDirection();
+          printInfo("Image loaded as Integer image.");
+        }
         else if(rgb)
         {
             origin = imageRGB->GetOrigin();
@@ -1501,6 +1541,17 @@ void milxQtImage::imageInformation()
         printInfo("|" + QString::number(direction(0,0)) + ", " + QString::number(direction(0,1)) + ", " + QString::number(direction(0,2)) + "|");
         printInfo("|" + QString::number(direction(1,0)) + ", " + QString::number(direction(1,1)) + ", " + QString::number(direction(1,2)) + "|");
         printInfo("|" + QString::number(direction(2,0)) + ", " + QString::number(direction(2,1)) + ", " + QString::number(direction(2,2)) + "|");
+        
+        QString orientFlagStr;
+        if(eightbit)
+          orientFlagStr = milx::Image<charImageType>::ImageOrientation(imageChar).c_str();
+        else if(integer)
+          orientFlagStr = milx::Image<intImageType>::ImageOrientation(imageInt).c_str();
+        else if(rgb)
+          orientFlagStr = milx::Image<rgbImageType>::ImageOrientation(imageRGB).c_str();
+        else
+          orientFlagStr = milx::Image<floatImageType>::ImageOrientation(imageFloat).c_str();
+        printInfo("Orientation Flag: " + orientFlagStr);
     }
 
     emit done(-1);
@@ -1527,6 +1578,8 @@ void milxQtImage::rescale()
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::RescaleIntensity(imageChar, newMinValue, newMaxValue);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::RescaleIntensity(imageInt, newMinValue, newMaxValue);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::RescaledIntensity(imageRGB, newMinValue, newMaxValue);
     else
@@ -1579,6 +1632,8 @@ void milxQtImage::histogramEqualisation()
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::HistogramEqualisation(imageChar);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::HistogramEqualisation(imageInt);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::HistogramEqualisation(imageRGB);
     else
@@ -1600,6 +1655,8 @@ void milxQtImage::gradientMagnitude()
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::GradientMagnitude(imageChar);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::GradientMagnitude(imageInt);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::GradientMagnitude(imageRGB);
     else
@@ -1623,6 +1680,11 @@ void milxQtImage::sobelEdges()
     {
         imageFloat = milx::Image<floatImageType>::SobelEdges( milx::Image<charImageType>::CastImage<floatImageType>(imageChar) );
         eightbit = false;
+    }
+    else if(integer)
+    {
+        imageFloat = milx::Image<floatImageType>::SobelEdges( milx::Image<intImageType>::CastImage<floatImageType>(imageInt) );
+        integer = false;
     }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::SobelEdges(imageRGB);
@@ -1660,6 +1722,12 @@ void milxQtImage::cannyEdges()
         imageFloat = milx::Image<floatImageType>::CannyEdges( milx::Image<charImageType>::CastImage<floatImageType>(imageChar), variance, lower, upper );
         eightbit = false;
     }
+    else if(integer)
+    {
+        //must be float type image
+        imageFloat = milx::Image<floatImageType>::CannyEdges(milx::Image<intImageType>::CastImage<floatImageType>(imageInt), variance, lower, upper);
+        integer = false;
+    }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::CannyEdges(imageRGB, variance, lower, upper);
     else
@@ -1685,6 +1753,12 @@ void milxQtImage::laplacian()
         imageFloat = milx::Image<floatImageType>::Laplacian( milx::Image<charImageType>::CastImage<floatImageType>(imageChar) );
         eightbit = false;
     }
+    else if(integer)
+    {
+        //must be float type image
+        imageFloat = milx::Image<floatImageType>::Laplacian(milx::Image<intImageType>::CastImage<floatImageType>(imageInt));
+        integer = false;
+    }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::Laplacian(imageRGB);
     else
@@ -1708,6 +1782,11 @@ void milxQtImage::normalize()
     {
         imageFloat = milx::Image<charImageType>::Normalization(imageChar);
         eightbit = false;
+    }
+    else if(integer)
+    {
+        imageFloat = milx::Image<intImageType>::Normalization(imageInt);
+        integer = false;
     }
 //    else if(rgb)
 //    {
@@ -1735,6 +1814,8 @@ void milxQtImage::invertIntensity()
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::InvertIntensity(imageChar, maxValue);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::InvertIntensity(imageInt, maxValue);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::InvertIntensity(imageRGB, maxValue);
     else
@@ -1750,6 +1831,8 @@ void milxQtImage::matchInfo(milxQtImage *imageToMatch)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::MatchInformation(imageChar, imageToMatch->GetCharImage());
+    else if(integer)
+        imageInt = milx::Image<intImageType>::MatchInformation(imageInt, imageToMatch->GetIntImage());
     else if(rgb)
         imageRGB = milx::Image<rgbImageType>::MatchInformation(imageRGB, imageToMatch->GetRGBImage());
     else
@@ -1789,6 +1872,8 @@ void milxQtImage::matchHistogram(milxQtImage *imageToMatch)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::MatchHistogram(imageChar, imageToMatch->GetCharImage());
+    else if(integer)
+        imageInt = milx::Image<intImageType>::MatchHistogram(imageInt, imageToMatch->GetIntImage());
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::MatchInformation(imageRGB, imageToMatch->GetRGBImage());
     else
@@ -1849,10 +1934,32 @@ void milxQtImage::resample(QString filename)
     {
         if(imageToMatch->is8BitImage())
             imageChar = milx::Image<charImageType>::ResampleImage<charImageType>(imageChar, imageToMatch->GetCharImage());
+        else if(imageToMatch->is32BitImage())
+        {
+            imageInt = milx::Image<charImageType>::ResampleImage<intImageType>(imageChar, imageToMatch->GetIntImage());
+            eightbit = false;
+            integer = true;
+        }
         else
         {
             imageFloat = milx::Image<charImageType>::ResampleImage<floatImageType>(imageChar, imageToMatch->GetFloatImage());
             eightbit = false;
+        }
+    }
+    else if(integer)
+    {
+        if(imageToMatch->is8BitImage())
+        {
+            imageChar = milx::Image<intImageType>::ResampleImage<charImageType>(imageInt, imageToMatch->GetCharImage());
+            eightbit = true;
+            integer = false;
+        }
+        else if(imageToMatch->is32BitImage())
+            imageInt = milx::Image<intImageType>::ResampleImage<intImageType>(imageInt, imageToMatch->GetIntImage());
+        else
+        {
+            imageFloat = milx::Image<intImageType>::ResampleImage<floatImageType>(imageInt, imageToMatch->GetFloatImage());
+            integer = false;
         }
     }
 //    else if(rgb)
@@ -1902,9 +2009,16 @@ void milxQtImage::mask(QString filename)
         else
             imageChar = milx::Image<charImageType>::MaskImage<floatImageType>(imageChar, imageToMatch->GetFloatImage());
     }
+    else if(integer)
+    {
+        if(imageToMatch->is8BitImage())
+            imageInt = milx::Image<intImageType>::MaskImage<charImageType>(imageInt, imageToMatch->GetCharImage());
+        else
+            imageInt = milx::Image<intImageType>::MaskImage<intImageType>(imageInt, imageToMatch->GetIntImage());
+    }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::MaskImage<rgbImageType>(imageRGB, imageToMatch->GetRGBImage());
-#if ITK_MAJOR_VERSION > 3
+#if ITK_VERSION_MAJOR > 3
     else if(vectorised)
     {
         if(imageToMatch->is8BitImage())
@@ -1957,6 +2071,8 @@ void milxQtImage::subsample(size_t xSampleFactor, size_t ySampleFactor, size_t z
     factors[2] = zSampleFactor;
     if(eightbit)
         imageChar = milx::Image<charImageType>::SubsampleImage(imageChar, factors);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::SubsampleImage(imageInt, factors);
     else if(rgb)
         imageRGB = milx::Image<rgbImageType>::SubsampleImage(imageRGB, factors);
     else if(vectorised)
@@ -1998,6 +2114,13 @@ void milxQtImage::crop(QString filename)
             imageChar = milx::Image<charImageType>::MaskAndCropImage<charImageType>(imageChar, imageToMatch->GetCharImage());
         else
             imageChar = milx::Image<charImageType>::MaskAndCropImage<floatImageType>(imageChar, imageToMatch->GetFloatImage());
+    }
+    else if(integer)
+    {
+      if(imageToMatch->is8BitImage())
+        imageInt = milx::Image<intImageType>::MaskAndCropImage<charImageType>(imageInt, imageToMatch->GetCharImage());
+      else
+        imageInt = milx::Image<intImageType>::MaskAndCropImage<floatImageType>(imageInt, imageToMatch->GetFloatImage());
     }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::MaskAndCropImage<rgbImageType>(imageRGB, imageToMatch->GetRGBImage());
@@ -2055,6 +2178,20 @@ void milxQtImage::resampleLabel(QString filename)
             imageFloat = milx::Image<charImageType>::ResampleLabel<floatImageType>(imageChar, imageToMatch->GetFloatImage());
             eightbit = false;
         }
+    }
+    else if(integer)
+    {
+      if(imageToMatch->is8BitImage())
+      {
+           imageChar = milx::Image<intImageType>::ResampleLabel<charImageType>(imageInt, imageToMatch->GetCharImage());
+           eightbit = true;
+           integer = false;
+      }
+      else
+      {
+          imageFloat = milx::Image<intImageType>::ResampleLabel<floatImageType>(imageInt, imageToMatch->GetFloatImage());
+          integer = false;
+      }
     }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::ResampleLabel(imageRGB, imageToMatch->GetRGBImage());
@@ -2141,6 +2278,20 @@ void milxQtImage::transform(QString filename, QString refImgFilename, bool inver
                 eightbit = false;
             }
         }
+        else if(integer)
+        {
+            if(imageToMatch->is8BitImage())
+            {
+                imageChar = milx::Image<intImageType>::TransformImage<charImageType, TransformType, transformType>(imageInt, imageToMatch->GetCharImage(), transf, inverse, 0); //NN Interp
+                eightbit = true;
+                integer = false;
+            }
+            else
+            {
+                imageFloat = milx::Image<intImageType>::TransformImage<floatImageType, TransformType, transformType>(imageInt, imageToMatch->GetFloatImage(), transf, inverse, 0); //NN interp
+                integer = false;
+            }
+        }
     //    else if(rgb)
     //        imageRGB = milx::Image<rgbImageType>::TransformImage(imageRGB, imageToMatch->GetRGBImage(), transf);
         else
@@ -2165,6 +2316,20 @@ void milxQtImage::transform(QString filename, QString refImgFilename, bool inver
             {
                 imageFloat = milx::Image<charImageType>::TransformImage<floatImageType, TransformType, transformType>(imageChar, transf, inverse, 0); //NN Interp
                 eightbit = false;
+            }
+        }
+        else if(integer)
+        {
+            if(imageToMatch->is8BitImage())
+            {
+                imageChar = milx::Image<intImageType>::TransformImage<charImageType, TransformType, transformType>(imageInt, transf, inverse);
+                eightbit = true;
+                integer = false;
+            }
+            else
+            {
+                imageFloat = milx::Image<intImageType>::TransformImage<floatImageType, TransformType, transformType>(imageInt, transf, inverse); 
+                integer = false;
             }
         }
     //    else if(rgb)
@@ -2210,6 +2375,8 @@ void milxQtImage::checkerBoard(milxQtImage *img, int numberOfSquares)
     {
         if(eightbit)
             imageChar = milx::Image<charImageType>::CheckerBoard(imageChar, img->GetCharImage(), numberOfSquares);
+        else if(eightbit)
+            imageInt = milx::Image<intImageType>::CheckerBoard(imageInt, img->GetIntImage(), numberOfSquares);
     //    else if(rgb)
     //        imageRGB = milx::Image<rgbImageType>::CheckerBoard(imageRGB, img->GetRGBImage());
         else
@@ -2239,6 +2406,14 @@ void milxQtImage::checkerBoard(milxQtImage *img, int numberOfSquares)
             charImage2DType::Pointer imageChar2DToChecker = milx::Image<charImageType>::ExtractSlice<charImage2DType>(img->GetCharImage(), extent);
             imageChar2D = milx::Image<charImage2DType>::CheckerBoard(imageChar2D, imageChar2DToChecker, numberOfSquares);
             imageChar = milx::Image<charImage2DType>::CastImage<charImageType>(imageChar2D);
+        }
+        else if(integer)
+        {
+            typedef itk::Image<intPixelType, 2> intImage2DType;
+            intImage2DType::Pointer imageInt2D = milx::Image<charImageType>::ExtractSlice<intImage2DType>(imageChar, extent);
+            intImage2DType::Pointer imageInt2DToChecker = milx::Image<intImageType>::ExtractSlice<intImage2DType>(img->GetIntImage(), extent);
+            imageInt2D = milx::Image<intImage2DType>::CheckerBoard(imageInt2D, imageInt2DToChecker, numberOfSquares);
+            imageInt = milx::Image<intImage2DType>::CastImage<intImageType>(imageInt2D);
         }
     //    else if(rgb)
     //        imageRGB = milx::Image<rgbImageType>::CheckerBoard(imageRGB, img->GetRGBImage());
@@ -2319,6 +2494,11 @@ void milxQtImage::distanceMap(bool signedDistance, bool inside)
         imageFloat = milx::Image<charImageType>::DistanceMap<floatImageType>(imageChar, true, signedDistance, inside);
         eightbit = false;
     }
+    else if(integer)
+    {
+        imageFloat = milx::Image<intImageType>::DistanceMap<floatImageType>(imageInt, true, signedDistance, inside);
+        integer = false;
+    }
 //    else if(rgb)
 //        imageRGB = milx::Image::DistanceMap<rgbImageType>(imageRGB);
     else
@@ -2356,6 +2536,8 @@ void milxQtImage::thresholdAbove(float value, float level)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::ThresholdAboveImage(imageChar, value, level);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::ThresholdAboveImage(imageInt, value, level);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::ThresholdAboveImage(imageRGB);
     else
@@ -2391,6 +2573,8 @@ void milxQtImage::thresholdBelow(float value, float level)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::ThresholdBelowImage(imageChar, value, level);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::ThresholdBelowImage(imageInt, value, level);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::ThresholdBelowImage(imageRGB);
     else
@@ -2428,6 +2612,8 @@ void milxQtImage::threshold(float value, float blevel, float alevel)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::ThresholdImage(imageChar, value, blevel, alevel);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::ThresholdImage(imageInt, value, blevel, alevel);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::ThresholdImage(imageRGB, blevel, alevel);
     else
@@ -2461,6 +2647,8 @@ void milxQtImage::otsu(int bins)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::OtsuThresholdImage<charImageType>(imageChar, bins);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::OtsuThresholdImage<intImageType>(imageInt, bins);
     //~ else if(rgb)
         //~ imageChar = milx::Image<rgbImageType>::OtsuThresholdImage<charImageType>(imageRGB, bins);
     else
@@ -2498,6 +2686,8 @@ void milxQtImage::otsuMultiple(int bins, int labels)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::OtsuMultipleThresholdImage<charImageType>(imageChar, bins, labels);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::OtsuMultipleThresholdImage<intImageType>(imageInt, bins, labels);
     //~ else if(rgb)
         //~ imageChar = milx::Image<rgbImageType>::OtsuMultipleThresholdImage<charImageType>(imageRGB, bins, labels);
     else
@@ -2537,6 +2727,8 @@ void milxQtImage::binaryThreshold(float value, float blevel, float alevel)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::BinaryThresholdImage<charImageType>(imageChar, 0, value, blevel, alevel);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::BinaryThresholdImage<intImageType>(imageInt, 0, value, blevel, alevel);
 //    else if(rgb)
 //        imageChar = milx::Image<rgbImageType>::TBinaryThresholdImage<charImageType>(imageRGB, 0, value, blevel, alevel);
     else
@@ -2602,6 +2794,14 @@ void milxQtImage::flip(bool xAxis, bool yAxis, bool zAxis, bool aboutOrigin)
         //~ cerr << "Flipped Direction: " << imageChar->GetDirection() << endl;
         //~ flipped = !flipped;
         //~ imageChar->GetDirection()(1,1) *= -1;
+    }
+    else if(integer)
+    {
+        imageInt = milx::Image<intImageType>::FlipImage(imageInt, xAxis, yAxis, zAxis, aboutOrigin);
+        //~ direction = imageInt->GetDirection();
+        //~ cout << "Flipped Direction: " << imageInt->GetDirection() << endl;
+        //~ flipped = !flipped;
+        //~ imageInt->GetDirection()(1,1) *= -1;
     }
     else if(rgb)
     {
@@ -2789,6 +2989,11 @@ void milxQtImage::anisotropicDiffusion()
             imageFloat = milx::Image<charImageType>::AnisotropicDiffusion<floatImageType>(imageChar, iterations, timestep);
             eightbit = false;
         }
+        else if(integer)
+        {
+            imageFloat = milx::Image<intImageType>::AnisotropicDiffusion<floatImageType>(imageInt, iterations, timestep);
+            integer = false;
+        }
 //        else if(rgb)
 //            imageRGB = milx::Image<rgbImageType>::AnisotropicDiffusion(imageRGB, iterations, timestep);
         else
@@ -2817,6 +3022,8 @@ void milxQtImage::gaussianSmooth()
         emit working(-1);
         if(eightbit)
             imageChar = milx::Image<charImageType>::GaussianSmooth(imageChar, variance);
+        else if(integer)
+            imageInt = milx::Image<intImageType>::GaussianSmooth(imageInt, variance);
 //        else if(rgb)
 //            imageRGB = milx::Image<rgbImageType>::GaussianSmooth(imageRGB, variance);
         else
@@ -2842,19 +3049,21 @@ void milxQtImage::bilateral()
                                            tr("Domain Sigma:"), 5, 0.0, 2147483647, 5, &ok2);
 
   if(ok1)
-    {
+  {
       printInfo("Computing Bilateral Smoothing of Image");
       emit working(-1);
       if(eightbit)
-        imageChar = milx::Image<charImageType>::Bilateral(imageChar, sigmaRange, sigmaSpatial);
+          imageChar = milx::Image<charImageType>::Bilateral(imageChar, sigmaRange, sigmaSpatial);
+      else if(integer)
+          imageInt = milx::Image<intImageType>::Bilateral(imageInt, sigmaRange, sigmaSpatial);
       //        else if(rgb)
       //            imageRGB = milx::Image<rgbImageType>::Bilateral(imageRGB, sigmaRange, sigmaSpatial);
       else
-        imageFloat = milx::Image<floatImageType>::Bilateral(imageFloat, sigmaRange, sigmaSpatial);
+          imageFloat = milx::Image<floatImageType>::Bilateral(imageFloat, sigmaRange, sigmaSpatial);
       emit done(-1);
 
       generateImage();
-    }
+  }
 }
 
 void milxQtImage::median()
@@ -2875,6 +3084,8 @@ void milxQtImage::median()
         emit working(-1);
         if(eightbit)
             imageChar = milx::Image<charImageType>::Median(imageChar, radius);
+        else if(integer)
+            imageInt = milx::Image<intImageType>::Median(imageInt, radius);
 //        else if(rgb)
 //            imageRGB = milx::Image<rgbImageType>::Median(imageRGB, radius);
         else
@@ -2909,6 +3120,22 @@ void milxQtImage::zeros(const unsigned long xSize, const unsigned long ySize, co
             imageChar->SetOrigin(refImage->GetCharImage()->GetOrigin());
             imageChar->SetSpacing(refImage->GetCharImage()->GetSpacing());
             imageChar->SetDirection(refImage->GetCharImage()->GetDirection());
+        }
+    }
+    else if(integer)
+    {
+        intImageType::SizeType blankSize;
+          blankSize[0]  = xSize;  // size along X
+          blankSize[1]  = ySize;  // size along Y
+          blankSize[2]  = zSize;  // size along Z
+
+        imageInt = milx::Image<intImageType>::BlankImage(0.0, blankSize);
+
+        if(refImage)
+        {
+            imageInt->SetOrigin(refImage->GetIntImage()->GetOrigin());
+            imageInt->SetSpacing(refImage->GetIntImage()->GetSpacing());
+            imageInt->SetDirection(refImage->GetIntImage()->GetDirection());
         }
     }
     else if(rgb)
@@ -2963,6 +3190,13 @@ void milxQtImage::resize(double outputSpacing)
         newOrigin = imageChar->GetOrigin();
         newDirection = imageChar->GetDirection();
     }
+    else if(integer)
+    {
+        newSpacing = imageInt->GetSpacing();
+        newSize = imageInt->GetLargestPossibleRegion().GetSize();
+        newOrigin = imageInt->GetOrigin();
+        newDirection = imageInt->GetDirection();
+    }
     else if(!eightbit && !rgb && !vectorised)
     {
         newSpacing = imageFloat->GetSpacing();
@@ -3001,6 +3235,8 @@ void milxQtImage::resize(double outputSpacing)
 
     if(eightbit)
         imageChar = milx::Image<charImageType>::ResizeImage(imageChar, newSize, newSpacing, newOrigin, newDirection);
+    else if(integer)
+        imageInt = milx::Image<intImageType>::ResizeImage(imageInt, newSize, newSpacing, newOrigin, newDirection);
     else if(!eightbit && !rgb && !vectorised)
         imageFloat = milx::Image<floatImageType>::ResizeImage(imageFloat, newSize, newSpacing, newOrigin, newDirection);
     emit done(-1);
@@ -3029,6 +3265,18 @@ void milxQtImage::resize(const unsigned long xSize, const unsigned long ySize, c
             imageChar = milx::Image<charImageType>::ResizeImage(imageChar, blankSize, refImage->GetCharImage()->GetSpacing(), refImage->GetCharImage()->GetOrigin(), refImage->GetCharImage()->GetDirection());
         else
             imageChar = milx::Image<charImageType>::ResizeImage(imageChar, blankSize, imageChar->GetSpacing(), imageChar->GetOrigin(), imageChar->GetDirection());
+    }
+    else if(integer)
+    {
+        intImageType::SizeType blankSize;
+          blankSize[0]  = xSize;  // size along X
+          blankSize[1]  = ySize;  // size along Y
+          blankSize[2]  = zSize;  // size along Z
+
+        if(refImage)
+            imageInt = milx::Image<intImageType>::ResizeImage(imageInt, blankSize, refImage->GetIntImage()->GetSpacing(), refImage->GetIntImage()->GetOrigin(), refImage->GetIntImage()->GetDirection());
+        else
+            imageInt = milx::Image<intImageType>::ResizeImage(imageInt, blankSize, imageInt->GetSpacing(), imageInt->GetOrigin(), imageInt->GetDirection());
     }
 //    else if(rgb)
 //    {
@@ -3073,6 +3321,8 @@ void milxQtImage::add(milxQtImage *img)
     emit working(-1);
     if(eightbit && img->is8BitImage())
         imageChar = milx::Image<charImageType>::AddImages(imageChar, img->GetCharImage());
+    else if(integer && img->is32BitImage())
+        imageInt = milx::Image<intImageType>::AddImages(imageInt, img->GetIntImage());
     else if(rgb && img->isRGBImage())
         imageRGB = milx::Image<rgbImageType>::AddImages(imageRGB, img->GetRGBImage());
     else if(vectorised && img->isVectorImage())
@@ -3125,6 +3375,8 @@ void milxQtImage::subtract(milxQtImage *img)
     emit working(-1);
     if(eightbit && img->is8BitImage())
         imageChar = milx::Image<charImageType>::SubtractImages(imageChar, img->GetCharImage());
+    else if(integer && img->is32BitImage())
+        imageInt = milx::Image<intImageType>::SubtractImages(imageInt, img->GetIntImage());
     else if(rgb && img->isRGBImage())
         imageRGB = milx::Image<rgbImageType>::SubtractImages(imageRGB, img->GetRGBImage());
     else if(vectorised && img->isVectorImage())
@@ -3177,6 +3429,8 @@ void milxQtImage::multiply(milxQtImage *img)
   emit working(-1);
   if (eightbit && img->is8BitImage())
       imageChar = milx::Image<charImageType>::MultiplyImages(imageChar, img->GetCharImage());
+  else if (integer && img->is32BitImage())
+      imageInt = milx::Image<intImageType>::MultiplyImages(imageInt, img->GetIntImage());
   else if (!eightbit && !rgb && img->isFloatingPointImage())
       imageFloat = milx::Image<floatImageType>::MultiplyImages(imageFloat, img->GetFloatImage());
   else
@@ -3225,6 +3479,11 @@ void milxQtImage::scale(float scaling)
         imageFloat = milx::Image<charImageType>::ScaleImage<floatImageType>(imageChar, scaling);
         eightbit = false;
     }
+    else if(integer)
+    {
+        imageFloat = milx::Image<intImageType>::ScaleImage<floatImageType>(imageInt, scaling);
+        integer = false;
+    }
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::ScaleImage(imageRGB);
     else if(vectorised)
@@ -3251,6 +3510,8 @@ void milxQtImage::convolve(milxQtImage *img)
     emit working(-1);
     if(eightbit && img->is8BitImage())
         imageChar = milx::Image<charImageType>::ConvolveImages(imageChar, img->GetCharImage());
+    else if(integer && img->is32BitImage())
+        imageInt = milx::Image<intImageType>::ConvolveImages(imageInt, img->GetIntImage());
 //    else if(rgb && img->isRGBImage())
 //        imageRGB = milx::Image<rgbImageType>::ConvolveImages(imageRGB, img->GetRGBImage());
 //    else if(vectorised && img->isVectorImage())
@@ -3487,12 +3748,25 @@ void milxQtImage::scaleDisplay(const bool forceDisplay)
     Render();
 }
 
+#if VTK_MAJOR_VERSION > 5
+void milxQtImage::resliceMode(const bool quietly)
+{
+    if(resliceAct->isChecked())
+        enableResliceMode();
+    else
+        disableResliceMode();
+
+    if(!quietly)
+        emit modified(this);
+}
+#endif
+
 void milxQtImage::showCrosshair(const bool quietly)
 {
     if(cursorAct->isChecked())
-      enableCrosshair();
+        enableCrosshair();
     else
-      disableCrosshair();
+        disableCrosshair();
 
     if(!quietly)
         emit modified(this);
@@ -3560,7 +3834,7 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
     double range[2];
     imageData->GetScalarRange(range);
 
-    int ret = QMessageBox::Yes;
+    int ret = QMessageBox::No;
     if(plotHistogram)
     {
         ///ask user number of bins
@@ -4057,6 +4331,14 @@ void milxQtImage::createActions()
     orientAct->setShortcut(tr("Shift+Alt+o"));
     orientAct->setCheckable(true);
     orientAct->setChecked(true);
+    resliceAct = new QAction(this);
+    resliceAct->setText(QApplication::translate("Image", "3D Slice View Mode", 0, QApplication::UnicodeUTF8));
+    resliceAct->setShortcut(tr("Shift+Ctrl+s"));
+    resliceAct->setCheckable(true);
+    resliceAct->setChecked(false);
+#if VTK_MAJOR_VERSION <= 5
+    resliceAct->setDisabled(true);
+#endif
     cursorAct = new QAction(this);
     cursorAct->setText(tr("Show Cursor", 0));
     cursorAct->setShortcut(tr("Shift+Alt+c"));
@@ -4142,6 +4424,9 @@ void milxQtImage::createConnections()
     connect(infoAct, SIGNAL(triggered()), this, SLOT(imageInformation()));
     connect(interpolateAct, SIGNAL(triggered()), this, SLOT(interpolateDisplay()));
     connect(orientAct, SIGNAL(triggered()), this, SLOT(applyOrientDisplay()));
+#if VTK_MAJOR_VERSION > 5
+    connect(resliceAct, SIGNAL(triggered()), this, SLOT(resliceMode()));
+#endif
     connect(cursorAct, SIGNAL(triggered()), this, SLOT(showCrosshair()));
     connect(milxQtRenderWindow::refreshAct, SIGNAL(triggered()), this, SLOT(refresh()));
     connect(milxQtRenderWindow::resetAct, SIGNAL(triggered()), this, SLOT(reset()));
@@ -4188,6 +4473,7 @@ QMenu* milxQtImage::basicContextMenu()
     contextMenu->addAction(infoAct);
     contextMenu->addAction(interpolateAct);
     contextMenu->addAction(orientAct);
+    contextMenu->addAction(resliceAct);
     contextMenu->addAction(cursorAct);
     contextMenu->addAction(milxQtRenderWindow::humanAct);
     ///Change View of Volume

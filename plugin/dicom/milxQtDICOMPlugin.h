@@ -335,6 +335,7 @@ protected:
     QCheckBox *anonPatientInfo;
     QCheckBox *anonPhysician;
     QCheckBox *anonOperator;
+    QCheckBox *anonScanDate;
 
     //data
     milxQtImage *image; //main window owner

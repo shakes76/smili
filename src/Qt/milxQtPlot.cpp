@@ -498,7 +498,15 @@ void milxQtPlot::volumePlot(vtkSmartPointer<vtkImageData> img, const bool eightb
     else
         volumeMapper->SetInterpolationModeToLinear();
         volumeMapper->SetRequestedRenderModeToDefault(); //choose best automatically
-//        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
+    #if !defined(VTK_LEGACY_REMOVE) && (VTK_MAJOR_VERSION <= 5 || (VTK_MAJOR_VERSION == 6 && VTK_MINOR_VERSION <= 2))
+        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
+    #else // VTK_LEGACY_REMOVE
+        if(milxQtRenderWindow::GetRenderWindow()->IsDirect() && milxQtRenderWindow::GetRenderWindow()->SupportsOpenGL()) //if hardware accelleration present
+        {
+            printDebug("Requesting GPU Volume Rendering");
+            volumeMapper->SetRequestedRenderModeToGPU();
+        }
+    #endif
 //        volumeMapper->SetRequestedRenderModeToRayCast();
         linkProgressEventOf(volumeMapper);
 

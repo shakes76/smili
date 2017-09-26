@@ -291,6 +291,7 @@ void milxQtModel::refresh()
     #else
         modelMapper->SetInputData(model.Result());
     #endif
+        resetScalarRange();
         modelMapper->Update();
         milxQtRenderWindow::refresh();
     }
@@ -769,11 +770,7 @@ void milxQtModel::generateModel(float red, float green, float blue)
         ///Setup actor for rendering
         modelActor->SetMapper(modelMapper);
         modelActor->GetProperty()->SetColor(colourRed, colourGreen, colourBlue);
-        modelActor->GetProperty()->SetSpecularColor(1, 1, 1);
-        modelActor->GetProperty()->SetSpecular(0.25);
-        modelActor->GetProperty()->SetSpecularPower(10);
-        modelActor->GetProperty()->SetAmbient(0.2);
-        modelActor->GetProperty()->SetDiffuse(0.8);
+        enableSpecularDisplay(true);
 
         modelled = true; //dont move down, ordering necessary
         milxQtRenderWindow::AddActor(modelActor);
@@ -1894,7 +1891,7 @@ void milxQtModel::changeOpacity(float opacity)
     }
 }
 
-void milxQtModel::toggleInterpolation()
+void milxQtModel::toggleInterpolation(bool quiet)
 {
     model.GenerateNormals();
 
@@ -1906,7 +1903,33 @@ void milxQtModel::toggleInterpolation()
     QString shadingStr = modelActor->GetProperty()->GetInterpolationAsString();
     printInfo("Using " + shadingStr + " Shading");
 
-    refresh();
+    if(!quiet)
+        refresh();
+}
+
+void milxQtModel::toggleSpecular(bool quiet)
+{
+    if(!specularAct->isChecked())
+    {
+        modelActor->GetProperty()->SetSpecularColor(0, 0, 0);
+        modelActor->GetProperty()->SetSpecular(0.1);
+        modelActor->GetProperty()->SetSpecularPower(0.01);
+        modelActor->GetProperty()->SetAmbient(0.1);
+        modelActor->GetProperty()->SetDiffuse(0.9);
+        printInfo("Using Flat Lighting");
+    }
+    else
+    {
+        modelActor->GetProperty()->SetSpecularColor(1, 1, 1);
+        modelActor->GetProperty()->SetSpecular(0.25);
+        modelActor->GetProperty()->SetSpecularPower(10);
+        modelActor->GetProperty()->SetAmbient(0.2);
+        modelActor->GetProperty()->SetDiffuse(0.8);
+        printInfo("Using Specular Lighting");
+    }
+
+    if(!quiet)
+        refresh();  
 }
 
 void milxQtModel::normals(const bool turnOn)
@@ -2769,6 +2792,11 @@ void milxQtModel::createActions()
     interpAct->setShortcut(tr("Alt+g"));
     interpAct->setCheckable(true);
     interpAct->setChecked(false);
+    specularAct = new QAction(this);
+    specularAct->setText(QApplication::translate("Model", "Specular Lighting", 0, QApplication::UnicodeUTF8));
+    specularAct->setShortcut(tr("Ctrl+Alt+s"));
+    specularAct->setCheckable(true);
+    specularAct->setChecked(false);
 
     normalsAct = new QAction(this);
     normalsAct->setText(tr("Show Normals", 0));
@@ -2861,6 +2889,7 @@ void milxQtModel::createConnections()
     //Properties
     connect(colourAct, SIGNAL(triggered()), this, SLOT(changeColour()));
     connect(interpAct, SIGNAL(triggered()), this, SLOT(toggleInterpolation()));
+    connect(specularAct, SIGNAL(triggered()), this, SLOT(toggleSpecular()));
     //Show
     connect(normalsAct, SIGNAL(triggered()), this, SLOT(normals()));
     connect(centroidAct, SIGNAL(triggered()), this, SLOT(centroid()));
@@ -2906,6 +2935,8 @@ void milxQtModel::setupTooltips()
     colourAct->setStatusTip("Change the mesh colour and transparency (colour is only applicable for meshes with no scalars)");
     interpAct->setToolTip("Change the interpolation of the mesh");
     interpAct->setStatusTip("Change the interpolation of the mesh");
+    specularAct->setToolTip("Change the lighting to be shiny or not");
+    specularAct->setStatusTip("Change the lighting to be shiny or not");
     scaleAct->setToolTip("Show a colour bar of the mesh scalars");
     scaleAct->setStatusTip("Show a colour bar of the mesh scalars");
 }
@@ -2940,6 +2971,7 @@ QMenu* milxQtModel::basicContextMenu()
     contextMenu->addAction(textureAct);
     contextMenu->addAction(colourAct);
     contextMenu->addAction(interpAct);
+    contextMenu->addAction(specularAct);
     contextMenu->addSeparator()->setText(tr("Display"));
     contextMenu->addAction(pointsAct);
     contextMenu->addAction(wireframeAct);

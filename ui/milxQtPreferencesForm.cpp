@@ -94,12 +94,17 @@ void milxQtPreferencesForm::setupPages()
         viewLayout->addWidget(humanCheckBox);
     QGroupBox *generalViewGroup = new QGroupBox(tr("View Options"));
         generalViewGroup->setLayout(viewLayout);
+	//Reset button
+	resetButton = new QPushButton;
+	resetButton->setText("Reset User Interface");
+	connect(resetButton, SIGNAL(clicked()), MainWindow, SLOT(resetSettings()));
     //General layout
     QVBoxLayout *generalLayout = new QVBoxLayout;
         generalLayout->addLayout(windowSizeLayout);
         generalLayout->addLayout(processorsLayout);
         generalLayout->addLayout(magnifyLayout);
         generalLayout->addWidget(timestampCheckBox);
+		generalLayout->addWidget(resetButton);
     QGroupBox *generalGroup = new QGroupBox(tr("General"));
         generalGroup->setLayout(generalLayout);
     QVBoxLayout *generalPageLayout = new QVBoxLayout;
