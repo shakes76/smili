@@ -35,4 +35,4 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SMILI  DEFAULT_MSG
                                   SMILI_LIBRARY MILXQT_LIBRARY VTK_EXT_LIBRARY SMILI_INCLUDE_DIR)
 
-mark_as_advanced(SMILI_INCLUDE_DIR SMILI_LIBRARIES )
+mark_as_advanced(SMILI_LIBRARIES )
