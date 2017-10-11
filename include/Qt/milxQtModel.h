@@ -19,9 +19,6 @@
 #define MILXQTMODEL_H
 
 #include "milxQtRenderWindow.h"
-#include <QFormLayout>
-#include <QDesktopWidget>
-#include <QMenuBar>
 
 #include <vtkPoints.h>
 #include <vtkCellArray.h>
@@ -440,27 +437,16 @@ public slots:
         generateModel(colourRed, colourGreen, colourBlue);
     }
     /*!
-        \fn milxQtModel::toggleInterpolation(bool quiet = false)
+        \fn milxQtModel::toggleInterpolation()
         \brief Toggles the interpolation of the mesh between Phong and Gouraud. Default is Gouraud.
     */
-    void toggleInterpolation(bool quiet = false);
-    inline void interpolateDisplay(bool quiet = false)
-    {   toggleInterpolation(quiet);    }
-    inline void disableInterpolateDisplay(bool quiet = false)
-    {   interpAct->setChecked(false);   interpolateDisplay(quiet);   }
-    inline void enableInterpolateDisplay(bool quiet = false)
-    {   interpAct->setChecked(true);   interpolateDisplay(quiet);   }
-    /*!
-        \fn milxQtModel::toggleSpecular(bool quiet = false)
-        \brief Toggles the specular or shininess of the mesh between Flat and Shiny. Default is Shiny.
-    */
-    void toggleSpecular(bool quiet = false);
-    inline void specularDisplay(bool quiet = false)
-    {   toggleSpecular(quiet);    }
-    inline void disableSpecularDisplay(bool quiet = false)
-    {   specularAct->setChecked(false);   specularDisplay(quiet);    }
-    inline void enableSpecularDisplay(bool quiet = false)
-    {   specularAct->setChecked(true);   specularDisplay(quiet);    }
+    void toggleInterpolation();
+    inline void interpolateDisplay()
+    {   toggleInterpolation();    }
+    inline void disableInterpolateDisplay()
+    {   interpAct->setChecked(false);   interpolateDisplay();   }
+    inline void enableInterpolateDisplay()
+    {   interpAct->setChecked(true);   interpolateDisplay();   }
     /*!
         \fn milxQtModel::copyToContextMenu(QMenu *copyMenu)
         \brief Copies the menu, by duplicating the entries, to the context menu. Connections are assumed to be made before hand.
@@ -1068,7 +1054,6 @@ protected:
     //------------------
     QAction* colourAct; //!< Action for changing colours of a model
     QAction* interpAct; //!< Action for changing the interpolation of a model
-    QAction* specularAct; //!< Action for changing the specular of a model to flat
 
     //View Menu
     //------------------

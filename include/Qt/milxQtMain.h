@@ -27,14 +27,9 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QProgressBar>
-#include <QWebEngineView>
-#include <QMessageBox>
-#include <QFileDialog>
+#include <QComboBox>
 #include <QCheckBox>
-#include <QMenuBar>
-#include <QSignalMapper>
-#include <QApplication>
-#include <QPluginLoader>
+#include <QWebEngineView>
 
 //VTK
 #include <vtkEventQtSlotConnect.h>
@@ -43,6 +38,8 @@
 #include "milxQtModel.h"
 #include "milxQtUnifiedWindow.h"
 #include "milxQtPluginInterface.h"
+
+typedef QMdiArea WorkspaceType;
 
 /*!
     \class milxQtMain
@@ -127,88 +124,128 @@ public:
         \brief Sets whether white background is to be used whenever possible. Default: false
     */
     inline void preferWhiteBackground(const bool whiteBack)
-    {   whiteBackground = whiteBack;    }
+    {
+        whiteBackground = whiteBack;
+    }
     inline bool isWhiteBackgroundPreferred()
-    {   return whiteBackground;   }
+    {
+        return whiteBackground;
+    }
     /*!
         \fn milxQtMain::preferHumanGlyph(const bool human)
         \brief Sets whether human orientation glyph is to be shown whenever possible. Default: true
     */
     inline void preferHumanGlyph(const bool human)
-    {   humanGlyph = human;   }
+    {
+        humanGlyph = human;
+    }
     inline bool isHumanGlyphPreferred()
-    {   return humanGlyph;   }
+    {
+        return humanGlyph;
+    }
     /*!
         \fn milxQtMain::preferSubWindowSize(const int winSize)
         \brief Sets number of sub-window size is to be used whenever possible. Default: double of minWindowSize (around 512).
     */
     inline void preferSubWindowSize(const int winSize)
-    {   subWindowSize = winSize;   }
+    {
+        subWindowSize = winSize;
+    }
     inline int hasPreferredSubWindowSize()
-    {   return subWindowSize;   }
+    {
+        return subWindowSize;
+    }
     /*!
         \fn milxQtMain::preferMaximumProcessors(const int procs)
         \brief Sets number of max processors is to be used whenever possible. Default: Half of max available on CPU to a minimum of one.
     */
     inline void preferMaximumProcessors(const int procs)
-    {   maxProcessors = procs;   }
+    {
+        maxProcessors = procs;
+    }
     inline int hasMaximumProcessors()
-    {   return maxProcessors;   }
+    {
+        return maxProcessors;
+    }
     /*!
         \fn milxQtMain::preferScreenshotMagnifyFactor(const int factor)
         \brief Sets the magnify factor when saving screenshots. Default: 2.
     */
     inline void preferScreenshotMagnifyFactor(const int factor)
-    {   magnifyFactor = factor;   }
+    {
+        magnifyFactor = factor;
+    }
     inline int hasScreenshotMagnifyFactor()
-    {   return magnifyFactor;   }
+    {
+        return magnifyFactor;
+    }
     /*!
         \fn milxQtMain::preferTimestamps(const bool timestamp)
         \brief Sets whether timestamps are to be shown whenever possible. Default: true
     */
     inline void preferTimestamps(const bool timestamps)
-    {   timestamping = timestamps;   }
+    {
+        timestamping = timestamps;
+    }
     inline bool isTimestampsPreferred()
-    {   return timestamping;   }
+    {
+        return timestamping;
+    }
     /*!
         \fn milxQtMain::preferImageInterpolation(const bool interp)
         \brief Sets whether interpolation is to be shown whenever possible for images. Default: true
     */
     inline void preferImageInterpolation(const bool interp)
-    {   interpolationImages = interp;   }
+    {
+        interpolationImages = interp;
+    }
     inline bool isImageInterpolationPreferred()
-    {   return interpolationImages;   }
+    {
+        return interpolationImages;
+    }
     /*!
         \fn milxQtMain::preferOrientation(const bool orient)
         \brief Sets whether image orientation is to be applied whenever possible for images. Default: true
     */
     inline void preferOrientation(const bool orient)
-    {   orientationImages = orient;   }
+    {
+        orientationImages = orient;
+    }
     inline bool isOrientationPreferred()
-    {   return orientationImages;   }
+    {
+        return orientationImages;
+    }
     /*!
         \fn milxQtMain::preferModelInterpolation(const bool interp)
         \brief Sets whether interpolation is to be shown whenever possible for models. Default: false
     */
     inline void preferModelInterpolation(const bool interp)
-    {   interpolationModels = interp;   }
+    {
+        interpolationModels = interp;
+    }
     inline bool isModelInterpolationPreferred()
-    {   return interpolationModels;   }
+    {
+        return interpolationModels;
+    }
     /*!
         \fn milxQtMain::preferScalarBar(const bool bar)
         \brief Sets whether scalar bar is to be show whenever possible for models. Default: false
     */
     inline void preferScalarBar(const bool bar)
-    {   scalarBarModels = bar;   }
+    {
+        scalarBarModels = bar;
+    }
     inline bool isScalarBarPreferred()
-    {   return scalarBarModels;   }
+    {
+        return scalarBarModels;
+    }
 
 public slots:
     /*!
         \fn milxQtMain::isRender(QWidget *win)
         \brief Returns true if window is a generic render (milxQtRenderWindow object)
     */
-    bool isRender(QMdiSubWindow *win);
+    bool isRender(QWidget *win);
     /*!
         \fn milxQtMain::isActiveRender()
         \brief Returns true if active window is a generic render (milxQtRenderWindow object)
@@ -253,7 +290,7 @@ public slots:
         \fn milxQtMain::isPlot(QWidget *win)
         \brief Returns true if window is an Plot (milxQtPlot object)
     */
-    bool isPlot(QMdiSubWindow *win);
+    bool isPlot(QWidget *win);
     /*!
         \fn milxQtMain::isActivePlot()
         \brief Returns true if active window is an Plot (milxQtPlot object)
@@ -268,7 +305,7 @@ public slots:
         \fn milxQtMain::isUnifiedWindow(QWidget *win)
         \brief Returns true if window is an UnifiedWindow (milxQtUnifiedWindow object)
     */
-    bool isUnifiedWindow(QMdiSubWindow *win);
+    bool isUnifiedWindow(QWidget *win);
     /*!
         \fn milxQtMain::isActiveUnifiedWindow()
         \brief Returns true if active window is an UnifiedWindow (milxQtUnifiedWindow object)
@@ -293,7 +330,7 @@ public slots:
         \fn milxQtMain::setActiveWindow(QWidget *window)
         \brief Makes the window the active window.
     */
-    void setActiveWindow(QMdiSubWindow *currentWindow);
+    void setActiveWindow(QWidget *currentWindow);
 
     /**
         \fn milxQtMain::newTab()
@@ -424,12 +461,12 @@ public slots:
         \fn milxQtMain::setTabName(QWidget *window)
         \brief Set the tab name.
     */
-    //void setTabName(QWidget *fromWindow);
+    void setTabName(QWidget *fromWindow);
     /*!
         \fn milxQtMain::setTabName(const QString newName)
         \brief Set the tab name of the current tab.
     */
-    //void setTabName(const QString newName);
+    void setTabName(const QString newName);
     /*!
         \fn milxQtMain::closeTab(int index)
         \brief Close the tab.
@@ -441,7 +478,7 @@ public slots:
     */
     inline void closeTabActiveWindow()
     {
-		qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeActiveSubWindow();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeActiveSubWindow();
     }
     /*!
         \fn milxQtMain::closeTabAllWindows()
@@ -449,7 +486,7 @@ public slots:
     */
     inline void closeTabAllWindows()
     {
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeAllSubWindows();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeAllSubWindows();
     }
     /*!
         \fn milxQtMain::cascadeTab()
@@ -457,7 +494,7 @@ public slots:
     */
     inline void cascadeTab()
     {
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->cascadeSubWindows();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->cascadeSubWindows();
     }
     /*!
         \fn milxQtMain::tileTab()
@@ -465,7 +502,7 @@ public slots:
     */
     inline void tileTab()
     {
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->tileSubWindows();
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->tileSubWindows();
     }
     /*!
         \fn milxQtMain::tileTabVertically()
@@ -608,16 +645,16 @@ public slots:
         \fn milxQtMain::cleanUpOnClose(QWidget *win)
         \brief Removes references to windows that are closed so they are no longer "open"
     */
-    void cleanUpOnClose(QMdiSubWindow *win);
+    void cleanUpOnClose(QWidget *win);
 
     //Window traversal
     /**
         \fn milxQtMain::getListOfWindows()
         \brief Get a list of widgets/windows that are in the current tab
     */
-    inline QList<QMdiSubWindow *> getListOfWindows()
+    inline QList<QMdiSubWindow*> getListOfWindows()
     {
-        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     }
     /**
         \fn milxQtMain::getNumberOfWindows()
@@ -625,7 +662,7 @@ public slots:
     */
     inline int getNumberOfWindows()
     {
-        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList().size();
+        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList().size();
     }
     /**
         \fn milxQtMain::getNumberOfImageWindows()
@@ -809,13 +846,17 @@ public slots:
         \brief Link all windows in the current tab. Changing one window camera updates all others.
     */
     inline void link()
-    {   actionLinkWindows->setChecked(true);  }
+    {
+        actionLinkWindows->setChecked(true);
+    }
     /**
         \fn milxQtMain::unlink()
         \brief Unlink all windows in the current tab.
     */
     inline void unlink()
-    {   actionLinkWindows->setChecked(false);  }
+    {
+        actionLinkWindows->setChecked(false);
+    }
     /**
         \fn milxQtMain::update()
         \brief Update the GUI elements, such as menus etc. to most up-to-date status.
@@ -842,7 +883,9 @@ public slots:
         \brief Returns a list of the loaded plugins (which are assumed to be DLLs) according to the milxQtPluginInterface.
     */
     inline QList< QPointer<milxQtPluginInterface> > getPlugins()
-    {   return plugins;   }
+    {
+        return plugins;
+    }
 
     //Print Members
     /*!
@@ -850,28 +893,36 @@ public slots:
         \brief Error message wrapper for console.
     */
     inline void printError(QString msg)
-    {   console->printError(msg);   }
+    {
+        console->printError(msg);
+    }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printWarning(QString msg)
         \brief Warning message wrapper for console.
     */
     inline void printWarning(QString msg)
-    {   console->printWarning(msg);   }
+    {
+        console->printWarning(msg);
+    }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printDebug(QString msg)
         \brief Debug message wrapper for console.
     */
     inline void printDebug(QString msg)
-    {   console->printDebug(msg);   }
+    {
+        console->printDebug(msg);
+    }
 //    {   cerr << msg.toStdString() << endl;   }
     /*!
         \fn milxQtMain::printInfo(QString msg)
         \brief Info message wrapper for console.
     */
     inline void printInfo(QString msg)
-    {   console->printInfo(msg);   }
+    {
+        console->printInfo(msg);
+    }
 //    {   cerr << msg.toStdString() << endl;   }
 
 protected slots:
@@ -1035,7 +1086,7 @@ protected:
     QPushButton* cursorButton; //!< crosshairs button
 
     //Workspaces (hierarchical deletion)
-    QTabWidget *workspaces; //!< Pointer to the Workspace environment for the user.
+    QTabWidget* workspaces; //!< Pointer to the Workspace environment for the user.
     QSignalMapper *windowMapper; //!< Mapper of mulit-connections
     //Plugins (Smart Pointer deletion)
     QList< QPointer<milxQtPluginInterface> > plugins; //!< List of plugins loaded succesfully.

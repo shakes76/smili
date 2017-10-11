@@ -5,7 +5,6 @@ FIND_PACKAGE(VTK REQUIRED)
 INCLUDE(${VTK_USE_FILE})
 
 PROJECT(vtk-ext)
-cmake_policy(SET CMP0020 NEW)
 
 # Add Sources
 #set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3 vtkAreaSimplificationMetric)

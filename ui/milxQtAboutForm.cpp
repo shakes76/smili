@@ -25,6 +25,7 @@ milxQtAboutForm::milxQtAboutForm(QWidget *theParent) : QDialog(theParent)
     ui.setupUi(this);
 
     setWindowModality(Qt::ApplicationModal); //block user input
+	setWindowTitle(tr("About sMILX"));
 
     setupVersion();
     createConnections();

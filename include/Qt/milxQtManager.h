@@ -19,13 +19,8 @@
 #define MILXQTMANAGER_H
 
 #include <QtGui/QtGui>
-#include <QApplication>
 #include <QTabWidget>
-#include <QTreeWidget>
-#include <QFileDialog>
 #include <QAction>
-#include <QMenu>
-
 //milxQt Specific
 #include "milxQtAliases.h"
 

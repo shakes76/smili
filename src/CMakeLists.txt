@@ -2,8 +2,7 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(milx-SMILI)
-cmake_policy(SET CMP0020 NEW)
-cmake_policy(SET CMP0025 NEW)
+
 #load modules
 #-----------------------------------------------------------------------------
 include(zlib)

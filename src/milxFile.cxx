@@ -39,8 +39,6 @@
   #include <vtkPLYReader.h>
   #include <vtkPLYWriter.h>
   #include <vtkPolyDataReader.h>
-  #include <vtkUnstructuredGridReader.h>
-  #include <vtkGeometryFilter.h>
   #include <vtkPolyDataWriter.h>
   #include <vtkXMLPolyDataReader.h>
   #include <vtkXMLPolyDataWriter.h>
@@ -118,17 +116,10 @@ namespace milx
     typedef itk::GDCMSeriesFileNames GeneratorType;
     GeneratorType::Pointer nameGenerator = GeneratorType::New();
     nameGenerator->SetUseSeriesDetails(true);
-    if(recursive)
-      nameGenerator->RecursiveOn(); //order important
-    nameGenerator->AddSeriesRestriction("0020|0010"); //StudyID
-    nameGenerator->AddSeriesRestriction("0018|0024"); //SeriesName
-    nameGenerator->AddSeriesRestriction("0018|0086"); //EchoNumber
-    nameGenerator->AddSeriesRestriction("0008|0021"); //SeriesDate
-    nameGenerator->AddSeriesRestriction("0020|0011"); //SeriesNumber
-    nameGenerator->AddSeriesRestriction("0020|0012"); //AcquisitionNumber
-//    nameGenerator->AddSeriesRestriction("300A,0282"); //ChannelNumber
-//    nameGenerator->AddSeriesRestriction("0020|0013"); //InstanceNumber
+    nameGenerator->AddSeriesRestriction("0008|0021");
     nameGenerator->SetDirectory(directoryPath.c_str());
+    if(recursive)
+        nameGenerator->RecursiveOn();
     nameGenerator->AddObserver(itk::ProgressEvent(), ProgressUpdates);
   #if (ITK_VERSION_MAJOR > 3)
     try
@@ -148,22 +139,13 @@ namespace milx
     return UIDs;
   }
 
-  std::vector<std::string> File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName, bool recursive)
+  std::vector<std::string> File::GetDICOMSeriesFilenames(const std::string directoryPath, const std::string seriesName)
   {
     std::vector<std::string> filenames;
     typedef itk::GDCMSeriesFileNames GeneratorType;
     GeneratorType::Pointer nameGenerator = GeneratorType::New();
     nameGenerator->SetUseSeriesDetails(true);
-    if(recursive)
-      nameGenerator->RecursiveOn(); //order important
-    nameGenerator->AddSeriesRestriction("0020|0010"); //StudyID
-    nameGenerator->AddSeriesRestriction("0018|0024"); //SeriesName
-    nameGenerator->AddSeriesRestriction("0018|0086"); //EchoNumber
-    nameGenerator->AddSeriesRestriction("0008|0021"); //SeriesDate
-    nameGenerator->AddSeriesRestriction("0020|0011"); //SeriesNumber
-    nameGenerator->AddSeriesRestriction("0020|0012"); //AcquisitionNumber
-//    nameGenerator->AddSeriesRestriction("300A,0282"); //ChannelNumber
-//    nameGenerator->AddSeriesRestriction("0020|0013"); //InstanceNumber
+    nameGenerator->AddSeriesRestriction("0008|0021");
     nameGenerator->SetDirectory(directoryPath.c_str());
     nameGenerator->AddObserver(itk::ProgressEvent(), ProgressUpdates);
   #if (ITK_VERSION_MAJOR > 3)
@@ -505,49 +487,15 @@ bool File::OpenModel(const std::string filename, vtkSmartPointer<vtkPolyData> &d
   vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
   if (legacy)
   {
-    //Check legacy data type
-    vtkSmartPointer<vtkDataReader> dreader = vtkSmartPointer<vtkDataReader>::New();
-    dreader->SetFileName(filename.c_str());
-    dreader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-    dreader->OpenVTKFile();
-    dreader->ReadHeader();
-    dreader->CloseVTKFile();
+    vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
+    reader->SetFileName(filename.c_str());
+    reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
+    reader->Update();
 
-    if(dreader->IsFilePolyData())
+    if (!errorObserver->ReportsFailure())
     {
-      PrintDebug("Found Poly Data.");
-      vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
-      reader->SetFileName(filename.c_str());
-      reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-      reader->Update();
-
-      if(!errorObserver->ReportsFailure())
-      {
-        data = reader->GetOutput();
-        return true;
-      }
-    }
-    else if(dreader->IsFileUnstructuredGrid())
-    {
-      PrintDebug("Found Unstructured Grid Data.");
-      vtkSmartPointer<vtkUnstructuredGridReader> reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
-      reader->SetFileName(filename.c_str());
-      reader->AddObserver(vtkCommand::ErrorEvent, errorObserver);
-      reader->Update();
-
-      vtkSmartPointer<vtkGeometryFilter> geometryFilter = vtkSmartPointer<vtkGeometryFilter>::New();
-      geometryFilter->SetInputConnection(reader->GetOutputPort());
-      geometryFilter->Update();
-
-      if(!errorObserver->ReportsFailure())
-      {
-        data = geometryFilter->GetOutput();
-        return true;
-      }
-    }
-    else
-    {
-      PrintError("VTK Legacy Data Type Not Supported.");
+      data = reader->GetOutput();
+      return true;
     }
   }
   else if (wavefront)

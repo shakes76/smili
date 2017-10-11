@@ -24,6 +24,7 @@
 */
 //Qt
 #include <QApplication>
+#include <QMainWindow>
 
 #include "milxQtAnimateModel.h"
 #include "milxQtImage.h"
@@ -65,7 +66,6 @@ int main(int argc, char* argv[])
     ValueArg<std::string> isoArg("", "isosurface", "Generate Iso-surface (surface from label image) from the image", false, "data.nii.gz", "Isosurface");
     ValueArg<std::string> loadScalarsArg("", "loadscalars", "Load scalars for the mesh from another mesh", false, "scalars.vtk", "Scalars");
     ValueArg<std::string> loadViewFileArg("", "loadviewfile", "Load saved view from file (use onscreen mode to save view files)", false, "camera.cam", "Load View File");
-    ValueArg<std::string> scalarBarArg("", "scalarbar", "Enable the scalar bar for display with given name.", false, "Scalars", "Scalar Bar");
     ValueArg<float> opacityArg("", "opacity", "Set the opacity of the models", false, 0.5, "Opacity");
     ValueArg<float> isoValueArg("", "isovalue", "Set the label or iso-surface value for option --isosurface.", false, 0.5, "Isovalue");
     ValueArg<float> minArg("", "min", "Set the minimum value for scalars on model.", false, 0.0, "Minimum Scalar");
@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
     ValueArg<float> redArg("", "redbackground", "Set the redness value (0-1) for the background.", false, 1.0, "Red Component");
     ValueArg<float> greenArg("", "greenbackground", "Set the greenness value (0-1) for the background.", false, 1.0, "Green Component");
     ValueArg<float> blueArg("", "bluebackground", "Set the blueness value (0-1) for the background.", false, 1.0, "Blue Component");
-    ValueArg<float> zoomArg("", "zoom", "Zoom in on the current view by given factor.", false, 2.0, "Zoom");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> axialSliceArg("", "axialslice", "Set the axial slice of the image.", false, 0, "Axial Slice");
@@ -136,7 +135,6 @@ int main(int argc, char* argv[])
     cmd.add( redArg );
     cmd.add( greenArg );
     cmd.add( blueArg );
-    cmd.add( zoomArg );
     cmd.add( opacityArg );
     cmd.add( isoValueArg );
     cmd.add( loadScalarsArg );
@@ -162,7 +160,6 @@ int main(int argc, char* argv[])
     cmd.add( coolArg );
     cmd.add( loadViewArg );
     cmd.add( loadViewFileArg );
-    cmd.add( scalarBarArg );
     cmd.add( onscreenArg );
     cmd.add( whiteArg );
     cmd.add( inverseArg );
@@ -192,7 +189,6 @@ int main(int argc, char* argv[])
     const std::string loadScalarsName = loadScalarsArg.getValue();
     const std::string loadViewName = loadViewFileArg.getValue();
     const std::string arrayName = setScalarsArg.getValue();
-    const std::string barName = scalarBarArg.getValue();
     const float opacity = opacityArg.getValue();
     const float isoValue = isoValueArg.getValue();
     const float minValue = minArg.getValue();
@@ -200,7 +196,6 @@ int main(int argc, char* argv[])
     const float redValue = redArg.getValue();
     const float greenValue = greenArg.getValue();
     const float blueValue = blueArg.getValue();
-    const float zoomFactor = zoomArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     const int axialSliceNumber = axialSliceArg.getValue();
@@ -512,14 +507,6 @@ int main(int argc, char* argv[])
       model->colourMapToCOOL();
     if(minArg.isSet() || maxArg.isSet()) //set the range if another colour map is used
         model->SetScalarRange(range);
-    if(scalarBarArg.isSet())
-    {
-        if(minArg.isSet() || maxArg.isSet())
-            model->enableScale(barName.c_str(), true, range[0], range[1]);
-        else
-            model->enableScale(barName.c_str(), true);
-    }
-
     if(isoArg.isSet())
         model->AddActor(modelIso->GetActor());
     if(whiteArg.isSet())
@@ -561,12 +548,6 @@ int main(int argc, char* argv[])
         model->loadView(loadViewName.c_str());
     if(wireframesArg.isSet())
         model->generateWireframe();
-    //Zoom
-    if(zoomArg.isSet())
-    {
-      vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
-      camera->Zoom(zoomFactor);
-    }
 
     cout << ">> Animate: Rendering" << endl;
     if(!onscreenArg.isSet())

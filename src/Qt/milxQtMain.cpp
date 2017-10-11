@@ -25,8 +25,6 @@
 #include <QToolBar>
 #include <QSplashScreen>
 #include <QDesktopWidget>
-#include <QBitmap>
-
 //VTK
 #include <vtkWindowToImageFilter.h>
 #include <vtkRendererCollection.h>
@@ -137,7 +135,6 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     printInfo("--------------------------------------------------------\n");
 
     ///Style
-
     update();
     printDebug("Main Window Setup Complete");
 }
@@ -162,7 +159,7 @@ milxQtMain::~milxQtMain()
 
 QString milxQtMain::activeName()
 {
-    if(qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow() == 0)
+    if(qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow() == 0)
     {
         ///\todo Possible Bug: Handling when no window active.
         return 0;
@@ -191,7 +188,7 @@ QString milxQtMain::activeName()
 
 QString milxQtMain::activeNamePrefix()
 {
-    if(qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow() == 0)
+    if(qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow() == 0)
     {
         ///\todo Possible Bug: Handling when no window active.
         return 0;
@@ -225,7 +222,7 @@ QString milxQtMain::activeNamePrefix()
 
 void milxQtMain::newTab()
 {
-    QMdiArea *tmpPtr = new QMdiArea; ///\todo Workspace class is deprecated. Update to MdiArea.
+    WorkspaceType *tmpPtr = new WorkspaceType;
     workspaces->addTab(tmpPtr, tr("Empty"));
     workspaces->setCurrentWidget(tmpPtr); //Hierachy deletion
     tmpPtr->setAttribute(Qt::WA_DeleteOnClose);
@@ -234,17 +231,17 @@ void milxQtMain::newTab()
     connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(redirectWindowActivated(QMdiSubWindow *)));
 }
 
+///\todo bug: Fix popped out RenderWindow bug
 void milxQtMain::addRender(milxQtRenderWindow *rnd)
 {
-    QMdiSubWindow *subWindow = new QMdiSubWindow;
-    subWindow->setWidget(rnd);
+    QMdiSubWindow *subWindow = new QMdiSubWindow(rnd);
     qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
 
     commonChildProperties(rnd);
-
+	
     rnd->enableUpdates(statusBar());
-    rnd->GetRenderWindow()->SetSize(subWindowSize, subWindowSize);
-    rnd->setMinimumSize(subWindowSize, subWindowSize);
+    rnd->GetRenderWindow()->SetSize(200, 200);
+    rnd->setMinimumSize(100, 100);
     rnd->refresh();
 
     connect(rnd, SIGNAL(nameChanged(const QString &)), this, SLOT(setTabName(const QString &)));
@@ -269,7 +266,7 @@ void milxQtMain::addUnifiedWindow(milxQtUnifiedWindow *uni)
     addRender(uni);
 }
 
-void milxQtMain::cleanUpOnClose(QMdiSubWindow *win)
+void milxQtMain::cleanUpOnClose(QWidget *win)
 {
     if(isImage(win))
     {
@@ -292,7 +289,7 @@ void milxQtMain::cleanUpOnClose(QMdiSubWindow *win)
 }
 
 //Slots
-bool milxQtMain::isRender(QMdiSubWindow *win)
+bool milxQtMain::isRender(QWidget *win)
 {
     if(qobject_cast<milxQtRenderWindow *>(win) == 0)
         return false;
@@ -310,7 +307,7 @@ bool milxQtMain::isActiveRender()
 
 milxQtRenderWindow* milxQtMain::activeRender()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -338,7 +335,7 @@ bool milxQtMain::isActiveImage()
 
 milxQtImage* milxQtMain::activeImage()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -365,7 +362,7 @@ bool milxQtMain::isActiveModel()
 
 milxQtModel* milxQtMain::activeModel()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -374,7 +371,7 @@ milxQtModel* milxQtMain::activeModel()
     return NULL;
 }
 
-bool milxQtMain::isPlot(QMdiSubWindow *win)
+bool milxQtMain::isPlot(QWidget *win)
 {
     if(qobject_cast<milxQtPlot *>(win) == 0)
         return false;
@@ -392,7 +389,7 @@ bool milxQtMain::isActivePlot()
 
 milxQtModel* milxQtMain::activePlot()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -401,7 +398,7 @@ milxQtModel* milxQtMain::activePlot()
     return NULL;
 }
 
-bool milxQtMain::isUnifiedWindow(QMdiSubWindow *win)
+bool milxQtMain::isUnifiedWindow(QWidget *win)
 {
     if(qobject_cast<milxQtUnifiedWindow *>(win) == 0)
         return false;
@@ -419,7 +416,7 @@ bool milxQtMain::isActiveUnifiedWindow()
 
 milxQtUnifiedWindow* milxQtMain::activeUnifiedWindow()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -438,7 +435,7 @@ bool milxQtMain::isActiveWebView()
 
 QWebEngineView* milxQtMain::activeWebView()
 {
-    QMdiSubWindow *win = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QMdiSubWindow *win = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow();
     if(!win)
         return NULL;
 
@@ -447,7 +444,7 @@ QWebEngineView* milxQtMain::activeWebView()
     return NULL;
 }
 
-void milxQtMain::setActiveWindow(QMdiSubWindow *currentWindow)
+void milxQtMain::setActiveWindow(QWidget *currentWindow)
 {
     if(!currentWindow)
         return;
@@ -455,7 +452,7 @@ void milxQtMain::setActiveWindow(QMdiSubWindow *currentWindow)
     {
         QMdiSubWindow *subWindow = new QMdiSubWindow;
         subWindow->setWidget(currentWindow);
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->setActiveSubWindow(subWindow);
+        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->setActiveSubWindow(subWindow);
     }
 }
 
@@ -579,9 +576,6 @@ bool milxQtMain::loadFile(const QString &filename)
     if (filename.isEmpty())
         return success;
 
-    //Convert string to native paths
-    QString nativeFilename = QDir::toNativeSeparators(filename);
-
     ///Check filename with plugins
     printDebug("Check Plugins if they can open the file.");
     foreach (QPointer<milxQtPluginInterface> loadedPlugin, plugins)
@@ -608,13 +602,13 @@ bool milxQtMain::loadFile(const QString &filename)
                 else ///if not then use serial methods
                 {
                     printInfo("Using standard opening for plugin.");
-                    loadedPlugin->open(nativeFilename);
+                    loadedPlugin->open(filename);
                 }
 
                 QPointer<milxQtRenderWindow> renWin = loadedPlugin->genericResult();
                 if(renWin)
                 {
-                    printInfo("Loading Plugin Generic Result");
+                    printInfo("Loading Generic Result");
                     if(renWin->getName() == "")
                         renWin->setName(filename);
                     renWin->setConsole(console);
@@ -626,7 +620,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtModel> model = loadedPlugin->modelResult();
                 if(model)
                 {
-                    printInfo("Loading Plugin Model Result");
+                    printInfo("Loading Model Result");
                     if(model->getName() == "")
                         model->setName(filename);
                     model->setConsole(console);
@@ -638,7 +632,7 @@ bool milxQtMain::loadFile(const QString &filename)
                 QPointer<milxQtImage> image = loadedPlugin->imageResult();
                 if(image)
                 {
-                    printInfo("Loading Plugin Image Result");
+                    printInfo("Loading Image Result");
                     if(image->getName() == "")
                         image->setName(filename);
                     image->setConsole(console);
@@ -656,7 +650,7 @@ bool milxQtMain::loadFile(const QString &filename)
         {
             printInfo("Loaded File via Plugin, now Updating");
             loadedPlugin->update();
-            setCurrentFile(nativeFilename);
+            setCurrentFile(filename);
             return success;
         }
     }
@@ -668,7 +662,7 @@ bool milxQtMain::loadFile(const QString &filename)
     {
         printDebug("Opening Model.");
         QPointer<milxQtModel> model = new milxQtModel; //list deletion
-        success = reader->openModel(nativeFilename, model);
+        success = reader->openModel(filename, model);
 
         if(success)
         {
@@ -684,7 +678,7 @@ bool milxQtMain::loadFile(const QString &filename)
         //Load the vertex table from CSV file
         vtkSmartPointer<vtkTable> table;
         QPointer<milxQtPlot> plot = new milxQtPlot;
-        success = milx::File::OpenDelimitedText(nativeFilename.toStdString(), table);
+        success = milx::File::OpenDelimitedText(filename.toStdString(), table);
 
         int surfaceRet = QMessageBox::No, dimensionRet = QMessageBox::No;
         int xCol = 0, yCol = 1, zCol = 2;
@@ -749,28 +743,26 @@ bool milxQtMain::loadFile(const QString &filename)
         QPointer<milxQtImage> img = new milxQtImage;  //list deletion
 
         printDebug("Supported Image formats: " + reader->supportedImageFormats());
-        success = reader->openImage(nativeFilename, img);
+        success = reader->openImage(filename, img);
 
         printInfo("Image Pixel Type: " + reader->getPixelType());
         printInfo("Image Component Type: " + reader->getComponentType());
         printInfo("Image Number of Components: " + QString::number(reader->getNumberOfComponents()));
         printInfo("Image Dimensions: " + QString::number(reader->getNumberOfDimensions()));
 
-        if(success)
-        {
+        if(success) {
             img->setName(filename);
             img->setConsole(console);
             img->generateImage();
-
             predisplay(img);
         }
         else
           printError("File format didn't appear to be supported. Check the file or add plugins for support.");
     }
-
-    if(success)
-        setCurrentFile(nativeFilename);
-
+	
+	if (success) {
+		setCurrentFile(filename);
+	}
     return success;
 }
 
@@ -778,15 +770,12 @@ void milxQtMain::save(QString filename)
 {
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
-    QWidget *activeWindow = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QWidget *activeWindow = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget();
     milxQtWindow *currentWindowOpen = qobject_cast<milxQtWindow *>(activeWindow);
     bool pluginSave = false, success = false;
 
     if(!activeWindow)
         return;
-
-    //Convert string to native paths
-    filename = QDir::toNativeSeparators(filename);
 
     QFileDialog *fileSaver = new QFileDialog(this);
 
@@ -897,10 +886,7 @@ void milxQtMain::saveScreen(QString filename)
 {
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
-    QWidget *activeWindow = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
-
-    //Convert string to native paths
-    filename = QDir::toNativeSeparators(filename);
+    QWidget *activeWindow = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow()->widget();
 
     if(!activeWindow)
         return;
@@ -964,6 +950,14 @@ void milxQtMain::close()
 
 void milxQtMain::setTabName(QMdiSubWindow *fromWindow)
 {
+    if(!fromWindow)
+        return;
+
+    setTabName(fromWindow->widget());
+}
+
+void milxQtMain::setTabName(QWidget *fromWindow)
+{
     QString tabTitle = activeNamePrefix();
     int index = workspaces->currentIndex();
 
@@ -973,13 +967,20 @@ void milxQtMain::setTabName(QMdiSubWindow *fromWindow)
         workspaces->setTabText(index, tabTitle);
 }
 
+void milxQtMain::setTabName(const QString newName)
+{
+    int index = workspaces->currentIndex();
+
+    workspaces->setTabText(index, newName);
+}
+
 void milxQtMain::closeTab(int index)
 {
     int newIndex = 0;
 
     if(workspaces->count() > 1 || index > 0)
     {
-        QMdiArea *tmpWorkspace = qobject_cast<QMdiArea *>(workspaces->widget(index));
+        WorkspaceType *tmpWorkspace = qobject_cast<WorkspaceType *>(workspaces->widget(index));
         disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
         tmpWorkspace->closeAllSubWindows();
         tmpWorkspace->close();
@@ -996,7 +997,7 @@ void milxQtMain::closeTab(int index)
 
 void milxQtMain::tileTabVertically()
 {
-    QMdiArea *wrkSpc = qobject_cast<QMdiArea *>(workspaces->currentWidget());
+    WorkspaceType *wrkSpc = qobject_cast<WorkspaceType *>(workspaces->currentWidget());
     QList<QMdiSubWindow*> windows = wrkSpc->subWindowList();
     if (windows.count() < 2) {
         tileTab();
@@ -1014,7 +1015,7 @@ void milxQtMain::tileTabVertically()
 
 void milxQtMain::tileTabHorizontally()
 {
-    QMdiArea *wrkSpc = qobject_cast<QMdiArea *>(workspaces->currentWidget());
+    WorkspaceType *wrkSpc = qobject_cast<WorkspaceType *>(workspaces->currentWidget());
     QList<QMdiSubWindow*> windows = wrkSpc->subWindowList();
     if (windows.count() < 2) {
         tileTab();
@@ -1032,22 +1033,24 @@ void milxQtMain::tileTabHorizontally()
 
 void milxQtMain::helpContents()
 {
-    printDebug("Showing Help browser");
-
+    printDebug("Help browser is currently disabled.");
+	/*
     QFile file(":/resources/smilx_doc/home.html");
     QWebEngineView *view = new QWebEngineView(this);
-    if(file.open(QIODevice::ReadOnly))
-      view->setHtml(file.readAll());
-      view->setWindowTitle("sMILX Help");
-      qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(view);
-      view->show();
-
+    
+	if (file.open(QIODevice::ReadOnly)) {
+		view->setHtml(":/resources/smilx_doc/home.html");
+		view->setWindowTitle("sMILX Help");
+		qobject_cast<WorkspaceType *>(workspaces->currentWidget())->addSubWindow(view);
+		view->show();
+	}
+	
     //Quick setup toolbar
     QToolBar *toolBar = addToolBar(QObject::tr("Navigation"));
     toolBar->addAction(view->pageAction(QWebEnginePage::Back));
     toolBar->addAction(view->pageAction(QWebEnginePage::Forward));
     toolBar->addAction(view->pageAction(QWebEnginePage::Reload));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Stop));
+    toolBar->addAction(view->pageAction(QWebEnginePage::Stop));*/
 }
 
 void milxQtMain::preferences()
@@ -1149,17 +1152,17 @@ void milxQtMain::display(milxQtRenderWindow* newRender)
 void milxQtMain::predisplay(milxQtImage* newImage)
 {
     const QString filename = newImage->getName();
-    const size_t numberOfWindows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList().size();
-
+    const size_t numberOfWindows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList().size();
+	
     if(defaultViewTypeBox->currentIndex() != SINGLE && numberOfWindows > 0)
         newTab();
     else if(defaultViewTypeBox->currentIndex() == SINGLE)
     {
         newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
         display(newImage);
-    }
+    }/*
 
-    if(defaultViewTypeBox->currentIndex() != SINGLE) //Are we displaying scanner like three views + 3D view?
+	if(defaultViewTypeBox->currentIndex() != SINGLE) //Are we displaying scanner like three views + 3D view?
     {
         int ret = QMessageBox::Yes;
         if (actionLinkWindows->isChecked())
@@ -1244,7 +1247,7 @@ void milxQtMain::predisplay(milxQtImage* newImage)
 
         updateQtEvents(); //ensure all complete before tiling
         tileTab();
-  }
+  }*/
 }
 
 void milxQtMain::display(milxQtImage* newImage)
@@ -1254,7 +1257,7 @@ void milxQtMain::display(milxQtImage* newImage)
         printError("Image not loaded properly. Aborting Display.");
         return; //Check if model is valid
     }
-
+	
     ///Set the image into the viewer
     addImage(newImage);
     newImage->setToolTip("<p style='white-space:pre'>VTK Image Viewer 2 Keys - <b>f:</b> Move to, <b>r:</b> Reset, <b>Shift+r:</b> Reset Camera,\n<b>Shift+Mouse1:</b> Translate, <b>Shift+Ctrl+Mouse1:</b> Zoom</p>");
@@ -1265,7 +1268,7 @@ void milxQtMain::display(milxQtImage* newImage)
     }
     newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex());
     newImage->show();
-
+	
     foreach(QAction *currAct, imageExtsActions) ///Add extension actions
     {
         newImage->addExtensionAction(currAct);
@@ -1691,10 +1694,10 @@ void milxQtMain::updateWindowsWithCursors()
     while (currentWindow())
     {
         milxQtWindow *win = currentWindow();
-		cout << "Weeee1: " << win->strippedBaseName().toStdString();// << endl;
+        cout << "Weeee1: " << win->strippedBaseName().toStdString() << std::endl;
         if (isImage(win))
         {
-			cout << "Weeee2: " << win->strippedBaseName().toStdString();// << endl;
+            cout << "Weeee2: " << win->strippedBaseName().toStdString() << std::endl;
             milxQtImage *img = qobject_cast<milxQtImage *>(win);
             img->enableCrosshair();
         }
@@ -1717,7 +1720,7 @@ void milxQtMain::updateWindowsWithView(int value)
 
 void milxQtMain::updateWindowsWithViewType(int value)
 {
-    QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
 
     if(windows.isEmpty())
         return;
@@ -1734,7 +1737,7 @@ void milxQtMain::updateWindowsWithViewType(int value)
 
 void milxQtMain::updateWindowsWithViewOrientation(int value)
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
 
     if(windows.isEmpty())
         return;
@@ -1751,17 +1754,17 @@ void milxQtMain::updateWindowsWithViewOrientation(int value)
 
 QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogether, bool applyMapper)
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     milxQtWindow *win = NULL;
     QActionGroup *winGp = new QActionGroup(this);
     QString text;
 
-    foreach(QWidget *currentWindow, windows)
+    foreach(QMdiSubWindow *currentWindow, windows)
     {
         if(!currentWindow)
             continue;
 
-        win = qobject_cast<milxQtWindow *>(currentWindow);
+        win = qobject_cast<milxQtWindow *>(currentWindow->widget());
 
         if(win == 0)
             continue;
@@ -1776,7 +1779,7 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
         if(groupTogether)
         {
             action->setCheckable(true);
-            action->setChecked(currentWindow == qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow());
+            action->setChecked(currentWindow == qobject_cast<WorkspaceType *>(workspaces->currentWidget())->activeSubWindow());
             winGp->addAction(action);
         }
 
@@ -1826,39 +1829,39 @@ int milxQtMain::getNumberOfModelWindows()
 
 milxQtWindow* milxQtMain::currentWindow()
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     milxQtWindow *win = NULL;
 
     if(windowIterator < windows.size())
-        win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
+        win = qobject_cast<milxQtWindow *>(windows[windowIterator]->widget());
 
     return win;
 }
 
 milxQtWindow* milxQtMain::nextWindow()
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
-  milxQtWindow *win = NULL;
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
+    milxQtWindow *win = NULL;
 
-  if(windowIterator < windows.size())
+    if(windowIterator < windows.size())
     {
-      win = qobject_cast<milxQtWindow *>(windows[windowIterator]);
-      windowIterator ++;
+        win = qobject_cast<milxQtWindow *>(windows[windowIterator]->widget());
+        windowIterator ++;
     }
 
-  return win;
+    return win;
 }
 
 milxQtRenderWindow* milxQtMain::nextRenderWindow()
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     milxQtRenderWindow *win = NULL;
 
     while(windowIterator < windows.size())
     {
         if(isRender(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtRenderWindow *>(windows[windowIterator]);
+            win = qobject_cast<milxQtRenderWindow *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -1871,14 +1874,14 @@ milxQtRenderWindow* milxQtMain::nextRenderWindow()
 
 milxQtModel* milxQtMain::nextModel()
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     milxQtModel *win = NULL;
 
     while(windowIterator < windows.size())
     {
         if(isModel(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtModel *>(windows[windowIterator]);
+            win = qobject_cast<milxQtModel *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -1891,7 +1894,7 @@ milxQtModel* milxQtMain::nextModel()
 
 milxQtImage* milxQtMain::nextImage()
 {
-	QList<QMdiSubWindow *> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+    QList<QMdiSubWindow*> windows = qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
     milxQtImage *win = NULL;
 
     printDebug("Number of Windows: " + QString::number(windows.size()));
@@ -1899,7 +1902,7 @@ milxQtImage* milxQtMain::nextImage()
     {
         if(isImage(windows[windowIterator]))
         {
-            win = qobject_cast<milxQtImage *>(windows[windowIterator]);
+            win = qobject_cast<milxQtImage *>(windows[windowIterator]->widget());
             windowIterator ++;
             break;
         }
@@ -2253,7 +2256,7 @@ void milxQtMain::imageToStreamLines(vectorImageType::Pointer img, floatImageType
 //    const size_t components = img->GetNumberOfComponentsPerPixel();
     vectorImageType::Pointer imgSubSampled = milx::Image<vectorImageType>::SubsampleImage(img, subsampleSizes);
     floatImageType::Pointer magImgSubSampled = milx::Image<floatImageType>::SubsampleImage(magImg, sliceSubsampleSizes);
-	cout << "Slice Information: ";// << endl;
+    cout << "Slice Information: " << std::endl;
     milx::Image<floatImageType>::Information(magImg);
 
     ///Need to flip y-axis because of VTK's CG coordinate system
@@ -2749,7 +2752,6 @@ void milxQtMain::update()
         menuImages->setDisabled(false);
     else
         menuImages->setDisabled(true);
-
     if(!imageWindows.isEmpty() || !modelWindows.isEmpty())
         menuData->setDisabled(false);
     else
@@ -2835,40 +2837,40 @@ void milxQtMain::createMenu()
     ///Setup Exit Action and File Menus
     ///File
     menuBar->addAction(menuFile->menuAction());
-    menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
+    menuFile->setTitle(tr("File", 0));
     actionNewTab->setIcon(QIcon(":/resources/toolbar/new_tab.png"));
-    actionNewTab->setText(QApplication::translate("MainWindow", "New Tab", 0));
+    actionNewTab->setText(tr("New Tab", 0));
     actionNewTab->setShortcut(tr("Ctrl+t"));
     menuFile->addAction(actionNewTab);
     actionOpen->setIcon(QIcon(":/resources/toolbar/open.png"));
-    actionOpen->setText(QApplication::translate("MainWindow", "Open", 0));
+    actionOpen->setText(tr("Open", 0));
     actionOpen->setShortcut(tr("Ctrl+o"));
     menuFile->addAction(actionOpen);
     actionOpenSeries->setIcon(QIcon(":/resources/toolbar/open_series.png"));
-    actionOpenSeries->setText(QApplication::translate("MainWindow", "Open DICOM Series", 0));
+    actionOpenSeries->setText(tr("Open DICOM Series", 0));
     actionOpenSeries->setShortcut(tr("Ctrl+Alt+o"));
     menuFile->addAction(actionOpenSeries);
     actionOpenCollect->setIcon(QIcon(":/resources/toolbar/open_collection.png"));
-    actionOpenCollect->setText(QApplication::translate("MainWindow", "Open Model Collection", 0));
+    actionOpenCollect->setText(tr("Open Model Collection", 0));
     actionOpenCollect->setShortcut(tr("Ctrl+Shift+o"));
     menuFile->addAction(actionOpenCollect);
     actionSave->setIcon(QIcon(":/resources/toolbar/save.png"));
-    actionSave->setText(QApplication::translate("MainWindow", "Save", 0));
+    actionSave->setText(tr("Save", 0));
     actionSave->setShortcut(tr("Ctrl+s"));
     menuFile->addAction(actionSave);
     actionSaveScreen->setIcon(QIcon(":/resources/toolbar/screenshot.png"));
-    actionSaveScreen->setText(QApplication::translate("MainWindow", "Save Screenshot", 0));
+    actionSaveScreen->setText(tr("Save Screenshot", 0));
     actionSaveScreen->setShortcut(tr("Shift+Ctrl+s"));
     menuFile->addAction(actionSaveScreen);
     menuFile->addSeparator();
     //Closing
     menuFile->addAction(actionCloseActive);
     actionCloseActive->setIcon(QIcon(":/resources/toolbar/close.png"));
-    actionCloseActive->setText(QApplication::translate("MainWindow", "Close", 0));
+    actionCloseActive->setText(tr("Close", 0));
     actionCloseActive->setShortcut(tr("Ctrl+w"));
     menuFile->addAction(actionCloseActive);
     actionCloseAll->setIcon(QIcon(":/resources/toolbar/close_all.png"));
-    actionCloseAll->setText(QApplication::translate("MainWindow", "Close All", 0));
+    actionCloseAll->setText(tr("Close All", 0));
     actionCloseAll->setShortcut(tr("Ctrl+Shift+w"));
     menuFile->addAction(actionCloseAll);
     menuFile->addSeparator();
@@ -2880,83 +2882,83 @@ void milxQtMain::createMenu()
     //Exit
     menuFile->addAction(actionPreferences);
     actionPreferences->setIcon(QIcon(":/resources/toolbar/settings.png"));
-    actionPreferences->setText(QApplication::translate("MainWindow", "Preferences ...", 0));
+    actionPreferences->setText(tr("Preferences ...", 0));
     actionPreferences->setShortcut(tr("Ctrl+p"));
     actionExit->setIcon(QIcon(":/resources/toolbar/exit.png"));
-    actionExit->setText(QApplication::translate("MainWindow", "Exit", 0));
+    actionExit->setText(tr("Exit", 0));
     actionExit->setShortcut(tr("Ctrl+x"));
     menuFile->addAction(actionExit);
     ///Data
     menuBar->addAction(menuData->menuAction());
-    menuData->setTitle(QApplication::translate("MainWindow", "Data", 0));
+    menuData->setTitle(tr("Data", 0));
     ///Images
-    menuImages->setTitle(QApplication::translate("MainWindow", "Images", 0));
+    menuImages->setTitle(tr("Images", 0));
     menuBar->addAction(menuImages->menuAction());
-    actionBlendImages->setText(QApplication::translate("MainWindow", "Blend Images", 0));
+    actionBlendImages->setText(tr("Blend Images", 0));
     actionBlendImages->setShortcut(tr("Ctrl+b"));
     menuImages->addAction(actionBlendImages);
-    actionAddImages->setText(QApplication::translate("MainWindow", "Add Images", 0));
+    actionAddImages->setText(tr("Add Images", 0));
     actionAddImages->setShortcut(tr("Ctrl+a"));
     menuImages->addAction(actionAddImages);
-    actionAverageImages->setText(QApplication::translate("MainWindow", "Average Images", 0));
+    actionAverageImages->setText(tr("Average Images", 0));
     actionAverageImages->setShortcut(tr("Ctrl+Shift+a"));
     menuImages->addAction(actionAverageImages);
-    actionSubtractImages->setText(QApplication::translate("MainWindow", "Difference Images", 0));
+    actionSubtractImages->setText(tr("Difference Images", 0));
     actionSubtractImages->setShortcut(tr("Ctrl+d"));
     menuImages->addAction(actionSubtractImages);
-    actionMultiplyImages->setText(QApplication::translate("MainWindow", "Multiply Images", 0));
+    actionMultiplyImages->setText(tr("Multiply Images", 0));
     actionMultiplyImages->setShortcut(tr("Ctrl+d"));
     menuImages->addAction(actionMultiplyImages);
-    actionConvolveImages->setText(QApplication::translate("MainWindow", "Convolve Images", 0));
+    actionConvolveImages->setText(tr("Convolve Images", 0));
     actionConvolveImages->setShortcut(tr("Ctrl+c"));
     menuImages->addAction(actionConvolveImages);
-    actionMergeLabels->setText(QApplication::translate("MainWindow", "Merge Labels", 0));
+    actionMergeLabels->setText(tr("Merge Labels", 0));
     actionMergeLabels->setShortcut(tr("Ctrl+l"));
     menuImages->addAction(actionMergeLabels);
     ///Windows
     menuBar->addAction(menuWindows->menuAction());
-    menuWindows->setTitle(QApplication::translate("MainWindow", "Windows", 0));
-    actionLinkWindows->setText(QApplication::translate("MainWindow", "Link All Windows", 0));
+    menuWindows->setTitle(tr("Windows", 0));
+    actionLinkWindows->setText(tr("Link All Windows", 0));
     actionLinkWindows->setIcon(QIcon(":/resources/toolbar/link.png"));
     actionLinkWindows->setCheckable(true);
     menuWindows->addAction(actionLinkWindows);
     actionCascade->setIcon(QIcon(":/resources/toolbar/cascade.png"));
-    actionCascade->setText(QApplication::translate("MainWindow", "Cascade", 0));
+    actionCascade->setText(tr("Cascade", 0));
     menuWindows->addAction(actionCascade);
     actionTile->setIcon(QIcon(":/resources/toolbar/tile.png"));
-    actionTile->setText(QApplication::translate("MainWindow", "Tile", 0));
+    actionTile->setText(tr("Tile", 0));
     menuWindows->addAction(actionTile);
     actionTileVertically->setIcon(QIcon(":/resources/toolbar/tilev.png"));
-    actionTileVertically->setText(QApplication::translate("MainWindow", "Tile Vertically", 0));
+    actionTileVertically->setText(tr("Tile Vertically", 0));
     menuWindows->addAction(actionTileVertically);
     actionTileHorizontally->setIcon(QIcon(":/resources/toolbar/tileh.png"));
-    actionTileHorizontally->setText(QApplication::translate("MainWindow", "Tile Horizontally", 0));
+    actionTileHorizontally->setText(tr("Tile Horizontally", 0));
     menuWindows->addAction(actionTileHorizontally);
     updateWindowMenu();
     connect(menuWindows, SIGNAL(aboutToShow()), this, SLOT(updateWindowMenu()));
     ///Help
-    menuHelp->setTitle(QApplication::translate("MainWindow", "Help", 0));
+    menuHelp->setTitle(tr("Help", 0));
     menuBar->addAction(menuHelp->menuAction());
-    actionContents->setText(QApplication::translate("MainWindow", "sMILX Help Contents", 0));
+    actionContents->setText(tr("sMILX Help Contents", 0));
     actionContents->setIcon(QIcon(":/resources/toolbar/help.png"));
     actionContents->setShortcut(tr("F1"));
     menuHelp->addAction(actionContents);
-    actionControls->setText(QApplication::translate("MainWindow", "Controls", 0));
+    actionControls->setText(tr("Controls", 0));
     actionControls->setShortcut(tr("F2"));
     actionControls->setIcon(QIcon(":/resources/toolbar/controls.png"));
     menuHelp->addAction(actionControls);
-    actionAbout->setText(QApplication::translate("MainWindow", "About", 0));
+    actionAbout->setText(tr("About", 0));
     actionAbout->setShortcut(tr("Ctrl+h"));
     menuHelp->addAction(actionAbout);
 
     ///Common Actions/Menus
     actionCompare = new QAction(this);
-    actionCompare->setText(QApplication::translate("MainWindow", "Compare", 0));
+    actionCompare->setText(tr("Compare", 0));
     actionCompare->setShortcut(tr("Ctrl+u"));
     actionCompare->setDisabled(true); ///\todo enable compare when fixed
-    menuWindowList->setTitle(QApplication::translate("MainWindow", "Switch Window To", 0));
+    menuWindowList->setTitle(tr("Switch Window To", 0));
     connect(menuWindowList, SIGNAL(aboutToShow()), this, SLOT(updateWindowListMenu()));
-    importFromMenu->setTitle(QApplication::translate("MainWindow", "Import View From", 0));
+    importFromMenu->setTitle(tr("Import View From", 0));
     connect(importFromMenu, SIGNAL(aboutToShow()), this, SLOT(updateImportFromMenu()));
 
 #if !(ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
@@ -2966,7 +2968,7 @@ void milxQtMain::createMenu()
 
     ///Image Toolbar actions
     actionImageText = new QAction(this);
-    actionImageText->setText(QApplication::translate("MainWindow", "Text", 0));
+    actionImageText->setText(tr("Text", 0));
     actionImageText->setShortcut(tr("Ctrl+Alt+t"));
 
     statusBar()->showMessage(tr("Ready"));
@@ -3079,41 +3081,41 @@ void milxQtMain::createConnections()
     QObject::connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveWindow(QWidget *)));
     ///Actions
     ///File
-    QObject::connect(actionNewTab, SIGNAL(activated()), this, SLOT(newTab()));
-    QObject::connect(actionOpen, SIGNAL(activated()), this, SLOT(open()));
-    QObject::connect(actionOpenSeries, SIGNAL(activated()), this, SLOT(openSeries()));
-    QObject::connect(actionOpenCollect, SIGNAL(activated()), this, SLOT(openCollection()));
-    QObject::connect(actionSave, SIGNAL(activated()), this, SLOT(save()));
-    QObject::connect(actionSaveScreen, SIGNAL(activated()), this, SLOT(saveScreen()));
-    QObject::connect(actionCloseActive, SIGNAL(activated()), this, SLOT(closeTabActiveWindow()));
-    QObject::connect(actionCloseAll, SIGNAL(activated()), this, SLOT(closeTabAllWindows()));
-    QObject::connect(actionExit, SIGNAL(activated()), this, SLOT(close()));
+    QObject::connect(actionNewTab, SIGNAL(triggered()), this, SLOT(newTab()));
+    QObject::connect(actionOpen, SIGNAL(triggered()), this, SLOT(open()));
+    QObject::connect(actionOpenSeries, SIGNAL(triggered()), this, SLOT(openSeries()));
+    QObject::connect(actionOpenCollect, SIGNAL(triggered()), this, SLOT(openCollection()));
+    QObject::connect(actionSave, SIGNAL(triggered()), this, SLOT(save()));
+    QObject::connect(actionSaveScreen, SIGNAL(triggered()), this, SLOT(saveScreen()));
+    QObject::connect(actionCloseActive, SIGNAL(triggered()), this, SLOT(closeTabActiveWindow()));
+    QObject::connect(actionCloseAll, SIGNAL(triggered()), this, SLOT(closeTabAllWindows()));
+    QObject::connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
     ///Data
     QObject::connect(menuData, SIGNAL(aboutToShow()), this, SLOT(dataMenu()));
     ///Images
-    QObject::connect(actionBlendImages, SIGNAL(activated()), this, SLOT(imagesMix()));
-    QObject::connect(actionAddImages, SIGNAL(activated()), this, SLOT(imagesAdd()));
-    QObject::connect(actionAverageImages, SIGNAL(activated()), this, SLOT(imagesAverage()));
-    QObject::connect(actionSubtractImages, SIGNAL(activated()), this, SLOT(imagesSubtract()));
-    QObject::connect(actionMultiplyImages, SIGNAL(activated()), this, SLOT(imagesMultiply()));
+    QObject::connect(actionBlendImages, SIGNAL(triggered()), this, SLOT(imagesMix()));
+    QObject::connect(actionAddImages, SIGNAL(triggered()), this, SLOT(imagesAdd()));
+    QObject::connect(actionAverageImages, SIGNAL(triggered()), this, SLOT(imagesAverage()));
+    QObject::connect(actionSubtractImages, SIGNAL(triggered()), this, SLOT(imagesSubtract()));
+    QObject::connect(actionMultiplyImages, SIGNAL(triggered()), this, SLOT(imagesMultiply()));
   #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
-    QObject::connect(actionConvolveImages, SIGNAL(activated()), this, SLOT(imagesConvolve()));
+    QObject::connect(actionConvolveImages, SIGNAL(triggered()), this, SLOT(imagesConvolve()));
   #endif
-    QObject::connect(actionMergeLabels, SIGNAL(activated()), this, SLOT(imagesMergeLabels()));
+    QObject::connect(actionMergeLabels, SIGNAL(triggered()), this, SLOT(imagesMergeLabels()));
     ///Windows
     //actionLinkWindows is not connected because its used as a Boolean in the transferViewToWindows() member
-    QObject::connect(actionCascade, SIGNAL(activated()), this, SLOT(cascadeTab()));
-    QObject::connect(actionTile, SIGNAL(activated()), this, SLOT(tileTab()));
-    QObject::connect(actionTileVertically, SIGNAL(activated()), this, SLOT(tileTabVertically()));
-    QObject::connect(actionTileHorizontally, SIGNAL(activated()), this, SLOT(tileTabHorizontally()));
+    QObject::connect(actionCascade, SIGNAL(triggered()), this, SLOT(cascadeTab()));
+    QObject::connect(actionTile, SIGNAL(triggered()), this, SLOT(tileTab()));
+    QObject::connect(actionTileVertically, SIGNAL(triggered()), this, SLOT(tileTabVertically()));
+    QObject::connect(actionTileHorizontally, SIGNAL(triggered()), this, SLOT(tileTabHorizontally()));
     ///Help
-    QObject::connect(actionContents, SIGNAL(activated()), this, SLOT(helpContents()));
-    QObject::connect(actionPreferences, SIGNAL(activated()), this, SLOT(preferences()));
-    QObject::connect(actionControls, SIGNAL(activated()), this, SLOT(controls()));
-    QObject::connect(actionAbout, SIGNAL(activated()), this, SLOT(about()));
+    QObject::connect(actionContents, SIGNAL(triggered()), this, SLOT(helpContents()));
+    QObject::connect(actionPreferences, SIGNAL(triggered()), this, SLOT(preferences()));
+    QObject::connect(actionControls, SIGNAL(triggered()), this, SLOT(controls()));
+    QObject::connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
     ///Common actions
-    QObject::connect(actionCompare, SIGNAL(activated()), this, SLOT(unify()));
+    QObject::connect(actionCompare, SIGNAL(triggered()), this, SLOT(unify()));
 }
 
 void milxQtMain::createProgressBar()
@@ -3155,8 +3157,8 @@ void milxQtMain::setupTooltips()
     actionConsole->setStatusTip("Hide/Show console docking window");
     actionLinkWindows->setToolTip("Link the view in all windows");
     actionLinkWindows->setStatusTip("Link the view in all windows");
-    actionContents->setToolTip("Browse the help");
-    actionContents->setStatusTip("Browse the help");
+    actionContents->setToolTip("Browse the help docs");
+    actionContents->setStatusTip("Browse the help docs");
     actionPreferences->setToolTip("Customise the program settings");
     actionPreferences->setStatusTip("Customise the program settings");
 
@@ -3231,7 +3233,7 @@ void milxQtMain::closeEvent(QCloseEvent *event)
         closeTab(j);
 
     //first tab
-    QMdiArea *tmpWorkspace = qobject_cast<QMdiArea *>(workspaces->widget(0));
+    WorkspaceType *tmpWorkspace = qobject_cast<WorkspaceType *>(workspaces->widget(0));
     disconnect(tmpWorkspace, SIGNAL(subWindowActivated(QMdiSubWindow *)), 0, 0);
     tmpWorkspace->closeAllSubWindows();
     tmpWorkspace->close();
@@ -3320,7 +3322,7 @@ bool milxQtMain::loadPlugins()
                     QString tmpName = "[" + loadedPlugin->name() + " Extension]";
 
                     QAction *extAction = new QAction(this);
-                    extAction->setText(QApplication::translate("Plugin", tmpName.toStdString().c_str(), 0));
+                    extAction->setText(tr("Plugin", tmpName.toStdString().c_str(), 0));
                     extAction->setShortcut(tr("Alt+n"));
 
                     if(loadedPlugin->genericResult())

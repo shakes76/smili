@@ -23,7 +23,6 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QWebEngineView>
-#include <QWebEnginePage>
 #include <QFile>
 #include <QToolBar>
 #include <QDebug>
@@ -31,9 +30,9 @@
 int main(int argc, char* argv[])
 {
     QApplication app(argc,argv);
-	QMainWindow Main;
+    QMainWindow Main;
     Q_INIT_RESOURCE(smili);
-	QWebEngineView *assistantView = new QWebEngineView(&Main);
+    QWebEngineView *assistantView = new QWebEngineView(&Main);
 
     QFile file(":/resources/index.html");
     if(file.open(QIODevice::ReadOnly))

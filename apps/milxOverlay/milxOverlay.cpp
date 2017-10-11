@@ -81,7 +81,6 @@ int main(int argc, char* argv[])
     ValueArg<float> redArg("", "redbackground", "Set the redness value (0-1) for the background.", false, 1.0, "Red Component");
     ValueArg<float> greenArg("", "greenbackground", "Set the greenness value (0-1) for the background.", false, 1.0, "Green Component");
     ValueArg<float> blueArg("", "bluebackground", "Set the blueness value (0-1) for the background.", false, 1.0, "Blue Component");
-    ValueArg<float> zoomArg("", "zoom", "Zoom in on the current view by given factor.", false, 2.0, "Zoom");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> axialSliceArg("", "axialslice", "Set the axial slice of the image.", false, 0, "Axial Slice");
@@ -118,7 +117,6 @@ int main(int argc, char* argv[])
     SwitchArg wireframeArg("", "wireframe", "Display initial surface as a wireframe model.", false);
     SwitchArg wireframesArg("", "wireframes", "Display all surfaces as a wireframe models.", false);
     SwitchArg humanArg("", "nohuman", "Disable human orientation glyph.", false);
-    SwitchArg specularArg("", "nospecular", "Disable specular lighting for the rendered view.", false);
 
     ///Mandatory
     UnlabeledMultiArg<std::string> multinames("surfaces", "Surfaces to overlay", true, "Surfaces");
@@ -146,7 +144,6 @@ int main(int argc, char* argv[])
     cmd.add( redArg );
     cmd.add( greenArg );
     cmd.add( blueArg );
-    cmd.add( zoomArg );
     cmd.add( opacityArg );
     cmd.add( isoValueArg );
     cmd.add( loadScalarsArg );
@@ -186,7 +183,6 @@ int main(int argc, char* argv[])
     cmd.add( wireframeArg );
     cmd.add( wireframesArg );
     cmd.add( humanArg );
-    cmd.add( specularArg );
 
     ///Parse the argv array.
     cmd.parse( argc, argv );
@@ -212,7 +208,6 @@ int main(int argc, char* argv[])
     const float redValue = redArg.getValue();
     const float greenValue = greenArg.getValue();
     const float blueValue = blueArg.getValue();
-    const float zoomFactor = zoomArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     const int axialSliceNumber = axialSliceArg.getValue();
@@ -226,7 +221,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument.";// << endl;
+            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -234,7 +229,7 @@ int main(int argc, char* argv[])
     {
         if(!imageArg.isSet())
         {
-            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument.";// << endl;
+            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -242,7 +237,7 @@ int main(int argc, char* argv[])
     {
         if(!isoArg.isSet())
         {
-            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument.";// << endl;
+            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -254,12 +249,12 @@ int main(int argc, char* argv[])
     bool success = false;
 
     //Read model
-    cout << ">> Overlay: Reading Models";// << endl;
+    cout << ">> Overlay: Reading Models" << std::endl;
     vtkSmartPointer<vtkPolyDataCollection> collection;
     success = milx::File::OpenModelCollection(filenames, collection);
     if(!success) //Error printed inside
     {
-        cerr << "Error reading models!";// << endl;
+        cerr << "Error reading models!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -282,7 +277,7 @@ int main(int argc, char* argv[])
 
     if(n < 1)
     {
-        cerr << "At least one model must be provided!";// << endl;
+        cerr << "At least one model must be provided!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -343,7 +338,7 @@ int main(int argc, char* argv[])
     }
     model = models[0];
     mainWindow.setCentralWidget(model.data());
-    std::cerr << "Done" << std::endl;
+    cerr << "Done" << std::endl;
 
     //Read vectors model
     QScopedPointer<milxQtModel> modelVectors(new milxQtModel); //smart deletion
@@ -352,7 +347,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(vectorsName.c_str(), modelVectors.data());
       if(success)
       {
-          cout << ">> Applying Vectors";// << endl;
+          cout << ">> Applying Vectors" << std::endl;
           modelVectors->setName(vectorsName.c_str());
           modelVectors->generateModel();
           modelVectors->generateVectorField();
@@ -369,7 +364,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(scalarMaskName.c_str(), modelMask.data());
       if(success)
       {
-          cout << ">> Overlay: Applying Mask";// << endl;
+          cout << ">> Overlay: Applying Mask" << std::endl;
           modelMask->setName(scalarMaskName.c_str());
           modelMask->generateModel();
 
@@ -386,7 +381,7 @@ int main(int argc, char* argv[])
 
           if(model->GetNumberOfPoints() == 0)
           {
-              cerr << "Error using scalar mask. Model no longer has any points!";// << endl;
+              cerr << "Error using scalar mask. Model no longer has any points!" << std::endl;
               exit(EXIT_FAILURE);
           }
       }
@@ -398,7 +393,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtImage> imgIso(new milxQtImage);  //smart deletion
     if(isoArg.isSet())
     {
-        cout << ">> Overlay: Applying Isosurface";// << endl;
+        cout << ">> Overlay: Applying Isosurface" << std::endl;
         success = reader->openImage(isoName.c_str(), imgIso.data());
             imgIso->setName(isoName.c_str());
             imgIso->generateImage();
@@ -417,7 +412,7 @@ int main(int argc, char* argv[])
 
     if(errorReading)
     {
-        cerr << "Error Reading one or more of the input files. Exiting.";// << endl;
+        cerr << "Error Reading one or more of the input files. Exiting." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -433,7 +428,7 @@ int main(int argc, char* argv[])
         transform2->PostMultiply();
     if(imageArg.isSet())
     {
-        cout << ">> Overlay: Reading Image";// << endl;
+        cout << ">> Overlay: Reading Image" << std::endl;
         errorReading = false;
         success = reader->openImage(imageName.c_str(), img.data());
 
@@ -493,7 +488,7 @@ int main(int argc, char* argv[])
 
         if(errorReading)
         {
-            cerr << "Error Reading the image file. Exiting.";// << endl;
+            cerr << "Error Reading the image file. Exiting." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -503,7 +498,7 @@ int main(int argc, char* argv[])
         orientTransform->Invert();
         transform2->Concatenate(orientTransform);
 //        transform2->Concatenate(transform->GetMatrix());
-        cout << ">> Overlay: Transforming Actors";// << endl;
+        cout << ">> Overlay: Transforming Actors" << std::endl;
     }
 
     ///Display
@@ -533,7 +528,7 @@ int main(int argc, char* argv[])
     }
 
     //Colour maps
-    cout << ">>> Overlay: Setting Colourmap";// << endl;
+    cout << ">>> Overlay: Setting Colourmap" << std::endl;
     if(jetArg.isSet())
         model->colourMapToJet();
     if(vtkArg.isSet())
@@ -613,16 +608,8 @@ int main(int argc, char* argv[])
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
-    if(specularArg.isSet())
-        model->disableSpecularDisplay();
-    //Zoom
-    if(zoomArg.isSet())
-    {
-      vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
-      camera->Zoom(zoomFactor);
-    }
 
-    cout << ">> Overlay: Rendering";// << endl;
+    cout << ">> Overlay: Rendering" << std::endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -640,7 +627,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
     model->GetRenderWindow()->Render();
     writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
-    cout << ">> Complete";// << endl;
+    cout << ">> Complete" << std::endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
     if(!onscreenArg.isSet())

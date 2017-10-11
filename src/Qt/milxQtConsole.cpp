@@ -167,19 +167,19 @@ void milxQtConsole::createActions()
 {
     copyAct = new QAction(this);
         copyAct->setIcon(QIcon(":/resources/toolbar/copy.png"));
-        copyAct->setText(tr("Console", "Copy", 0));
+        copyAct->setText(tr("Copy", 0));
         copyAct->setShortcut(tr("Ctrl+c"));
 
 //    cutAct = new QAction(this);
-//        cutAct->setText(QApplication::translate("Console", "Cut", 0, QApplication::UnicodeUTF8));
+//        cutAct->setText(QApplication::translate("Cut", 0, QApplication::UnicodeUTF8));
 //        cutAct->setShortcut(tr("Ctrl+x"));
 //
 //    pasteAct = new QAction(this);
-//        pasteAct->setText(QApplication::translate("Console", "Paste", 0, QApplication::UnicodeUTF8));
+//        pasteAct->setText(QApplication::translate("Paste", 0, QApplication::UnicodeUTF8));
 //        pasteAct->setShortcut(tr("Ctrl+v"));
 
     clearAct = new QAction(this);
-        clearAct->setText(tr("Console", "Clear", 0));
+        clearAct->setText(tr("Clear", 0));
         clearAct->setShortcut(tr("Crtl+z"));
 }
 

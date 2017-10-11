@@ -21,8 +21,11 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
-#include <QWizardPage>
+#include <QFileDialog>
 #include <QGroupBox>
+#include <QLineEdit>
+#include <QWizardPage>
+#include <QApplication>
 
 //ITK
 #include <itkImageSeriesReader.h>
@@ -338,7 +341,6 @@ protected:
     QCheckBox *anonPatientInfo;
     QCheckBox *anonPhysician;
     QCheckBox *anonOperator;
-    QCheckBox *anonScanDate;
 
     //data
     milxQtImage *image; //main window owner

@@ -18,18 +18,16 @@
 #ifndef MILXQTPLOT_H
 #define MILXQTPLOT_H
 
+//Qt
+#include <QSlider>
+#include <QSlider>
+
 //VTK
 #include <vtkChartXY.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkVolume.h>
 
 #include "milxQtModel.h"
-#include <QSlider>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QApplication>
-#include <QMenu>
 
 /**
     \class milxQtPlot

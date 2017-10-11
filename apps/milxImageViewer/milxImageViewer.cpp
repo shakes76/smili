@@ -19,6 +19,8 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <QMenu>
+#include <QDesktopWidget>
 
 #include "milxQtFile.h"
 #include "milxQtImage.h"
@@ -33,11 +35,11 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        cerr << "milxImageViewer Application:";// << endl;
-        cerr << "For quick and fast display of image files.";// << endl;
-        cerr << "View configuration always matches sMILX settings wherever possible.";// << endl;
-        cerr << "Usage:";// << endl;
-        cerr << "<Image Filename> ";// << endl;
+        cerr << "milxImageViewer Application:" << std::endl;
+        cerr << "For quick and fast display of image files." << std::endl;
+        cerr << "View configuration always matches sMILX settings wherever possible." << std::endl;
+        cerr << "Usage:" << std::endl;
+        cerr << "<Image Filename> " << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -50,7 +52,7 @@ int main(int argc, char *argv[])
 
     if(!success)
     {
-      cerr << "Error opening image file.";// << endl;
+      cerr << "Error opening image file." << std::endl;
       return EXIT_FAILURE;
     }
 

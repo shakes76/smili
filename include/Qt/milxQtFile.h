@@ -20,11 +20,6 @@
 
 #include <QFile>
 #include <QPointer>
-#include <QLabel>
-#include <QComboBox>
-#include <QPushButton>
-#include <QVBoxLayout>
-
 //VTK
 #include <vtkSmartPointer.h>
 #include <vtkPolyData.h>
@@ -95,19 +90,12 @@ public slots:
     */
     QString supportedImageFormats();
     /*!
-        \fn milxQtFile::is8BitFormat(const QString filename, bool &errorEncountered)
+        \fn milxQtFile::isIntegerFormat(const QString filename, bool &errorEncountered)
         \brief Returns if a image is an 8-bit image format or not.
 
         Also writes Boolean into errorEncountered if error was encountered during reading of header.
     */
-    bool is8BitFormat(const QString filename, bool &errorEncountered);
-    /*!
-    \fn milxQtFile::is32BitFormat(const QString filename, bool &errorEncountered)
-    \brief Returns if a image is an 32-bit image format or not.
-
-    Also writes Boolean into errorEncountered if error was encountered during reading of header.
-    */
-    bool is32BitFormat(const QString filename, bool &errorEncountered);
+    bool isIntegerFormat(const QString filename, bool &errorEncountered);
     /*!
         \fn milxQtFile::isFieldFormat(const QString filename, bool &errorEncountered)
         \brief Returns if a image is a deformation field type image (a vector image) format or not.

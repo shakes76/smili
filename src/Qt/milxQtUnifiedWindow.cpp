@@ -18,7 +18,8 @@
 #include <limits>
 
 #include "milxQtUnifiedWindow.h"
-#include <QDebug>
+#include <QMenu>
+//#include <QDebug>
 //ITK
 #include <itkLinearInterpolateImageFunction.h>
 //VTK
@@ -297,7 +298,7 @@ void milxQtUnifiedWindow::generateCheckerBoard()
             printDebug("Adding " + img->getName() + " to checkerboard");
             int *displayExtents = img->GetDisplayExtent();
             cerr   << "Slice: " << displayExtents[0] << ", " << displayExtents[1] << ", " << displayExtents[2]
-                   << ", " << displayExtents[3] << ", " << displayExtents[4] << ", " << displayExtents[5];// << endl;
+                   << ", " << displayExtents[3] << ", " << displayExtents[4] << ", " << displayExtents[5] << std::endl;
             vtkSmartPointer<vtkImageReslice> slice = vtkSmartPointer<vtkImageReslice>::New();
             #if VTK_MAJOR_VERSION <=5
                 slice->SetInput(img->GetOutput());
@@ -404,21 +405,21 @@ void milxQtUnifiedWindow::createActions()
 {
     //Modes
     unionAct = new QAction(this);
-    unionAct->setText(QApplication::translate("Unified", "&Union of Data", 0));
+    unionAct->setText(tr("&Union of Data", 0));
     unionAct->setShortcut(tr("Alt+u"));
     unionAct->setCheckable(true);
     unionAct->setChecked(true);
     geoDifferenceAct = new QAction(this);
-    geoDifferenceAct->setText(QApplication::translate("Unified", "&Surface (Hausdoff) Distance", 0));
+    geoDifferenceAct->setText(tr("&Surface (Hausdoff) Distance", 0));
     geoDifferenceAct->setShortcut(tr("Alt+d"));
     geoDifferenceAct->setCheckable(true);
     scalarDifferenceAct = new QAction(this);
-    scalarDifferenceAct->setText(QApplication::translate("Unified", "&Scalar Difference", 0));
+    scalarDifferenceAct->setText(tr("&Scalar Difference", 0));
     scalarDifferenceAct->setShortcut(tr("Alt+s"));
     scalarDifferenceAct->setCheckable(true);
     scalarDifferenceAct->setDisabled(true);
     checkerBoardAct = new QAction(this);
-    checkerBoardAct->setText(QApplication::translate("Unified", "&Checkerboard", 0));
+    checkerBoardAct->setText(tr("&Checkerboard", 0));
     checkerBoardAct->setShortcut(tr("Alt+c"));
     checkerBoardAct->setCheckable(true);
     checkerBoardAct->setDisabled(true);
