@@ -30,6 +30,7 @@ milxQtPreferencesForm::milxQtPreferencesForm(milxQtMain *theParent) : QDialog(th
 
     setWindowModality(Qt::ApplicationModal); //block user input
     setWindowTitle(tr("sMILX Preferences"));
+	setFixedSize(this->size());
 
     MainWindow = theParent;
 
@@ -188,10 +189,12 @@ void milxQtPreferencesForm::accept()
     MainWindow->preferMaximumProcessors(processorsEdit->value());
     MainWindow->preferScreenshotMagnifyFactor(magnifyEdit->value());
     MainWindow->preferTimestamps(timestampCheckBox->isChecked());
-    //Imaging
+    
+	//Imaging
     MainWindow->preferImageInterpolation(interpolationCheckBox->isChecked());
     MainWindow->preferOrientation(orientationCheckBox->isChecked());
-    //Models
+    
+	//Models
     MainWindow->preferModelInterpolation(interpolationModelCheckBox->isChecked());
     MainWindow->preferScalarBar(scalarBarCheckBox->isChecked());
     MainWindow->writeSettings();

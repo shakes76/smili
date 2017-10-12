@@ -41,6 +41,7 @@
 //Forms
 #include "milxQtAboutForm.h"
 #include "milxQtPreferencesForm.h"
+#include "milxQtControlsForm.h"
 
 milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
 {
@@ -1053,33 +1054,44 @@ void milxQtMain::helpContents()
     toolBar->addAction(view->pageAction(QWebEnginePage::Stop));*/
 }
 
+void milxQtMain::about()
+{
+	milxQtAboutForm aboutForm(this);
+	aboutForm.exec();
+}
+
+void milxQtMain::controls()
+{
+	printDebug("Showing controls available...");
+	bool isActive = false; // If the controls window is already active
+	
+	// Search for the controls window
+	foreach(QWidget *win, this->findChildren<QWidget *>()) {
+		// Check if the window is the controls window
+		if (win->windowTitle().compare(milxQtControlsForm::title) == 0) {
+			// Controls window exists - bring the window to the front
+			printDebug(win->windowTitle());
+			win->activateWindow();
+			isActive = true;
+			//delete win;
+			break;
+		}
+	}
+
+	// Create the controls window, if it doesn't already exist
+	if (!isActive) {
+		milxQtControlsForm *controlsForm = new milxQtControlsForm(this);
+		controlsForm->show();
+	}
+}
+
 void milxQtMain::preferences()
 {
     ///Multi-page dialog is populated with options
     ///Upon acceptance, the settings are directly written
     ///to the MainWindow
     milxQtPreferencesForm prefsForm(this);
-
     prefsForm.exec();
-}
-
-void milxQtMain::controls()
-{
-    printDebug("Showing controls available...");
-    QPixmap pixmap(":resources/controls_splash.png");
-    QSplashScreen *controlsSplash = new QSplashScreen(this);
-        controlsSplash->setPixmap(pixmap);
-        controlsSplash->setMask(pixmap.mask());
-        controlsSplash->show();
-
-    qApp->processEvents();
-}
-
-void milxQtMain::about()
-{
-  milxQtAboutForm aboutForm(this);
-
-  aboutForm.exec();
 }
 
 void milxQtMain::working(int value)

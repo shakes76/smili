@@ -519,22 +519,21 @@ public slots:
         \brief Show the help contents browser.
     */
     void helpContents();
-    /*!
+	/*!
+	\fn milxQtMain::about()
+	\brief Show the about information.
+	*/
+	void about();
+	/*!
+	\fn milxQtMain::controls()
+	\brief Show the controls information.
+	*/
+	void controls();
+	/*!
         \fn milxQtMain::preferences()
         \brief Show the preferences for the program.
     */
     void preferences();
-    /*!
-        \fn milxQtMain::controls()
-        \brief Show the controls information.
-    */
-    void controls();
-    /*!
-        \fn milxQtMain::about()
-        \brief Show the about information.
-    */
-    void about();
-
     /*!
         \fn milxQtMain::working(int value)
         \brief Show progress bar when computing work. NEgative value shows a busy bar.
@@ -1062,7 +1061,7 @@ protected:
     //----Help---- (hierarchical deletion)
     QAction* actionContents; //!< Action for showing contents of help
     QAction* actionPreferences; //!< Action for showing program preferences
-    QAction* actionControls; //!< Action for showing about information
+    QAction* actionControls; //!< Action for showing controls information
     QAction* actionAbout; //!< Action for showing about information
 
     //Common actions/menus

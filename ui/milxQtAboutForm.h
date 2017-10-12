@@ -20,6 +20,7 @@
 
 #include "ui_about.h"
 #include "milxQtAliases.h"
+
 /*!
     \class milxQtAboutForm
     \brief This class represents the about form and other info.
