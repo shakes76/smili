@@ -45,130 +45,142 @@ milxQtPreferencesForm::~milxQtPreferencesForm()
 
 void milxQtPreferencesForm::setupPages()
 {
-    ///General
-    QWidget *generalPage = new QWidget;
-    QListWidgetItem *generalPageItem = new QListWidgetItem(ui.wdtOptions);
-        generalPageItem->setText(tr("General"));
-        generalPageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    ///Background colour (check)
+    ///General Page
+	QWidget *generalPage = new QWidget;
+	QListWidgetItem *generalPageItem = new QListWidgetItem(ui.wdtOptions);
+		generalPageItem->setText(tr("General"));
+		generalPageItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+	
+	//Application options
+	//Window size (text)
+	QLabel *windowSizeLabel = new QLabel(tr("Preferred Window Size:"));
+	QSize desktopSize = qApp->desktop()->availableGeometry().size();
+		windowSizeEdit = new QSpinBox;
+		windowSizeEdit->setMinimum(minWindowSize);
+		windowSizeEdit->setMaximum(milx::Maximum<int>(desktopSize.width(), desktopSize.height()));
+		windowSizeEdit->setValue(MainWindow->hasPreferredSubWindowSize());
+	QHBoxLayout *windowSizeLayout = new QHBoxLayout;
+		windowSizeLayout->addWidget(windowSizeLabel);
+		windowSizeLayout->addWidget(windowSizeEdit);
+	//Number of processors (text)
+	QLabel *processorsLabel = new QLabel(tr("Preferred Max. Processors:"));
+	processorsEdit = new QSpinBox;
+		processorsEdit->setMinimum(1);
+		processorsEdit->setMaximum(milx::NumberOfProcessors());
+		processorsEdit->setValue(MainWindow->hasMaximumProcessors());
+	QHBoxLayout *processorsLayout = new QHBoxLayout;
+		processorsLayout->addWidget(processorsLabel);
+		processorsLayout->addWidget(processorsEdit);
+	//Magnification of Screenshots
+	QLabel *magnifyLabel = new QLabel(tr("Screenshot Magnification Factor"));
+	magnifyEdit = new QSpinBox;
+		magnifyEdit->setMinimum(1);
+		magnifyEdit->setMaximum(1024);
+		magnifyEdit->setValue(MainWindow->hasScreenshotMagnifyFactor());
+	QHBoxLayout *magnifyLayout = new QHBoxLayout;
+		magnifyLayout->addWidget(magnifyLabel);
+		magnifyLayout->addWidget(magnifyEdit);
+	//Timestamp in log? (check)
+	timestampCheckBox = new QCheckBox(tr("Show timestamp in logs"));
+	timestampCheckBox->setChecked(MainWindow->isTimestampsPreferred());
+	// Save settings option
+
+	// Load settings option
+
+	//Application options layout
+	QVBoxLayout *generalLayout = new QVBoxLayout;
+		generalLayout->addLayout(windowSizeLayout);
+		generalLayout->addLayout(processorsLayout);
+		generalLayout->addLayout(magnifyLayout);
+		generalLayout->addWidget(timestampCheckBox);
+	QGroupBox *applicationGroup = new QGroupBox(tr("Application"));
+		applicationGroup->setLayout(generalLayout);
+
+	//View options
+    //Background colour (check)
     backgroundCheckBox = new QCheckBox(tr("Prefer white background"));
         backgroundCheckBox->setChecked(MainWindow->isWhiteBackgroundPreferred());
-    ///View (combo)
-    ///Orientation standard (combo)
-    ///Human glyph (check)
+    //Human glyph (check)
     humanCheckBox = new QCheckBox(tr("Show human orientation glyph"));
         humanCheckBox->setChecked(MainWindow->isHumanGlyphPreferred());
-    ///Window size (text)
-    QLabel *windowSizeLabel = new QLabel(tr("Preferred Window Size:"));
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
-    windowSizeEdit = new QSpinBox;
-        windowSizeEdit->setMinimum(minWindowSize);
-        windowSizeEdit->setMaximum(milx::Maximum<int>(desktopSize.width(), desktopSize.height()));
-        windowSizeEdit->setValue(MainWindow->hasPreferredSubWindowSize());
-    QHBoxLayout *windowSizeLayout = new QHBoxLayout;
-        windowSizeLayout->addWidget(windowSizeLabel);
-        windowSizeLayout->addWidget(windowSizeEdit);
-    ///Number of processors (text)
-    QLabel *processorsLabel = new QLabel(tr("Preferred Max. Processors:"));
-    processorsEdit = new QSpinBox;
-        processorsEdit->setMinimum(1);
-        processorsEdit->setMaximum(milx::NumberOfProcessors());
-        processorsEdit->setValue(MainWindow->hasMaximumProcessors());
-    QHBoxLayout *processorsLayout = new QHBoxLayout;
-        processorsLayout->addWidget(processorsLabel);
-        processorsLayout->addWidget(processorsEdit);
-    ///Magnification of Screenshots
-    QLabel *magnifyLabel = new QLabel(tr("Screenshot Magnification Factor"));
-    magnifyEdit = new QSpinBox;
-        magnifyEdit->setMinimum(1);
-        magnifyEdit->setMaximum(1024);
-        magnifyEdit->setValue(MainWindow->hasScreenshotMagnifyFactor());
-    QHBoxLayout *magnifyLayout = new QHBoxLayout;
-        magnifyLayout->addWidget(magnifyLabel);
-        magnifyLayout->addWidget(magnifyEdit);
-    ///Timestamp in log? (check)
-    timestampCheckBox = new QCheckBox(tr("Show timestamp in logs"));
-        timestampCheckBox->setChecked(MainWindow->isTimestampsPreferred());
-    //View Layout
-    QVBoxLayout *viewLayout = new QVBoxLayout;
-        viewLayout->addWidget(backgroundCheckBox);
-        viewLayout->addWidget(humanCheckBox);
-    QGroupBox *generalViewGroup = new QGroupBox(tr("View Options"));
-        generalViewGroup->setLayout(viewLayout);
-    //General layout
-    QVBoxLayout *generalLayout = new QVBoxLayout;
-        generalLayout->addLayout(windowSizeLayout);
-        generalLayout->addLayout(processorsLayout);
-        generalLayout->addLayout(magnifyLayout);
-        generalLayout->addWidget(timestampCheckBox);
-    QGroupBox *generalGroup = new QGroupBox(tr("General"));
-        generalGroup->setLayout(generalLayout);
-    QVBoxLayout *generalPageLayout = new QVBoxLayout;
-        generalPageLayout->addWidget(generalViewGroup);
-        generalPageLayout->addWidget(generalGroup);
-        generalPage->setLayout(generalPageLayout);
+	//View options layout
+	QVBoxLayout *viewLayout = new QVBoxLayout;
+		viewLayout->addWidget(backgroundCheckBox);
+		viewLayout->addWidget(humanCheckBox);
+	QGroupBox *generalViewGroup = new QGroupBox(tr("View Options"));
+		generalViewGroup->setLayout(viewLayout);
+       	
+	//Imaging options
+	//Interpolation (check)
+	interpolationCheckBox = new QCheckBox(tr("Interpolate images"));
+	interpolationCheckBox->setChecked(MainWindow->isImageInterpolationPreferred());
+	//Apply Orientation (check)
+	orientationCheckBox = new QCheckBox(tr("Apply orientation to images"));
+	orientationCheckBox->setChecked(MainWindow->isOrientationPreferred());
+	//TODO Add custom colour maps
+
+	//Imaging options layout
+	QVBoxLayout *imagingLayout = new QVBoxLayout;
+		imagingLayout->addWidget(interpolationCheckBox);
+		imagingLayout->addWidget(orientationCheckBox);
+	QGroupBox *imagingGroup = new QGroupBox(tr("Imaging"));
+		imagingGroup->setLayout(imagingLayout);
+	
+	//Model options
+	//Interpolation (check)
+	interpolationModelCheckBox = new QCheckBox(tr("Interpolate (Phong Shading) Models"));
+	interpolationModelCheckBox->setChecked(MainWindow->isModelInterpolationPreferred());
+	///Scalar bar (Check)
+	scalarBarCheckBox = new QCheckBox(tr("Always show scalar bar"));
+	scalarBarCheckBox->setChecked(MainWindow->isScalarBarPreferred());
+	//layout
+	QVBoxLayout *ModelLayout = new QVBoxLayout;
+		ModelLayout->addWidget(interpolationModelCheckBox);
+		ModelLayout->addWidget(scalarBarCheckBox);
+	QGroupBox *modelGroup = new QGroupBox(tr("Models"));
+		modelGroup->setLayout(ModelLayout);
+
+	//General page layout
+	QVBoxLayout *generalPageLayout = new QVBoxLayout;
+		generalPageLayout->addWidget(generalViewGroup);
+		generalPageLayout->addWidget(applicationGroup);
+		generalPageLayout->addWidget(imagingGroup);
+		generalPageLayout->addWidget(modelGroup);
+		generalPageLayout->setAlignment(Qt::AlignTop);
+	generalPage->setLayout(generalPageLayout);
+
+	//Add General options page to preferences
     ui.wdtPages->insertWidget(0, generalPage);
     ui.wdtPages->setCurrentWidget(generalPage);
     ui.wdtOptions->setCurrentItem(generalPageItem);
-
-    ///Imaging
-    QWidget *imagingPage = new QWidget;
-    QListWidgetItem *imagingPageItem = new QListWidgetItem(ui.wdtOptions);
-        imagingPageItem->setText(tr("Images"));
-        imagingPageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    ///Colourmap (combo)
-    ///Interpolation (check)
-    interpolationCheckBox = new QCheckBox(tr("Interpolate images"));
-        interpolationCheckBox->setChecked(MainWindow->isImageInterpolationPreferred());
-    ///Apply Orientation (check)
-    orientationCheckBox = new QCheckBox(tr("Apply orientation to images"));
-        orientationCheckBox->setChecked(MainWindow->isOrientationPreferred());
-    //Layout
-    QVBoxLayout *imagingPageLayout = new QVBoxLayout;
-        imagingPageLayout->addWidget(interpolationCheckBox);
-        imagingPageLayout->addWidget(orientationCheckBox);
-        imagingPage->setLayout(imagingPageLayout);
-    ui.wdtPages->insertWidget(1, imagingPage);
-
-    ///Models
-    QWidget *modelPage = new QWidget;
-    QListWidgetItem *modelPageItem = new QListWidgetItem(ui.wdtOptions);
-        modelPageItem->setText(tr("Models"));
-        modelPageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    ///Colourmap (combo)
-    ///Interpolation (check)
-    interpolationModelCheckBox = new QCheckBox(tr("Interpolate (Phong Shading) models"));
-        interpolationModelCheckBox->setChecked(MainWindow->isModelInterpolationPreferred());
-    ///Scalar bar
-    scalarBarCheckBox = new QCheckBox(tr("Always show scalar bar"));
-        scalarBarCheckBox->setChecked(MainWindow->isScalarBarPreferred());
-    //Layout
-    QVBoxLayout *modelPageLayout = new QVBoxLayout;
-        modelPageLayout->addWidget(interpolationModelCheckBox);
-        modelPageLayout->addWidget(scalarBarCheckBox);
-        modelPage->setLayout(modelPageLayout);
-    ui.wdtPages->insertWidget(2, modelPage);
-
-    ///Plugins
+	
+    ///Plugins Page
     QWidget *pluginsPage = new QWidget;
+	QVBoxLayout *pluginsPageLayout = new QVBoxLayout;
     QListWidgetItem *pluginsPageItem = new QListWidgetItem(ui.wdtOptions);
         pluginsPageItem->setText(tr("Plugins"));
         pluginsPageItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    ///List and Disable
-    QListWidget *pluginsList = new QListWidget;
-        pluginsList->setDisabled(true);
-    foreach(QPointer<milxQtPluginInterface> plugin, MainWindow->getPlugins())
-    {
-        QListWidgetItem *pluginsItem = new QListWidgetItem(pluginsList);
-            pluginsItem->setText(plugin->name());
-            pluginsItem->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    }
-    //Layout
-    QVBoxLayout *pluginsPageLayout = new QVBoxLayout;
-        pluginsPageLayout->addWidget(pluginsList);
-        pluginsPage->setLayout(pluginsPageLayout);
+	// Check if no plugins
+	if (!MainWindow->getPlugins().size()) {
+		noPluginMsg = new QLabel(tr("There are currently no plugins installed."));
+		pluginsPageLayout->addWidget(noPluginMsg);
+		pluginsPageLayout->setAlignment(Qt::AlignCenter);
+	} else {
+		///List and Disable
+		QListWidget *pluginsList = new QListWidget;
+		pluginsList->setDisabled(true);
 
-    ui.wdtPages->insertWidget(3, pluginsPage);
+		foreach(QPointer<milxQtPluginInterface> plugin, MainWindow->getPlugins())
+		{
+			QListWidgetItem *pluginsItem = new QListWidgetItem(pluginsList);
+			pluginsItem->setText(plugin->name());
+			pluginsItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+		}
+		pluginsPageLayout->addWidget(pluginsList);
+	}
+    //Layout	
+    pluginsPage->setLayout(pluginsPageLayout);
+    ui.wdtPages->insertWidget(1, pluginsPage);
 }
 
 void milxQtPreferencesForm::changePage(QListWidgetItem *current, QListWidgetItem *previous)

@@ -25,6 +25,7 @@
 #include <QToolBar>
 #include <QSplashScreen>
 #include <QDesktopWidget>
+
 //VTK
 #include <vtkWindowToImageFilter.h>
 #include <vtkRendererCollection.h>
@@ -1035,23 +1036,29 @@ void milxQtMain::tileTabHorizontally()
 void milxQtMain::helpContents()
 {
     printDebug("Help browser is currently disabled.");
-	/*
+	
     QFile file(":/resources/smilx_doc/home.html");
-    QWebEngineView *view = new QWebEngineView(this);
-    
+	QWebEngineView view;
+	//view.setUrl(QUrl(QStringLiteral("http://www.qt.io")));
+	view.resize(1024, 750);
+	//view.show();
+
+
+    /*
 	if (file.open(QIODevice::ReadOnly)) {
-		view->setHtml(":/resources/smilx_doc/home.html");
-		view->setWindowTitle("sMILX Help");
-		qobject_cast<WorkspaceType *>(workspaces->currentWidget())->addSubWindow(view);
-		view->show();
+		//view->setHtml(":/resources/smilx_doc/home.html");
+		view.setUrl(QUrl(QStringLiteral("http://www.qt.io")));
+		view.setWindowTitle("sMILX Help");
+		//qobject_cast<WorkspaceType *>(workspaces->currentWidget())->addSubWindow(view.widg);
+		view.show();
 	}
 	
     //Quick setup toolbar
     QToolBar *toolBar = addToolBar(QObject::tr("Navigation"));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Back));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Forward));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Reload));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Stop));*/
+    toolBar->addAction(view.pageAction(QWebEnginePage::Back));
+    toolBar->addAction(view.pageAction(QWebEnginePage::Forward));
+    toolBar->addAction(view.pageAction(QWebEnginePage::Reload));
+    toolBar->addAction(view.pageAction(QWebEnginePage::Stop));*/
 }
 
 void milxQtMain::about()
@@ -1062,7 +1069,7 @@ void milxQtMain::about()
 
 void milxQtMain::controls()
 {
-	printDebug("Showing controls available...");
+	printDebug("Showing control scheme...");
 	bool isActive = false; // If the controls window is already active
 	
 	// Search for the controls window
@@ -1070,7 +1077,6 @@ void milxQtMain::controls()
 		// Check if the window is the controls window
 		if (win->windowTitle().compare(milxQtControlsForm::title) == 0) {
 			// Controls window exists - bring the window to the front
-			printDebug(win->windowTitle());
 			win->activateWindow();
 			isActive = true;
 			//delete win;
@@ -1172,7 +1178,7 @@ void milxQtMain::predisplay(milxQtImage* newImage)
     {
         newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
         display(newImage);
-    }/*
+    }
 
 	if(defaultViewTypeBox->currentIndex() != SINGLE) //Are we displaying scanner like three views + 3D view?
     {
@@ -1222,7 +1228,7 @@ void milxQtMain::predisplay(milxQtImage* newImage)
         imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
         imgCoronal->viewToCoronal();
         display(imgCoronal);
-
+		printDebug("DISPLAYING IMG");
         //3D view
         QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
         slicesView->setNamePrefix("3D View: ");
@@ -1259,7 +1265,7 @@ void milxQtMain::predisplay(milxQtImage* newImage)
 
         updateQtEvents(); //ensure all complete before tiling
         tileTab();
-  }*/
+  }
 }
 
 void milxQtMain::display(milxQtImage* newImage)

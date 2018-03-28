@@ -19,6 +19,7 @@
 #define MILXQTPreferencesFORM_H
 
 #include <QSpinBox>
+#include <QLabel>
 
 #include "ui_preferences.h"
 #include "milxQtMain.h"
@@ -61,6 +62,7 @@ protected:
     QCheckBox *interpolationModelCheckBox;
     QCheckBox *scalarBarCheckBox;
     //Plugins
+	QLabel *noPluginMsg;
 
     milxQtMain *MainWindow;
 

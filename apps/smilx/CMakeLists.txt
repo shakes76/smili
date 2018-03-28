@@ -28,6 +28,15 @@ IF (WIN32)
     SET (QT_USE_QTMAIN TRUE)
 ENDIF (WIN32)
 
+
+
+
+#--------------------------------------------------------------------------------
+# this command finds Qt5 libraries and sets all required variables
+# note that it's Qt5, not QT5 or qt5
+FIND_PACKAGE(Qt5 REQUIRED Core Gui WebEngineWidgets)
+
+
 #--------------------------------------------------------------------------------
 # this command finds Qt4 libraries and sets all required variables
 IF(VTK_QT_VERSION VERSION_GREATER "4")
