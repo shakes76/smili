@@ -18,6 +18,7 @@
 #ifndef MILXQTPreferencesFORM_H
 #define MILXQTPreferencesFORM_H
 
+#include <QPushButton>
 #include <QSpinBox>
 #include <QLabel>
 
@@ -42,25 +43,30 @@ public:
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+	void changeTheme(int);
     void accept();
 
 protected:
     Ui::dlgPreferences ui;
 
     //Options
-    //General
-    QCheckBox *backgroundCheckBox;
-    QCheckBox *humanCheckBox;
-    QSpinBox *windowSizeEdit;
+    //Application
+	QSpinBox *windowSizeEdit;
     QSpinBox *processorsEdit;
     QSpinBox *magnifyEdit;
     QCheckBox *timestampCheckBox;
+	QComboBox *themeList;
+	QPushButton *editThemeButton;
+	//View
+	QCheckBox *backgroundCheckBox;
+	QCheckBox *humanCheckBox;
     //Imaging
     QCheckBox *interpolationCheckBox;
     QCheckBox *orientationCheckBox;
     //Models
     QCheckBox *interpolationModelCheckBox;
     QCheckBox *scalarBarCheckBox;
+	QCheckBox *colourMapCheckBox;
     //Plugins
 	QLabel *noPluginMsg;
 

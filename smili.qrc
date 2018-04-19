@@ -6,6 +6,8 @@
         <file>resources/smili_logo.png</file>
         <file>resources/controls_splash.png</file>
         <file>resources/human.obj</file>
+        <file>resources/styles/light.qss</file>
+        <file>resources/styles/dark.qss</file>
         <file>resources/toolbar/copy.png</file>
         <file>resources/toolbar/cut.png</file>
         <file>resources/toolbar/new.png</file>

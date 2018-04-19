@@ -191,7 +191,19 @@ public:
     {
         return timestamping;
     }
-    /*!
+	/*!
+	\fn milxQtMain::setCurrentTheme(const QString theme)
+	\brief Sets whether timestamps are to be shown whenever possible. Default: true
+	*/
+	inline void setCurrentTheme(const QString theme)
+	{
+		appTheme = theme;
+	}
+	inline QString currentTheme()
+	{
+		return appTheme;
+	}
+	/*!
         \fn milxQtMain::preferImageInterpolation(const bool interp)
         \brief Sets whether interpolation is to be shown whenever possible for images. Default: true
     */
@@ -239,6 +251,18 @@ public:
     {
         return scalarBarModels;
     }
+	/*!
+	\fn milxQtMain::enableColourMaps(const bool enable)
+	\brief Sets whether to use custom colour maps. Default: true
+	*/
+	inline void activateColourMaps(const bool enable)
+	{
+		enableColourMaps = enable;
+	}
+	inline bool isColourMapEnabled()
+	{
+		return enableColourMaps;
+	}
 
 public slots:
     /*!
@@ -1008,10 +1032,12 @@ protected:
     int maxProcessors; //!< Max processors to use
     int magnifyFactor; //!< Screenshot magnify factor
     bool timestamping; //!< Prefer showing timestamp?
+	QString appTheme; //!< The application style theme
     bool interpolationImages; //!< Prefer showing interpolation for images?
     bool orientationImages; //!< Prefer applying orientation to images?
     bool interpolationModels; //!< Prefer applying interpolation to models?
     bool scalarBarModels; //!< Show scalar bar for models?
+	bool enableColourMaps = true; //!< Enable custom colour maps
 
     enum { MaxRecentFiles = 10 };
     //Menus (hierarchical deletion)

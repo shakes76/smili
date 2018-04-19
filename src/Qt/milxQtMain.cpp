@@ -139,6 +139,10 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Style
     update();
     printDebug("Main Window Setup Complete");
+	QFile qss(QString(":/resources/styles/" + appTheme + ".qss"));
+	qss.open(QFile::ReadOnly);
+	qApp->setStyleSheet(qss.readAll());
+	qss.close();
 }
 
 milxQtMain::~milxQtMain()
@@ -3406,10 +3410,12 @@ void milxQtMain::writeSettings()
     settings.setValue("maxProcessors", maxProcessors);
     settings.setValue("magnifyFactor", magnifyFactor);
     settings.setValue("timestamping", timestamping);
+	settings.setValue("appTheme", appTheme);
     settings.setValue("interpolationImages", interpolationImages);
     settings.setValue("orientationImages", orientationImages);
     settings.setValue("interpolationModels", interpolationModels);
     settings.setValue("scalarBarModels", scalarBarModels);
+	settings.setValue("enableColourMaps", enableColourMaps);
 
     settings.endGroup();
 }
@@ -3443,10 +3449,12 @@ void milxQtMain::readSettings()
     maxProcessors = settings.value("maxProcessors", maxProcessors).toInt();
     magnifyFactor = settings.value("magnifyFactor", magnifyFactor).toInt();
     timestamping = settings.value("timestamping", timestamping).toBool();
+	appTheme = settings.value("appTheme", appTheme).toString();
     interpolationImages = settings.value("interpolationImages", interpolationImages).toBool();
     orientationImages = settings.value("orientationImages", orientationImages).toBool();
     interpolationModels = settings.value("interpolationModels", interpolationModels).toBool();
     scalarBarModels = settings.value("scalarBarModels", scalarBarModels).toBool();
+	enableColourMaps = settings.value("enableColourMaps", enableColourMaps).toBool();
 
     ///Handle saving dock positions/areas etc.
     restoreDockWidget(console->dockWidget());

@@ -23,6 +23,7 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QDesktopWidget>
+#include <QScrollArea>
 
 milxQtPreferencesForm::milxQtPreferencesForm(milxQtMain *theParent) : QDialog(theParent)
 {
@@ -83,33 +84,56 @@ void milxQtPreferencesForm::setupPages()
 	//Timestamp in log? (check)
 	timestampCheckBox = new QCheckBox(tr("Show timestamp in logs"));
 	timestampCheckBox->setChecked(MainWindow->isTimestampsPreferred());
-	// Save settings option
-
-	// Load settings option
-
+	//Application theme options
+	QLabel *themeLabel = new QLabel(tr("Theme:"));
+		themeList = new QComboBox;
+		themeList->addItem("Light");
+		themeList->addItem("Dark");
+		//Load additional themes
+		QString currTheme = MainWindow->currentTheme();
+		currTheme.replace(0, 1, currTheme[0].toUpper());
+		themeList->setCurrentText(currTheme);
+		editThemeButton = new QPushButton("Edit Theme");
+	QHBoxLayout *themeLayout = new QHBoxLayout;
+		themeLayout->addWidget(themeLabel);
+		themeLayout->addWidget(themeList);
+		themeLayout->addWidget(editThemeButton);
 	//Application options layout
 	QVBoxLayout *generalLayout = new QVBoxLayout;
 		generalLayout->addLayout(windowSizeLayout);
 		generalLayout->addLayout(processorsLayout);
 		generalLayout->addLayout(magnifyLayout);
 		generalLayout->addWidget(timestampCheckBox);
-	QGroupBox *applicationGroup = new QGroupBox(tr("Application"));
-		applicationGroup->setLayout(generalLayout);
+		generalLayout->addLayout(themeLayout);
+		generalLayout->setAlignment(Qt::AlignTop);
 
+	//General page layout
+	generalPage->setLayout(generalLayout);
+	
+	//Add General options page to preferences
+    ui.wdtPages->insertWidget(0, generalPage);
+    ui.wdtPages->setCurrentWidget(generalPage);
+    ui.wdtOptions->setCurrentItem(generalPageItem);
+	
+	///Workspace Page
+	QWidget *workspacePage = new QWidget;
+	QListWidgetItem *workspacePageItem = new QListWidgetItem(ui.wdtOptions);
+		workspacePageItem->setText(tr("Workspace"));
+		workspacePageItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 	//View options
-    //Background colour (check)
-    backgroundCheckBox = new QCheckBox(tr("Prefer white background"));
-        backgroundCheckBox->setChecked(MainWindow->isWhiteBackgroundPreferred());
-    //Human glyph (check)
-    humanCheckBox = new QCheckBox(tr("Show human orientation glyph"));
-        humanCheckBox->setChecked(MainWindow->isHumanGlyphPreferred());
+	//Background colour (check)
+	backgroundCheckBox = new QCheckBox(tr("Prefer white background"));
+	backgroundCheckBox->setChecked(MainWindow->isWhiteBackgroundPreferred());
+	//Human glyph (check)
+	humanCheckBox = new QCheckBox(tr("Show human orientation glyph"));
+	humanCheckBox->setChecked(MainWindow->isHumanGlyphPreferred());
 	//View options layout
 	QVBoxLayout *viewLayout = new QVBoxLayout;
 		viewLayout->addWidget(backgroundCheckBox);
 		viewLayout->addWidget(humanCheckBox);
-	QGroupBox *generalViewGroup = new QGroupBox(tr("View Options"));
-		generalViewGroup->setLayout(viewLayout);
-       	
+	QGroupBox *viewGroup = new QGroupBox(tr("View Options"));
+		viewGroup->setLayout(viewLayout);
+
 	//Imaging options
 	//Interpolation (check)
 	interpolationCheckBox = new QCheckBox(tr("Interpolate images"));
@@ -121,11 +145,11 @@ void milxQtPreferencesForm::setupPages()
 
 	//Imaging options layout
 	QVBoxLayout *imagingLayout = new QVBoxLayout;
-		imagingLayout->addWidget(interpolationCheckBox);
-		imagingLayout->addWidget(orientationCheckBox);
+	imagingLayout->addWidget(interpolationCheckBox);
+	imagingLayout->addWidget(orientationCheckBox);
 	QGroupBox *imagingGroup = new QGroupBox(tr("Imaging"));
-		imagingGroup->setLayout(imagingLayout);
-	
+	imagingGroup->setLayout(imagingLayout);
+
 	//Model options
 	//Interpolation (check)
 	interpolationModelCheckBox = new QCheckBox(tr("Interpolate (Phong Shading) Models"));
@@ -135,25 +159,32 @@ void milxQtPreferencesForm::setupPages()
 	scalarBarCheckBox->setChecked(MainWindow->isScalarBarPreferred());
 	//layout
 	QVBoxLayout *ModelLayout = new QVBoxLayout;
-		ModelLayout->addWidget(interpolationModelCheckBox);
-		ModelLayout->addWidget(scalarBarCheckBox);
+	ModelLayout->addWidget(interpolationModelCheckBox);
+	ModelLayout->addWidget(scalarBarCheckBox);
 	QGroupBox *modelGroup = new QGroupBox(tr("Models"));
-		modelGroup->setLayout(ModelLayout);
+	modelGroup->setLayout(ModelLayout);
 
-	//General page layout
-	QVBoxLayout *generalPageLayout = new QVBoxLayout;
-		generalPageLayout->addWidget(generalViewGroup);
-		generalPageLayout->addWidget(applicationGroup);
-		generalPageLayout->addWidget(imagingGroup);
-		generalPageLayout->addWidget(modelGroup);
-		generalPageLayout->setAlignment(Qt::AlignTop);
-	generalPage->setLayout(generalPageLayout);
+	//Colour Maps
+	colourMapCheckBox = new QCheckBox(tr("Enable Custom Colour Maps"));
+	colourMapCheckBox->setChecked(MainWindow->isColourMapEnabled());
+	//layout
+	QVBoxLayout *colourMapLayout = new QVBoxLayout;
+	colourMapLayout->addWidget(colourMapCheckBox);
+	QGroupBox *colourMapGroup = new QGroupBox(tr("Colour Maps"));
+	colourMapGroup->setLayout(colourMapLayout);
+
+	//Workspace page layout
+	QVBoxLayout *workspacePageLayout = new QVBoxLayout;
+	workspacePageLayout->addWidget(viewGroup);
+	workspacePageLayout->addWidget(imagingGroup);
+	workspacePageLayout->addWidget(modelGroup);
+	workspacePageLayout->addWidget(colourMapGroup);
+	workspacePageLayout->setAlignment(Qt::AlignTop);
+	workspacePage->setLayout(workspacePageLayout);
 
 	//Add General options page to preferences
-    ui.wdtPages->insertWidget(0, generalPage);
-    ui.wdtPages->setCurrentWidget(generalPage);
-    ui.wdtOptions->setCurrentItem(generalPageItem);
-	
+	ui.wdtPages->insertWidget(1, workspacePage);
+
     ///Plugins Page
     QWidget *pluginsPage = new QWidget;
 	QVBoxLayout *pluginsPageLayout = new QVBoxLayout;
@@ -180,17 +211,30 @@ void milxQtPreferencesForm::setupPages()
 	}
     //Layout	
     pluginsPage->setLayout(pluginsPageLayout);
-    ui.wdtPages->insertWidget(1, pluginsPage);
+    ui.wdtPages->insertWidget(2, pluginsPage);
 }
 
 void milxQtPreferencesForm::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
-
 //    cout << "Index of Page: " << ui.wdtOptions->row(current) << endl;
     ui.wdtPages->setCurrentIndex(ui.wdtOptions->row(current));
 }
+
+void milxQtPreferencesForm::changeTheme(int)
+{
+	//QString msg = QString("Changing Theme to: " + themeList->currentText().toLower());
+	//MainWindow->printDebug(msg);
+	
+	QString themeFile = QString(":/resources/styles/" + themeList->currentText().toLower() + ".qss");
+	QFile qss(themeFile);
+	qss.open(QFile::ReadOnly);
+	qApp->setStyleSheet(qss.readAll());
+	qss.close();
+	MainWindow->update();
+}
+
 
 void milxQtPreferencesForm::accept()
 {
@@ -201,6 +245,7 @@ void milxQtPreferencesForm::accept()
     MainWindow->preferMaximumProcessors(processorsEdit->value());
     MainWindow->preferScreenshotMagnifyFactor(magnifyEdit->value());
     MainWindow->preferTimestamps(timestampCheckBox->isChecked());
+	MainWindow->setCurrentTheme(themeList->currentText().toLower());
     
 	//Imaging
     MainWindow->preferImageInterpolation(interpolationCheckBox->isChecked());
@@ -209,12 +254,17 @@ void milxQtPreferencesForm::accept()
 	//Models
     MainWindow->preferModelInterpolation(interpolationModelCheckBox->isChecked());
     MainWindow->preferScalarBar(scalarBarCheckBox->isChecked());
-    MainWindow->writeSettings();
-    QDialog::accept();
+
+	//Colour Maps
+	MainWindow->activateColourMaps(colourMapCheckBox->isChecked());
+	MainWindow->writeSettings();
+	QDialog::accept();
 }
 
 void milxQtPreferencesForm::createConnections()
 {
     connect(ui.wdtOptions, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
                 this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
+	connect(this->themeList, SIGNAL(currentIndexChanged(int)),
+		this, SLOT(changeTheme(int)));
 }
