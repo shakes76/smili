@@ -38,12 +38,16 @@ class MILXQT_EXPORT milxQtPreferencesForm : public QDialog
 public:
     milxQtPreferencesForm(milxQtMain *theParent = 0);
     virtual ~milxQtPreferencesForm();
-
-    void setupPages();
+	QString currentTheme();
+	void addTheme(QString themeName);
+	void removeTheme(QString themeName);
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
-	void changeTheme(int);
+	void changeTheme(int themeIndex);
+	void editTheme();
+	void newTheme();
+	bool isTheme(QString themeName);
     void accept();
 
 protected:
@@ -57,6 +61,7 @@ protected:
     QCheckBox *timestampCheckBox;
 	QComboBox *themeList;
 	QPushButton *editThemeButton;
+	QPushButton *newThemeButton;
 	//View
 	QCheckBox *backgroundCheckBox;
 	QCheckBox *humanCheckBox;
@@ -67,12 +72,15 @@ protected:
     QCheckBox *interpolationModelCheckBox;
     QCheckBox *scalarBarCheckBox;
 	QCheckBox *colourMapCheckBox;
+	QPushButton *newColourMapButton;
     //Plugins
 	QLabel *noPluginMsg;
 
     milxQtMain *MainWindow;
 
     void createConnections();
+	void setupPrefs();
+	void loadCustomThemes();
 };
 
 #endif // MILXQTPreferencesFORM_H

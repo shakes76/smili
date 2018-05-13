@@ -139,7 +139,19 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     ///Style
     update();
     printDebug("Main Window Setup Complete");
-	QFile qss(QString(":/resources/styles/" + appTheme + ".qss"));
+
+	QString themeFile; // The theme filename
+
+	// Open the chosen style sheet file and apply it
+	if (!appTheme.compare("Light") || !appTheme.compare("Dark")) {
+		// A system theme
+		themeFile = QString(":/resources/styles/" + appTheme + ".qss");
+	}
+	else {
+		// A custom theme
+		themeFile = QString(QDir::currentPath() + "/" + appTheme + ".qss");
+	}
+	QFile qss(themeFile);
 	qss.open(QFile::ReadOnly);
 	qApp->setStyleSheet(qss.readAll());
 	qss.close();

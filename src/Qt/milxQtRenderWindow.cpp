@@ -1017,7 +1017,7 @@ void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
         range[1] = maxRange;
     }
 
-    milx::ColourMap *colours = new milx::ColourMap;
+	milx::ColourMap *colours = new milx::ColourMap;
     colours->toSeismic();
     colours->SetRange(range);
 
