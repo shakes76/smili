@@ -39,8 +39,6 @@
 #include "milxQtUnifiedWindow.h"
 #include "milxQtPluginInterface.h"
 
-typedef QMdiArea WorkspaceType;
-
 /*!
     \class milxQtMain
     \brief This class represents the MILX Qt Main Window object using Qt.
@@ -502,7 +500,7 @@ public slots:
     */
     inline void closeTabActiveWindow()
     {
-        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeActiveSubWindow();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeActiveSubWindow();
     }
     /*!
         \fn milxQtMain::closeTabAllWindows()
@@ -510,7 +508,7 @@ public slots:
     */
     inline void closeTabAllWindows()
     {
-        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->closeAllSubWindows();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->closeAllSubWindows();
     }
     /*!
         \fn milxQtMain::cascadeTab()
@@ -518,7 +516,7 @@ public slots:
     */
     inline void cascadeTab()
     {
-        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->cascadeSubWindows();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->cascadeSubWindows();
     }
     /*!
         \fn milxQtMain::tileTab()
@@ -526,7 +524,7 @@ public slots:
     */
     inline void tileTab()
     {
-        qobject_cast<WorkspaceType *>(workspaces->currentWidget())->tileSubWindows();
+        qobject_cast<QMdiArea *>(workspaces->currentWidget())->tileSubWindows();
     }
     /*!
         \fn milxQtMain::tileTabVertically()
@@ -677,7 +675,7 @@ public slots:
     */
     inline QList<QMdiSubWindow*> getListOfWindows()
     {
-        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList();
+        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
     }
     /**
         \fn milxQtMain::getNumberOfWindows()
@@ -685,7 +683,7 @@ public slots:
     */
     inline int getNumberOfWindows()
     {
-        return qobject_cast<WorkspaceType *>(workspaces->currentWidget())->subWindowList().size();
+        return qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList().size();
     }
     /**
         \fn milxQtMain::getNumberOfImageWindows()
@@ -955,7 +953,12 @@ protected slots:
     */
     inline void redirectWindowActivated(QMdiSubWindow *win)
     {
-        emit windowActivated(win->widget());
+		if (win) {
+			emit windowActivated(win->widget());
+		}
+		else {
+			printDebug("No more Windows!");
+		}
     }
     /*!
         \fn milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *client_data, void *, vtkCommand *command)

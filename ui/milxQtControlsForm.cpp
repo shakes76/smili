@@ -17,13 +17,11 @@ limitations under the License.
 =========================================================================*/
 #include "milxQtControlsForm.h"
 
-QString milxQtControlsForm::title = QString("sMILX Controls");
-
 milxQtControlsForm::milxQtControlsForm(QWidget *theParent) : QDialog(theParent)
 {
 	// Setup Controls dialog box
-    ui.setupUi(this);	
-    setWindowTitle(title);
+    ui.setupUi(this);
+	setWindowTitle(QString("sMILX Controls"));
 	setFixedSize(ui.lblControls->size());
 }
 

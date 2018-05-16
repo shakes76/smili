@@ -274,7 +274,7 @@ void milxQtPreferencesForm::changeTheme(int themeIndex)
 	qss.close();
 	
 	// Update the window
-	MainWindow->update();
+	//MainWindow->update();
 }
 
 void milxQtPreferencesForm::editTheme()

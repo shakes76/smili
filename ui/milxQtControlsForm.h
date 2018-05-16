@@ -36,8 +36,6 @@ public:
     milxQtControlsForm(QWidget *theParent = 0);
     virtual ~milxQtControlsForm();
 
-	static QString title;
-
 protected:
     Ui::dlgControls ui;
 

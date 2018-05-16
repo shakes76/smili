@@ -4,8 +4,8 @@
 
 QPushButton {
     background-color: palegoldenrod;
-    border-width: 2px;
     border-color: darkkhaki;
+    border-width: 2px;
     border-style: solid;
     border-radius: 5;
     padding: 3px;
@@ -42,10 +42,7 @@ QLabel {
 }
 
 QLineEdit, QFrame {
-    border-width: 2px;
-    border-style: solid;
-    border-color: #808080;
-    padding: 1px;
+    #background-color: #808080;
 }
 
 QLineEdit:focus, QFrame:focus {
@@ -80,5 +77,5 @@ QTabBar::tab:selected {
 }
 
 QToolBar {
-    background-color: ghostwhite;
-
+    background: ghostwhite;
+}

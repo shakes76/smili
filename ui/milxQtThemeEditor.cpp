@@ -191,13 +191,14 @@ void milxQtThemeEditorForm::discardTheme(QAbstractButton *button)
 
 void milxQtThemeEditorForm::accept()
 {
-	// Save the style and close the editor, if valid theme name
-	if (prefForm->isTheme(themeNameInput->text())) {
+	// Check if the theme is valid
+	if ((prefForm->isTheme(themeNameInput->text()) && !isEdit) || 
+		(prefForm->isTheme(themeNameInput->text()) && isEdit && themeName->compare(themeNameInput->text()))) {
 		// Already a theme - highlight the input box
-		MainWindow->printDebug("Already a Theme");
 		themeNameInput->setStyleSheet("QLineEdit{background: tomato};" + themeNameInput->styleSheet());
 	}
-	else { // Not a theme - save the theme
+	else {
+		// Save the theme
 		saveColourSettings();
 		QDialog::accept();
 	}
@@ -309,7 +310,7 @@ void milxQtThemeEditorForm::updateStyles(int index)
 
 	// Tool Bar
 	colour = toolBarCombo->currentText();
-	qApp->setStyleSheet("QToolBar{background-color: " + colour + ";}" + qApp->styleSheet());
+	qApp->setStyleSheet("QToolBar{background: " + colour + ";}" + qApp->styleSheet());
 }
 
 void milxQtThemeEditorForm::loadColourSettings(QString *theme)
@@ -445,13 +446,13 @@ void milxQtThemeEditorForm::saveColourSettings()
 	themeData.append("    background: " + tbTabSelectedCombo->currentText() + ";");
 
 	// Tab Bar (selected) text
-	in->readLine();
+	in->readLine(); // Eat next line
 	themeData.append("    color: " + tbTabSelectedTextCombo->currentText() + ";");
 	
 	// Tool Bar
 	copyThemeFile(in, QString("QToolBar"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + toolBarCombo->currentText() + ";");
+	themeData.append("    background: " + toolBarCombo->currentText() + ";}");
 	
 	// Close the read-in file
 	tmp.close();
