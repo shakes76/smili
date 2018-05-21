@@ -4,6 +4,7 @@
 
 QPushButton {
     background-color: palegoldenrod;
+    color: black;
     border-color: darkkhaki;
     border-width: 2px;
     border-style: solid;
@@ -33,16 +34,14 @@ QStatusBar QLabel {
 
 QListView {
     background-color: beige;
+    color: black;
 }
 
 QLabel {
+    color: black;
     border: 0px;
     padding: 0;
     background: none;
-}
-
-QLineEdit, QFrame {
-    #background-color: #808080;
 }
 
 QLineEdit:focus, QFrame:focus {
@@ -52,7 +51,10 @@ QLineEdit:focus, QFrame:focus {
 
 QToolTip {
     background-color: beige;
-    border: 2px solid darkkhaki;
+    color: black;
+    border-color: darkkhaki;
+    border-width: 2px;
+    border-style: solid;
     padding: 5px;
     border-radius: 3px;
     opacity: 200;
@@ -64,6 +66,7 @@ QDialogButtonBox {
 
 QMenuBar {
     background-color: ghostwhite;
+    color: black;
 }
 
 QTabBar::tab {
@@ -78,4 +81,12 @@ QTabBar::tab:selected {
 
 QToolBar {
     background: ghostwhite;
+}
+
+QCheckBox {
+    color: black;
+}
+
+QGroupBox::title {
+    color: black;
 }

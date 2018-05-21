@@ -34,11 +34,25 @@ public:
 	milxQtThemeEditorForm(milxQtPreferencesForm *theParent = 0, milxQtMain *mainWindow = 0, QString *themeName = 0, bool isEdit = 0);
 	virtual ~milxQtThemeEditorForm();
 
+	/*!
+		\fn
+		\brief
+	*/
 	void setupEditor(QString *themeName);
 
 public slots:
 	void accept();
+
+	/*!
+		\fn
+		\brief
+	*/
 	void discardTheme(QAbstractButton *button);
+
+	/*!
+		\fn
+		\brief
+	*/
 	void updateStyles(int index);
 
 protected:
@@ -53,31 +67,49 @@ protected:
 	QString *themeName;
 	
 	// The app theme elements
-	QLabel *widgetLabel;
-	QComboBox *widgetCombo;
-	QLabel *pbLabel;
-	QComboBox *pbCombo;
-	QLabel *pbHoverLabel;
-	QComboBox *pbHoverCombo;
-	QLabel *pbPressedLabel;
-	QComboBox *pbPressedCombo;
-	QLabel *listViewLabel;
-	QComboBox *listViewCombo;
-	QLabel *toolTipLabel;
-	QComboBox *toolTipCombo;
-	QLabel *menuBarLabel;
-	QComboBox *menuBarCombo;
-	QLabel *tbTabLabel;
-	QComboBox *tbTabCombo;
+	QLabel *widgetBGLabel;
+	QComboBox *widgetBGCombo;
+	QLabel *pbBGLabel;
+	QComboBox *pbBGCombo;
+	QLabel *pbTextLabel;
+	QComboBox *pbTextCombo;
+	QLabel *pbBorderLabel;
+	QComboBox *pbBorderCombo;
+	QLabel *pbHoverBGLabel;
+	QComboBox *pbHoverBGCombo;
+	QLabel *pbPressedBGLabel;
+	QComboBox *pbPressedBGCombo;
+	QLabel *listViewBGLabel;
+	QComboBox *listViewBGCombo;
+	QLabel *listViewTextLabel;
+	QComboBox *listViewTextCombo;
+	QLabel *labelTextLabel;
+	QComboBox *labelTextCombo;
+	QLabel *toolTipBGLabel;
+	QComboBox *toolTipBGCombo;
+	QLabel *toolTipTextLabel;
+	QComboBox *toolTipTextCombo;
+	QLabel *toolTipBorderLabel;
+	QComboBox *toolTipBorderCombo;
+	QLabel *menuBarBGLabel;
+	QComboBox *menuBarBGCombo;
+	QLabel *menuBarTextLabel;
+	QComboBox *menuBarTextCombo;
+	QLabel *tbTabBGLabel;
+	QComboBox *tbTabBGCombo;
 	QLabel *tbTabTextLabel;
 	QComboBox *tbTabTextCombo;
-	QLabel *tbTabSelectedLabel;
-	QComboBox *tbTabSelectedCombo;
+	QLabel *tbTabSelectedBGLabel;
+	QComboBox *tbTabSelectedBGCombo;
 	QLabel *tbTabSelectedTextLabel;
 	QComboBox *tbTabSelectedTextCombo;
-	QLabel *toolBarLabel;
-	QComboBox *toolBarCombo;
-	
+	QLabel *toolBarBGLabel;
+	QComboBox *toolBarBGCombo;
+	QLabel *checkBoxTextLabel;
+	QComboBox *checkBoxTextCombo;
+	QLabel *groupBoxTextLabel;
+	QComboBox *groupBoxTextCombo;
+
 	QString getStyleColour(QTextStream *in, QString section);
 	void createColourPalette(QComboBox *box);
 	void copyThemeFile(QTextStream *in, QString section, QStringList *data);

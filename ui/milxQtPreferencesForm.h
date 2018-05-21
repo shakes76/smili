@@ -78,8 +78,22 @@ protected:
 
     milxQtMain *MainWindow;
 
+	/*!
+		\fn 
+		\brief 
+	*/
     void createConnections();
+
+	/*!
+		\fn
+		\brief
+	*/
 	void setupPrefs();
+
+	/*!
+		\fn
+		\brief
+	*/
 	void loadCustomThemes();
 };
 

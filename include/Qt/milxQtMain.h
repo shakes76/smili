@@ -956,9 +956,6 @@ protected slots:
 		if (win) {
 			emit windowActivated(win->widget());
 		}
-		else {
-			printDebug("No more Windows!");
-		}
     }
     /*!
         \fn milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *client_data, void *, vtkCommand *command)

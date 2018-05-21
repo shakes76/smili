@@ -20,6 +20,7 @@ limitations under the License.
 #include <cstdlib>
 #include <iostream>
 #include <QLineEdit>
+#include <QscrollArea>
 
 milxQtThemeEditorForm::milxQtThemeEditorForm(milxQtPreferencesForm *theParent, milxQtMain *mainWindow, QString *themeName, bool isEdit) : QDialog(theParent)
 {
@@ -56,65 +57,125 @@ void milxQtThemeEditorForm::setupEditor(QString *themeName)
 		nameLayout->addWidget(themeNameInput);
 
 	// Default widget background
-	widgetLabel = new QLabel(tr("Background - Default:"));
-	widgetCombo = new QComboBox;
-	createColourPalette(widgetCombo);
-	QHBoxLayout *widgetLayout = new QHBoxLayout;
-		widgetLayout->addWidget(widgetLabel);
-		widgetLayout->addWidget(widgetCombo);
-	// Button background
-	pbLabel = new QLabel(tr("Button - Default"));
-	pbCombo = new QComboBox;
-	createColourPalette(pbCombo);
-	QHBoxLayout *pbLayout = new QHBoxLayout;
-		pbLayout->addWidget(pbLabel);
-		pbLayout->addWidget(pbCombo);
-	// Button (hover) background
-	pbHoverLabel = new QLabel(tr("Button - Hover:"));
-	pbHoverCombo = new QComboBox;
-	createColourPalette(pbHoverCombo);
-	QHBoxLayout *pbHoverLayout = new QHBoxLayout;
-		pbHoverLayout->addWidget(pbHoverLabel);
-		pbHoverLayout->addWidget(pbHoverCombo);
-	// Button (pressed) background
-	pbPressedLabel = new QLabel(tr("Button - Pressed:"));
-	pbPressedCombo = new QComboBox;
-	createColourPalette(pbPressedCombo);
-	QHBoxLayout *pbPressedLayout = new QHBoxLayout;
-		pbPressedLayout->addWidget(pbPressedLabel);
-		pbPressedLayout->addWidget(pbPressedCombo);
+	widgetBGLabel = new QLabel(tr("Background - Default:"));
+	widgetBGCombo = new QComboBox;
+	createColourPalette(widgetBGCombo);
+	QHBoxLayout *widgetBGLayout = new QHBoxLayout;
+		widgetBGLayout->addWidget(widgetBGLabel);
+		widgetBGLayout->addWidget(widgetBGCombo);
+	
+	// Push Button background
+	pbBGLabel = new QLabel(tr("Button - Background:"));
+	pbBGCombo = new QComboBox;
+	createColourPalette(pbBGCombo);
+	QHBoxLayout *pbBGLayout = new QHBoxLayout;
+		pbBGLayout->addWidget(pbBGLabel);
+		pbBGLayout->addWidget(pbBGCombo);
+	
+	// Push Button text
+	pbTextLabel = new QLabel(tr("Button - Text:"));
+	pbTextCombo = new QComboBox;
+	createColourPalette(pbTextCombo);
+	QHBoxLayout *pbTextLayout = new QHBoxLayout;
+		pbTextLayout->addWidget(pbTextLabel);
+		pbTextLayout->addWidget(pbTextCombo);
 
-	// List View
-	listViewLabel = new QLabel(tr("List View:"));
-	listViewCombo = new QComboBox;
-	createColourPalette(listViewCombo);
-	QHBoxLayout *listViewLayout = new QHBoxLayout;
-		listViewLayout->addWidget(listViewLabel);
-		listViewLayout->addWidget(listViewCombo);
+	// Push Button border
+	pbBorderLabel = new QLabel(tr("Button - Border:"));
+	pbBorderCombo = new QComboBox;
+	createColourPalette(pbBorderCombo);
+	QHBoxLayout *pbBorderLayout = new QHBoxLayout;
+		pbBorderLayout->addWidget(pbBorderLabel);
+		pbBorderLayout->addWidget(pbBorderCombo);
 
-	// Tool Tip
-	toolTipLabel = new QLabel(tr("Tool Tip Background:"));
-	toolTipCombo = new QComboBox;
-	createColourPalette(toolTipCombo);
-	QHBoxLayout *toolTipLayout = new QHBoxLayout;
-		toolTipLayout->addWidget(toolTipLabel);
-		toolTipLayout->addWidget(toolTipCombo);
+	// Push Button (hover) background
+	pbHoverBGLabel = new QLabel(tr("Button (Hover) - Background:"));
+	pbHoverBGCombo = new QComboBox;
+	createColourPalette(pbHoverBGCombo);
+	QHBoxLayout *pbHoverBGLayout = new QHBoxLayout;
+		pbHoverBGLayout->addWidget(pbHoverBGLabel);
+		pbHoverBGLayout->addWidget(pbHoverBGCombo);
 
-	// Menu Bar
-	menuBarLabel = new QLabel(tr("Menu Bar:"));
-	menuBarCombo = new QComboBox;
-	createColourPalette(menuBarCombo);
-	QHBoxLayout *menuBarLayout = new QHBoxLayout;
-		menuBarLayout->addWidget(menuBarLabel);
-		menuBarLayout->addWidget(menuBarCombo);
+	// Push Button (pressed) background
+	pbPressedBGLabel = new QLabel(tr("Button (Pressed) - Background:"));
+	pbPressedBGCombo = new QComboBox;
+	createColourPalette(pbPressedBGCombo);
+	QHBoxLayout *pbPressedBGLayout = new QHBoxLayout;
+		pbPressedBGLayout->addWidget(pbPressedBGLabel);
+		pbPressedBGLayout->addWidget(pbPressedBGCombo);
 
-	// Tab Bar
-	tbTabLabel = new QLabel(tr("Tab Bar - Background:"));
-	tbTabCombo = new QComboBox;
-	createColourPalette(tbTabCombo);
-	QHBoxLayout *tbTabLayout = new QHBoxLayout;
-		tbTabLayout->addWidget(tbTabLabel);
-		tbTabLayout->addWidget(tbTabCombo);
+	// List View background
+	listViewBGLabel = new QLabel(tr("List View - Background:"));
+	listViewBGCombo = new QComboBox;
+	createColourPalette(listViewBGCombo);
+	QHBoxLayout *listViewBGLayout = new QHBoxLayout;
+		listViewBGLayout->addWidget(listViewBGLabel);
+		listViewBGLayout->addWidget(listViewBGCombo);
+
+	// List View text
+	listViewTextLabel = new QLabel(tr("List View - Text:"));
+	listViewTextCombo = new QComboBox;
+	createColourPalette(listViewTextCombo);
+	QHBoxLayout *listViewTextLayout = new QHBoxLayout;
+		listViewTextLayout->addWidget(listViewTextLabel);
+		listViewTextLayout->addWidget(listViewTextCombo);
+
+	// Label text
+	labelTextLabel = new QLabel(tr("Label - Text:"));
+	labelTextCombo = new QComboBox;
+	createColourPalette(labelTextCombo);
+	QHBoxLayout *labelTextLayout = new QHBoxLayout;
+		labelTextLayout->addWidget(labelTextLabel);
+		labelTextLayout->addWidget(labelTextCombo);
+
+	// Tool Tip background
+	toolTipBGLabel = new QLabel(tr("Tool Tip - Background:"));
+	toolTipBGCombo = new QComboBox;
+	createColourPalette(toolTipBGCombo);
+	QHBoxLayout *toolTipBGLayout = new QHBoxLayout;
+		toolTipBGLayout->addWidget(toolTipBGLabel);
+		toolTipBGLayout->addWidget(toolTipBGCombo);
+
+	// Tool Tip text
+	toolTipTextLabel = new QLabel(tr("Tool Tip - Text:"));
+	toolTipTextCombo = new QComboBox;
+	createColourPalette(toolTipTextCombo);
+	QHBoxLayout *toolTipTextLayout = new QHBoxLayout;
+		toolTipTextLayout->addWidget(toolTipTextLabel);
+		toolTipTextLayout->addWidget(toolTipTextCombo);
+
+	// Tool Tip border
+	toolTipBorderLabel = new QLabel(tr("Tool Tip - Border:"));
+	toolTipBorderCombo = new QComboBox;
+	createColourPalette(toolTipBorderCombo);
+	QHBoxLayout *toolTipBorderLayout = new QHBoxLayout;
+		toolTipBorderLayout->addWidget(toolTipBorderLabel);
+		toolTipBorderLayout->addWidget(toolTipBorderCombo);
+
+	// Menu Bar background
+	menuBarBGLabel = new QLabel(tr("Menu Bar - Background:"));
+	menuBarBGCombo = new QComboBox;
+	createColourPalette(menuBarBGCombo);
+	QHBoxLayout *menuBarBGLayout = new QHBoxLayout;
+		menuBarBGLayout->addWidget(menuBarBGLabel);
+		menuBarBGLayout->addWidget(menuBarBGCombo);
+
+	// Menu Bar text
+	menuBarTextLabel = new QLabel(tr("Menu Bar - Text:"));
+	menuBarTextCombo = new QComboBox;
+	createColourPalette(menuBarTextCombo);
+	QHBoxLayout *menuBarTextLayout = new QHBoxLayout;
+		menuBarTextLayout->addWidget(menuBarTextLabel);
+		menuBarTextLayout->addWidget(menuBarTextCombo);
+
+	// Tab Bar background
+	tbTabBGLabel = new QLabel(tr("Tab Bar - Background:"));
+	tbTabBGCombo = new QComboBox;
+	createColourPalette(tbTabBGCombo);
+	QHBoxLayout *tbTabBGLayout = new QHBoxLayout;
+		tbTabBGLayout->addWidget(tbTabBGLabel);
+		tbTabBGLayout->addWidget(tbTabBGCombo);
+
 	// Tab Bar Text
 	tbTabTextLabel = new QLabel(tr("Tab Bar - Text:"));
 	tbTabTextCombo = new QComboBox;
@@ -122,71 +183,92 @@ void milxQtThemeEditorForm::setupEditor(QString *themeName)
 	QHBoxLayout *tbTabTextLayout = new QHBoxLayout;
 		tbTabTextLayout->addWidget(tbTabTextLabel);
 		tbTabTextLayout->addWidget(tbTabTextCombo);
-	// Tab Bar (selected)
-	tbTabSelectedLabel = new QLabel(tr("Tab Bar - Selected:"));
-	tbTabSelectedCombo = new QComboBox;
-	createColourPalette(tbTabSelectedCombo);
-	QHBoxLayout *tbTabSelectedLayout = new QHBoxLayout;
-		tbTabSelectedLayout->addWidget(tbTabSelectedLabel);
-		tbTabSelectedLayout->addWidget(tbTabSelectedCombo);
+
+	// Tab Bar (selected) background
+	tbTabSelectedBGLabel = new QLabel(tr("Tab Bar (Selected) - Background:"));
+	tbTabSelectedBGCombo = new QComboBox;
+	createColourPalette(tbTabSelectedBGCombo);
+	QHBoxLayout *tbTabSelectedBGLayout = new QHBoxLayout;
+		tbTabSelectedBGLayout->addWidget(tbTabSelectedBGLabel);
+		tbTabSelectedBGLayout->addWidget(tbTabSelectedBGCombo);
+
 	// Tab Bar (selected) text
-	tbTabSelectedTextLabel = new QLabel(tr("Tab Bar - Selected Text:"));
+	tbTabSelectedTextLabel = new QLabel(tr("Tab Bar (Selected) - Text:"));
 	tbTabSelectedTextCombo = new QComboBox;
 	createColourPalette(tbTabSelectedTextCombo);
 	QHBoxLayout *tbTabSelectedTextLayout = new QHBoxLayout;
 		tbTabSelectedTextLayout->addWidget(tbTabSelectedTextLabel);
 		tbTabSelectedTextLayout->addWidget(tbTabSelectedTextCombo);
 
-	// Tool Bar
-	toolBarLabel = new QLabel(tr("Tool Bar:"));
-	toolBarCombo = new QComboBox;
-	createColourPalette(toolBarCombo);
-	QHBoxLayout *toolBarLayout = new QHBoxLayout;
-		toolBarLayout->addWidget(toolBarLabel);
-		toolBarLayout->addWidget(toolBarCombo);
+	// Tool Bar background
+	toolBarBGLabel = new QLabel(tr("Tool Bar - Background:"));
+	toolBarBGCombo = new QComboBox;
+	createColourPalette(toolBarBGCombo);
+	QHBoxLayout *toolBarBGLayout = new QHBoxLayout;
+		toolBarBGLayout->addWidget(toolBarBGLabel);
+		toolBarBGLayout->addWidget(toolBarBGCombo);
+
+	// Check Box text
+	checkBoxTextLabel = new QLabel(tr("Check Box - Text:"));
+	checkBoxTextCombo = new QComboBox;
+	createColourPalette(checkBoxTextCombo);
+	QHBoxLayout *checkBoxTextLayout = new QHBoxLayout;
+		checkBoxTextLayout->addWidget(checkBoxTextLabel);
+		checkBoxTextLayout->addWidget(checkBoxTextCombo);
+
+	// Group Box text
+	groupBoxTextLabel = new QLabel(tr("Group Box - Text:"));
+	groupBoxTextCombo = new QComboBox;
+	createColourPalette(groupBoxTextCombo);
+	QHBoxLayout *groupBoxTextLayout = new QHBoxLayout;
+		groupBoxTextLayout->addWidget(groupBoxTextLabel);
+		groupBoxTextLayout->addWidget(groupBoxTextCombo);
 
 	// Add all the elements together
 	QVBoxLayout *generalLayout = new QVBoxLayout;
 		generalLayout->addLayout(nameLayout);
-		generalLayout->addLayout(widgetLayout);
-		generalLayout->addLayout(pbLayout);
-		generalLayout->addLayout(pbHoverLayout);
-		generalLayout->addLayout(pbPressedLayout);
-		generalLayout->addLayout(listViewLayout);
-		generalLayout->addLayout(toolTipLayout);
-		generalLayout->addLayout(menuBarLayout);
-		generalLayout->addLayout(tbTabLayout);
+		generalLayout->addLayout(widgetBGLayout);
+		generalLayout->addLayout(pbBGLayout);
+		generalLayout->addLayout(pbTextLayout);
+		generalLayout->addLayout(pbBorderLayout);
+		generalLayout->addLayout(pbHoverBGLayout);
+		generalLayout->addLayout(pbPressedBGLayout);
+		generalLayout->addLayout(listViewBGLayout);
+		generalLayout->addLayout(listViewTextLayout);
+		generalLayout->addLayout(labelTextLayout);
+		generalLayout->addLayout(toolTipBGLayout);
+		generalLayout->addLayout(toolTipTextLayout);
+		generalLayout->addLayout(toolTipBorderLayout);
+		generalLayout->addLayout(menuBarBGLayout);
+		generalLayout->addLayout(menuBarTextLayout);
+		generalLayout->addLayout(tbTabBGLayout);
 		generalLayout->addLayout(tbTabTextLayout);
-		generalLayout->addLayout(tbTabSelectedLayout);
+		generalLayout->addLayout(tbTabSelectedBGLayout);
 		generalLayout->addLayout(tbTabSelectedTextLayout);
-		generalLayout->addLayout(toolBarLayout);
+		generalLayout->addLayout(toolBarBGLayout);
+		generalLayout->addLayout(checkBoxTextLayout);
+		generalLayout->addLayout(groupBoxTextLayout);	
 
 	// Add the layout to the Editor widget
-	ui.generalWidget->setLayout(generalLayout);
-
+	ui.scrollAreaWidgetContents_2->setLayout(generalLayout);
+	
 	// Load the current colour style settings
 	loadColourSettings(themeName);
 }
 
 void milxQtThemeEditorForm::discardTheme(QAbstractButton *button)
 {
-	// Check if "Discard" button was pressed
-	if (!button->text().compare("Discard")) {
-		// Delete the theme (if editing), reset the theme, and close the editor
-		if (isEdit) {
-			QDir dir;
-			dir.remove(QString(QDir::currentPath() + "/" + *themeName + ".qss"));
-			prefForm->removeTheme(*themeName);
-			MainWindow->update();
-		}
-		prefForm->changeTheme(0);
-		QDialog::reject();
+	// Check if "Discard" button was pressed while editing a theme
+	if (!button->text().compare("Discard") && isEdit) {
+		QDir dir;
+		dir.remove(QString(QDir::currentPath() + "/" + *themeName + ".qss"));
+		prefForm->removeTheme(*themeName);
+		MainWindow->update();
 	}
-	else if (!button->text().compare("Cancel")) { // "Cancel" button pressed
-		// Reset theme colours, close the editor
-		prefForm->changeTheme(0);
-		QDialog::reject();
-	}
+
+	// Reset theme colours, close the editor
+	prefForm->changeTheme(0);
+	QDialog::reject();
 }
 
 void milxQtThemeEditorForm::accept()
@@ -214,7 +296,7 @@ void milxQtThemeEditorForm::createColourPalette(QComboBox *box)
 	}
 
 	// Set the style for the combobox, to make it more viewable
-	box->setStyleSheet("background-color: " + QColor::colorNames()[0] + ";");
+	//box->setStyleSheet("background-color: " + QColor::colorNames()[0] + ";");
 }
 
 QString milxQtThemeEditorForm::getStyleColour(QTextStream *in, QString section)
@@ -265,52 +347,88 @@ void milxQtThemeEditorForm::updateStyles(int index)
 	QString colour;
 
 	// Default widget background
-	colour = widgetCombo->currentText();
-	qApp->setStyleSheet(".QWidget{background-color: " + colour + ";}" + qApp->styleSheet());
-
-	// Button background
-	colour = pbCombo->currentText();
-	qApp->setStyleSheet("QPushButton{background-color: " + colour + ";}" + qApp->styleSheet());
+	colour = widgetBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + ".QWidget {background-color: " + colour + ";}");
 	
+	// Push Button background
+	colour = pbBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QPushButton{background-color: " + colour + ";}");
+	
+	// Push Button text
+	colour = pbTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QPushButton{color: " + colour + ";}");
+
+	// Push Button border
+	colour = pbBorderCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QPushButton{border-color: " + colour + ";}");
+
 	// Button (hover) background
-	colour = pbHoverCombo->currentText();
-	qApp->setStyleSheet("QPushButton:hover{background-color: " + colour + ";}" + qApp->styleSheet());
+	colour = pbHoverBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QPushButton:hover{background-color: " + colour + ";}");
 	
 	// Button (pressed) background
-	colour = pbPressedCombo->currentText();
-	qApp->setStyleSheet("QPushButton:pressed{background-color: " + colour + ";}" + qApp->styleSheet());
+	colour = pbPressedBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QPushButton:pressed{background-color: " + colour + ";}");
 
-	// List View
-	colour = listViewCombo->currentText();
-	qApp->setStyleSheet("QListView{background-color: " + colour + ";}" + qApp->styleSheet());
+	// List View background
+	colour = listViewBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QListView{background-color: " + colour + ";}");
 
-	// Tool Tip
-	colour = toolTipCombo->currentText();
-	qApp->setStyleSheet("QToolTip{background-color: " + colour + ";}" + qApp->styleSheet());
+	// List View text
+	colour = listViewTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QListView{color: " + colour + ";}");
 
-	// Menu Bar
-	colour = menuBarCombo->currentText();
-	qApp->setStyleSheet("QMenuBar{background-color: " + colour + ";}" + qApp->styleSheet());
+	// Label Text
+	colour = labelTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QLabel{color: " + colour + ";}");
 
-	// Tab Bar
-	colour = tbTabCombo->currentText();
-	qApp->setStyleSheet("QTabBar::tab{background: " + colour + ";}" + qApp->styleSheet());
+	// Tool Tip background
+	colour = toolTipBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QToolTip{background-color: " + colour + ";}");
 
-	// Tab Bar Text
+	// Tool Tip text
+	colour = toolTipTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QToolTip{color: " + colour + ";}");
+
+	// Tool Tip border
+	colour = toolTipBorderCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QToolTip{border-color: " + colour + ";}");
+
+	// Menu Bar background
+	colour = menuBarBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QMenuBar{background-color: " + colour + ";}");
+
+	// Menu Bar text
+	colour = menuBarTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QMenuBar{color: " + colour + ";}");
+
+	// Tab Bar background
+	colour = tbTabBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QTabBar::tab{background: " + colour + ";}");
+
+	// Tab Bar text
 	colour = tbTabTextCombo->currentText();
-	qApp->setStyleSheet("QTabBar::tab{color: " + colour + ";}" + qApp->styleSheet());
+	qApp->setStyleSheet(qApp->styleSheet() + "QTabBar::tab{color: " + colour + ";}");
 
-	// Tab Bar (selected)
-	colour = tbTabSelectedCombo->currentText();
-	qApp->setStyleSheet("QTabBar::tab:selected{background: " + colour + ";}" + qApp->styleSheet());
+	// Tab Bar (selected) background
+	colour = tbTabSelectedBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QTabBar::tab:selected{background: " + colour + ";}");
 
 	// Tab Bar (selected) text
 	colour = tbTabSelectedTextCombo->currentText();
-	qApp->setStyleSheet("QTabBar::tab:selected{color: " + colour + ";}" + qApp->styleSheet());
+	qApp->setStyleSheet(qApp->styleSheet() + "QTabBar::tab:selected{color: " + colour + ";}");
 
-	// Tool Bar
-	colour = toolBarCombo->currentText();
-	qApp->setStyleSheet("QToolBar{background: " + colour + ";}" + qApp->styleSheet());
+	// Tool Bar background
+	colour = toolBarBGCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QToolBar{background: " + colour + ";}");
+
+	// Check Box text
+	colour = checkBoxTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QCheckBox{color: " + colour + ";}");
+
+	// Group Box text
+	colour = groupBoxTextCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QGroupBox::title{color: " + colour + ";}");
 }
 
 void milxQtThemeEditorForm::loadColourSettings(QString *theme)
@@ -333,53 +451,95 @@ void milxQtThemeEditorForm::loadColourSettings(QString *theme)
 
 	// Default widget background
 	colour = getStyleColour(in, QString(".QWidget"));
-	widgetCombo->setCurrentText(colour);
+	widgetBGCombo->setCurrentText(colour);
 	
-	// Button background
+	// Push Button background
 	colour = getStyleColour(in, QString("QPushButton"));
-	pbCombo->setCurrentText(colour);
+	pbBGCombo->setCurrentText(colour);
+
+	// Push Button text
+	QString line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	pbTextCombo->setCurrentText(colour);
 	
+	// Push Button border
+	line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	pbBorderCombo->setCurrentText(colour);
+
 	// Button (hover) background
 	colour = getStyleColour(in, QString("QPushButton:hover"));
-	pbHoverCombo->setCurrentText(colour);
+	pbHoverBGCombo->setCurrentText(colour);
 	
 	// Button (pressed) background
 	colour = getStyleColour(in, QString("QPushButton:pressed"));
-	pbPressedCombo->setCurrentText(colour);
+	pbPressedBGCombo->setCurrentText(colour);
 	
-	// List View
+	// List View background
 	colour = getStyleColour(in, QString("QListView"));
-	listViewCombo->setCurrentText(colour);
+	listViewBGCombo->setCurrentText(colour);
 	
-	// Tool Tip
+	// List View text
+	line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	listViewTextCombo->setCurrentText(colour);
+
+	// Label text
+	colour = getStyleColour(in, QString("QLabel"));
+	labelTextCombo->setCurrentText(colour);
+
+	// Tool Tip background
 	colour = getStyleColour(in, QString("QToolTip"));
-	toolTipCombo->setCurrentText(colour);
+	toolTipBGCombo->setCurrentText(colour);
 	
-	// Menu Bar
+	// Tool Tip text
+	line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	toolTipTextCombo->setCurrentText(colour);
+
+	// Tool Tip border
+	line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	toolTipBorderCombo->setCurrentText(colour);
+
+	// Menu Bar background
 	colour = getStyleColour(in, QString("QMenuBar"));
-	menuBarCombo->setCurrentText(colour);
+	menuBarBGCombo->setCurrentText(colour);
 	
-	// Tab Bar
+	// Menu Bar text
+	line = in->readLine();
+	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
+	menuBarTextCombo->setCurrentText(colour);
+
+	// Tab Bar background
 	colour = getStyleColour(in, QString("QTabBar::tab"));
-	tbTabCombo->setCurrentText(colour);
+	tbTabBGCombo->setCurrentText(colour);
 		
 	// Tab Bar Text
-	QString line = in->readLine();
+	line = in->readLine();
 	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
 	tbTabTextCombo->setCurrentText(colour);
 
-	// Tab Bar (selected)
+	// Tab Bar (selected) background
 	colour = getStyleColour(in, QString("QTabBar::tab:selected"));
-	tbTabSelectedCombo->setCurrentText(colour);
+	tbTabSelectedBGCombo->setCurrentText(colour);
 	
 	// Tab Bar (selected) text
 	line = in->readLine();
 	colour = line.section(" ", 1, 1, QString::SectionSkipEmpty).section(";", 0, 0);
 	tbTabSelectedTextCombo->setCurrentText(colour);
 	
-	// Tool Bar
+	// Tool Bar background
 	colour = getStyleColour(in, QString("QToolBar"));
-	toolBarCombo->setCurrentText(colour);
+	toolBarBGCombo->setCurrentText(colour);
+
+	// Check Box text
+	colour = getStyleColour(in, QString("QCheckBox"));
+	checkBoxTextCombo->setCurrentText(colour);
+
+	// Group Box text
+	colour = getStyleColour(in, QString("QGroupBox::title"));
+	groupBoxTextCombo->setCurrentText(colour);
 
 	// Close the style file
 	qss.close();
@@ -399,42 +559,71 @@ void milxQtThemeEditorForm::saveColourSettings()
 	// Default widget background
 	copyThemeFile(in, QString(".QWidget"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + widgetCombo->currentText() + ";");
+	themeData.append("    background-color: " + widgetBGCombo->currentText() + ";");
 
-	// Button background
+	// Push Button background
 	copyThemeFile(in, QString("QPushButton"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + pbCombo->currentText() + ";");
+	themeData.append("    background-color: " + pbBGCombo->currentText() + ";");
+
+	// Push Button text
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + pbTextCombo->currentText() + ";");
+
+	// Push Button border
+	in->readLine(); // Eat next line
+	themeData.append("    border-color: " + pbBorderCombo->currentText() + ";");
 
 	// Button (hover) background
 	copyThemeFile(in, QString("QPushButton:hover"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + pbHoverCombo->currentText() + ";");
+	themeData.append("    background-color: " + pbHoverBGCombo->currentText() + ";");
 	
 	// Button (pressed) background
 	copyThemeFile(in, QString("QPushButton:pressed"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + pbPressedCombo->currentText() + ";");
+	themeData.append("    background-color: " + pbPressedBGCombo->currentText() + ";");
 
-	// List View
+	// List View background
 	copyThemeFile(in, QString("QListView"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + listViewCombo->currentText() + ";");
+	themeData.append("    background-color: " + listViewBGCombo->currentText() + ";");
 
-	// Tool Tip
+	// List View text
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + listViewTextCombo->currentText() + ";");
+
+	// Label text
+	copyThemeFile(in, QString("QLabel"), &themeData);
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + labelTextCombo->currentText() + ";");
+
+	// Tool Tip background
 	copyThemeFile(in, QString("QToolTip"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + toolTipCombo->currentText() + ";");
+	themeData.append("    background-color: " + toolTipBGCombo->currentText() + ";");
 
-	// Menu Bar
+	// Tool Tip text
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + toolTipTextCombo->currentText() + ";");
+
+	// Tool Tip border
+	in->readLine(); // Eat next line
+	themeData.append("    border-color: " + toolTipBorderCombo->currentText() + ";");
+
+	// Menu Bar background
 	copyThemeFile(in, QString("QMenuBar"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background-color: " + menuBarCombo->currentText() + ";");
+	themeData.append("    background-color: " + menuBarBGCombo->currentText() + ";");
 
-	// Tab Bar
+	// Menu Bar text
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + menuBarTextCombo->currentText() + ";");
+
+	// Tab Bar background
 	copyThemeFile(in, QString("QTabBar::tab"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background: " + tbTabCombo->currentText() + ";");
+	themeData.append("    background: " + tbTabBGCombo->currentText() + ";");
 
 	// Tab Bar Text
 	in->readLine();
@@ -443,17 +632,27 @@ void milxQtThemeEditorForm::saveColourSettings()
 	// Tab Bar (selected)
 	copyThemeFile(in, QString("QTabBar::tab:selected"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background: " + tbTabSelectedCombo->currentText() + ";");
+	themeData.append("    background: " + tbTabSelectedBGCombo->currentText() + ";");
 
 	// Tab Bar (selected) text
 	in->readLine(); // Eat next line
 	themeData.append("    color: " + tbTabSelectedTextCombo->currentText() + ";");
 	
-	// Tool Bar
+	// Tool Bar background
 	copyThemeFile(in, QString("QToolBar"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    background: " + toolBarCombo->currentText() + ";}");
+	themeData.append("    background: " + toolBarBGCombo->currentText() + ";");
 	
+	// Check Box text
+	copyThemeFile(in, QString("QCheckBox"), &themeData);
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + checkBoxTextCombo->currentText() + ";");
+
+	// Group Box text
+	copyThemeFile(in, QString("QGroupBox::title"), &themeData);
+	in->readLine(); // Eat next line
+	themeData.append("    color: " + groupBoxTextCombo->currentText() + ";\n}");
+
 	// Close the read-in file
 	tmp.close();
 
@@ -495,16 +694,25 @@ void milxQtThemeEditorForm::saveColourSettings()
 void milxQtThemeEditorForm::createConnections()
 {
 	connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(discardTheme(QAbstractButton*)));
-	connect(this->widgetCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->pbCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->pbHoverCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->pbPressedCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->listViewCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->toolTipCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->menuBarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->tbTabCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->tbTabTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->tbTabSelectedCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->tbTabSelectedTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
-	connect(this->toolBarCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(widgetBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(pbBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(pbTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(pbBorderCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(pbHoverBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(pbPressedBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(listViewBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(listViewTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(labelTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(toolTipBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(toolTipTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(toolTipBorderCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(menuBarBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(menuBarTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(tbTabBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(tbTabTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(tbTabSelectedBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(tbTabSelectedTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(toolBarBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(checkBoxTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(groupBoxTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 }

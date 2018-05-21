@@ -354,7 +354,7 @@ void milxQtPreferencesForm::createConnections()
 {
     connect(ui.wdtOptions, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
                 this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
-	connect(this->themeList, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTheme(int)));
-	connect(this->editThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::editTheme);
-	connect(this->newThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::newTheme);
+	connect(themeList, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTheme(int)));
+	connect(editThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::editTheme);
+	connect(newThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::newTheme);
 }

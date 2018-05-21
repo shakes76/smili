@@ -4,7 +4,8 @@
 
 QPushButton {
     background-color: darkgrey;
-    border-color: darkkhaki;
+    color: aliceblue;
+    border-color: black;
     border-width: 2px;
     border-style: solid;
     border-radius: 5;
@@ -14,7 +15,7 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: dimgrey;
+    background-color: slategrey;
 }
 
 QPushButton:pressed {
@@ -33,16 +34,14 @@ QStatusBar QLabel {
 
 QListView {
     background-color: dimgrey;
+    color: aliceblue;
 }
 
 QLabel {
+    color: aliceblue;
     border: 0px;
     padding: 0;
     background: none;
-}
-
-QLineEdit, QFrame {
-    background-color: #808080;
 }
 
 QLineEdit:focus, QFrame:focus {
@@ -51,8 +50,9 @@ QLineEdit:focus, QFrame:focus {
 }
 
 QToolTip {
-    background-color: darkgrey;
-    border-color: darkkhaki;
+    background-color: dimgrey;
+    color: aliceblue;
+    border-color: black;
     border-width: 2px;
     border-style: solid;
     padding: 5px;
@@ -65,12 +65,13 @@ QDialogButtonBox {
 }
 
 QMenuBar {
-    background-color: dimgrey;
+    background-color: grey;
+    color: aliceblue;
 }
 
 QTabBar::tab {
-    background: khaki;
-    color: aliceblue;
+    background: darkgrey;
+    color: black;
 }
 
 QTabBar::tab:selected {
@@ -79,5 +80,13 @@ QTabBar::tab:selected {
 }
 
 QToolBar {
-    background: dimgrey;
+    background: grey;
+}
+
+QCheckBox {
+    color: aliceblue;
+}
+
+QGroupBox::title {
+    color: aliceblue;
 }
