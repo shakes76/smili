@@ -92,8 +92,11 @@ void milxQtPreferencesForm::setupPrefs()
 	themeList->addItem("Light");
 	themeList->addItem("Dark");
 	loadCustomThemes();
+	themeList->setCurrentText(MainWindow->currentTheme());
+	if (themeList->currentText().compare(MainWindow->currentTheme())) {
+		MainWindow->setCurrentTheme(themeList->currentText());
+	}
 	QString currTheme = MainWindow->currentTheme();
-	themeList->setCurrentText(currTheme);
 	editThemeButton = new QPushButton("Edit Theme");
 	if (!currTheme.compare("Light") || !currTheme.compare("Dark")) {
 		editThemeButton->setDisabled(true);
@@ -151,7 +154,6 @@ void milxQtPreferencesForm::setupPrefs()
 	//Apply Orientation (check)
 	orientationCheckBox = new QCheckBox(tr("Apply orientation to images"));
 	orientationCheckBox->setChecked(MainWindow->isOrientationPreferred());
-	//TODO Add custom colour maps
 
 	//Imaging options layout
 	QVBoxLayout *imagingLayout = new QVBoxLayout;
@@ -177,12 +179,17 @@ void milxQtPreferencesForm::setupPrefs()
 	//Colour Maps
 	colourMapCheckBox = new QCheckBox(tr("Enable Custom Colour Maps"));
 	colourMapCheckBox->setChecked(MainWindow->isColourMapEnabled());
-	//layout
+	editColourMapButton = new QPushButton(tr("Edit Colour Maps"));
+	newColourMapButton = new QPushButton(tr("New Colour Map"));
+	//layouts
+	QHBoxLayout *colourMapButtonLayout = new QHBoxLayout;
+		colourMapButtonLayout->addWidget(editColourMapButton);
+		colourMapButtonLayout->addWidget(newColourMapButton);
 	QVBoxLayout *colourMapLayout = new QVBoxLayout;
-	colourMapLayout->addWidget(colourMapCheckBox);
+		colourMapLayout->addWidget(colourMapCheckBox);
+		colourMapLayout->addLayout(colourMapButtonLayout);
 	QGroupBox *colourMapGroup = new QGroupBox(tr("Colour Maps"));
-	colourMapGroup->setLayout(colourMapLayout);
-
+		colourMapGroup->setLayout(colourMapLayout);
 
 	//Workspace page layout
 	QVBoxLayout *workspacePageLayout = new QVBoxLayout;

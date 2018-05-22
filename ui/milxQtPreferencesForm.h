@@ -72,10 +72,12 @@ protected:
     QCheckBox *interpolationModelCheckBox;
     QCheckBox *scalarBarCheckBox;
 	QCheckBox *colourMapCheckBox;
+	QPushButton *editColourMapButton;
 	QPushButton *newColourMapButton;
     //Plugins
 	QLabel *noPluginMsg;
 
+	// The main window
     milxQtMain *MainWindow;
 
 	/*!
