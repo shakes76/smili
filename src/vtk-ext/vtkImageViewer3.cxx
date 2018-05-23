@@ -54,7 +54,7 @@ public:
         {
       #if(VTK_MAJOR_VERSION > 5)
         this->IV->GetInputAlgorithm()->UpdateInformation();
-        vtkStreamingDemandDrivenPipeline::SetUpdateExtent(
+        vtkStreamingDemandDrivenPipeline::SetWholeExtent(
           this->IV->GetInputInformation(),
           vtkStreamingDemandDrivenPipeline::GetWholeExtent(
             this->IV->GetInputInformation()));

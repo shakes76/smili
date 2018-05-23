@@ -210,9 +210,9 @@ public:
     */
     inline void SetSize(int height, int width)
     {
-        QVTKWidget::GetRenderWindow()->SetSize(width, height);
+		QVTKWidget::GetRenderWindow()->SetSize(width, height);
         int *winSize = QVTKWidget::GetRenderWindow()->GetSize();
-        QVTKWidget::resize(winSize[0],winSize[1]);
+		QVTKWidget::resize(winSize[0],winSize[1]);
     }
     /*!
         \fn milxQtRenderWindow::SetLookupTable(vtkSmartPointer<vtkLookupTable> lut)

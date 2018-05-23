@@ -32,9 +32,14 @@
 #include <vtkCamera.h>
 #include <vtkLookupTable.h>
 #include <vtkImageBlend.h>
-#include <vtkTensor.h>
 #include <vtkMultiThreader.h>
 #include <vtkMath.h>
+#include <vtkNew.h>
+#include <vtkVectorText.h>
+#include <vtkElevationFilter.h>
+#include <vtkImageMapper.h>
+#include <vtkActor2D.h>
+#include <vtkTensor.h>
 //milxQt
 #include "milxQtFile.h"
 #include "milxQtPlot.h"
@@ -163,7 +168,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
 }
 
 milxQtMain::~milxQtMain()
-{
+{ 
     foreach (QPointer<milxQtPluginInterface> loadedPlugin, plugins)
     {
         if(loadedPlugin->isThreaded() && loadedPlugin->isRunning())
@@ -254,11 +259,16 @@ void milxQtMain::newTab()
 	connect(tmpPtr, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(redirectWindowActivated(QMdiSubWindow *)));
 }
 
-///\todo bug: Fix popped out RenderWindow bug
 void milxQtMain::addRender(milxQtRenderWindow *rnd)
 {
-	printDebug("Rendering Window");
-
+	// Create a subwindow, and add the renderwindow to it
+	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	subWindow->setWidget(rnd);
+	subWindow->setWindowTitle(rnd->strippedBaseName());
+	subWindow->resize(rnd->size());
+	subWindow->setAttribute(Qt::WA_DeleteOnClose);
+	qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
+	
 	commonChildProperties(rnd);
 	rnd->enableUpdates(statusBar());
 	rnd->GetRenderWindow()->SetSize(200, 200);
@@ -268,13 +278,6 @@ void milxQtMain::addRender(milxQtRenderWindow *rnd)
 	connect(rnd, SIGNAL(nameChanged(const QString &)), this, SLOT(setTabName(const QString &)));
 	connect(rnd, SIGNAL(working(int)), this, SLOT(working(int)));
 	connect(rnd, SIGNAL(done(int)), this, SLOT(done(int)));
-
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
-	subWindow->setWidget(rnd);
-	subWindow->setWindowTitle(rnd->windowTitle());
-	subWindow->setAttribute(Qt::WA_DeleteOnClose);
-	qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
-	subWindow->show();
 }
 
 void milxQtMain::addImage(milxQtImage *img)
@@ -470,7 +473,9 @@ QWebEngineView* milxQtMain::activeWebView()
         return NULL;
 
     QWidget *activeWin = win->widget();
-        return qobject_cast<QWebEngineView *>(activeWin);
+	if (activeWin->layout()->count() == 2) {
+		return qobject_cast<QWebEngineView *>(activeWin->layout()->itemAt(1)->widget());
+	}
     return NULL;
 }
 
@@ -567,8 +572,8 @@ void milxQtMain::openCollection()
 
 void milxQtMain::openSeries()
 {
-  QPointer<milxQtFile> reader = new milxQtFile;
-  QPointer<milxQtImage> img = new milxQtImage;  //list deletion
+  milxQtFile *reader = new milxQtFile;
+  milxQtImage *img = new milxQtImage;  //list deletion
 
   printDebug("Supported Image formats: " + reader->supportedImageFormats());
   bool success = reader->openImageSeries(img);
@@ -924,7 +929,7 @@ void milxQtMain::saveScreen(QString filename)
     {
         QFileDialog *fileSaver = new QFileDialog(this);
         vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
-        QVTKWidget* windowVTK = qobject_cast<QVTKWidget *>(activeWindow);
+		QVTKWidget* windowVTK = qobject_cast<QVTKWidget *>(activeWindow);
 
         if(windowVTK == 0)
             return;
@@ -1066,27 +1071,42 @@ void milxQtMain::tileTabHorizontally()
 
 void milxQtMain::helpContents()
 {	
-	// Create a new help window
+	// The help window home page
 	QFile file(":/resources/smilx_doc/home.html");
-	QMdiSubWindow *subWindow = new QMdiSubWindow;
+	
+	// Create the help web viewer
 	QWebEngineView *view = new QWebEngineView;
-	if (file.open(QIODevice::ReadOnly))
+	if (file.open(QIODevice::ReadOnly)) {
+		QString title = QString("sMILX Help");
 		view->setHtml(file.readAll());
-		view->setWindowTitle("sMILX Help");
-		subWindow->setWidget(view);
-		subWindow->setWindowTitle("sMILX Help");
+		view->setWindowTitle(title);
+
+		// Setup toolbar
+		QToolBar *toolBar = new QToolBar(QObject::tr("Navigation"));
+		toolBar->addAction(view->pageAction(QWebEnginePage::Back));
+		toolBar->addAction(view->pageAction(QWebEnginePage::Forward));
+		toolBar->addAction(view->pageAction(QWebEnginePage::Reload));
+		toolBar->addAction(view->pageAction(QWebEnginePage::Stop));
+		
+		QVBoxLayout *helpLayout = new QVBoxLayout(view);
+			helpLayout->addWidget(toolBar);
+			helpLayout->addWidget(view);
+
+		QDialog *window = new QDialog;
+		window->setWindowTitle(title);
+		window->setLayout(helpLayout);
+		window->setStyleSheet("QDialog{background: none};" + window->styleSheet());
+		
+		// Create the help window and add it to the current workspace
+		QMdiSubWindow *subWindow = new QMdiSubWindow;
+		subWindow->setWidget(window);
+		subWindow->setWindowTitle(title);
 		subWindow->resize(800, 600);
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
 		qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
 		subWindow->show();
 		file.close();
-	
-    //Quick setup toolbar
-    QToolBar *toolBar = addToolBar(QObject::tr("Navigation"));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Back));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Forward));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Reload));
-    toolBar->addAction(view->pageAction(QWebEnginePage::Stop));
+	}
 }
 
 void milxQtMain::about()
@@ -1097,7 +1117,6 @@ void milxQtMain::about()
 
 void milxQtMain::controls()
 {
-	printDebug("Showing control scheme...");
 	bool isActive = false; // If the controls window is already active
 	
 	// Search for the controls window
@@ -1164,7 +1183,7 @@ void milxQtMain::display(milxQtRenderWindow* newRender)
     newRender->setDefaultView(defaultViewBox->currentIndex());
     newRender->setView(defaultViewBox->currentIndex());
     newRender->setDefaultOrientation(defaultOrientationTypeBox->currentIndex());
-    //newRender->show();
+    newRender->show();
 
     foreach(QAction *currAct, renderExtsActions) ///Add extension actions
     {
@@ -1256,7 +1275,7 @@ void milxQtMain::predisplay(milxQtImage* newImage)
         imgCoronal->setDefaultOrientation(defaultOrientationTypeBox->currentIndex()); //do not remove, not redundant
         imgCoronal->viewToCoronal();
         display(imgCoronal);
-		printDebug("DISPLAYING IMG");
+		
         //3D view
         QPointer<milxQtRenderWindow> slicesView = new milxQtRenderWindow;  //list deletion
         slicesView->setNamePrefix("3D View: ");
@@ -1313,9 +1332,8 @@ void milxQtMain::display(milxQtImage* newImage)
         newImage->setView(defaultViewBox->currentIndex());
     }
     newImage->setDefaultOrientation(defaultOrientationTypeBox->currentIndex());
-	printDebug("ABOUT TO SHOW IMAGE!!!");
-    newImage->show();
-	
+	newImage->show();
+
     foreach(QAction *currAct, imageExtsActions) ///Add extension actions
     {
         newImage->addExtensionAction(currAct);
@@ -1757,7 +1775,6 @@ void milxQtMain::updateWindowsWithCursors()
 void milxQtMain::updateWindowsWithView(int value)
 {
     initialiseWindowTraversal();
-
     while(currentWindow())
     {
         milxQtWindow *win = currentWindow();
@@ -1769,7 +1786,7 @@ void milxQtMain::updateWindowsWithView(int value)
 
 void milxQtMain::updateWindowsWithViewType(int value)
 {
-    QList<QMdiSubWindow*> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
+	QList<QMdiSubWindow*> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
 
     if(windows.isEmpty())
         return;

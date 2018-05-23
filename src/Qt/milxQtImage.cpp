@@ -341,11 +341,8 @@ void milxQtImage::generateImage(const bool quietly)
 
         ///Setup Viewer
         //~ viewer->SetInput(magnify->GetOutput());
-    #if VTK_MAJOR_VERSION <= 5
-        viewer->SetInput(imageData);
-    #else
         viewer->SetInputData(imageData);
-    #endif
+
         if(!viewerSetup)
         {
             printDebug("Setting up viewer");
@@ -417,7 +414,7 @@ void milxQtImage::generateImage(const bool quietly)
         viewer->GetRenderer()->ResetCamera(); //Reset window view as if pressing 'Shift+r'
         viewer->UpdateCursor();
         viewer->Render();
-
+		
         ///Check for magnification
         if(!viewerSetup)
         {
@@ -621,7 +618,6 @@ vtkSmartPointer<vtkImageData> milxQtImage::butterWorthHighPass(vtkSmartPointer<v
 
 void milxQtImage::trackView(milxQtImage *windowToTrack, ViewType viewTo)
 {
-    printDebug("Tracking View");
     track = true;
     viewToTrack = viewTo;
     enableCrosshair();
