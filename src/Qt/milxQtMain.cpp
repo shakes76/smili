@@ -1195,7 +1195,7 @@ void milxQtMain::display(milxQtRenderWindow* newRender)
     connect(newRender, SIGNAL(imageAvailable(vtkImageData*, QString )), this, SLOT(display(vtkImageData*, QString )));
     connect(newRender, SIGNAL(modelAvailable(vtkPolyData*, QString )), this, SLOT(display(vtkPolyData*, QString )));
     Connector->Connect(newRender->GetRenderWindow(),
-                       vtkCommand::ModifiedEvent,
+                       vtkCommand::StartEvent,
                        this,
                        SLOT( transferViewToWindows(vtkObject*, unsigned long, void*, void*, vtkCommand*) ),
                        NULL, 1.0); //High Priority
@@ -1358,7 +1358,7 @@ void milxQtMain::display(milxQtImage* newImage)
     connect(this, SIGNAL(updatedImportFromMenu(QMenu*)), newImage, SLOT(createCustomConnections(QMenu*)));
     connect(this, SIGNAL(updatedImportFromMenu(QActionGroup*)), newImage, SLOT(setCustomActionGroup(QActionGroup*)));
     Connector->Connect(newImage->GetRenderWindow(),
-                       vtkCommand::ModifiedEvent,
+                       vtkCommand::StartEvent,
                        this,
                        SLOT( transferViewToWindows(vtkObject*, unsigned long, void*, void*, vtkCommand*) ),
                        NULL, 1.0); //High Priority
@@ -1432,7 +1432,7 @@ void milxQtMain::display(milxQtModel* newModel)
     connect(newModel, SIGNAL(modelAvailable(vtkPolyData*, QString )), this, SLOT(display(vtkPolyData*, QString )));
     connect(newModel, SIGNAL(closing(QWidget *)), this, SLOT(cleanUpOnClose(QWidget *)));
     Connector->Connect(newModel->GetRenderWindow(),
-                       vtkCommand::ModifiedEvent,
+                       vtkCommand::StartEvent,
                        this,
                        SLOT( transferViewToWindows(vtkObject*, unsigned long, void*, void*, vtkCommand*) ),
                        NULL, 1.0); //High Priority
@@ -1925,7 +1925,7 @@ milxQtRenderWindow* milxQtMain::nextRenderWindow()
 
     while(windowIterator < windows.size())
     {
-        if(isRender(windows[windowIterator]))
+        if(isRender(windows[windowIterator]->widget()))
         {
             win = qobject_cast<milxQtRenderWindow *>(windows[windowIterator]->widget());
             windowIterator ++;
@@ -1945,7 +1945,7 @@ milxQtModel* milxQtMain::nextModel()
 
     while(windowIterator < windows.size())
     {
-        if(isModel(windows[windowIterator]))
+        if(isModel(windows[windowIterator]->widget()))
         {
             win = qobject_cast<milxQtModel *>(windows[windowIterator]->widget());
             windowIterator ++;
@@ -1963,10 +1963,9 @@ milxQtImage* milxQtMain::nextImage()
     QList<QMdiSubWindow*> windows = qobject_cast<QMdiArea *>(workspaces->currentWidget())->subWindowList();
     milxQtImage *win = NULL;
 
-    printDebug("Number of Windows: " + QString::number(windows.size()));
     while(windowIterator < windows.size())
     {
-        if(isImage(windows[windowIterator]))
+        if(isImage(windows[windowIterator]->widget()))
         {
             win = qobject_cast<milxQtImage *>(windows[windowIterator]->widget());
             windowIterator ++;
@@ -1975,7 +1974,6 @@ milxQtImage* milxQtMain::nextImage()
 
         windowIterator ++;
     }
-    printDebug("Window Iterator Value: " + QString::number(windowIterator));
 
     return win;
 }
@@ -1985,8 +1983,7 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
     if(!actionLinkWindows->isChecked()) //if all windows not linked, exit
         return;
 
-    printDebug("Updating Views in Other Windows");
-    actionLinkWindows->setChecked(false); //prevent cycle calls
+	actionLinkWindows->setChecked(false); //prevent cycle calls
     // get render window
     vtkRenderWindow* rndWindow = vtkRenderWindow::SafeDownCast(obj);
     vtkRenderer* rnd = rndWindow->GetRenderers()->GetFirstRenderer();
@@ -2038,7 +2035,7 @@ void milxQtMain::transferViewToWindows(vtkObject *obj, unsigned long, void *clie
             window->Render(); //!< refresh the destination display, quick
         }
 
-//        rndWindow->Render(); //!< refresh the source display, quick
+        rndWindow->Render(); //!< refresh the source display, quick
     }
 
     actionLinkWindows->setChecked(true); //restore

@@ -279,9 +279,6 @@ void milxQtPreferencesForm::changeTheme(int themeIndex)
 	qss.open(QFile::ReadOnly);
 	qApp->setStyleSheet(qss.readAll());
 	qss.close();
-	
-	// Update the window
-	//MainWindow->update();
 }
 
 void milxQtPreferencesForm::editTheme()
@@ -362,6 +359,7 @@ void milxQtPreferencesForm::createConnections()
     connect(ui.wdtOptions, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
                 this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 	connect(themeList, SIGNAL(currentIndexChanged(int)), this, SLOT(changeTheme(int)));
-	connect(editThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::editTheme);
-	connect(newThemeButton, &QAbstractButton::clicked, this, &milxQtPreferencesForm::newTheme);
+	connect(editThemeButton, SIGNAL(clicked()), this, SLOT(editTheme()));
+	connect(newThemeButton, SIGNAL(clicked()), this, SLOT(newTheme()));
+	connect(ui.btnOk, SIGNAL(accepted()), this, SLOT(accept()));
 }

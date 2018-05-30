@@ -41,14 +41,14 @@ public:
 	QString currentTheme();
 	void addTheme(QString themeName);
 	void removeTheme(QString themeName);
+	bool isTheme(QString themeName);
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 	void changeTheme(int themeIndex);
 	void editTheme();
 	void newTheme();
-	bool isTheme(QString themeName);
-    void accept();
+	void accept();
 
 protected:
     Ui::dlgPreferences ui;
@@ -81,12 +81,6 @@ protected:
     milxQtMain *MainWindow;
 
 	/*!
-		\fn 
-		\brief 
-	*/
-    void createConnections();
-
-	/*!
 		\fn
 		\brief
 	*/
@@ -97,6 +91,12 @@ protected:
 		\brief
 	*/
 	void loadCustomThemes();
+
+	/*!
+		\fn
+		\brief
+	*/
+	void createConnections();
 };
 
 #endif // MILXQTPreferencesFORM_H

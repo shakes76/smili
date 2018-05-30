@@ -224,6 +224,14 @@ void milxQtThemeEditorForm::setupEditor(QString *themeName)
 		groupBoxTextLayout->addWidget(groupBoxTextLabel);
 		groupBoxTextLayout->addWidget(groupBoxTextCombo);
 
+	// Group Box text
+	msgBoxLabel = new QLabel(tr("Message Box - Background:"));
+	msgBoxCombo = new QComboBox;
+	createColourPalette(msgBoxCombo);
+	QHBoxLayout *msgBoxLayout = new QHBoxLayout;
+	msgBoxLayout->addWidget(msgBoxLabel);
+	msgBoxLayout->addWidget(msgBoxCombo);
+
 	// Add all the elements together
 	QVBoxLayout *generalLayout = new QVBoxLayout;
 		generalLayout->addLayout(nameLayout);
@@ -248,6 +256,7 @@ void milxQtThemeEditorForm::setupEditor(QString *themeName)
 		generalLayout->addLayout(toolBarBGLayout);
 		generalLayout->addLayout(checkBoxTextLayout);
 		generalLayout->addLayout(groupBoxTextLayout);	
+		generalLayout->addLayout(msgBoxLayout);
 
 	// Add the layout to the Editor widget
 	ui.scrollAreaWidgetContents_2->setLayout(generalLayout);
@@ -258,8 +267,12 @@ void milxQtThemeEditorForm::setupEditor(QString *themeName)
 
 void milxQtThemeEditorForm::discardTheme(QAbstractButton *button)
 {
+	// If "OK" button, do nothing
+	if (!button->text().compare("OK")) return;
+
 	// Check if "Discard" button was pressed while editing a theme
 	if (!button->text().compare("Discard") && isEdit) {
+		// Delete the theme
 		QDir dir;
 		dir.remove(QString(QDir::currentPath() + "/" + *themeName + ".qss"));
 		prefForm->removeTheme(*themeName);
@@ -277,9 +290,8 @@ void milxQtThemeEditorForm::accept()
 	if ((prefForm->isTheme(themeNameInput->text()) && !isEdit) || 
 		(prefForm->isTheme(themeNameInput->text()) && isEdit && themeName->compare(themeNameInput->text()))) {
 		// Already a theme - highlight the input box
-		themeNameInput->setStyleSheet("QLineEdit{background: tomato};" + themeNameInput->styleSheet());
-	}
-	else {
+		themeNameInput->setStyleSheet(themeNameInput->styleSheet() + "QLineEdit{background: tomato;}");
+	} else {
 		// Save the theme
 		saveColourSettings();
 		QDialog::accept();
@@ -348,7 +360,7 @@ void milxQtThemeEditorForm::updateStyles(int index)
 
 	// Default widget background
 	colour = widgetBGCombo->currentText();
-	qApp->setStyleSheet(qApp->styleSheet() + ".QWidget {background-color: " + colour + ";}");
+	qApp->setStyleSheet(qApp->styleSheet() + ".QWidget{background-color: " + colour + ";}");
 	
 	// Push Button background
 	colour = pbBGCombo->currentText();
@@ -429,6 +441,10 @@ void milxQtThemeEditorForm::updateStyles(int index)
 	// Group Box text
 	colour = groupBoxTextCombo->currentText();
 	qApp->setStyleSheet(qApp->styleSheet() + "QGroupBox::title{color: " + colour + ";}");
+
+	// Message Box background
+	colour = msgBoxCombo->currentText();
+	qApp->setStyleSheet(qApp->styleSheet() + "QMessageBox{background: " + colour + ";}");
 }
 
 void milxQtThemeEditorForm::loadColourSettings(QString *theme)
@@ -541,6 +557,10 @@ void milxQtThemeEditorForm::loadColourSettings(QString *theme)
 	colour = getStyleColour(in, QString("QGroupBox::title"));
 	groupBoxTextCombo->setCurrentText(colour);
 
+	// Message Box text
+	colour = getStyleColour(in, QString("QMessageBox"));
+	msgBoxCombo->setCurrentText(colour);
+
 	// Close the style file
 	qss.close();
 }
@@ -651,7 +671,12 @@ void milxQtThemeEditorForm::saveColourSettings()
 	// Group Box text
 	copyThemeFile(in, QString("QGroupBox::title"), &themeData);
 	in->readLine(); // Eat next line
-	themeData.append("    color: " + groupBoxTextCombo->currentText() + ";\n}");
+	themeData.append("    color: " + groupBoxTextCombo->currentText() + ";");
+
+	// Group Box text
+	copyThemeFile(in, QString("QMessageBox"), &themeData);
+	in->readLine(); // Eat next line
+	themeData.append("    background: " + msgBoxCombo->currentText() + ";\n}");
 
 	// Close the read-in file
 	tmp.close();
@@ -694,6 +719,7 @@ void milxQtThemeEditorForm::saveColourSettings()
 void milxQtThemeEditorForm::createConnections()
 {
 	connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(discardTheme(QAbstractButton*)));
+	connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(widgetBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 	connect(pbBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 	connect(pbTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
@@ -715,4 +741,5 @@ void milxQtThemeEditorForm::createConnections()
 	connect(toolBarBGCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 	connect(checkBoxTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 	connect(groupBoxTextCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
+	connect(msgBoxCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateStyles(int)));
 }

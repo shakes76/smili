@@ -31,27 +31,32 @@ class MILXQT_EXPORT milxQtThemeEditorForm : public QDialog
     Q_OBJECT
 
 public:
-	milxQtThemeEditorForm(milxQtPreferencesForm *theParent = 0, milxQtMain *mainWindow = 0, QString *themeName = 0, bool isEdit = 0);
+	milxQtThemeEditorForm(milxQtPreferencesForm *theParent = 0, milxQtMain *mainWindow = 0, QString *themeName = 0, bool isEdit = false);
 	virtual ~milxQtThemeEditorForm();
 
 	/*!
-		\fn
-		\brief
+		\fn milxQtThemeEditorForm::setupEditor(QString *themeName)
+		\brief Initialises the theme editor dialog, using the given theme name.
 	*/
 	void setupEditor(QString *themeName);
 
 public slots:
+	/*!
+		\fn milxQtThemeEditorForm::accept()
+		\brief Overrides the QDialog::accept() function, to allow for invalid name error correction.
+	*/
 	void accept();
 
 	/*!
-		\fn
-		\brief
+		\fn milxQtThemeEditorForm::discardTheme(QAbstractButton *button)
+		\brief Discards the changes to the current theme (if new). If an existing theme is being edited, it is
+			   deleted instead.
 	*/
 	void discardTheme(QAbstractButton *button);
 
 	/*!
-		\fn
-		\brief
+		\fn milxQtThemeEditorForm::updateStyles(int index)
+		\brief Applies the style changes made to the whole application.
 	*/
 	void updateStyles(int index);
 
@@ -109,6 +114,8 @@ protected:
 	QComboBox *checkBoxTextCombo;
 	QLabel *groupBoxTextLabel;
 	QComboBox *groupBoxTextCombo;
+	QLabel *msgBoxLabel;
+	QComboBox *msgBoxCombo;
 
 	QString getStyleColour(QTextStream *in, QString section);
 	void createColourPalette(QComboBox *box);

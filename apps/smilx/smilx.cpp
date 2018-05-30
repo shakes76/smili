@@ -24,9 +24,11 @@
 #include <QSplashScreen>
 
 #include "milxQtMain.h"
+#include "vtkOutputWindow.h"
 
 int main(int argc, char* argv[])
 {
+	vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
 	QApplication app(argc,argv);
 
     QPixmap icon(":resources/smilx_icon.png");

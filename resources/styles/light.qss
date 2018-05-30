@@ -90,3 +90,7 @@ QCheckBox {
 QGroupBox::title {
     color: black;
 }
+
+QMessageBox {
+    background: none;
+}
