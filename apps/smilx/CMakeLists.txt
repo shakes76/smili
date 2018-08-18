@@ -158,11 +158,12 @@ ELSE(WIN32) #Rest of the OSes (Unix and Apple atm)
     # endif()
 
     # Make sure the 'Resources' Directory is correctly created before we build
-    # add_custom_command (TARGET smilx PRE_BUILD COMMAND mkdir -p ${EXECUTABLE_OUTPUT_PATH}/\${CONFIGURATION}/smilx.app/Contents/Resources)
+    # add_custom_command (TARGET smilx PRE_BUILD COMMAND mkdir -p ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents/Resources)
 
     IF(BUILD_PLUGINS)
         message("Plugin Directory is ${SMILI_PLUGINS_PATH}")
-        INSTALL(DIRECTORY ${SMILI_PLUGINS_PATH} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/\${CONFIGURATION}/smilx.app/Contents COMPONENT Runtime)
+        INSTALL(DIRECTORY ${SMILI_PLUGINS_PATH} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents COMPONENT Runtime)
+        message("Plugin Install Directory is ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents")
     ENDIF(BUILD_PLUGINS)
 
     set(CMAKE_INSTALL_PREFIX "")

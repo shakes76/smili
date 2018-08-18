@@ -508,7 +508,7 @@ void milxQtModel::generateSampledPoints(float distance, float red, float green, 
         if(distance <= 0)
         {
             distance = QInputDialog::getDouble(this, tr("Please Provide the sample distance"),
-                                             tr("Distance:"), 0.1, 0.0, 2147483647, 7, &ok);
+                                             tr("Distance:"), 0.1, 0.0, DBL_MAX, 7, &ok);
         }
         else
             ok = true;
@@ -567,7 +567,7 @@ void milxQtModel::generateVectorField(double newScale, float red, float green, f
             bool ok1 = false;
             double newScaling = 1.0/meanDirection.two_norm();
             newScaling = QInputDialog::getDouble(this, tr("Please enter scaling for the vector field"),
-                                tr("Scaling:"), newScaling, -2147483647, 2147483647, 7, &ok1);
+                                tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
             if(!ok1)
                 newScale = 0.0;
@@ -611,7 +611,7 @@ void milxQtModel::generateTensorField(double newScale, float red, float green, f
         bool ok1 = false;
         double newScaling = 1.0/meanDirection.frobenius_norm();
         newScaling = QInputDialog::getDouble(this, tr("Please enter scaling for the vector field"),
-                            tr("Scaling:"), newScaling, -2147483647, 2147483647, 7, &ok1);
+                            tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
         if(!ok1)
             newScale = 0.0;
@@ -842,7 +842,7 @@ void milxQtModel::generateIsoSurface(vtkSmartPointer<vtkImageData> img, int cont
         contourNumber = 0;
         ok1 = true;
         value = QInputDialog::getDouble(this, tr("Please enter label/iso surface value"),
-                          tr("Value:"), 0.5, -2147483647, 2147483647, 7, &ok2);
+                          tr("Value:"), 0.5, -DBL_MAX, DBL_MAX, 7, &ok2);
     }
     else
         ok1 = ok2 = true;
@@ -949,7 +949,7 @@ void milxQtModel::generateQuantisedPoints(float quantiseFactor)
         if(quantiseFactor <= 0)
         {
             quantiseFactor = QInputDialog::getDouble(this, tr("Please Provide the Quantise Factor"),
-                                             tr("Factor:"), 0.25, 0.0, 2147483647, 5, &ok);
+                                             tr("Factor:"), 0.25, 0.0, DBL_MAX, 5, &ok);
         }
         else
             ok = true;
@@ -1182,9 +1182,9 @@ void milxQtModel::threshold(double lowValue, double upValue)
         model.Result()->GetScalarRange(range);
 
         lowValue = QInputDialog::getDouble(this, tr("Lower level of band to keep"),
-                                         tr("Lower Value (inclusive):"), range[0], -2147483647, 2147483647, 12, &ok);
+                                         tr("Lower Value (inclusive):"), range[0], -DBL_MAX, DBL_MAX, 12, &ok);
         upValue = QInputDialog::getDouble(this, tr("Upper level of band to keep (inclusive)"),
-                                         tr("Upper Value (inclusive):"), range[1], -2147483647, 2147483647, 12, &ok);
+                                         tr("Upper Value (inclusive):"), range[1], -DBL_MAX, DBL_MAX, 12, &ok);
     }
     else
         ok = true;
@@ -1214,11 +1214,11 @@ void milxQtModel::thresholdScalars(double lowValue, double upValue, double outsi
         model.Result()->GetScalarRange(range);
 
         lowValue = QInputDialog::getDouble(this, tr("Lower level of band to keep"),
-                                         tr("Lower Value (inclusive):"), range[0], -2147483647, 2147483647, 12, &ok);
+                                         tr("Lower Value (inclusive):"), range[0], -DBL_MAX, DBL_MAX, 12, &ok);
         upValue = QInputDialog::getDouble(this, tr("Upper level of band to keep (inclusive)"),
-                                         tr("Upper Value (inclusive):"), range[1], -2147483647, 2147483647, 12, &ok);
+                                         tr("Upper Value (inclusive):"), range[1], -DBL_MAX, DBL_MAX, 12, &ok);
         outsideVal = QInputDialog::getDouble(this, tr("Value to give scalars outside the range"),
-                                         tr("Outside Value:"), 0.0, -2147483647, 2147483647, 12, &ok);
+                                         tr("Outside Value:"), 0.0, -DBL_MAX, DBL_MAX, 12, &ok);
     }
     else
         ok = true;
@@ -1246,13 +1246,13 @@ void milxQtModel::thresholdScalarsBinary(double lowValue, double upValue, double
         model.Result()->GetScalarRange(range);
 
         lowValue = QInputDialog::getDouble(this, tr("Lower level of band to keep"),
-                                         tr("Lower Value (inclusive):"), range[0], -2147483647, 2147483647, 12, &ok);
+                                         tr("Lower Value (inclusive):"), range[0], -DBL_MAX, DBL_MAX, 12, &ok);
         upValue = QInputDialog::getDouble(this, tr("Upper level of band to keep"),
-                                         tr("Upper Value (inclusive):"), range[1], -2147483647, 2147483647, 12, &ok);
+                                         tr("Upper Value (inclusive):"), range[1], -DBL_MAX, DBL_MAX, 12, &ok);
         insideVal = QInputDialog::getDouble(this, tr("Value to give scalars inside the range"),
-                                         tr("Inside Value:"), 1.0, -2147483647, 2147483647, 12, &ok);
+                                         tr("Inside Value:"), 1.0, -DBL_MAX, DBL_MAX, 12, &ok);
         outsideVal = QInputDialog::getDouble(this, tr("Value to give scalars outside the range"),
-                                         tr("Outside Value:"), 0.0, -2147483647, 2147483647, 12, &ok);
+                                         tr("Outside Value:"), 0.0, -DBL_MAX, DBL_MAX, 12, &ok);
     }
     else
         ok = true;
@@ -2240,9 +2240,9 @@ void milxQtModel::enableScale(QString title, const bool quiet, double minRange, 
         bool ok1 = false, ok2 = false, ok3 = false, ok4 = false;
 
         minRange = QInputDialog::getDouble(this, tr("Enter Table Range of new Lookup Table"),
-                                         tr("Minimum:"), 0, -2147483647, 2147483647, 5, &ok1);
+                                         tr("Minimum:"), 0, -DBL_MAX, DBL_MAX, 5, &ok1);
         maxRange = QInputDialog::getDouble(this, tr("Enter Table Range of new Lookup Table"),
-                                         tr("Maximum:"), 1, -2147483647, 2147483647, 5, &ok2);
+                                         tr("Maximum:"), 1, -DBL_MAX, DBL_MAX, 5, &ok2);
         noOfLabels = QInputDialog::getInt(this, tr("How many labels to show"),
                                           tr("Labels:"), noOfLabels, 0, 99, 1, &ok3);
         title = QInputDialog::getText(this, tr("Title of Bar"),

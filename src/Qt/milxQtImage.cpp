@@ -1619,25 +1619,27 @@ void milxQtImage::histogramEqualisation()
         return;
     }
 
-//    bool ok1, ok2;
-//    float newMinValue = QInputDialog::getDouble(this, tr("Please Provide the minimum value of new intensities"),
-//                     tr("Minimum:"), minValue, -2147483647, 2147483647, 1, &ok1);
-//    float newMaxValue = QInputDialog::getDouble(this, tr("Please Provide the maximum value of new intensities"),
-//                     tr("Maximum:"), maxValue, -2147483647, 2147483647, 1, &ok2);
-//
-//    if(!ok1 || !ok2)
-//        return;
+    bool ok1, ok2, ok3;
+    float alphaValue = QInputDialog::getDouble(this, tr("Please Provide the alpha value (towards 1 produces unsharp mask)"),
+                     tr("Alpha:"), 0.3, 0, 1.0, 5, &ok1);
+    float betaValue = QInputDialog::getDouble(this, tr("Please Provide the beta value (towards 0 produces unsharp mask)"),
+                     tr("Beta:"), 0.3, 0, 1.0, 5, &ok2);
+    int radiusValue = QInputDialog::getInteger(this, tr("Please Provide the radius value (smaller for fine detail)"),
+                     tr("Radius:"), 5, 1, 2147483647, 1, &ok3);
+
+    if(!ok1 || !ok2 || !ok3)
+        return;
 
     printInfo("Histogram Equalisation of Image");
     emit working(-1);
     if(eightbit)
-        imageChar = milx::Image<charImageType>::HistogramEqualisation(imageChar);
+        imageChar = milx::Image<charImageType>::HistogramEqualisation(imageChar, alphaValue, betaValue);
     else if(integer)
-        imageInt = milx::Image<intImageType>::HistogramEqualisation(imageInt);
+        imageInt = milx::Image<intImageType>::HistogramEqualisation(imageInt, alphaValue, betaValue);
 //    else if(rgb)
 //        imageRGB = milx::Image<rgbImageType>::HistogramEqualisation(imageRGB);
     else
-        imageFloat = milx::Image<floatImageType>::HistogramEqualisation(imageFloat);
+        imageFloat = milx::Image<floatImageType>::HistogramEqualisation(imageFloat, alphaValue, betaValue);
     emit done(-1);
 
     generateImage();
