@@ -24,10 +24,12 @@
 #include <QSplashScreen>
 
 #include "milxQtMain.h"
+#include "vtkOutputWindow.h"
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc,argv);
+	vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
+	QApplication app(argc,argv);
 
     QPixmap icon(":resources/smilx_icon.png");
     app.setWindowIcon(QIcon(icon));
@@ -38,16 +40,17 @@ int main(int argc, char* argv[])
         splash.showMessage("This software is for research purposes only and is NOT approved for clinical use", Qt::AlignBottom | Qt::AlignHCenter);
         splash.show();
     app.processEvents();
-
+	
     milxQtMain Main;
     Main.setWindowTitle("SMILX");
+	Main.setMinimumSize(800, 600);
     Main.show();
     splash.finish(&Main);
-
+		
     ///Open files if provided
     QStringList files = app.arguments();
         files.erase(files.begin()); //First element is the program name
         Main.loadFiles(files);
-
+	
     return app.exec();
 }

@@ -133,8 +133,8 @@ void milxQtConsole::printInfo(QString msg)
 
     cout << timeStr.toStdString() << msg.toStdString() << endl;
     msg.prepend(timeStr);
-    msg.prepend("<font color='black'>");
-    msg.append("</font>");
+    //msg.prepend("<font color='black'>");
+    //msg.append("</font>");
     consoleHTMLMessage(msg);
 }
 

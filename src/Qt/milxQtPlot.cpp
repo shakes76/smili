@@ -76,7 +76,7 @@ milxQtPlot::~milxQtPlot()
 
 void milxQtPlot::createMenu(QMenu *menu)
 {
-    cout << "Creating Plot Menu 1" << endl;
+    cout << "Creating Plot Menu 1" << std::endl;
     if(!menu)
         return;
 
@@ -84,7 +84,7 @@ void milxQtPlot::createMenu(QMenu *menu)
     if(plotTypeSurface || plotType3D)
         menu->addMenu(milxQtModel::basicContextMenu()); ///Have all the basic model options
 
-    cout << "Creating Plot Menu 2" << endl;
+    cout << "Creating Plot Menu 2" << std::endl;
     if(plotTypeVolume)
     {
       foreach(QAction *currAct, actionsToAdd)
@@ -174,7 +174,7 @@ void milxQtPlot::generatePlot()
 
     if(table->GetNumberOfColumns() == 1) //bar chart
     {
-        cerr << "One column is not supported yet." << endl;
+        cerr << "One column is not supported yet." << std::endl;
     }
     else if(table->GetNumberOfColumns() == 2) //2D scatter
     {
@@ -498,15 +498,7 @@ void milxQtPlot::volumePlot(vtkSmartPointer<vtkImageData> img, const bool eightb
     else
         volumeMapper->SetInterpolationModeToLinear();
         volumeMapper->SetRequestedRenderModeToDefault(); //choose best automatically
-    #if !defined(VTK_LEGACY_REMOVE) && (VTK_MAJOR_VERSION <= 5 || (VTK_MAJOR_VERSION == 6 && VTK_MINOR_VERSION <= 2))
-        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
-    #else // VTK_LEGACY_REMOVE
-        if(milxQtRenderWindow::GetRenderWindow()->IsDirect() && milxQtRenderWindow::GetRenderWindow()->SupportsOpenGL()) //if hardware accelleration present
-        {
-            printDebug("Requesting GPU Volume Rendering");
-            volumeMapper->SetRequestedRenderModeToGPU();
-        }
-    #endif
+//        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
 //        volumeMapper->SetRequestedRenderModeToRayCast();
         linkProgressEventOf(volumeMapper);
 

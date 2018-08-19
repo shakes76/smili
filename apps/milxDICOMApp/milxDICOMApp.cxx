@@ -80,16 +80,15 @@ int main(int argc, char *argv[])
   ValueArg<std::string> exportArg("e", "export-tags", "Output DICOM tags as text pairs to file.", false, "tags.csv", "Export Tags");
   //~ ValueArg<float> decimateArg("d", "decimate", "Decimate all the meshes provided using the Quadric Decimate algorithm", false, 0.5, "Decimate");
   //ValueArg<size_t> mergeArg("", "merge", "Merge the labels in labelled images, 0:keep, 1:aggregate, 2:pack, 3:strict.", false, 0, "Merge");
+  //~ ValueArg<float> aboveArg("", "above", "Add above value to operation (such as to thresholding).", false, 0.0, "Above");
+  //~ ValueArg<float> belowArg("", "below", "Add below value to operation (such as to thresholding).", false, 255.0, "Below");
+  //~ ValueArg<float> insideArg("", "inside", "Add inside value to operation (such as to thresholding).", false, 1.0, "Inside");
   ///Switches
   ///XOR Switches
   SwitchArg infoArg("", "info", "Report the image information(s) for each image in the DICOM series.", false);
   SwitchArg convertArg("c", "convert", "Convert the DICOM series to image volumes given at output.", false);
   SwitchArg printArg("t", "print-tags", "Output DICOM tags as text pairs in terminal.", false);
-  SwitchArg recursiveArg("r", "recursive", "Recursively parse series directory provided.", false);
-  SwitchArg instanceArg("", "instance", "Add Instance ID to filename if found.", false);
-  SwitchArg echoArg("", "echo", "Add Echo ID to filename if found.", false);
-  SwitchArg acquisitionArg("", "acquisition", "Add Acquisition ID to filename if found.", true);
-  SwitchArg nocaseIDArg("", "nocase", "Ignore case ID in filename etc.", false);
+  //SwitchArg binaryArg("b", "binary", "Compute the binary version of the operation(s).", false);
 
   ///Mandatory
   UnlabeledMultiArg<std::string> multinames("series", "DICOM Image series to operate on", true, "Series");
@@ -99,11 +98,10 @@ int main(int argc, char *argv[])
   cmd.add( outputArg );
   cmd.add( prefixArg );
   cmd.add( suffixArg );
-  cmd.add( recursiveArg );
-  cmd.add( instanceArg );
-  cmd.add( echoArg );
-  cmd.add( acquisitionArg );
-  cmd.add( nocaseIDArg );
+  //~ cmd.add( aboveArg );
+  //~ cmd.add( belowArg );
+  //~ cmd.add( insideArg );
+  //cmd.add( binaryArg );
   ///XOR args
   std::vector<Arg*> xorlist;
   xorlist.push_back(&infoArg);
@@ -126,7 +124,9 @@ int main(int argc, char *argv[])
   const std::string prefixName = prefixArg.getValue();
   const std::string suffixName = suffixArg.getValue();
   const std::string exportName = exportArg.getValue();
-  const bool recurse = recursiveArg.isSet();
+  //~ float aboveValue = aboveArg.getValue();
+  //~ float belowValue = belowArg.getValue();
+  //~ float insideValue = insideArg.getValue();
 
   ///Display operation
   operations operation = none;
@@ -165,6 +165,15 @@ int main(int argc, char *argv[])
       //Print Tags
       operation = print;
   }
+  //~ if(aboveArg.isSet() || belowArg.isSet())
+  //~ {
+    //~ if(!thresholdArg.isSet() && !rescaleArg.isSet())
+    //~ {
+      //~ milx::PrintError("Argument Error: Another argument (such as threshold) must be provided.");
+      //~ milx::PrintError("Re-run with one of these flags set.");
+      //~ exit(EXIT_FAILURE);
+    //~ }
+  //~ }
 
   std::cout << "Total Folders: " << filenames.size() << std::endl;
   if(filenames.empty())
@@ -183,7 +192,7 @@ int main(int argc, char *argv[])
   std::vector<std::string> validFilenames;
   for (stringiterator name = filenames.begin(); name != filenames.end(); name++)
   {
-    std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(*name, recurse);
+    std::vector<std::string> UIDs = milx::File::GetDICOMSeriesUIDs(*name, true);
     milx::PrintInfo("Found " + milx::NumberToString(UIDs.size()) + " in " + *name);
     if (!UIDs.empty())
     {
@@ -207,7 +216,7 @@ int main(int argc, char *argv[])
     for (stringiterator name = list->begin(); name != list->end(); name++)
     {
       std::cerr << "Processing UID: " << *name << std::endl;
-      const std::vector<std::string> seriesFilenames = milx::File::GetDICOMSeriesFilenames(*dir, *name, recurse);
+      const std::vector<std::string> seriesFilenames = milx::File::GetDICOMSeriesFilenames(*dir, *name);
 
       //Read Header
       size_t dimensions = 3;
@@ -227,10 +236,6 @@ int main(int argc, char *argv[])
 
       //Open image using relevant type
       std::string caseID;
-      std::string echoID = "";
-      std::string seriesID = "";
-      std::string acqID = "";
-      std::string instanceID = "";
       itk::SmartPointer<vectorImageType> vectorImage;
       itk::SmartPointer<charImageType> labelledImage;
       itk::SmartPointer<shortImageType> shortImage;
@@ -243,7 +248,7 @@ int main(int argc, char *argv[])
       if (pixelType == "vector" || dimensions > 3) ///\todo handle 4D images here properly
       {
         milx::PrintInfo("Detected vector images.");
-        if (!milx::File::OpenDICOMSeriesAndTags<vectorImageType>(*dir, vectorImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+        if (!milx::File::OpenDICOMSeriesAndTags<vectorImageType>(*dir, vectorImage, tags, *name, caseID)) //Error NOT printed inside
         {
           milx::PrintError("Failed Reading Vector Images. Exiting.");
           exit(EXIT_FAILURE);
@@ -253,7 +258,7 @@ int main(int argc, char *argv[])
       else if (componentType == "unsigned_char" || componentType == "unsigned char")
       {
         milx::PrintInfo("Detected labelled images.");
-        if (!milx::File::OpenDICOMSeriesAndTags<charImageType>(*dir, labelledImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+        if (!milx::File::OpenDICOMSeriesAndTags<charImageType>(*dir, labelledImage, tags, *name, caseID)) //Error NOT printed inside
         {
           milx::PrintError("Failed Reading Labelled Images. Exiting.");
           exit(EXIT_FAILURE);
@@ -263,7 +268,7 @@ int main(int argc, char *argv[])
       else if (componentType == "short" || componentType == "int16")
       {
           milx::PrintInfo("Detected short images.");
-          if (!milx::File::OpenDICOMSeriesAndTags<shortImageType>(*dir, shortImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+          if (!milx::File::OpenDICOMSeriesAndTags<shortImageType>(*dir, shortImage, tags, *name, caseID)) //Error NOT printed inside
           {
               milx::PrintError("Failed Reading Short Images. Exiting.");
               exit(EXIT_FAILURE);
@@ -273,7 +278,7 @@ int main(int argc, char *argv[])
       else if (componentType == "unsigned_short" || componentType == "unsigned short")
       {
           milx::PrintInfo("Detected unsigned short images.");
-          if (!milx::File::OpenDICOMSeriesAndTags<ushortImageType>(*dir, ushortImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+          if (!milx::File::OpenDICOMSeriesAndTags<ushortImageType>(*dir, ushortImage, tags, *name, caseID)) //Error NOT printed inside
           {
               milx::PrintError("Failed Reading Unsigned Short Images. Exiting.");
               exit(EXIT_FAILURE);
@@ -283,7 +288,7 @@ int main(int argc, char *argv[])
       else if (componentType == "int" || componentType == "signed" || componentType == "int32" || componentType == "int64")
       {
         milx::PrintInfo("Detected integer images.");
-        if (!milx::File::OpenDICOMSeriesAndTags<intImageType>(*dir, intImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+        if (!milx::File::OpenDICOMSeriesAndTags<intImageType>(*dir, intImage, tags, *name, caseID)) //Error NOT printed inside
         {
           milx::PrintError("Failed Reading Integer Images. Exiting.");
           exit(EXIT_FAILURE);
@@ -293,7 +298,7 @@ int main(int argc, char *argv[])
       else if (componentType == "unsigned_int" || componentType == "unsigned int" || componentType == "unsigned")
       {
         milx::PrintInfo("Detected unsigned int images.");
-        if (!milx::File::OpenDICOMSeriesAndTags<uintImageType>(*dir, uintImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+        if (!milx::File::OpenDICOMSeriesAndTags<uintImageType>(*dir, uintImage, tags, *name, caseID)) //Error NOT printed inside
         {
           milx::PrintError("Failed Reading Unsigned Integer Images. Exiting.");
           exit(EXIT_FAILURE);
@@ -303,7 +308,7 @@ int main(int argc, char *argv[])
       else
       {
         milx::PrintInfo("Detected floating point images.");
-        if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(*dir, floatImage, tags, *name, caseID, echoID, seriesID, acqID, instanceID, recurse)) //Error NOT printed inside
+        if (!milx::File::OpenDICOMSeriesAndTags<floatImageType>(*dir, floatImage, tags, *name, caseID)) //Error NOT printed inside
         {
           milx::PrintError("Failed Reading Images. Exiting.");
           exit(EXIT_FAILURE);
@@ -313,40 +318,11 @@ int main(int argc, char *argv[])
       //Remove illegal characters from names
       name->erase(std::remove(name->begin(),name->end(),' '),name->end());
       caseID.erase(std::remove(caseID.begin(),caseID.end(),' '),caseID.end());
-      if(!echoID.empty())
-        echoID.erase(std::remove(echoID.begin(),echoID.end(),' '),echoID.end());
-      if(!seriesID.empty())
-        seriesID.erase(std::remove(seriesID.begin(),seriesID.end(),' '),seriesID.end());
-      if(!acqID.empty())
-        acqID.erase(std::remove(acqID.begin(),acqID.end(),' '),acqID.end());
-      if(!instanceID.empty())
-        instanceID.erase(std::remove(instanceID.begin(),instanceID.end(),' '),instanceID.end());
-
-      //Create directories
-      std::string path = caseID + "/" + *name;
-      if(nocaseIDArg.isSet())
-        path = *name;
-      if(!echoID.empty())
-        path += "_" + echoID;
-      if (prefixArg.isSet())
-        path = prefixName + path;
-      milx::PrintDebug("Making Directory " + path);
-      milx::File::MakeDirectory(path);
 
       //create filename if needed
-      std::string filename = path + "/" + caseID + "_" + *name;
-      if(nocaseIDArg.isSet())
-        filename = path + "/" + *name;
-      if(!echoID.empty() && echoArg.isSet())
-        filename += "_" + echoID;
-      if(!acqID.empty() && acquisitionArg.isSet())
-        filename += "_Acq_" + acqID;
-      if(!seriesID.empty())
-        filename += "_Series_" + seriesID;
-      if(!instanceID.empty() && instanceArg.isSet())
-        filename += "_Instance_" + instanceID;
-      filename += suffixName;
-      milx::PrintDebug("Output Filename would be " + filename);
+      std::string filename = caseID + "_" + *name + suffixName;
+      if (prefixArg.isSet())
+        filename = prefixName + "_" + filename;
 
       if(operation == print) //independent operation from pixel type
       {
