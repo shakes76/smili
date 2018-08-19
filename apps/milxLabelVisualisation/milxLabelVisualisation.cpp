@@ -53,14 +53,11 @@ int main(int argc, char* argv[])
     ValueArg<std::string> labelledImageArg("l", "labels", "Labelled image to visualise", true, "seg.nii.gz", "Labels");
     ///Optional
     ValueArg<std::string> outputArg("o", "output", "Output Screenshot name", false, "screenshot.png", "Output");
-    ValueArg<std::string> saveArg("", "save", "Save the mesh generated with name. Only for non-volume output.", false, "surface.vtk", "Save");
     ValueArg<std::string> surfaceArg("s", "surface", "Surface to overlay with labelled image", false, "surface.vtk", "Surface");
     ValueArg<std::string> transformArg("t", "transform", "Transform (ITK Format) to apply to objects being rendered", false, "rigid.txt", "Transform");
     ValueArg<std::string> loadViewFileArg("", "loadviewfile", "Load saved view from file (use onscreen mode to save view files)", false, "camera.cam", "Load View File");
     ValueArg<float> aboveArg("", "above", "Add above value to thresholding of the labels. Controls max of scalar range of colourmap also.", false, 255, "Above");
     ValueArg<float> belowArg("", "below", "Add below value to thresholding of the labels. Controls min of scalar range of colourmap also.", false, 0, "Below");
-    ValueArg<float> opacityArg("", "opacity", "Set the opacity of the surface", false, 0.5, "Opacity");
-    ValueArg<float> zoomArg("", "zoom", "Zoom in on the current view by given factor.", false, 2.0, "Zoom");
     ValueArg<int> heightArg("y", "height", "Set the height of the window.", false, 600, "Height");
     ValueArg<int> widthArg("x", "width", "Set the width of the window.", false, 800, "Width");
     ValueArg<int> linearDivisionArg("", "lineardivision", "Evenly space the label values across N to get full use of colourmap.", false, 16, "Linear Division");
@@ -72,19 +69,12 @@ int main(int argc, char* argv[])
     SwitchArg loadViewArg("", "loadview", "Load saved view (use smilx or onscreen render mode to view and save with Right Click->View->Save View", false);
     SwitchArg humanArg("", "nohuman", "Disable human orientation glyph.", false);
     SwitchArg processArg("", "postprocess", "Process the resulting surfaces from labels to reduce vertices and smooth etc.", false);
-    SwitchArg oversmoothArg("", "oversmooth", "Process the resulting surfaces from labels with oversmoothing. Option is for Postprocess argument.", false);
     SwitchArg volumeArg("", "volume", "Display using volume rendering instead of marching cude iso-surfaces.", false);
     SwitchArg lineariseArg("", "linearise", "Evenly space the label values to get full use of colourmap.", false);
-    SwitchArg wireframeArg("", "wireframe", "Display surface as a wireframe model.", false);
-    SwitchArg axialArg("", "axial", "Show axial view based on position of first surface.", false);
-    SwitchArg coronalArg("", "coronal", "Show coronal view based on position of first surface.", false);
-    SwitchArg saggitalArg("", "saggital", "Show saggital view based on position of first surface.", false);
     ///Colourmaps
     SwitchArg jetArg("", "jet", "Change colourmap of the scalars to the Jet map (default)", false);
     SwitchArg vtkArg("", "vtk", "Change colourmap of the scalars to blue-red (rainbow VTK) map", false);
-    SwitchArg hsvArg("", "hsv", "Change colourmap of the scalars to blue-red (rainbow HSV) map", false);
     SwitchArg rainbowArg("", "rainbow", "Change colourmap of the scalars to the rainbow map", false);
-    SwitchArg spectralArg("", "spectral", "Change colourmap of the scalars to the spectral map", false);
     SwitchArg nihArg("", "NIH", "Change colourmap of the scalars to NIH", false);
     SwitchArg fireArg("", "NIH_FIRE", "Change colourmap of the scalars to NIH Fire", false);
     SwitchArg aalArg("", "AAL", "Change colourmap of the scalars to AAL", false);
@@ -93,14 +83,11 @@ int main(int argc, char* argv[])
     ///Add arguments
     cmd.add( labelledImageArg );
     cmd.add( outputArg );
-    cmd.add( saveArg );
     cmd.add( surfaceArg );
     cmd.add( transformArg );
     cmd.add( loadViewFileArg );
     cmd.add( aboveArg );
     cmd.add( belowArg );
-    cmd.add( opacityArg );
-    cmd.add( zoomArg );
     cmd.add( heightArg );
     cmd.add( widthArg );
     cmd.add( linearDivisionArg );
@@ -112,19 +99,12 @@ int main(int argc, char* argv[])
     cmd.add( loadViewArg );
     cmd.add( humanArg );
     cmd.add( processArg );
-    cmd.add( oversmoothArg );
     cmd.add( volumeArg );
     cmd.add( lineariseArg );
-    cmd.add( wireframeArg );
-    cmd.add( axialArg );
-    cmd.add( coronalArg );
-    cmd.add( saggitalArg );
 
     cmd.add( jetArg );
     cmd.add( vtkArg );
-    cmd.add( hsvArg );
     cmd.add( rainbowArg );
-    cmd.add( spectralArg );
     cmd.add( nihArg );
     cmd.add( fireArg );
     cmd.add( aalArg );
@@ -136,14 +116,11 @@ int main(int argc, char* argv[])
     ///Save argument values
     const std::string labelsName = labelledImageArg.getValue();
     const std::string screenName = outputArg.getValue();
-    const std::string fileName = saveArg.getValue();
     const std::string surfaceName = surfaceArg.getValue();
     const std::string transformName = transformArg.getValue();
     const std::string loadViewName = loadViewFileArg.getValue();
     const float aboveValue = aboveArg.getValue();
     const float belowValue = belowArg.getValue();
-    const float opacity = opacityArg.getValue();
-    const float zoomFactor = zoomArg.getValue();
     const int windowHeight = heightArg.getValue();
     const int windowWidth = widthArg.getValue();
     int N = linearDivisionArg.getValue();
@@ -155,7 +132,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << endl;
+            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -237,7 +214,6 @@ int main(int argc, char* argv[])
 
 if(volumeArg.isSet())
 {
-    cout << ">> Overlay: Volume Rendering" << endl;
 //    float minVolumeValue = numeric_limits<float>::max();
 //    float maxVolumeValue = numeric_limits<float>::min();
     std::vector<float> colourValuesAsFloat, opacityValuesAsFloat;
@@ -267,12 +243,8 @@ if(volumeArg.isSet())
         label->colourMapToJet(belowValue, aboveValue); //default
     if(vtkArg.isSet())
         label->colourMapToVTK(belowValue, aboveValue);
-    if(hsvArg.isSet())
-        label->colourMapToHSV(belowValue, aboveValue);
     if(rainbowArg.isSet())
         label->colourMapToRainbow(belowValue, aboveValue);
-    if(spectralArg.isSet())
-        label->colourMapToSpectral(belowValue, aboveValue);
     if(nihArg.isSet())
         label->colourMapToNIH(belowValue, aboveValue);
     if(fireArg.isSet())
@@ -293,7 +265,6 @@ if(volumeArg.isSet())
 }
 else
 {
-    cout << ">> Overlay: Isosurfacing" << endl;
     const float linearScale = (aboveValue-belowValue)/N;
     for(size_t j = 0; j < values.size(); j ++)
     {
@@ -311,11 +282,8 @@ else
             mdl->generateIsoSurface(label->GetOutput(), 0, 0.5);
         if(processArg.isSet())
         {
-            mdl->quadricDecimate(0.25);
-            if(oversmoothArg.isSet())
-                mdl->smooth(500);
-            else
-                mdl->smoothSinc(15);
+            mdl->quadricDecimate(0.5);
+            mdl->smoothSinc(15);
         }
         if(transformArg.isSet())
             mdl->SetTransform(transform);
@@ -323,22 +291,18 @@ else
 
         //Colour maps
         model->colourMapToJet(belowValue, aboveValue); //default
-        if(vtkArg.isSet())
-            model->colourMapToVTK(belowValue, aboveValue);
-        if(hsvArg.isSet())
-            model->colourMapToHSV(belowValue, aboveValue);
-        if(rainbowArg.isSet())
-            model->colourMapToRainbow(belowValue, aboveValue);
-        if(spectralArg.isSet())
-            model->colourMapToSpectral(belowValue, aboveValue);
-        if(nihArg.isSet())
-            model->colourMapToNIH(belowValue, aboveValue);
-        if(fireArg.isSet())
-            model->colourMapToNIH_Fire(belowValue, aboveValue);
-        if(aalArg.isSet())
-            model->colourMapToAAL(belowValue, aboveValue);
-        if(hotArg.isSet())
-            model->colourMapToHOT(belowValue, aboveValue);
+    if(vtkArg.isSet())
+        model->colourMapToVTK(belowValue, aboveValue);
+    if(rainbowArg.isSet())
+        model->colourMapToRainbow(belowValue, aboveValue);
+    if(nihArg.isSet())
+        model->colourMapToNIH(belowValue, aboveValue);
+    if(fireArg.isSet())
+        model->colourMapToNIH_Fire(belowValue, aboveValue);
+    if(aalArg.isSet())
+        model->colourMapToAAL(belowValue, aboveValue);
+    if(hotArg.isSet())
+        model->colourMapToHOT(belowValue, aboveValue);
 
         ///Get Colour
         double colour[3];
@@ -351,26 +315,7 @@ else
         model->AddActor(mdl->GetActor());
         isoSurfaces.push_back(mdl); //prevent deletion
     }
-    
-    if(saveArg.isSet())
-    {
-        QSharedPointer<milxQtModel> labelMesh(new milxQtModel);
-        for(size_t j = 0; j < isoSurfaces.size(); j ++)
-        {
-            vtkSmartPointer<vtkPolyData> labelPolyData = vtkSmartPointer<vtkPolyData>::New();
-            labelPolyData->DeepCopy(isoSurfaces[j].data()->GetOutput());
-            vtkSmartPointer<vtkFloatArray> labelValueArray = vtkSmartPointer<vtkFloatArray>::New();
-            labelValueArray->SetNumberOfComponents(1);
-            labelValueArray->SetNumberOfTuples(labelPolyData->GetNumberOfPoints());
-            labelValueArray->FillComponent(0, values[j]);
-            labelPolyData->GetPointData()->SetScalars(labelValueArray);
-            labelMesh->AddInput(labelPolyData);
-        }
-        labelMesh->generateModel();
-        milx::File::SaveModel(fileName, labelMesh.data()->GetOutput());
-    }
 }
-    cout << ">> Overlay: Generating Scene" << endl;
     model->generateRender();
 
     ///Overlay surface if requested
@@ -384,13 +329,9 @@ else
             exit(EXIT_FAILURE);
         }
 
-        cout << ">> Overlaying surface" << endl;
+        cout << ">> Overlaying surface" << std::endl;
         surface->setName(surfaceName.c_str());
         surface->generateModel();
-        if(wireframeArg.isSet())
-            surface->generateWireframe();
-        if(opacityArg.isSet()) //needs to be after generate Model
-            surface->SetOpacity(opacity);
 
         model->AddActor(surface->GetActor());
     }
@@ -402,23 +343,11 @@ else
         model->disableOrient();
     if(whiteArg.isSet())
         model->background(true);
-    if(axialArg.isSet())
-        model->viewToAxial();
-    if(coronalArg.isSet())
-        model->viewToCoronal();
-    if(saggitalArg.isSet())
-        model->viewToSagittal();
     if(loadViewArg.isSet())
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
-    //Zoom
-    if(zoomArg.isSet())
-    {
-        vtkCamera *camera = model->GetRenderer()->GetActiveCamera();
-        camera->Zoom(zoomFactor);
-    }
-    cout << ">> Overlay: Rendering" << endl;
+    cout << ">> Overlay: Rendering" << std::endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -427,22 +356,20 @@ else
     //Update view
     model->GetRenderWindow()->Render();
     qApp->processEvents();
-    cout << ">> Complete" << endl;
-        
-    if(!onscreenArg.isSet())
-    {
-        ///Take screenshot
-        vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
+
+    ///Take screenshot
+    vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
         windowToImage->SetInput(model->GetRenderWindow());
         windowToImage->Update();
 
-        QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
-        model->GetRenderWindow()->Render();
-        writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
+    QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
+    model->GetRenderWindow()->Render();
+    writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
+    cout << ">> Complete" << std::endl;
 
-        model->OffScreenRenderingOff(); //Required to prevent double-free
+    model->OffScreenRenderingOff(); //Required to prevent double-free
+    if(!onscreenArg.isSet())
         return EXIT_SUCCESS;
-    }
     else
         return app.exec();
 }

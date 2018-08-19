@@ -73,7 +73,7 @@ add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} $
 
 IF(VTK_QT_VERSION VERSION_GREATER "4")
   message("Qt Version: ${Qt5Widgets_VERSION}")
-  qt5_use_modules(milx-Qt Core Gui Widgets WebKitWidgets)
+  qt5_use_modules(milx-Qt Core Gui Widgets WebEngineWidgets)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 # Set the build version (VERSION) and the API version (SOVERSION)

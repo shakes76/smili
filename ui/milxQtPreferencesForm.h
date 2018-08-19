@@ -18,7 +18,9 @@
 #ifndef MILXQTPreferencesFORM_H
 #define MILXQTPreferencesFORM_H
 
+#include <QPushButton>
 #include <QSpinBox>
+#include <QLabel>
 
 #include "ui_preferences.h"
 #include "milxQtMain.h"
@@ -36,36 +38,65 @@ class MILXQT_EXPORT milxQtPreferencesForm : public QDialog
 public:
     milxQtPreferencesForm(milxQtMain *theParent = 0);
     virtual ~milxQtPreferencesForm();
-
-    void setupPages();
+	QString currentTheme();
+	void addTheme(QString themeName);
+	void removeTheme(QString themeName);
+	bool isTheme(QString themeName);
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
-    void accept();
+	void changeTheme(int themeIndex);
+	void editTheme();
+	void newTheme();
+	void accept();
 
 protected:
     Ui::dlgPreferences ui;
 
     //Options
-    //General
-    QCheckBox *backgroundCheckBox;
-    QCheckBox *humanCheckBox;
-    QSpinBox *windowSizeEdit;
+    //Application
+	QSpinBox *windowSizeEdit;
     QSpinBox *processorsEdit;
     QSpinBox *magnifyEdit;
     QCheckBox *timestampCheckBox;
-	QPushButton *resetButton;
+	QComboBox *themeList;
+	QPushButton *editThemeButton;
+	QPushButton *newThemeButton;
+	//View
+	QCheckBox *backgroundCheckBox;
+	QCheckBox *humanCheckBox;
     //Imaging
     QCheckBox *interpolationCheckBox;
     QCheckBox *orientationCheckBox;
     //Models
     QCheckBox *interpolationModelCheckBox;
     QCheckBox *scalarBarCheckBox;
+	QCheckBox *colourMapCheckBox;
+	QPushButton *editColourMapButton;
+	QPushButton *newColourMapButton;
     //Plugins
+	QLabel *noPluginMsg;
 
+	// The main window
     milxQtMain *MainWindow;
 
-    void createConnections();
+	/*!
+		\fn
+		\brief
+	*/
+	void setupPrefs();
+
+	/*!
+		\fn
+		\brief
+	*/
+	void loadCustomThemes();
+
+	/*!
+		\fn
+		\brief
+	*/
+	void createConnections();
 };
 
 #endif // MILXQTPreferencesFORM_H

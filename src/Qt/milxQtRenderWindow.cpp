@@ -488,7 +488,6 @@ void milxQtRenderWindow::viewToZYPlane()
 
 void milxQtRenderWindow::setView(int viewMode)
 {
-    printDebug("Changing view to " + QString::number(viewMode));
     if(viewMode == SAGITTAL) //sagittal
         viewToSagittal();
     else if(viewMode == CORONAL) //coronal
@@ -1017,7 +1016,7 @@ void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
         range[1] = maxRange;
     }
 
-    milx::ColourMap *colours = new milx::ColourMap;
+	milx::ColourMap *colours = new milx::ColourMap;
     colours->toSeismic();
     colours->SetRange(range);
 
@@ -1569,7 +1568,7 @@ bool milxQtRenderWindow::openModelUsingQt(const QString filename, vtkSmartPointe
             float normal[3];
             inFile >> normal[0] >> normal[1] >> normal[2];
 //            qDebug() << normal[0] << "," << normal[1] << "," << normal[2];
-            normals->InsertNextTupleValue(normal);
+            normals->InsertNextTuple(normal);
         }
         else if(lineType == "f") //faces/cells
         {

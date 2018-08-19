@@ -1,21 +1,35 @@
+###########################
+# DICOM PLUGIN CMAKE FILE #
+###########################
+cmake_minimum_required(VERSION 3.2.0)
+
+PROJECT(DICOMPlugin CXX)
+cmake_policy(SET CMP0053 NEW)
+cmake_policy(SET CMP0020 NEW)
+
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-cmake_minimum_required(VERSION 2.6)
-
-PROJECT(DICOMPlugin CXX)
-
+##################
+# Find libraries #
+##################
 include(find)
 
 if("${ITK_VERSION_MAJOR}" LESS 4)
     message("DICOM Plugin requires ITK 4 or above for DICOM RT support. Disabling structure set support.")
 endif("${ITK_VERSION_MAJOR}" LESS 4)
 
+FIND_PACKAGE(Qt5 REQUIRED Widgets WebEngineWidgets)
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
-# Add Headers into List
+#########################
+# Add Headers into List #
+#########################
 file(GLOB SMILI_HEADERS ${SMILI_DIR}/include/*.h)
 
+################################
+# Include and link directories #
+################################
 include_directories (${MILXQT_INCLUDE_DIRS})
 link_directories(${SMILI_BINARY_DIR}/lib)
 
@@ -36,9 +50,15 @@ ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   QT4_WRAP_CPP(SSM_MOCS milxQtDICOMPlugin.h)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
+###################################
+# Add and link external libraries #
+###################################
 ADD_LIBRARY(DICOMPlugin SHARED milxQtDICOMPlugin.cpp ${SSM_MOCS})
-TARGET_LINK_LIBRARIES(DICOMPlugin milx-SMILI milx-Qt ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(DICOMPlugin milx-SMILI milx-Qt Qt5::Widgets Qt5::WebEngineWidgets)
 
+##########################
+# Install the executable #
+##########################
 install(TARGETS DICOMPlugin
         DESTINATION "plugins"
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
