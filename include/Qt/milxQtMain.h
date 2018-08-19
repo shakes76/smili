@@ -1042,7 +1042,8 @@ protected:
     bool orientationImages; //!< Prefer applying orientation to images?
     bool interpolationModels; //!< Prefer applying interpolation to models?
     bool scalarBarModels; //!< Show scalar bar for models?
-	  bool enableColourMaps = true; //!< Enable custom colour maps
+	bool resettingInterface; //!< Flag if reseting interface, ignore write settings on close
+	bool enableColourMaps = true; //!< Enable custom colour maps
 
     enum { MaxRecentFiles = 10 };
     //Menus (hierarchical deletion)
