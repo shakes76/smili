@@ -7,7 +7,7 @@ The Simple Medical Imaging Library Interface (SMILI), pronounced 'smilie', is a 
 ```
 Chandra, S. S.; Dowling, J. A.; Engstrom, C.; Paproki, A.; Neubert, A.; Xia, Y.; Rivest-Hénault, D.; Shen, K.-K.; Salvado, O.; Crozier, S. & Fripp, J.
 "A simple framework for the rapid development of biomedical imaging applications"
-Computer Methods and Programs in Biomedicine, 2018.
+Computer Methods and Programs in Biomedicine, vol. 164, pp. 193–205, 2018.
 ```
 
 DOI: https://doi.org/10.1016/j.cmpb.2018.07.011
