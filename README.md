@@ -2,10 +2,18 @@
 
 ![sMILX Screenshot](resources/screenies/smili3.png)
 
-## Introduction
-The Simple Medical Imaging Library Interface (SMILI) is a light weight medical imaging library for image and model/surface processing and visualisation.
+The Simple Medical Imaging Library Interface (SMILI), pronounced 'smilie', is a light weight framework for the rapid development of biomedical imaging applications. Please cite our SMILI publication if you find this project useful:
 
-Built around Qt, ITK and VTK, it is divided into three main parts:
+```
+Chandra, S. S.; Dowling, J. A.; Engstrom, C.; Paproki, A.; Neubert, A.; Xia, Y.; Rivest-Hénault, D.; Shen, K.-K.; Salvado, O.; Crozier, S. & Fripp, J.
+"A simple framework for the rapid development of biomedical imaging applications"
+Computer Methods and Programs in Biomedicine, 2018.
+```
+
+DOI: https://doi.org/10.1016/j.cmpb.2018.07.011
+
+## Introduction
+SMILI is built around Qt, [ITK](https://itk.org/) and [VTK](https://www.vtk.org/), it is divided into three main parts:
 
  * the sMILX user interface application for medical imaging with just a few mouse clicks.
  * a user-interface dependent library for writing and using easy to use medical imaging applications.
@@ -62,6 +70,9 @@ You will need to use ITK 3.20 and VTK 5.8 or VK 5.10.1
 All aspects of sMILX can be scripted using the python plugin. Example scripts for sMILX can be found in scripts/ directory with the prefix 'smilx_'. Additional modules for filenames from directories etc. are also in the scripts/ directory.
 
 Applications like milxOverlay can also be run as a batch job. All batch scripts for apps can be found in the scripts/ directory with the prefix 'batch_'. The scripts using the multi-processing module wrapped conveniently in the batch module found in the scripts/ directory.
+
+## Qt 5 Support
+The latest changes for supporting Qt 5 is provided for in the [topic-qt5](https://github.com/shakes76/smili/tree/topic-qt5) branch.
 
 ### Appendix A - VTK MODULAR
 SMILI needs
