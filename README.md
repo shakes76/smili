@@ -10,7 +10,7 @@ Chandra, S. S.; Dowling, J. A.; Engstrom, C.; Paproki, A.; Neubert, A.; Xia, Y.;
 Computer Methods and Programs in Biomedicine, vol. 164, pp. 193–205, 2018.
 ```
 
-DOI: https://doi.org/10.1016/j.cmpb.2018.07.011
+DOI: <https://doi.org/10.1016/j.cmpb.2018.07.011>
 
 ## Introduction
 SMILI is built around Qt, [ITK](https://itk.org/) and [VTK](https://www.vtk.org/), it is divided into three main parts:
@@ -35,6 +35,9 @@ Similar syntax is available to the sMILX Python plugin, which has a Python conso
 
 ## Prerequisites 
 ITK 3.20+ and VTK 5.8+ built and installed. SMILX also requires Qt 4 and CMake to build. SMILI can function with either ITK or VTK installed and will detect each library.
+
+Downloads of pre-requisite libraries and other helpful files can be found [here](https://sourceforge.net/projects/smili-project/files/Dependencies/).
+
 To utilise just the imaging parts of SMILI, you just need ITK. To utilise the surface/model parts of SMILI you just need VTK. To utilise the GUI dependent parts you need both libraries.
 
 On Ubuntu linux systems (12.04+), simply install the repository version of Qt, VTK (with VTK-Qt), PythonQt (to build the Python plugin) and ITK. We reccomend ITK 4.5 and VTK 6.1 and not VTK 5.10.1 which seems to have a number of features broken.
