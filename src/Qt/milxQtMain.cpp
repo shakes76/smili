@@ -203,11 +203,11 @@ QString milxQtMain::activeNamePrefix()
             milxQtRenderWindow *childRnd = activeRender(); ///Check for image validity already done so safely do...
             return childRnd->strippedNamePrefix();
         }
-        else if(isActiveWebView())
+        /*else if(isActiveWebView())
         {
             QWebView *webViewer = activeWebView(); ///Check for image validity already done so safely do...
             return webViewer->windowTitle();
-        }
+        }*/
         else
             return "Unrecognised Display";
     }
@@ -392,7 +392,7 @@ milxQtUnifiedWindow* milxQtMain::activeUnifiedWindow()
     return 0;
 }
 
-bool milxQtMain::isActiveWebView()
+/*bool milxQtMain::isActiveWebView()
 {
     if(activeWebView() == 0)
         return false;
@@ -405,7 +405,7 @@ QWebView* milxQtMain::activeWebView()
     if(QWidget *activeWin = qobject_cast<QWorkspace *>(workspaces->currentWidget())->activeWindow())
         return qobject_cast<QWebView *>(activeWin);
     return 0;
-}
+}*/
 
 void milxQtMain::setActiveWindow(QWidget *currentWindow)
 {
@@ -988,9 +988,9 @@ void milxQtMain::tileTabHorizontally()
 
 void milxQtMain::helpContents()
 {
-    printDebug("Showing Help browser");
+    printError("Help browser disabled Ubuntu 18.04");
 
-    QFile file(":/resources/smilx_doc/home.html");
+    /*QFile file(":/resources/smilx_doc/home.html");
     QWebView *view = new QWebView(this);
     if(file.open(QIODevice::ReadOnly))
       view->setHtml(file.readAll());
@@ -1003,7 +1003,7 @@ void milxQtMain::helpContents()
     toolBar->addAction(view->pageAction(QWebPage::Back));
     toolBar->addAction(view->pageAction(QWebPage::Forward));
     toolBar->addAction(view->pageAction(QWebPage::Reload));
-    toolBar->addAction(view->pageAction(QWebPage::Stop));
+    toolBar->addAction(view->pageAction(QWebPage::Stop));*/
 }
 
 void milxQtMain::preferences()

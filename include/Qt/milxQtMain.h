@@ -23,7 +23,7 @@
 #include <QTabWidget>
 #include <QWorkspace>
 #include <QList>
-#include <QWebView>
+//#include <QWebView>
 //VTK
 #include <vtkEventQtSlotConnect.h>
 //Displays
@@ -271,12 +271,12 @@ public slots:
         \fn milxQtMain::isActiveWebView()
         \brief Returns true if active window is a web viewer
     */
-    bool isActiveWebView();
+    //bool isActiveWebView();
     /*!
         \fn milxQtMain::activeWebView()
         \brief Returns the QWebView object, returns 0 if active window is not a QWebView object
     */
-    QWebView* activeWebView();
+    //QWebView* activeWebView();
     /*!
         \fn milxQtMain::setActiveWindow(QWidget *window)
         \brief Makes the window the active window.
