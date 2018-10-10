@@ -8,7 +8,11 @@ PROJECT(vtk-ext)
 
 # Add Sources
 #set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3 vtkAreaSimplificationMetric)
-set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3)
+IF(VTK_MAJOR_VERSION VERSION_GREATER "6")
+  set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3 vtkTensor)
+ELSE(VTK_MAJOR_VERSION VERSION_GREATER "5")
+  set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3)
+ENDIF(VTK_MAJOR_VERSION VERSION_GREATER "5")
 set(VTK_EXT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(VTK_EXT_BINARY_DIR ${PROJECT_BINARY_DIR})
 # Add Headers into List
@@ -17,9 +21,10 @@ file(GLOB VTK_EXT_HEADERS_TEMPLATES ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.txx)
 file(GLOB VTK_EXT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
 
 #Win32 requirement for VTK classes in DLLs
-IF(VTK_MAJOR_VERSION VERSION_GREATER "5")
+IF(VTK_MAJOR_VERSION VERSION_GREATER "6")
   add_definitions (-DvtkInteractionStyle_EXPORTS)
   add_definitions (-DvtkRenderingImage_EXPORTS)
+  add_definitions (-DvtkCommonDataModel_EXPORTS)
 ELSE(VTK_MAJOR_VERSION VERSION_GREATER "5")
   add_definitions (-DvtkRendering_EXPORTS)
   add_definitions (-DvtkHybrid_EXPORTS)
