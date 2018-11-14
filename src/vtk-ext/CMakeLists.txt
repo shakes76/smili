@@ -22,13 +22,14 @@ file(GLOB VTK_EXT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
 
 #Win32 requirement for VTK classes in DLLs
 IF(VTK_MAJOR_VERSION VERSION_GREATER "6")
+  add_definitions (-DvtkCommonDataModel_EXPORTS)
+ELSEIF(VTK_MAJOR_VERSION VERSION_GREATER "5")
   add_definitions (-DvtkInteractionStyle_EXPORTS)
   add_definitions (-DvtkRenderingImage_EXPORTS)
-  add_definitions (-DvtkCommonDataModel_EXPORTS)
-ELSE(VTK_MAJOR_VERSION VERSION_GREATER "6")
+ELSE()
   add_definitions (-DvtkRendering_EXPORTS)
   add_definitions (-DvtkHybrid_EXPORTS)
-ENDIF(VTK_MAJOR_VERSION VERSION_GREATER "6")
+ENDIF()
 
 include_directories (${LIBRARY_INCLUDE_PATH}/vtk-ext)
 link_directories(${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
