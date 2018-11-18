@@ -2,6 +2,12 @@
 
 ![sMILX Screenshot](resources/screenies/smili3.png)
 
+<dl>
+  <a href="https://twitter.com/shakes76"> <img src="https://smili-project.sourceforge.io/images/Twitter_logo_blue.png" alt="Twitter" height="32" width="39"></a>  
+  <a href="https://www.facebook.com/smiliproject"><img src="https://smili-project.sourceforge.io/images/FB-f-Logo__blue_58.png" alt="Facebook" height="32" width="32"></a> 
+  <a href="https://github.com/shakes76/smili"><img src="https://smili-project.sourceforge.io/images/GitHub-Mark.png" alt="GitHub" height="32" width="32"></a>  <a href="https://www.youtube.com/channel/UCD-hU6IF2qGlz7roexAUj1Q"><img alt="YouTube Channel" src="https://smili-project.sourceforge.io/images/YouTube-icon-full_color.png" height="32" width="42"></a>
+</dl>
+
 The Simple Medical Imaging Library Interface (SMILI), pronounced 'smilie', is a light weight framework for the rapid development of biomedical imaging applications. Please cite our SMILI publication if you find this project useful:
 
 ```
@@ -12,10 +18,14 @@ Computer Methods and Programs in Biomedicine, vol. 164, pp. 193–205, 2018.
 
 DOI: <https://doi.org/10.1016/j.cmpb.2018.07.011>
 
+## Quick Start
+![Drag n Drop](https://smili-project.sourceforge.io/images/gifs/overlay.gif)
+Have a look at the [Quick Start page](https://smili-project.sourceforge.io/getting_started.html) on the [SMILI homepage](https://smili-project.sourceforge.io/), as well as the [SMILI YouTube channel](https://www.youtube.com/channel/UCD-hU6IF2qGlz7roexAUj1Q) for tutorial videos.
+
 ## Introduction
 SMILI is built around Qt, [ITK](https://itk.org/) and [VTK](https://www.vtk.org/), it is divided into three main parts:
 
- * the sMILX user interface application for medical imaging with just a few mouse clicks.
+ * the sMILX user interface application for medical imaging and image processing with just a few mouse clicks.
  * a user-interface dependent library for writing and using easy to use medical imaging applications.
  * a user-interface indepdendent library, so that it easily utilised in your own command line applications. This level can directly interfaces with ITK and VTK.
 
