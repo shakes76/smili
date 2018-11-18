@@ -19,7 +19,9 @@ Computer Methods and Programs in Biomedicine, vol. 164, pp. 193–205, 2018.
 DOI: <https://doi.org/10.1016/j.cmpb.2018.07.011>
 
 ## Quick Start
-![Drag n Drop](https://smili-project.sourceforge.io/images/gifs/overlay.gif)
+![Drag n Drop 1](https://smili-project.sourceforge.io/images/gifs/overlay.gif)
+![Drag n Drop 2](https://smili-project.sourceforge.io/images/gifs/label_overlay.gif)
+
 Have a look at the [Quick Start page](https://smili-project.sourceforge.io/getting_started.html) on the [SMILI homepage](https://smili-project.sourceforge.io/), as well as the [SMILI YouTube channel](https://www.youtube.com/channel/UCD-hU6IF2qGlz7roexAUj1Q) for tutorial videos.
 
 ## Introduction
