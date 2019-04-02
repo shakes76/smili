@@ -284,7 +284,8 @@ void milxQtPreferencesForm::changeTheme(int themeIndex)
 void milxQtPreferencesForm::editTheme()
 {
 	// Open the Theme Editor Form to change the theme
-	milxQtThemeEditorForm themeEditorForm(this, MainWindow, &themeList->currentText(), true);
+    QString themeText = themeList->currentText();
+	milxQtThemeEditorForm themeEditorForm(this, MainWindow, &themeText, true);
 	themeEditorForm.exec();
 }
 
