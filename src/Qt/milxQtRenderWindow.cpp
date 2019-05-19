@@ -1563,7 +1563,11 @@ bool milxQtRenderWindow::openModelUsingQt(const QString filename, vtkSmartPointe
             float normal[3];
             inFile >> normal[0] >> normal[1] >> normal[2];
 //            qDebug() << normal[0] << "," << normal[1] << "," << normal[2];
-            normals->InsertNextTupleValue(normal);
+		#if VTK_MAJOR_VERSION > 7
+			normals->InsertNextTypedTuple(normal); //InsertNextTypedTuple
+		#else
+			normals->InsertNextTupleValue(normal); //InsertNextTypedTuple
+		#endif
         }
         else if(lineType == "f") //faces/cells
         {
@@ -2071,7 +2075,7 @@ void milxQtRenderWindow::setupHumanGlyph(vtkSmartPointer<vtkMatrix4x4> mat)
             transformer->Update();
 
         vtkSmartPointer<vtkPolyDataNormals> normalsHuman = vtkSmartPointer<vtkPolyDataNormals>::New();
-            #if VTK_MAJOR_VERSION <= 5
+        #if VTK_MAJOR_VERSION <= 5
             normalsHuman->SetInput(transformer->GetOutput());
         #else
             normalsHuman->SetInputData(transformer->GetOutput());
