@@ -20,7 +20,7 @@ limitations under the License.
 #include <cstdlib>
 #include <iostream>
 #include <QLineEdit>
-#include <QscrollArea>
+#include <QScrollArea>
 
 milxQtThemeEditorForm::milxQtThemeEditorForm(milxQtPreferencesForm *theParent, milxQtMain *mainWindow, QString *themeName, bool isEdit) : QDialog(theParent)
 {

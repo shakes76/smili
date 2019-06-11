@@ -378,6 +378,7 @@ class MILXQT_PLUGIN_EXPORT milxQtDICOMPluginFactory: public QObject, public milx
 {
     Q_OBJECT
     Q_INTERFACES(milxQtPluginFactory)
+    Q_PLUGIN_METADATA(IID "milxQt.Plugins.milxQtDICOMPluginFactory/1.0" FILE "milxQtDICOMPlugin.json")
 
 public:
     milxQtPluginInterface* newPlugin(QObject *theParent = 0)
