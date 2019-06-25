@@ -21,6 +21,12 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
+#if (QT_VERSION > 4)
+    #include <QtPlugin>
+#else
+    #include <qplugin.h>
+#endif
+
 //VTK
 #include <vtkPolyDataCollection.h>
 

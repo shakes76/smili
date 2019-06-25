@@ -17,8 +17,6 @@
 =========================================================================*/
 #include "milxQtDICOMPlugin.h"
 
-#include <qplugin.h>
-
 //Image typedefs
 typedef unsigned char charPixelType;
 typedef itk::Image<charPixelType, milx::imgDimension> charImageType;
