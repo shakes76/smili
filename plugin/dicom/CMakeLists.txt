@@ -59,6 +59,8 @@ TARGET_LINK_LIBRARIES(DICOMPlugin milx-SMILI milx-Qt Qt5::Widgets Qt5::WebEngine
 ##########################
 # Install the executable #
 ##########################
-install(TARGETS DICOMPlugin
-        DESTINATION "plugins"
-        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+if(NOT APPLE)
+	install(TARGETS DICOMPlugin
+	        DESTINATION "plugins"
+	        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+endif()

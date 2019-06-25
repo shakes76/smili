@@ -91,6 +91,13 @@ ENDIF("${VTK_MAJOR_VERSION}" LESS 6)
 
 TARGET_LINK_LIBRARIES(milx-Qt milx-SMILI vtk-ext ${VTK_LIBRARIES} ${VTK_QT_LIBRARIES} ${QT_LIBRARIES} ${ITK_LIBRARIES} ${ITK_REVIEW_LIBRARIES} ${ZLIB_LIBRARIES})
 
+if(CMAKE_STRIP)
+  if(APPLE)
+    add_custom_command(TARGET milx-Qt POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-Qt>)
+    #add_custom_command(TARGET milx-SMILI POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-SMILI>)
+  endif()
+endif()
+
 # Installation of the Library
 # Installs the header files
 install(FILES ${MILXQT_HEADERS} ${MILXQT_HEADERS_TEMPLATES} DESTINATION "include")

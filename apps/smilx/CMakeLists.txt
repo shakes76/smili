@@ -180,77 +180,89 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
         #SET(CPACK_BUNDLE_PLIST "${PROJECT_SOURCE_DIR}/Info-CMake.plist")
         SET(CPACK_BUNDLE_ICON ${SMILX_ICON_FILE})
     
-        # Set the OS X Bundle specific CMake variables which will be used to populate the plist for
-        # the application bundle
-        ConfigureMacOSXBundlePlist(${PROJECT_NAME} "" ${PROJECT_SOURCE_DIR} ${SMILX_VERSION_STRING})
+    # Set the OS X Bundle specific CMake variables which will be used to populate the plist for
+    # the application bundle
+    ConfigureMacOSXBundlePlist(${PROJECT_NAME} "" ${PROJECT_SOURCE_DIR} ${SMILX_VERSION_STRING})
 
-        # Make sure we can find the 'ibtool' program. If we can NOT find it we
-        # skip generation of this project
-        # find_program(IBTOOL ibtool HINTS "/usr/bin" "${OSX_DEVELOPER_ROOT}/usr/bin")
-        # if (${IBTOOL} STREQUAL "IBTOOL-NOTFOUND")
-        #   message(SEND_ERROR "ibtool can not be found and is needed to compile the .xib files. It should have been installed with the Apple developer tools. The default system paths were searched in addition to ${OSX_DEVELOPER_ROOT}/usr/bin")
-        # endif()
+    # Make sure we can find the 'ibtool' program. If we can NOT find it we
+    # skip generation of this project
+    # find_program(IBTOOL ibtool HINTS "/usr/bin" "${OSX_DEVELOPER_ROOT}/usr/bin")
+    # if (${IBTOOL} STREQUAL "IBTOOL-NOTFOUND")
+    #   message(SEND_ERROR "ibtool can not be found and is needed to compile the .xib files. It should have been installed with the Apple developer tools. The default system paths were searched in addition to ${OSX_DEVELOPER_ROOT}/usr/bin")
+    # endif()
 
-        # Make sure the 'Resources' Directory is correctly created before we build
-        # add_custom_command (TARGET smilx PRE_BUILD COMMAND mkdir -p ${EXECUTABLE_OUTPUT_PATH}/\${CONFIGURATION}/smilx.app/Contents/Resources)
+    # Make sure the 'Resources' Directory is correctly created before we build
+    # add_custom_command (TARGET smilx PRE_BUILD COMMAND mkdir -p ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents/Resources)
 
-        IF(BUILD_PLUGINS)
-            message("Plugin Directory is ${SMILI_PLUGINS_PATH}")
-            INSTALL(DIRECTORY ${SMILI_PLUGINS_PATH} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/\${CONFIGURATION}/smilx.app/Contents COMPONENT Runtime)
-        ENDIF(BUILD_PLUGINS)
+    IF(BUILD_PLUGINS)
+        message("Plugin Directory is ${SMILI_PLUGINS_PATH}")
+        INSTALL(DIRECTORY ${SMILI_PLUGINS_PATH} DESTINATION ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents COMPONENT Runtime)
+        #message("Plugin Install Directory is ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents")
+    ENDIF(BUILD_PLUGINS)
 
-        set(CMAKE_INSTALL_PREFIX "")
-        SET(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-        set(CPACK_GENERATOR DragNDrop)
-        #set(CPACK_GENERATOR DragNDrop; PackageMaker)
-        set(CPACK_DMG_FORMAT "UDBZ")
-        set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}")
-        set(CPACK_SYSTEM_NAME "OSX")
+    set(CMAKE_INSTALL_PREFIX "")
+    SET(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+    set(CPACK_GENERATOR DragNDrop)
+    #set(CPACK_GENERATOR DragNDrop; PackageMaker)
+    set(CPACK_DMG_FORMAT "UDBZ")
+    set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}")
+    set(CPACK_SYSTEM_NAME "OSX")
 
-        # Pull out other dependencies
-        SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)    
+    #Pull out other dependencies
+    SET(LIBRARY_DIRS ${LIBRARY_OUTPUT_PATH};${SMILI_PLUGINS_PATH};${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)    
 
-        IF(CPACK_BINARY_PACKAGEMAKER) #Package Maker 
-            set(CMAKE_INSTALL_PREFIX "/Applications") 
-            # install(CODE "
-            # file(GLOB_RECURSE PLUGINS
-            #   \"\${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-            # set(BU_CHMOD_BUNDLE_ITEMS ON)
-            # include(BundleUtilities)
-            # fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
-            # " COMPONENT Runtime)
-      # ELSE(CPACK_BINARY_PACKAGEMAKER)
-            # Install VTK files 
-            # FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-            # INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
-            # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+    IF(CPACK_BINARY_PACKAGEMAKER) #Package Maker 
+      set(CMAKE_INSTALL_PREFIX "/Applications") 
+      # install(CODE "
+      # file(GLOB_RECURSE PLUGINS
+      #   \"\${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+      # set(BU_CHMOD_BUNDLE_ITEMS ON)
+      # include(BundleUtilities)
+      # fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
+      # " COMPONENT Runtime)
+    # ELSE(CPACK_BINARY_PACKAGEMAKER)
+      # Install VTK files 
+      # FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      # INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
+      # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
       
             #install Qt files
             # FILE(GLOB qtFiles_QtCore "${QT_LIBRARY_DIR}/QtCore.framework/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
             # INSTALL(FILES ${qtFiles_QtCore} DESTINATION lib COMPONENT Runtime
             # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
       
-            #SET(CPACK_GENERATOR Bundle)
-        ENDIF(CPACK_BINARY_PACKAGEMAKER) # Package Maker
+      #SET(CPACK_GENERATOR Bundle)
+    ENDIF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
 
-        include(DeployQt4)
-        set(EXECUTABLE "${PROJECT_NAME}.app")
-        FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-        install_qt4_executable("${EXECUTABLE}" "${PLUGINS} qsqlite" "" ${LIBRARY_DIRS})
+    include(DeployQt4)
+    set(EXECUTABLE "${PROJECT_NAME}.app")
+    FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    #INSTALL_QT4_PLUGIN_PATH("${PLUGINS}" "${EXECUTABLE}" FALSE ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents ${SMILI_PLUGINS_PATH})
+    INSTALL_QT4_PLUGIN("${PLUGINS}" "${EXECUTABLE}" FALSE SMILI_PLUGINS_INSTALL_PATH plugins)
+    #FILE(GLOB INSTALLED_PLUGINS "${SMILI_PLUGINS_INSTALL_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    INSTALL_QT4_EXECUTABLE("${EXECUTABLE}" "${PLUGINS} qsqlite" "${SMILI_PLUGINS_INSTALL_PATH}" ${LIBRARY_DIRS} plugins)
+    MESSAGE("Plugins to be Installed: ${SMILI_PLUGINS_INSTALL_PATH}")
 
-    ELSE(APPLE) #UNIX etc.
-        set(_add_executable_param UNIX)
+  ELSE(APPLE) #UNIX etc.
+    set(_add_executable_param UNIX)
 
-        # Install all necessary libraries
-        install(FILES ${MILXQT_LIBS} DESTINATION lib
-        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    #Install all necessary libraries
+    install(FILES ${MILXQT_LIBS} DESTINATION lib
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
-        # Install Python QT libraries if built
-        IF(BUILD_PYTHON_PLUGIN)
-            file(GLOB PYTHONQT_LIBS "${PYTHONQT_DIR}/lib/*PythonQt*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-            install(FILES ${PYTHONQT_LIBS} DESTINATION lib
-            PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-        ENDIF(BUILD_PYTHON_PLUGIN)
+    #Install Python QT libraries if built
+    IF(BUILD_PYTHON_PLUGIN)
+      file(GLOB PYTHONQT_LIBS "${PYTHONQT_DIR}/lib/*PythonQt*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      install(FILES ${PYTHONQT_LIBS} DESTINATION lib
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    ENDIF(BUILD_PYTHON_PLUGIN)
+    
+    #Install MSK libraries if built
+    IF(BUILD_SSM_PLUGIN)
+      FILE(GLOB MSKFiles "${MILXQT_INSTALL_BINARY_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      install(FILES ${MSKFiles} DESTINATION lib
+      PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    ENDIF(BUILD_SSM_PLUGIN)
     
         # Install MSK libraries if built
         IF(BUILD_SSM_PLUGIN)
