@@ -20,22 +20,6 @@ IF (WIN32)
     SET (QT_USE_QTMAIN TRUE)
 ENDIF (WIN32)
 
-#--------------------------------------------------------------------------------
-# this command finds Qt4 libraries and sets all required variables
-# note that it's Qt4, not QT4 or qt4
-#detect Qt version (depends on VTK-Qt)
-#VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt5Widgets REQUIRED QUIET)
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
-  add_definitions(${Qt5Widgets_DEFINITIONS})
-  qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
-ELSE(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-  INCLUDE(${QT_USE_FILE})
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
-
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX

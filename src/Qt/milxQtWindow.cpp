@@ -18,6 +18,9 @@
 #include "milxQtWindow.h"
 
 #include <QFileDialog>
+#include <QMenu>
+#include <QInputDialog>
+#include <QLineEdit>
 ///VTK Includes
 #include <vtkRenderWindow.h>
 
@@ -100,7 +103,7 @@ void milxQtWindow::printError(QString msg)
     if(consoleAssigned)
         console->printError(msg);
     else
-        cerr << "ERROR: " << msg.toStdString() << endl;
+        cerr << "ERROR: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printWarning(QString msg)
@@ -111,7 +114,7 @@ void milxQtWindow::printWarning(QString msg)
     if(consoleAssigned)
         console->printWarning(msg);
     else
-        cerr << "Warning: " << msg.toStdString() << endl;
+        cerr << "Warning: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printDebug(QString msg)
@@ -122,7 +125,7 @@ void milxQtWindow::printDebug(QString msg)
     if(consoleAssigned)
         console->printDebug(msg);
     else
-        cerr << "Debug: " << msg.toStdString() << endl;
+        cerr << "Debug: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printInfo(QString msg)
@@ -133,5 +136,5 @@ void milxQtWindow::printInfo(QString msg)
     if(consoleAssigned)
         console->printInfo(msg);
     else
-        cerr << msg.toStdString() << endl;
+        cerr << msg.toStdString() << std::endl;
 }

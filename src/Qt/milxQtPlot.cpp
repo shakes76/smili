@@ -17,6 +17,11 @@
 =========================================================================*/
 #include "milxQtPlot.h"
 
+#include <QMenu>
+#include <QDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+
 #include <vtkContextView.h>
 #include <vtkPlotPoints.h>
 #include <vtkContextScene.h>
@@ -71,7 +76,7 @@ milxQtPlot::~milxQtPlot()
 
 void milxQtPlot::createMenu(QMenu *menu)
 {
-    cout << "Creating Plot Menu 1" << endl;
+    cout << "Creating Plot Menu 1" << std::endl;
     if(!menu)
         return;
 
@@ -79,7 +84,7 @@ void milxQtPlot::createMenu(QMenu *menu)
     if(plotTypeSurface || plotType3D)
         menu->addMenu(milxQtModel::basicContextMenu()); ///Have all the basic model options
 
-    cout << "Creating Plot Menu 2" << endl;
+    cout << "Creating Plot Menu 2" << std::endl;
     if(plotTypeVolume)
     {
       foreach(QAction *currAct, actionsToAdd)
@@ -169,7 +174,7 @@ void milxQtPlot::generatePlot()
 
     if(table->GetNumberOfColumns() == 1) //bar chart
     {
-        cerr << "One column is not supported yet." << endl;
+        cerr << "One column is not supported yet." << std::endl;
     }
     else if(table->GetNumberOfColumns() == 2) //2D scatter
     {
@@ -493,15 +498,7 @@ void milxQtPlot::volumePlot(vtkSmartPointer<vtkImageData> img, const bool eightb
     else
         volumeMapper->SetInterpolationModeToLinear();
         volumeMapper->SetRequestedRenderModeToDefault(); //choose best automatically
-    #if !defined(VTK_LEGACY_REMOVE) && (VTK_MAJOR_VERSION <= 5 || (VTK_MAJOR_VERSION == 6 && VTK_MINOR_VERSION <= 2))
-        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
-    #else // VTK_LEGACY_REMOVE
-        if(milxQtRenderWindow::GetRenderWindow()->IsDirect() && milxQtRenderWindow::GetRenderWindow()->SupportsOpenGL()) //if hardware accelleration present
-        {
-            printDebug("Requesting GPU Volume Rendering");
-            volumeMapper->SetRequestedRenderModeToGPU();
-        }
-    #endif
+//        volumeMapper->SetRequestedRenderModeToRayCastAndTexture();
 //        volumeMapper->SetRequestedRenderModeToRayCast();
         linkProgressEventOf(volumeMapper);
 
@@ -912,23 +909,23 @@ void milxQtPlot::createActions()
 {
     //axes
     xAxisName = new QAction(this);
-    xAxisName->setText(QApplication::translate("Plot", "Rename &Axes", 0, QApplication::UnicodeUTF8));
+    xAxisName->setText(tr("Rename &Axes", 0));
     xAxisName->setShortcut(tr("Alt+x"));
     titleName = new QAction(this);
-    titleName->setText(QApplication::translate("Plot", "Rename &Title", 0, QApplication::UnicodeUTF8));
+    titleName->setText(tr("Rename &Title", 0));
     titleName->setShortcut(tr("Alt+t"));
     legendAct = new QAction(this);
-    legendAct->setText(QApplication::translate("Plot", "Legend", 0, QApplication::UnicodeUTF8));
+    legendAct->setText(tr("Legend", 0));
     legendAct->setShortcut(tr("Alt+l"));
     legendAct->setCheckable(true);
     legendAct->setChecked(true);
     pointsAct = new QAction(this);
-    pointsAct->setText(QApplication::translate("Plot", "Show Points", 0, QApplication::UnicodeUTF8));
+    pointsAct->setText(tr("Show Points", 0));
     pointsAct->setShortcut(tr("Shift+Alt+l"));
     pointsAct->setCheckable(true);
     pointsAct->setChecked(true);
     logScaleAct = new QAction(this);
-    logScaleAct->setText(QApplication::translate("Plot", "Log Scale", 0, QApplication::UnicodeUTF8));
+    logScaleAct->setText(tr("Log Scale", 0));
     logScaleAct->setShortcut(tr("Alt+s"));
     logScaleAct->setCheckable(true);
     logScaleAct->setChecked(false);
@@ -950,7 +947,7 @@ void milxQtPlot::createConnections()
 void milxQtPlot::contextMenuEvent(QContextMenuEvent *currentEvent)
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Plotting", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(tr("MainWindow", "Plotting", 0));
 
     createMenu(contextMenu);
 

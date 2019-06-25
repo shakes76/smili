@@ -17,6 +17,10 @@
 =========================================================================*/
 #include "milxQtManager.h"
 
+#include <QTreeWidget>
+#include <QFileDialog>
+#include <QMenu>
+
 milxQtManager::milxQtManager(QWidget *theParent) : QTabWidget(theParent)
 {
     setTabsClosable(true);
@@ -188,13 +192,13 @@ void milxQtManager::addTreeItem(int tabIndex, QStringList topLevelName, QList<QS
 void milxQtManager::createActions()
 {
     actionExportTab = new QAction(this);
-    actionExportTab->setText(QApplication::translate("Manager", "Export Contents ...", 0, QApplication::UnicodeUTF8));
+    actionExportTab->setText(tr("Export Contents ...", 0));
     actionExportTab->setShortcut(tr("Alt+e"));
     actionClearTab = new QAction(this);
-    actionClearTab->setText(QApplication::translate("Manager", "Clear Tab", 0, QApplication::UnicodeUTF8));
+    actionClearTab->setText(tr("Clear Tab", 0));
     actionClearTab->setShortcut(tr("Alt+t"));
     actionClear = new QAction(this);
-    actionClear->setText(QApplication::translate("Manager", "Clear Manager", 0, QApplication::UnicodeUTF8));
+    actionClear->setText(tr("Clear Manager", 0));
     actionClear->setShortcut(tr("Alt+c"));
 }
 

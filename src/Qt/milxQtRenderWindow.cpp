@@ -17,6 +17,12 @@
 =========================================================================*/
 #include "milxQtRenderWindow.h"
 
+#include <QMenu>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QLineEdit>
+#include <QMessageBox>
+
 #include <vtkRendererCollection.h>
 #include <vtkPropAssembly.h>
 #include <vtkCamera.h>
@@ -482,7 +488,6 @@ void milxQtRenderWindow::viewToZYPlane()
 
 void milxQtRenderWindow::setView(int viewMode)
 {
-    printDebug("Changing view to " + QString::number(viewMode));
     if(viewMode == SAGITTAL) //sagittal
         viewToSagittal();
     else if(viewMode == CORONAL) //coronal
@@ -1011,7 +1016,7 @@ void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
         range[1] = maxRange;
     }
 
-    milx::ColourMap *colours = new milx::ColourMap;
+	milx::ColourMap *colours = new milx::ColourMap;
     colours->toSeismic();
     colours->SetRange(range);
 
@@ -1640,23 +1645,23 @@ void milxQtRenderWindow::updateCoords(vtkObject *obj)
 void milxQtRenderWindow::createActions()
 {
     contextMenu = new QMenu(this);
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Rendering", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle(tr("Rendering", 0));
 
     contourAct = new QAction(this);
-    contourAct->setText(QApplication::translate("Render", "Contour Mode", 0, QApplication::UnicodeUTF8));
+    contourAct->setText(tr("Contour Mode", 0));
     contourAct->setCheckable(true);
     contourAct->setChecked(false);
     contourPolyDataAct = new QAction(this);
-    contourPolyDataAct->setText(QApplication::translate("Render", "Create Model From Contour", 0, QApplication::UnicodeUTF8));
+    contourPolyDataAct->setText(tr("Create Model From Contour", 0));
     contourNodePolyDataAct = new QAction(this);
-    contourNodePolyDataAct->setText(QApplication::translate("Render", "Save Contour", 0, QApplication::UnicodeUTF8));
+    contourNodePolyDataAct->setText(tr("Save Contour", 0));
     contourInitAct = new QAction(this);
-    contourInitAct->setText(QApplication::translate("Render", "Load Contour", 0, QApplication::UnicodeUTF8));
+    contourInitAct->setText(tr("Load Contour", 0));
 //    contourImageAct = new QAction(this);
-//    contourImageAct->setText(QApplication::translate("Render", "Create Binary Image From Contour", 0, QApplication::UnicodeUTF8));
+//    contourImageAct->setText(tr("Create Binary Image From Contour", 0));
 
     contourMenu = new QMenu(this);
-    contourMenu->setTitle(QApplication::translate("Render", "Contouring", 0, QApplication::UnicodeUTF8));
+    contourMenu->setTitle(tr("Contouring", 0));
     contourMenu->addAction(contourAct);
     contourMenu->addAction(contourPolyDataAct);
     contourMenu->addAction(contourNodePolyDataAct);
@@ -1664,68 +1669,68 @@ void milxQtRenderWindow::createActions()
 //    contourMenu->addAction(contourImageAct);
 
     backgroundAct = new QAction(this);
-    backgroundAct->setText(QApplication::translate("Render", "&White Background", 0, QApplication::UnicodeUTF8));
+    backgroundAct->setText(tr("&White Background", 0));
     backgroundAct->setCheckable(true);
 
     axesAct = new QAction(this);
-    axesAct->setText(QApplication::translate("Render", "&Axes", 0, QApplication::UnicodeUTF8));
+    axesAct->setText(tr("&Axes", 0));
     axesAct->setCheckable(true);
 
     lightingAct = new QAction(this);
-    lightingAct->setText(QApplication::translate("Render", "&Two-Sided Lighting", 0, QApplication::UnicodeUTF8));
+    lightingAct->setText(tr("&Two-Sided Lighting", 0));
     lightingAct->setCheckable(true);
     lightingAct->setChecked(true);
 
     lineAct = new QAction(this);
-    lineAct->setText(QApplication::translate("Render", "&Draw Line", 0, QApplication::UnicodeUTF8));
+    lineAct->setText(tr("&Draw Line", 0));
     lineAct->setCheckable(true);
     lineAct->setChecked(false);
 
     distanceAct = new QAction(this);
-    distanceAct->setText(QApplication::translate("Render", "&Measure Distance", 0, QApplication::UnicodeUTF8));
+    distanceAct->setText(tr("&Measure Distance", 0));
     distanceAct->setCheckable(true);
     distanceAct->setChecked(false);
 
     biDirectionAct = new QAction(this);
-    biDirectionAct->setText(QApplication::translate("Render", "&Measure Cross Distance", 0, QApplication::UnicodeUTF8));
+    biDirectionAct->setText(tr("&Measure Cross Distance", 0));
     biDirectionAct->setCheckable(true);
     biDirectionAct->setChecked(false);
 
     angleAct = new QAction(this);
-    angleAct->setText(QApplication::translate("Render", "&Measure Angle", 0, QApplication::UnicodeUTF8));
+    angleAct->setText(tr("&Measure Angle", 0));
     angleAct->setCheckable(true);
     angleAct->setChecked(false);
 
     planeAct = new QAction(this);
-    planeAct->setText(QApplication::translate("Render", "&Draw Plane", 0, QApplication::UnicodeUTF8));
+    planeAct->setText(tr("&Draw Plane", 0));
     planeAct->setCheckable(true);
     planeAct->setChecked(false);
 
     boxAct = new QAction(this);
-    boxAct->setText(QApplication::translate("Render", "&Draw Box/Cuboid", 0, QApplication::UnicodeUTF8));
+    boxAct->setText(tr("&Draw Box/Cuboid", 0));
     boxAct->setCheckable(true);
     boxAct->setChecked(false);
 
     sphereAct = new QAction(this);
-    sphereAct->setText(QApplication::translate("Render", "&Draw Sphere/Circle", 0, QApplication::UnicodeUTF8));
+    sphereAct->setText(tr("&Draw Sphere/Circle", 0));
     sphereAct->setCheckable(true);
     sphereAct->setChecked(false);
 
     humanAct = new QAction(this);
-    humanAct->setText(QApplication::translate("Render", "Show Human Orientation", 0, QApplication::UnicodeUTF8));
+    humanAct->setText(tr("Show Human Orientation", 0));
     humanAct->setCheckable(true);
     humanAct->setChecked(true);
 
     textAct = new QAction(this);
-    textAct->setText(QApplication::translate("Render", "&Insert Text", 0, QApplication::UnicodeUTF8));
+    textAct->setText(tr("&Insert Text", 0));
 
     crosshairAct = new QAction(this);
-    crosshairAct->setText(QApplication::translate("Render", "&Crosshair", 0, QApplication::UnicodeUTF8));
+    crosshairAct->setText(tr("&Crosshair", 0));
     crosshairAct->setCheckable(true);
     crosshairAct->setChecked(false);
 
     windowPropertiesMenu = new QMenu(this);
-    windowPropertiesMenu->setTitle(QApplication::translate("Render", "Window Properties", 0, QApplication::UnicodeUTF8));
+    windowPropertiesMenu->setTitle(tr("Window Properties", 0));
     windowPropertiesMenu->addAction(backgroundAct);
     windowPropertiesMenu->addAction(axesAct);
     windowPropertiesMenu->addAction(lightingAct);
@@ -1742,32 +1747,32 @@ void milxQtRenderWindow::createActions()
     viewMenu = new QMenu(this);
     viewMenu->setTitle("View");
     viewXY = new QAction(this);
-    viewXY->setText(QApplication::translate("Render", "Axial (xy-plane)", 0, QApplication::UnicodeUTF8));
+    viewXY->setText(tr("Axial (xy-plane)", 0));
     viewXY->setShortcut(tr("Alt+a"));
     viewXY->setCheckable(true);
     viewXY->setChecked(true);
     viewZX = new QAction(this);
-    viewZX->setText(QApplication::translate("Render", "Coronal (zx-plane)", 0, QApplication::UnicodeUTF8));
+    viewZX->setText(tr("Coronal (zx-plane)", 0));
     viewZX->setShortcut(tr("Alt+c"));
     viewZX->setCheckable(true);
     viewZY = new QAction(this);
-    viewZY->setText(QApplication::translate("Render", "Sagittal (zy-plane)", 0, QApplication::UnicodeUTF8));
+    viewZY->setText(tr("Sagittal (zy-plane)", 0));
     viewZY->setShortcut(tr("Alt+s"));
     viewZY->setCheckable(true);
     saveViewAct = new QAction(this);
-    saveViewAct->setText(QApplication::translate("Render", "Save View", 0, QApplication::UnicodeUTF8));
+    saveViewAct->setText(tr("Save View", 0));
     saveViewAct->setShortcut(tr("Ctrl+Alt+s"));
     loadViewAct = new QAction(this);
-    loadViewAct->setText(QApplication::translate("Render", "Load View", 0, QApplication::UnicodeUTF8));
+    loadViewAct->setText(tr("Load View", 0));
     loadViewAct->setShortcut(tr("Ctrl+Alt+l"));
     saveViewFileAct = new QAction(this);
-    saveViewFileAct->setText(QApplication::translate("Render", "Save View to File", 0, QApplication::UnicodeUTF8));
+    saveViewFileAct->setText(tr("Save View to File", 0));
     saveViewFileAct->setShortcut(tr("Shift+Alt+s"));
     loadViewFileAct = new QAction(this);
-    loadViewFileAct->setText(QApplication::translate("Render", "Load View from File", 0, QApplication::UnicodeUTF8));
+    loadViewFileAct->setText(tr("Load View from File", 0));
     loadViewFileAct->setShortcut(tr("Shift+Alt+l"));
     scaleAct = new QAction(this);
-    scaleAct->setText(QApplication::translate("Render", "&Scalar Bar", 0, QApplication::UnicodeUTF8));
+    scaleAct->setText(tr("&Scalar Bar", 0));
     scaleAct->setCheckable(true);
     viewGroup = new QActionGroup(this);
     viewGroup->addAction(viewXY);
@@ -1778,84 +1783,84 @@ void milxQtRenderWindow::createActions()
     colourMapMenu = new QMenu(this);
     colourMapMenu->setTitle("Colour Maps");
     actionDefault = new QAction(this);
-    actionDefault->setText(QApplication::translate("Render", "None", 0, QApplication::UnicodeUTF8));
+    actionDefault->setText(tr("None", 0));
 //    actionDefault->setDisabled(false);
     actionDefault->setCheckable(true);
     actionDefault->setChecked(true);
     actionJet = new LabelledAction("Jet", QPixmap(":resources/cmaps/cm_jet.png"));
-//    actionJet->setText(QApplication::translate("Render", "Jet", 0, QApplication::UnicodeUTF8));
+//    actionJet->setText(tr("Jet", 0));
     actionJet->setCheckable(true);
     actionJet->setChecked(false);
     actionRainbow = new LabelledAction("Rainbow", QPixmap(":resources/cmaps/cm_rainbow.png"));
-//    actionRainbow->setText(QApplication::translate("Render", "Rainbow", 0, QApplication::UnicodeUTF8));
+//    actionRainbow->setText(tr("Rainbow", 0));
     actionRainbow->setCheckable(true);
     actionRainbow->setChecked(false);
     actionInvRainbow = new LabelledAction("VTK", QPixmap(":resources/cmaps/cm_vtk.png"), this);
-//    actionInvRainbow->setText(QApplication::translate("Render", "VTK", 0, QApplication::UnicodeUTF8));
+//    actionInvRainbow->setText(tr("VTK", 0));
     actionInvRainbow->setCheckable(true);
     actionInvRainbow->setChecked(false);
     actionGray = new LabelledAction("Gray", QPixmap(":resources/cmaps/cm_gray.png"));
-//    actionGray->setText(QApplication::translate("Render", "Gray", 0, QApplication::UnicodeUTF8));
+//    actionGray->setText(tr("Gray", 0));
     actionGray->setCheckable(true);
     actionGray->setChecked(false);
     actionLogGray = new LabelledAction("Gray (Log)", QPixmap(":resources/cmaps/cm_gray.png"));
-//    actionLogGray->setText(QApplication::translate("Render", "Gray (Log 10)", 0, QApplication::UnicodeUTF8));
+//    actionLogGray->setText(tr("Gray (Log 10)", 0));
     actionLogGray->setCheckable(true);
     actionLogGray->setChecked(false);
     actionSeismic = new LabelledAction("Seismic", QPixmap(":resources/cmaps/cm_seismic.png"));
     actionSeismic->setCheckable(true);
     actionSeismic->setChecked(false);
     actionNIH = new LabelledAction("NIH", QPixmap(":resources/cmaps/cm_nih.png"), this);
-//    actionNIH->setText(QApplication::translate("Render", "NIH", 0, QApplication::UnicodeUTF8));
+//    actionNIH->setText(tr("NIH", 0));
     actionNIH->setCheckable(true);
     actionNIH->setChecked(false);
     actionNIH_FIRE = new LabelledAction("NIH Fire", QPixmap(":resources/cmaps/cm_nih_fire.png"), this);
-//    actionNIH_FIRE->setText(QApplication::translate("Render", "NIH Fire", 0, QApplication::UnicodeUTF8));
+//    actionNIH_FIRE->setText(tr("NIH Fire", 0));
     actionNIH_FIRE->setCheckable(true);
     actionNIH_FIRE->setChecked(false);
     actionAAL = new LabelledAction("AAL", QPixmap(":resources/cmaps/cm_aal.png"), this);
-//    actionAAL->setText(QApplication::translate("Render", "AAL", 0, QApplication::UnicodeUTF8));
+//    actionAAL->setText(tr("AAL", 0));
     actionAAL->setCheckable(true);
     actionAAL->setChecked(false);
     actionFS = new LabelledAction("FreeSurfer", QPixmap(":resources/cmaps/cm_fs.png"), this);
-//    actionFS->setText(QApplication::translate("Render", "FreeSurfer", 0, QApplication::UnicodeUTF8));
+//    actionFS->setText(tr("FreeSurfer", 0));
     actionFS->setCheckable(true);
     actionFS->setChecked(false);
     actionHOT = new LabelledAction("HOT", QPixmap(":resources/cmaps/cm_hot.png"), this);
-//    actionHOT->setText(QApplication::translate("Render", "HOT", 0, QApplication::UnicodeUTF8));
+//    actionHOT->setText(tr("HOT", 0));
 //    actionHOT->setIcon(QIcon(":resources/cmaps/cm_hot.png"));
     actionHOT->setCheckable(true);
     actionHOT->setChecked(false);
     actionCOOL = new LabelledAction("COOL", QPixmap(":resources/cmaps/cm_cool.png"), this);
-//    actionCOOL->setText(QApplication::translate("Render", "COOL", 0, QApplication::UnicodeUTF8));
+//    actionCOOL->setText(tr("COOL", 0));
     actionCOOL->setCheckable(true);
     actionCOOL->setChecked(false);
     actionCOOLWARM = new LabelledAction("COOL-WARM", QPixmap(":resources/cmaps/cm_coolwarm.png"), this);
-//    actionCOOLWARM->setText(QApplication::translate("Render", "COOL-WARM", 0, QApplication::UnicodeUTF8));
+//    actionCOOLWARM->setText(tr("COOL-WARM", 0));
 //    actionCOOLWARM->setIcon(QIcon(":resources/cmaps/cm_coolwarm.png"));
     actionCOOLWARM->setCheckable(true);
     actionCOOLWARM->setChecked(false);
     actionKnee = new LabelledAction("Knee", QPixmap(":resources/cmaps/cm_knee.png"), this);
-//    actionKnee->setText(QApplication::translate("Render", "Knee", 0, QApplication::UnicodeUTF8));
+//    actionKnee->setText(tr("Knee", 0));
     actionKnee->setCheckable(true);
     actionKnee->setChecked(false);
     actionBone = new LabelledAction("Bone", QPixmap(":resources/cmaps/cm_bone.png"), this);
-//    actionBone->setText(QApplication::translate("Render", "Bone", 0, QApplication::UnicodeUTF8));
+//    actionBone->setText(tr("Bone", 0));
 //    actionBone->setIcon(QIcon(":resources/cmaps/cm_bone.png"));
     actionBone->setCheckable(true);
     actionBone->setChecked(false);
     actionSpectral = new LabelledAction("Spectral", QPixmap(":resources/cmaps/cm_Spectral.png"), this);
-//    actionSpectral->setText(QApplication::translate("Render", "Spectral", 0, QApplication::UnicodeUTF8));
+//    actionSpectral->setText(tr("Spectral", 0));
 //    actionSpectral->setIcon(QIcon(":resources/cmaps/cm_Spectral.png"));
     actionSpectral->setCheckable(true);
     actionSpectral->setChecked(false);
     actionGNUPlot = new LabelledAction("GNUPlot", QPixmap(":resources/cmaps/cm_gnuplot.png"), this);
-//    actionGNUPlot->setText(QApplication::translate("Render", "GNUPlot", 0, QApplication::UnicodeUTF8));
+//    actionGNUPlot->setText(tr("GNUPlot", 0));
 //    actionGNUPlot->setIcon(QIcon(":resources/cmaps/cm_gnuplot.png"));
     actionGNUPlot->setCheckable(true);
     actionGNUPlot->setChecked(false);
     actionCubeHelix = new LabelledAction("CubeHelix", QPixmap(":resources/cmaps/cm_cubehelix.png"), this);
-//    actionCubeHelix->setText(QApplication::translate("Render", "CubeHelix", 0, QApplication::UnicodeUTF8));
+//    actionCubeHelix->setText(tr("CubeHelix", 0));
 //    actionCubeHelix->setIcon(QIcon(":resources/cmaps/cm_gnuplot.png"));
     actionCubeHelix->setCheckable(true);
     actionCubeHelix->setChecked(false);
@@ -1884,10 +1889,10 @@ void milxQtRenderWindow::createActions()
     colourMapsMenu();
 
     refreshAct = new QAction(this);
-    refreshAct->setText(QApplication::translate("Render", "&Refresh", 0, QApplication::UnicodeUTF8));
+    refreshAct->setText(tr("&Refresh", 0));
     refreshAct->setShortcut(tr("F5"));
     resetAct = new QAction(this);
-    resetAct->setText(QApplication::translate("Render", "Reset", 0, QApplication::UnicodeUTF8));
+    resetAct->setText(tr("Reset", 0));
     resetAct->setIcon(QIcon(":/resources/toolbar/refresh.png"));
     resetAct->setShortcut(tr("F7"));
 }
