@@ -21,7 +21,7 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
-#if (QT_VERSION > 4)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     #include <QtPlugin>
 #else
     #include <qplugin.h>
