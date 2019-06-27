@@ -17,7 +17,8 @@
 =========================================================================*/
 #ifndef __MILXIMAGE_H
 #define __MILXIMAGE_H
-
+//ITK 4.13
+#include <itkSpatialOrientationAdapter.h>
 //ITK
 #include <itkVectorImage.h>
 #include <itkImageDuplicator.h>
