@@ -208,7 +208,8 @@ void milxQtManager::createConnections()
 
     connect(actionExportTab, SIGNAL(triggered()), this, SLOT(exportTab()));
     connect(actionClearTab, SIGNAL(triggered()), this, SLOT(clearTab()));
-    connect(actionClear, SIGNAL(triggered()), this, SLOT(clear()));
+    //connect(actionClear, SIGNAL(triggered()), this, SLOT(clear()));
+    connect(actionClear, &QAction::triggered, this, &QTabWidget::clear);
 }
 
 void milxQtManager::contextMenuEvent(QContextMenuEvent *currentEvent)
