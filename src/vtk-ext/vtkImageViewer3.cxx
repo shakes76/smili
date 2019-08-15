@@ -29,8 +29,9 @@
 #include <vtkImageActor.h>
 #include <vtkImageMapToWindowLevelColors.h>
 #if(VTK_MAJOR_VERSION > 5)
-  #include "vtkStreamingDemandDrivenPipeline.h"
-  #include "vtkImageMapper3D.h"
+  #include <vtkStreamingDemandDrivenPipeline.h>
+  #include <vtkImageMapper3D.h>
+  #include <vtkInformation.h>
 #endif
 
 //----------------------------------------------------------------------------
@@ -52,13 +53,21 @@ public:
 
       if (event == vtkCommand::ResetWindowLevelEvent)
         {
-      #if(VTK_MAJOR_VERSION > 5)
+      #if(VTK_MAJOR_VERSION > 7)
         this->IV->GetInputAlgorithm()->UpdateInformation();
-        vtkStreamingDemandDrivenPipeline::SetUpdateExtent(
-          this->IV->GetInputInformation(),
-          vtkStreamingDemandDrivenPipeline::GetWholeExtent(
-            this->IV->GetInputInformation()));
+		vtkInformation *requests = this->IV->GetInputAlgorithm()->GetOutputInformation(0);
+		int *updateExtent = vtkStreamingDemandDrivenPipeline::GetWholeExtent(this->IV->GetInputInformation());
+		requests->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), updateExtent, 6);
+		//vtkInformation* outInfo = this->IV->GetInputAlgorithm()->GetOutputInformation(0);
+		//outInfo->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), updateExtent);
         this->IV->GetInputAlgorithm()->Update();
+	  #elif(VTK_MAJOR_VERSION > 5)
+		this->IV->GetInputAlgorithm()->UpdateInformation();
+		vtkStreamingDemandDrivenPipeline::SetUpdateExtent(
+			this->IV->GetInputInformation(),
+			vtkStreamingDemandDrivenPipeline::GetWholeExtent(
+			this->IV->GetInputInformation()));
+		this->IV->GetInputAlgorithm()->Update();
       #else
         this->IV->GetInput()->UpdateInformation();
         this->IV->GetInput()->SetUpdateExtent

@@ -32,6 +32,9 @@ milxQtWindow::milxQtWindow(QWidget *theParent) : QVTKWidget(theParent)
     prefix = "";
     name = "";
 
+	//Turn off the warnings window
+	//vtkObject::GlobalWarningDisplayOff();
+
     createConnections();
 }
 
