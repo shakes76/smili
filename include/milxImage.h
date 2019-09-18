@@ -769,6 +769,11 @@ public:
   template<typename TOutImage>
   static std::vector< typename itk::SmartPointer<TOutImage> > OtsuMultipleThresholdCollection(const std::vector< typename itk::SmartPointer<TImage> > &images, const int bins, const int noOfLabels);
 
+  /*!
+  \fn Image::SubsampleCollection(std::vector< typename itk::SmartPointer<TImage> > &images, unsigned factor = 2)
+  \brief Batch process images by downsampling each image by factor provided.
+  */
+  static void SubsampleCollection(std::vector< typename itk::SmartPointer<TImage> > &images, unsigned factor = 2);
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
   /*!
   	\fn Image::MaskAndCropCollection(std::vector< typename itk::SmartPointer<TImage> > &images, itk::SmartPointer<TMaskImage> maskImage, const size_t pixelPadding = 1)
@@ -3302,6 +3307,22 @@ std::vector< typename itk::SmartPointer<TOutImage> > Image<TImage>::OtsuMultiple
   }
 
   return collection;
+}
+
+template<class TImage>
+void Image<TImage>::SubsampleCollection(std::vector< typename itk::SmartPointer<TImage> > &images, unsigned factor)
+{
+  const size_t n = images.size();
+
+  typename TImage::SizeType factors;
+  factors[0] = factor;
+  factors[1] = factor;
+  factors[2] = factor;
+
+  for (size_t j = 0; j < n; j++)
+  {
+    images[j] = SubsampleImage(images[j], factors);
+  }
 }
 
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3)
