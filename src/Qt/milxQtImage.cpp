@@ -2780,8 +2780,8 @@ void milxQtImage::binaryThreshold(float value, float blevel, float alevel)
     emit working(-1);
     if(eightbit)
         imageChar = milx::Image<charImageType>::BinaryThresholdImage<charImageType>(imageChar, 0, value, blevel, alevel);
-	else if (integer)
-		imageInt = milx::Image<intImageType>::BinaryThresholdImage<intImageType>(imageInt, 0, value, blevel, alevel);
+    else if(integer)
+        imageChar = milx::Image<intImageType>::BinaryThresholdImage<charImageType>(imageInt, 0, value, blevel, alevel);
 //    else if(rgb)
 //        imageChar = milx::Image<rgbImageType>::TBinaryThresholdImage<charImageType>(imageRGB, 0, value, blevel, alevel);
     else
