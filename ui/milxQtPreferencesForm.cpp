@@ -232,6 +232,44 @@ void milxQtPreferencesForm::setupPrefs()
 	//Layout	
 	pluginsPage->setLayout(pluginsPageLayout);
 	ui.wdtPages->insertWidget(2, pluginsPage);
+
+	//Streaming page
+	QWidget *streamingPage = new QWidget;
+	QListWidgetItem *streamingPageItem = new QListWidgetItem(ui.wdtOptions);
+	streamingPageItem->setText(tr("Streaming"));
+	streamingPageItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+	
+	//Streaming options
+	//Streaminglevel
+	QLabel *streamingLevelLabel = new QLabel(tr("Memory Usage Level:"));
+	streamingLevelList = new QComboBox;
+	streamingLevelList->addItem("High");
+	streamingLevelList->addItem("Normal");
+	streamingLevelList->addItem("Low");
+	QHBoxLayout *streamingLevelLayout = new QHBoxLayout;
+	streamingLevelLayout->addWidget(streamingLevelLabel);
+	streamingLevelLayout->addWidget(streamingLevelList);
+	//CustomSplitsCheckBox
+	customStreamingCheckBox = new QCheckBox(tr("Use custom streaming splits"));
+	//CustomSplitsEdit
+	QLabel *splitsLabel = new QLabel(tr("Number of Splits:"));
+	customSplitsEdit = new QSpinBox;
+	customSplitsEdit->setMinimum(1);
+	QHBoxLayout *customSplitsEditLayout = new QHBoxLayout;
+	customSplitsEditLayout->addWidget(splitsLabel);
+	customSplitsEditLayout->addWidget(customSplitsEdit);
+
+	//Streaming options layout
+	QVBoxLayout *streamingPageLayout = new QVBoxLayout;
+	streamingPageLayout->addLayout(streamingLevelLayout);
+	streamingPageLayout->addWidget(customStreamingCheckBox);
+	streamingPageLayout->addLayout(customSplitsEditLayout);
+		//streamingPageLayout->addWidget();
+	streamingPageLayout->setAlignment(Qt::AlignTop);
+
+	//Layout
+	streamingPage->setLayout(streamingPageLayout);
+	ui.wdtPages->insertWidget(3, streamingPage);
 }
 
 void milxQtPreferencesForm::loadCustomThemes()
