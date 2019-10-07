@@ -142,7 +142,7 @@ public:
     Image is also NOT flipped, consider using overloaded OpenImage() with VTK image data which is flipped.
   */
   template<class TImage>
-  static bool OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data);
+  static bool OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits = 1);
 #if (ITK_VERSION_MAJOR > 3)
   /*!
     \fn File::OpenAsVectorImage(const std::string filename, typename itk::SmartPointer< itk::VectorImage< typename TImage::InternalPixelType, typename TImage::ImageDimension-1> > &data)
@@ -491,7 +491,7 @@ private:
 
 #ifndef VTK_ONLY
 template<class TImage>
-bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data)
+bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits = 1)
 {
   if(!Exists(filename))
   {
@@ -499,7 +499,7 @@ bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TIma
     return false;
   }
 
-  data = ReadImageUsingITK<TImage>(filename);
+  data = ReadImageUsingITK<TImage>(filename, numOfSplits);
 
   if(!data)
     return false;
@@ -939,15 +939,21 @@ bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk:
 
 #ifndef VTK_ONLY
 template<class TImage>
-itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
+itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename, size_t numOfSplits = 1)
 {
   typedef itk::ImageFileReader<TImage, itk::DefaultConvertPixelTraits<typename TImage::InternalPixelType> > ImageReader; //InternalPixelType != PixelType for vector images
   typename ImageReader::Pointer reader = ImageReader::New();
   reader->SetFileName(filename.c_str());
   reader->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  typedef itk::StreamingImageFilter< TImage, TImage > StreamingFilterType;
+  typename StreamingFilterType::Pointer streamingFilter = StreamingFilterType::New();
+  streamingFilter->SetInput( reader->GetOutput() );
+  streamingFilter->SetNumberOfStreamDivisions( numOfSplits ); 
+
   try
   {
-    reader->Update();
+      streamingFilter->Update();
   }
   catch( itk::ExceptionObject & err )
   {
@@ -956,7 +962,7 @@ itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
     return NULL;
   }
 
-  return reader->GetOutput();
+  return streamingFilter->GetOutput();
 }
 
 template<class TImage>
