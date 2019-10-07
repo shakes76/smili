@@ -29,6 +29,7 @@
 #include <vtkImagePermute.h>
 #include <vtkImageAccumulate.h>
 #include <vtkImageMapToWindowLevelColors.h>
+#include <vtkMemoryLimitImageDataStreamer.h>
 #if(VTK_MAJOR_VERSION > 5)
     #include <vtkResliceCursor.h>
     #include <vtkResliceCursorActor.h>
@@ -1382,6 +1383,7 @@ protected:
     ViewType viewToTrack; //!< In tracking mode, what slice to show
 
     //VTK
+    vtkSmartPointer<vtkMemoryLimitImageDataStreamer> streamer; //!< VTK Memory limit streamer, Smart Pointer
     vtkSmartPointer<vtkImageViewer3> viewer; //!< VTK Viewer handler, Smart Pointer
     vtkSmartPointer<vtkImageData> imageData; //!< Points to the current VTK Image Data, Smart Pointer
     vtkSmartPointer<vtkImageAppend> imageDataAppended; //!< Appended Data

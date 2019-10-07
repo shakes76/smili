@@ -182,7 +182,7 @@ public:
     Image is also NOT flipped, consider using overloaded OpenImage() with VTK image data which is flipped.
   */
   template<class TImage>
-  static bool SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io = NULL);
+  static bool SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io = NULL, unsigned int numberOfDivisions = 1);
   /*!
     \fn File::SaveImages(std::vector<std::string> &filenames, const std::vector< typename itk::SmartPointer<TImage> > images)
     \brief Saves a number of images, which are any of the following: JPEG, PNG, DICOM, TIFF, NIFTI etc.
@@ -593,7 +593,7 @@ bool File::OpenImages(std::vector<std::string> &filenames, std::vector< typename
 }
 
 template<class TImage>
-bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io)
+bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io, unsigned int numberOfDivisions)
 {
   typedef itk::ImageFileWriter<TImage> ImageWriter;
 
@@ -601,6 +601,9 @@ bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TIma
     writer->UseInputMetaDataDictionaryOn();
     writer->SetInput(data);
     writer->SetFileName(filename.c_str());
+    //set streaming divisions
+    numberOfDivisions = 1000;
+    writer->SetNumberOfStreamDivisions(numberOfDivisions);
     if(io)
       writer->SetImageIO(io);
     writer->AddObserver(itk::ProgressEvent(), ProgressUpdates);
