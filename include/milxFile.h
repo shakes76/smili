@@ -37,6 +37,7 @@
   #include <itkGDCMSeriesFileNames.h>
   #include <itkOrientImageFilter.h> //for dicom orientation
   #include <itkExtractImageFilter.h>
+  #include <itkStreamingImageFilter.h>
   #if (ITK_VERSION_MAJOR > 3)
     #include <itkComposeImageFilter.h>
   #endif
@@ -282,7 +283,7 @@ public:
     This member is inline deliberately to avoid function call overheads.
   */
   template<class TImage>
-  inline static itk::SmartPointer<TImage> ReadImageUsingITK(const std::string filename);
+  inline static itk::SmartPointer<TImage> ReadImageUsingITK(const std::string filename, size_t numOfSplits = 1);
   /**
     \brief Saves the image using the ITK file writer class. Returns NULL if failed and outputs the error to std error.
 
@@ -491,7 +492,7 @@ private:
 
 #ifndef VTK_ONLY
 template<class TImage>
-bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits = 1)
+bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits)
 {
   if(!Exists(filename))
   {
@@ -602,7 +603,7 @@ bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TIma
     writer->SetInput(data);
     writer->SetFileName(filename.c_str());
     //set streaming divisions
-    numberOfDivisions = 1000;
+    //numberOfDivisions = 1000;
     writer->SetNumberOfStreamDivisions(numberOfDivisions);
     if(io)
       writer->SetImageIO(io);
@@ -939,7 +940,7 @@ bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk:
 
 #ifndef VTK_ONLY
 template<class TImage>
-itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename, size_t numOfSplits = 1)
+itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename, size_t numOfSplits)
 {
   typedef itk::ImageFileReader<TImage, itk::DefaultConvertPixelTraits<typename TImage::InternalPixelType> > ImageReader; //InternalPixelType != PixelType for vector images
   typename ImageReader::Pointer reader = ImageReader::New();
