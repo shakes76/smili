@@ -38,6 +38,7 @@
 #include <itkGradientMagnitudeRecursiveGaussianImageFilter.h>
 #include <itkNormalizeImageFilter.h>
 #include <itkInvertIntensityImageFilter.h>
+#include <itkMaximumProjectionImageFilter.h>
 #include <itkChangeInformationImageFilter.h>
 #include <itkHistogramMatchingImageFilter.h>
 #include <itkCheckerBoardImageFilter.h>
@@ -463,6 +464,11 @@ public:
   */
   static itk::SmartPointer<TImage> InvertIntensity(itk::SmartPointer<TImage> img, float maxValue);
   /*!
+    \fn Image::MaximumIntensityProjection(itk::SmartPointer<TImage> img, bool xAxis = false, bool yAxis = false, bool zAxis = true)
+    \brief Generates an image with the intensities projected based on the max pixel value.
+  */
+  static itk::SmartPointer<TImage> MaximumIntensityProjection(itk::SmartPointer<TImage> img, bool xAxis = false, bool yAxis = false, bool zAxis = true);
+  /*!
   	\fn Image::HistogramEqualisation(itk::SmartPointer<TImage> img, float alpha, float beta)
   	\brief Generates an image with the intensities after histogram equalisation. Defaults to classic histogram equalisation.
 
@@ -694,6 +700,11 @@ public:
   	\brief Batch process images by inverting the intensities for each image.
   */
   static void InvertIntensityCollection(std::vector< typename itk::SmartPointer<TImage> > &images);
+  /*!
+  \fn Image::MaximumIntensityProjectionCollection(std::vector< typename itk::SmartPointer<TImage> > &images, bool xAxis = false, bool yAxis = false, bool zAxis = true)
+  \brief Batch process images by maximum projection of the intensities for each image.
+  */
+  static void MaximumIntensityProjectionCollection(std::vector< typename itk::SmartPointer<TImage> > &images, bool xAxis = false, bool yAxis = false, bool zAxis = true);
   /*!
   	\fn Image::FlipCollection(std::vector< typename itk::SmartPointer<TImage> > &images, bool xAxis = false, bool yAxis = true, bool zAxis = false, bool aboutOrigin = true)
   	\brief Batch process images by flipping each image along axis provided.
@@ -2260,6 +2271,32 @@ itk::SmartPointer<TImage> Image<TImage>::InvertIntensity(itk::SmartPointer<TImag
 }
 
 template<class TImage>
+itk::SmartPointer<TImage> Image<TImage>::MaximumIntensityProjection(itk::SmartPointer<TImage> img, bool xAxis, bool yAxis, bool zAxis)
+{
+  typedef itk::MaximumProjectionImageFilter<TImage, TImage> MaximumIntensityImageFilterType;
+  typename MaximumIntensityImageFilterType::Pointer project = MaximumIntensityImageFilterType::New();
+  project->SetInput(img);
+  if (xAxis)
+    project->SetProjectionDimension(0);
+  if (yAxis)
+    project->SetProjectionDimension(1);
+  if (zAxis)
+    project->SetProjectionDimension(2);
+  project->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+  try
+  {
+    project->Update();
+  }
+  catch (itk::ExceptionObject & ex)
+  {
+    PrintError("Failed Computing Intensity Projection");
+    PrintError(ex.GetDescription());
+  }
+
+  return project->GetOutput();
+}
+
+template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::HistogramEqualisation(itk::SmartPointer<TImage> img, float alpha, float beta, float radius)
 {
   typename TImage::SizeType radii;
@@ -3137,6 +3174,18 @@ void Image<TImage>::InvertIntensityCollection(std::vector< typename itk::SmartPo
   {
     float maxValue = ImageMaximum(images[j]);
     images[j] = InvertIntensity(images[j], maxValue);
+  }
+}
+
+template<class TImage>
+void Image<TImage>::MaximumIntensityProjectionCollection(std::vector< typename itk::SmartPointer<TImage> > &images, bool xAxis, bool yAxis, bool zAxis)
+{
+  const size_t n = images.size();
+
+  for (size_t j = 0; j < n; j++)
+  {
+    float maxValue = ImageMaximum(images[j]);
+    images[j] = MaximumIntensityProjection(images[j], xAxis, yAxis, zAxis);
   }
 }
 
