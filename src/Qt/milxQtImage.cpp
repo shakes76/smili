@@ -1858,6 +1858,17 @@ void milxQtImage::projectIntensity(bool xAxis, bool yAxis, bool zAxis)
     imageFloat = milx::Image<floatImageType>::MaximumIntensityProjection(imageFloat, xAxis, yAxis, zAxis);
   emit done(-1);
 
+  //if (!vectorised)
+    //volume = false; //3D image projected to 2D
+
+  //Determined according to ITK MIP class docs
+  if (xAxis)
+    viewToZYPlane();
+  if (yAxis)
+    viewToZXPlane();
+  if (zAxis)
+    viewToXYPlane();
+
   generateImage();
 }
 
@@ -4243,7 +4254,7 @@ void milxQtImage::createActions()
     invertAct->setText(QApplication::translate("Image", "Invert Intensities", 0, QApplication::UnicodeUTF8));
     invertAct->setShortcut(tr("Alt+v"));
     projectAct = new QAction(this);
-    projectAct->setText(QApplication::translate("Image", "Intensity Projection", 0, QApplication::UnicodeUTF8));
+    projectAct->setText(QApplication::translate("Image", "Maximum Intensity Projection", 0, QApplication::UnicodeUTF8));
     projectAct->setShortcut(tr("Alt+p"));
     relabelAct = new QAction(this);
     relabelAct->setText(QApplication::translate("Image", "Relabel", 0, QApplication::UnicodeUTF8));

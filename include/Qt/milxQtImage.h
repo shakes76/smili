@@ -831,10 +831,12 @@ public slots:
     */
     void invertIntensity();
     /**
-    \fn milxQtImage::projectIntensity(bool xAxis = false, bool yAxis = false, bool zAxis = false)
-    \brief Computes the intensity projection (mean, min or max) of the image and displays it.
+      \fn milxQtImage::projectIntensity(bool xAxis = false, bool yAxis = false, bool zAxis = false)
+      \brief Computes the intensity projection (mean, min or max) of the image and displays it.
 
-    Only supports maximum intensity projection (MIP)
+      Automatically changes view to axis selected since the dimension is reduced by 1.
+
+      Currently supports maximum intensity projection (MIP)
     */
     void projectIntensity(bool xAxis = false, bool yAxis = false, bool zAxis = false);
     /**
