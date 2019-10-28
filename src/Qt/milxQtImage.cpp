@@ -1811,6 +1811,67 @@ void milxQtImage::invertIntensity()
     generateImage();
 }
 
+void milxQtImage::projectIntensity(bool xAxis, bool yAxis, bool zAxis)
+{
+  if (usingVTKImage)
+  {
+    printError("Project Intensity from VTK image not support yet.");
+    return;
+  }
+
+  if (!xAxis && !yAxis && !zAxis)
+  {
+    QMessageBox msgBoxX, msgBoxY, msgBoxZ, msgBoxOrigin;
+    msgBoxX.setText("The image will be projected");
+    msgBoxX.setInformativeText("Do you want to project along the x-axis?");
+    msgBoxX.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBoxX.setDefaultButton(QMessageBox::No);
+    msgBoxY.setText("The image will be projected");
+    msgBoxY.setInformativeText("Do you want to project along the y-axis?");
+    msgBoxY.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBoxY.setDefaultButton(QMessageBox::No);
+    msgBoxZ.setText("The image will be projected");
+    msgBoxZ.setInformativeText("Do you want to project along the z-axis?");
+    msgBoxZ.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBoxZ.setDefaultButton(QMessageBox::Yes);
+    int retX = msgBoxX.exec();
+    int retY = msgBoxY.exec();
+    int retZ = msgBoxZ.exec();
+
+    if (retX == QMessageBox::Yes)
+      xAxis = true;
+    if (retY == QMessageBox::Yes)
+      yAxis = true;
+    if (retZ == QMessageBox::Yes)
+      zAxis = true;
+  }
+
+  printInfo("Projecting Maximum Intensity of Image");
+  emit working(-1);
+  if(eightbit)
+    imageChar = milx::Image<charImageType>::MaximumIntensityProjection(imageChar, xAxis, yAxis, zAxis);
+  else if (integer)
+    imageInt = milx::Image<intImageType>::MaximumIntensityProjection(imageInt, xAxis, yAxis, zAxis);
+  //    else if(rgb)
+  //        imageRGB = milx::Image<rgbImageType>::MaximumIntensityProjection(imageRGB, xAxis, yAxis, zAxis);
+  else
+    imageFloat = milx::Image<floatImageType>::MaximumIntensityProjection(imageFloat, xAxis, yAxis, zAxis);
+  emit done(-1);
+
+  //if (!vectorised)
+    //volume = false; //3D image projected to 2D
+
+  generateImage();
+
+  //Determined according to ITK MIP class docs
+  if (xAxis)
+    viewToZYPlane();
+  if (yAxis)
+    viewToZXPlane();
+  if (zAxis)
+    viewToXYPlane();
+}
+
 void milxQtImage::matchInfo(milxQtImage *imageToMatch)
 {
     printInfo("Matching Info of Image");
@@ -2714,7 +2775,7 @@ void milxQtImage::binaryThreshold(float value, float blevel, float alevel)
     if(eightbit)
         imageChar = milx::Image<charImageType>::BinaryThresholdImage<charImageType>(imageChar, 0, value, blevel, alevel);
     else if(integer)
-        imageInt = milx::Image<intImageType>::BinaryThresholdImage<intImageType>(imageInt, 0, value, blevel, alevel);
+        imageChar = milx::Image<intImageType>::BinaryThresholdImage<charImageType>(imageInt, 0, value, blevel, alevel);
 //    else if(rgb)
 //        imageChar = milx::Image<rgbImageType>::TBinaryThresholdImage<charImageType>(imageRGB, 0, value, blevel, alevel);
     else
@@ -4192,6 +4253,9 @@ void milxQtImage::createActions()
     invertAct = new QAction(this);
     invertAct->setText(QApplication::translate("Image", "Invert Intensities", 0, QApplication::UnicodeUTF8));
     invertAct->setShortcut(tr("Alt+v"));
+    projectAct = new QAction(this);
+    projectAct->setText(QApplication::translate("Image", "Maximum Intensity Projection", 0, QApplication::UnicodeUTF8));
+    projectAct->setShortcut(tr("Alt+p"));
     relabelAct = new QAction(this);
     relabelAct->setText(QApplication::translate("Image", "Relabel", 0, QApplication::UnicodeUTF8));
     relabelAct->setShortcut(tr("Shift+Alt+l"));
@@ -4367,6 +4431,7 @@ void milxQtImage::createConnections()
     connect(highPassAct, SIGNAL(triggered()), this, SLOT(highpass()));
     connect(normAct, SIGNAL(triggered()), this, SLOT(normalize()));
     connect(invertAct, SIGNAL(triggered()), this, SLOT(invertIntensity()));
+    connect(projectAct, SIGNAL(triggered()), this, SLOT(projectIntensity()));
     connect(relabelAct, SIGNAL(triggered()), this, SLOT(relabel()));
 
     connect(matchAct, SIGNAL(triggered()), this, SLOT(matchInfo()));
@@ -4497,6 +4562,7 @@ QMenu* milxQtImage::operationsMenu()
     operateMenu->addAction(distMapAct);
     operateMenu->addAction(matchHistAct);
     operateMenu->addAction(invertAct);
+    operateMenu->addAction(projectAct);
     operateMenu->addAction(relabelAct);
 
     return operateMenu;
