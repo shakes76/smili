@@ -48,6 +48,7 @@
 #include <itkJPEGImageIOFactory.h>
 #include <itkBMPImageIOFactory.h>
 #include <itkNrrdImageIOFactory.h>
+#include <itkMGHImageIOFactory.h>
 #include <itkRawImageIO.h>
 
 #include "itkImageToVTKImageFilter.h"
@@ -98,6 +99,10 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
     {
         vtkFormat = true;
     }
+    else if(extension == "mgh" || extension == "mgz")
+    {
+        itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
+    }
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float, 3>::New() );
 
@@ -109,11 +114,11 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
     {
         if(!medical)
         {
-          //Add some default image types
-          itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char,2>::New() );
-          itk::ObjectFactoryBase::RegisterFactory( itk::PNGImageIOFactory::New() );
-          itk::ObjectFactoryBase::RegisterFactory( itk::JPEGImageIOFactory::New() );
-          itk::ObjectFactoryBase::RegisterFactory( itk::BMPImageIOFactory::New() );
+            //Add some default image types
+            itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char,2>::New() );
+            itk::ObjectFactoryBase::RegisterFactory( itk::PNGImageIOFactory::New() );
+            itk::ObjectFactoryBase::RegisterFactory( itk::JPEGImageIOFactory::New() );
+            itk::ObjectFactoryBase::RegisterFactory( itk::BMPImageIOFactory::New() );
         }
 
         charImageType::Pointer charImg = milx::File::ReadImageUsingITK<charImageType>(filename.toStdString());
@@ -259,6 +264,10 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
     else if(extension == "pbm" || extension == "pgm" || extension == "ppm")
     {
         pnmImage = true;
+    }
+    else if(extension == "mgh" || extension == "mgz")
+    {
+        itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
 
     if(!vtkFormat && !pnmImage)
@@ -494,6 +503,10 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
         integerFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
     }
+    else if(extension == "mgh" || extension == "mgz")
+    {
+        itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
+    }
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float, 3>::New() );
 
@@ -589,6 +602,10 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
     else if(data->isRGBImage())
     {
         rgbFormat = true;
+    }
+    else if(extension == "mgh" || extension == "mgz")
+    {
+        itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float,3>::New() );

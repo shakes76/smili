@@ -116,21 +116,21 @@ static const int maxAASamples = 2; //Anti-Aliasing
 //Opens
 static string openImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm)";
 static string openSeriesImageExts = "Image Series (*.ima *.dcm *.dicom *.gz)";
-static string openMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr)";
+static string openMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz)";
 static string openOtherImageExts = "Other Images (*.vti)"; ///\todo add raw support, not working atm
 static string openOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
 static string openModelExts = "Model or Polygonal Files (*.vtp *.vtk *.ply *.obj *.stl)";
-static string extensionsOpen = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.vti *.vtp *.vtk *.ply *.obj *.stl *.csv *.dat *.txt";
+static string extensionsOpen = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl *.csv *.dat *.txt";
 static string allFileExts = "All Files (*.*)";
 static string openSupportedExts = "Images and Model Files (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.vti *.mrc *.rec *.vtp *.vtk *.ply *.obj *.stl)";
 static string openExts = openSupportedExts + ";;" + openModelExts + ";;" + openMedImageExts + ";;" + openImageExts + ";;" + openOtherImageExts + ";;" + openOtherExts + ";;" + allFileExts;
 //Saves
 static string saveImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif)";
-static string saveMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr)";
+static string saveMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.mgh *.mgz)";
 static string saveOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
 static string saveOtherImageExts = "Other Images (*.vti)";
 static string saveModelExts = "Model or Polygonal File (*.vtp *.vtk *.ply *.obj *.stl)";
-static string extensionsSave = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.vti *.vtp *.vtk *.ply *.obj *.stl";
+static string extensionsSave = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl";
 static string saveExtsForImages = saveMedImageExts + ";;" + saveImageExts + ";;" + saveOtherImageExts;
 static string saveExtsForScreens = saveImageExts;
 static string saveExtsForModels = saveModelExts;

@@ -27,7 +27,7 @@ using namespace TCLAP;
 typedef std::vector< std::string >::iterator stringiterator;
 
 //Supported operations
-enum operations {none = 0, info, convert, labelinfo, rescale, invert, relabel, smooth, bilateral, median, gradmag, laplacian, distancemap, threshold, Otsu, crop, mask, resample, match, checker, add, diff, mean, merge, cast, flip, subsample};
+enum operations {none = 0, info, convert, labelinfo, rescale, invert, relabel, smooth, bilateral, median, gradmag, laplacian, distancemap, threshold, Otsu, crop, mask, resample, match, checker, add, diff, mean, merge, cast, flip, mip, subsample};
 
 //Image stuff
 typedef unsigned char charPixelType;
@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
   ValueArg<size_t> OtsuArg("", "Otsu", "Otsu multiple threshold with the number of bins to use.", false, 128, "Otsu");
   ValueArg<size_t> paddingArg("", "padding", "Number of pixels to pad in the operation in question (such as crop).", false, 1, "Padding");
   ValueArg<size_t> flipArg("f", "flip", "Flip the image about origin at axis indicated (0: x-axis, 1:y-axis, 2:z-axis).", false, 0, "Flip");
+  ValueArg<size_t> mipArg("", "mip", "Maximum intensity image at axis indicated (0: x-axis, 1:y-axis, 2:z-axis).", false, 2, "MIP");
   ValueArg<size_t> subsampleArg("x", "subsample", "Downsample the image by the factor indicated (same in all dimensions).", false, 0, "Subsample");
   ///Switches
   ///XOR Switches
@@ -172,6 +173,7 @@ int main(int argc, char *argv[])
   xorlist.push_back(&meanArg);
   xorlist.push_back(&castArg);
   xorlist.push_back(&flipArg);
+  xorlist.push_back(&mipArg);
   xorlist.push_back(&subsampleArg);
   //~ xorlist.push_back(&mseArg);
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
@@ -207,7 +209,8 @@ int main(int argc, char *argv[])
   size_t labelsValue = labelsArg.getValue(); //number of labels
   size_t OtsuValue = OtsuArg.getValue(); //number of bins
   size_t paddingValue = paddingArg.getValue(); //number of bins
-  size_t flipAxis = flipArg.getValue(); //number of bins
+  size_t flipAxis = flipArg.getValue(); //axis
+  size_t mipAxis = mipArg.getValue(); //axis
   size_t subsampleFactor = subsampleArg.getValue(); //downsample by
 
   std::string maskName;
@@ -263,7 +266,7 @@ int main(int argc, char *argv[])
   }
   if( smoothArg.isSet() || bilateralArg.isSet() || medianArg.isSet() || gradMagArg.isSet() || laplacianArg.isSet() || distancemapArg.isSet() || cropArg.isSet() || maskArg.isSet()
      || resampleArg.isSet() || matchArg.isSet() || checkerArg.isSet() || thresholdArg.isSet() || OtsuArg.isSet() || rescaleArg.isSet() || invertArg.isSet() || relabelArg.isSet() || addArg.isSet()
-     || diffArg.isSet() || meanArg.isSet() || mergeArg.isSet() || castArg.isSet() || flipArg.isSet() || subsampleArg.isSet() )
+     || diffArg.isSet() || meanArg.isSet() || mergeArg.isSet() || castArg.isSet() || flipArg.isSet() || mipArg.isSet() || subsampleArg.isSet())
   {
     ///Check if output argument given and only doing one image
     if(filenames.size() == 1 && (addArg.isSet() || diffArg.isSet() || meanArg.isSet() || mergeArg.isSet()))
@@ -346,6 +349,8 @@ int main(int argc, char *argv[])
       operation = cast;
     if(flipArg.isSet())
       operation = flip;
+    if (mipArg.isSet())
+      operation = mip;
     if(subsampleArg.isSet())
       operation = subsample;
   }
@@ -398,11 +403,11 @@ int main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
   }
-  if(flipArg.isSet())
+  if(flipArg.isSet() || mipArg.isSet())
   {
-    if(flipAxis < 0 || flipAxis > 2)
+    if((flipAxis < 0 || flipAxis > 2) || (mipAxis < 0 || mipAxis > 2))
     {
-      milx::PrintError("Argument Error: Incorrect value provided for axis flipping.");
+      milx::PrintError("Argument Error: Incorrect value provided for axis.");
       milx::PrintError("Re-run with value correctly set.");
       exit(EXIT_FAILURE);
     }
@@ -778,6 +783,15 @@ int main(int argc, char *argv[])
           milx::Image<charImageType>::FlipCollection(labelledCollection, false, false, true, true);
         break;
 
+      case mip:
+        if (mipAxis == 0)
+          milx::Image<charImageType>::MaximumIntensityProjectionCollection(labelledCollection, true, false, false);
+        else if (mipAxis == 1)
+          milx::Image<charImageType>::MaximumIntensityProjectionCollection(labelledCollection, false, true, false);
+        else
+          milx::Image<charImageType>::MaximumIntensityProjectionCollection(labelledCollection, false, false, true);
+        break;
+
       case subsample:
         milx::Image<charImageType>::SubsampleCollection(labelledCollection, subsampleFactor);
         break;
@@ -1001,6 +1015,15 @@ int main(int argc, char *argv[])
           milx::Image<floatImageType>::FlipCollection(collection, false, true, false, true);
         else
           milx::Image<floatImageType>::FlipCollection(collection, false, false, true, true);
+        break;
+
+      case mip:
+        if (mipAxis == 0)
+          milx::Image<floatImageType>::MaximumIntensityProjectionCollection(collection, true, false, false);
+        else if (mipAxis == 1)
+          milx::Image<floatImageType>::MaximumIntensityProjectionCollection(collection, false, true, false);
+        else
+          milx::Image<floatImageType>::MaximumIntensityProjectionCollection(collection, false, false, true);
         break;
 
       case subsample:
