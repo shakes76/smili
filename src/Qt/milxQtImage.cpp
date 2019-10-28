@@ -1861,6 +1861,8 @@ void milxQtImage::projectIntensity(bool xAxis, bool yAxis, bool zAxis)
   //if (!vectorised)
     //volume = false; //3D image projected to 2D
 
+  generateImage();
+
   //Determined according to ITK MIP class docs
   if (xAxis)
     viewToZYPlane();
@@ -1868,8 +1870,6 @@ void milxQtImage::projectIntensity(bool xAxis, bool yAxis, bool zAxis)
     viewToZXPlane();
   if (zAxis)
     viewToXYPlane();
-
-  generateImage();
 }
 
 void milxQtImage::matchInfo(milxQtImage *imageToMatch)
