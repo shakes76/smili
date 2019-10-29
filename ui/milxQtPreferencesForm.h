@@ -76,6 +76,10 @@ protected:
 	QPushButton *newColourMapButton;
     //Plugins
 	QLabel *noPluginMsg;
+    //Streaming
+	QComboBox *streamingLevelList;
+	QCheckBox *customStreamingCheckBox;
+	QSpinBox *customSplitsEdit;
 
 	// The main window
     milxQtMain *MainWindow;
