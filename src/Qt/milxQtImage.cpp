@@ -4308,7 +4308,7 @@ void milxQtImage::createActions()
     invertAct->setText(tr("Invert Intensities", 0));
     invertAct->setShortcut(tr("Alt+v"));
     projectAct = new QAction(this);
-    projectAct->setText(QApplication::translate("Image", "Maximum Intensity Projection", 0, QApplication::UnicodeUTF8));
+    projectAct->setText(tr("Maximum Intensity Projection", 0));
     projectAct->setShortcut(tr("Alt+p"));
     relabelAct = new QAction(this);
     relabelAct->setText(tr("Relabel", 0));
