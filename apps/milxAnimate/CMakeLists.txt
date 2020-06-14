@@ -1,24 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
-
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(milxAnimate)
-
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
-
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE(${ITK_USE_FILE})
-
-#--------------------------------------------------------------------------------
-# This sets the windows build that will need the special winmain@16 call. Qt provides
-#  this for us in the qtmain.lib file. Using this cmake code will ensure we have it
-#  linked into our build. Not needed on Unix/OS X/Linux which is why we have the 
-#  IF(WIN32) conditional.
-IF (WIN32)
-    SET (QT_USE_QTMAIN TRUE)
-ENDIF (WIN32)
 
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 set(MILXQT_BINDIR ${SMILI_BINARY_DIR})

@@ -1,14 +1,14 @@
 ########################
-# SMILIX APP CMAKE FILE #
+# SMILX APP CMAKE FILE #
 ########################
 IF(APPLE) #Assumes MAC OSX
-    cmake_minimum_required(VERSION 2.8.8) #for deplotqt module
+    cmake_minimum_required(VERSION 2.8.11) #for deplotqt module
 ELSE(APPLE)
     cmake_minimum_required(VERSION 3.2.0)
 ENDIF(APPLE)
 
 PROJECT(smilx)
-cmake_policy(SET CMP0053 NEW)
+#~ cmake_policy(SET CMP0053 NEW)
 
 ### Include the directory itself as a path to include directories ###
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -18,29 +18,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 ##################
 include(find)
 
-#######################################################################################
-# This sets the windows build that will need the special winmain@16 call. Qt provides #
-# this for us in the qtmain.lib file. Using this cmake code will ensure we have it    #
-# linked into our build. Not needed on Unix/OS X/Linux which is why we have the       #
-# IF(WIN32) conditional.                                                              #
-#######################################################################################
-IF (WIN32)
-    SET (QT_USE_QTMAIN TRUE)
-ENDIF (WIN32)
-
-
-
-
 #--------------------------------------------------------------------------------
 # this command finds Qt5 libraries and sets all required variables
 # note that it's Qt5, not QT5 or qt5
-FIND_PACKAGE(Qt5 REQUIRED Core Gui WebEngineWidgets)
+FIND_PACKAGE(Qt5Core REQUIRED)
 
 
 #--------------------------------------------------------------------------------
 # this command finds Qt4 libraries and sets all required variables
 IF(VTK_QT_VERSION VERSION_GREATER "4")
   FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED QUIET)
+  set(QT_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES})
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
   # QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to
@@ -122,7 +110,8 @@ SET(CPACK_PACKAGE_FILE_NAME "smilx-Setup-v${SMILX_VERSION_STRING}")
 ##########################
 INSTALL(TARGETS smilx 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime)
+	RUNTIME DESTINATION bin COMPONENT Runtime
+  DESTINATION bin)
 
 INCLUDE(InstallRequiredSystemLibraries)
 
@@ -153,6 +142,9 @@ IF (WIN32)
     
     # Pull out other dependencies
     SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)    
+    
+#~     include(Windeployqt)
+#~     windeployqt(smilx bin)
     
     install(CODE "
     file(GLOB_RECURSE PLUGINS

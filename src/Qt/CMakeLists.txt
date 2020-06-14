@@ -1,21 +1,6 @@
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#detect Qt version (depends on VTK-Qt)
-#VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
-MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  MESSAGE("Using Qt 5 for build")
-  FIND_PACKAGE(Qt5Widgets REQUIRED QUIET)
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
-  add_definitions(${Qt5Widgets_DEFINITIONS})
-  qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
-ELSE(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-  INCLUDE(${QT_USE_FILE})
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
-
 PROJECT(milx-Qt)
 
 # Add Sources
@@ -70,11 +55,6 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
 
 add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
-
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  message("Qt Version: ${Qt5Widgets_VERSION}")
-  qt5_use_modules(milx-Qt Core Gui Widgets WebEngineWidgets)
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 # Set the build version (VERSION) and the API version (SOVERSION)
 SET_TARGET_PROPERTIES(milx-Qt

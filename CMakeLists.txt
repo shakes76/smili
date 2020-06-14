@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
  
 PROJECT(SMILI)
 
@@ -41,6 +41,23 @@ DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_USE_FILE_INCLUDE
 DEPENDENT_OPTION(BUILD_VTK_EXTENSIONS "Build the VTK Extensions Library" ON "USE_VTK" OFF)
 DEPENDENT_OPTION(BUILD_MILXQT "Build the MILX Qt Library" ON "BUILD_GUI_RELATED" OFF)
 DEPENDENT_OPTION(BUILD_PLUGINS "Build the plugins for the Viewer" OFF "BUILD_VIEWER" OFF)
+
+IF(BUILD_MILXQT)
+    #detect Qt version (depends on VTK-Qt)
+    #VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
+    MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
+    IF(VTK_QT_VERSION VERSION_GREATER "4")
+        MESSAGE("Using Qt 5 for build")
+        find_package(Qt5Core REQUIRED)
+        include_directories(${Qt5Core_INCLUDE_DIRS})
+        #~   add_definitions(${Qt5Core_DEFINITIONS})
+        qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
+        set(QT_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES})
+    ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+        FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
+        INCLUDE(${QT_USE_FILE})
+    ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+ENDIF(BUILD_MILXQT)
  
 IF(BUILD_PLUGINS)
     OPTION(BUILD_PYTHON_PLUGIN "Build the Python plugin for MILX Qt Viewer" OFF)
