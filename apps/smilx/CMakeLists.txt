@@ -19,24 +19,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include(find)
 
 #--------------------------------------------------------------------------------
-# this command finds Qt5 libraries and sets all required variables
-# note that it's Qt5, not QT5 or qt5
-FIND_PACKAGE(Qt5Core REQUIRED)
-
-
-#--------------------------------------------------------------------------------
-# this command finds Qt4 libraries and sets all required variables
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED QUIET)
-  set(QT_LIBRARIES ${Qt5Core_LIBRARIES} ${Qt5Core_QTMAIN_LIBRARIES})
-ELSE(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-  # QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to
-  # a CMake script that sets up this directory for building with Qt4
-  INCLUDE( ${QT_USE_FILE} )
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
-
-#--------------------------------------------------------------------------------
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX

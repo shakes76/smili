@@ -1,8 +1,6 @@
 ###########################
 # DICOM PLUGIN CMAKE FILE #
 ###########################
-cmake_minimum_required(VERSION 3.2.0)
-
 PROJECT(DICOMPlugin CXX)
 cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0020 NEW)
