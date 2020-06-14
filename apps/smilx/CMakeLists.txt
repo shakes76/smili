@@ -92,8 +92,7 @@ SET(CPACK_PACKAGE_FILE_NAME "smilx-Setup-v${SMILX_VERSION_STRING}")
 ##########################
 INSTALL(TARGETS smilx 
 	BUNDLE DESTINATION . COMPONENT Runtime
-	RUNTIME DESTINATION bin COMPONENT Runtime
-  DESTINATION bin)
+	RUNTIME DESTINATION bin COMPONENT Runtime)
 
 INCLUDE(InstallRequiredSystemLibraries)
 
@@ -123,10 +122,17 @@ IF (WIN32)
     SET(CPACK_NSIS_MODIFY_PATH ON)
     
     # Pull out other dependencies
-    SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)    
+    SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
     
-#~     include(Windeployqt)
-#~     windeployqt(smilx bin)
+    #qt5 windeploy
+    include(Windeployqt)
+#~     if(DEFINED CMAKE_CONFIGURATION_TYPES)
+#~         # multi-config handling
+#~         set(CMAKE_BUILD_CONFIG ${CMAKE_CFG_INTDIR})
+#~         MESSAGE(${CMAKE_BUILD_CONFIG})
+#~     endif()
+    windeployqt(smilx bin) #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
+    MESSAGE("Windows Qt5 Deployment")
     
     install(CODE "
     file(GLOB_RECURSE PLUGINS
