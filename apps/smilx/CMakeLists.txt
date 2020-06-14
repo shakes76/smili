@@ -124,15 +124,11 @@ IF (WIN32)
     # Pull out other dependencies
     SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
     
-    #qt5 windeploy
-    include(Windeployqt)
-#~     if(DEFINED CMAKE_CONFIGURATION_TYPES)
-#~         # multi-config handling
-#~         set(CMAKE_BUILD_CONFIG ${CMAKE_CFG_INTDIR})
-#~         MESSAGE(${CMAKE_BUILD_CONFIG})
-#~     endif()
-    windeployqt(smilx bin) #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
-    MESSAGE("Windows Qt5 Deployment")
+    #qt5 windeploy - Uncomment this if building the NSIS Windows installer
+    #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
+#~     include(Windeployqt)
+#~     windeployqt(smilx bin) 
+#~     MESSAGE("Windows Qt5 Deployment")
     
     install(CODE "
     file(GLOB_RECURSE PLUGINS
