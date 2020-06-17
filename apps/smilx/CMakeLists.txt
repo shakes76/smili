@@ -126,9 +126,9 @@ IF (WIN32)
     
     #qt5 windeploy - Uncomment this if building the NSIS Windows installer
     #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
-#~     include(Windeployqt)
-#~     windeployqt(smilx bin) 
-#~     MESSAGE("Windows Qt5 Deployment")
+    include(Windeployqt)
+    windeployqt(smilx bin) 
+    MESSAGE("Windows Qt5 Deployment")
     
     install(CODE "
     file(GLOB_RECURSE PLUGINS

@@ -4668,7 +4668,7 @@ void milxQtImage::dropEvent(QDropEvent *currentEvent)
     {
         if(urlsList[j].isValid())
         {
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
             tmp = urlsList[j].path().remove(0,1); //!< Remove leading forward slash
 #else
             tmp = urlsList[j].path();
