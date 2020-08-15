@@ -48,7 +48,9 @@
 #include <itkJPEGImageIOFactory.h>
 #include <itkBMPImageIOFactory.h>
 #include <itkNrrdImageIOFactory.h>
-#include <itkMGHImageIOFactory.h>
+#ifdef FREESURFER_SUPPORT
+    #include <itkMGHImageIOFactory.h>
+#endif
 #include <itkRawImageIO.h>
 
 #include "itkImageToVTKImageFilter.h"
@@ -99,10 +101,12 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
     {
         vtkFormat = true;
     }
+#ifdef FREESURFER_SUPPORT
     else if(extension == "mgh" || extension == "mgz")
     {
         itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
+#endif
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float, 3>::New() );
 
@@ -265,10 +269,12 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
     {
         pnmImage = true;
     }
+#ifdef FREESURFER_SUPPORT
     else if(extension == "mgh" || extension == "mgz")
     {
         itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
+#endif
 
     if(!vtkFormat && !pnmImage)
     {
@@ -503,10 +509,12 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
         integerFormat = true;
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<unsigned char, 3>::New() );
     }
+#ifdef FREESURFER_SUPPORT
     else if(extension == "mgh" || extension == "mgz")
     {
         itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
+#endif
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float, 3>::New() );
 
@@ -603,10 +611,12 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
     {
         rgbFormat = true;
     }
+#ifdef FREESURFER_SUPPORT
     else if(extension == "mgh" || extension == "mgz")
     {
         itk::ObjectFactoryBase::RegisterFactory( itk::MGHImageIOFactory::New() ); //itk-ext
     }
+#endif
     else
         itk::ObjectFactoryBase::RegisterFactory( itk::RawImageIOFactory<float,3>::New() );
 

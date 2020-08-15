@@ -35,6 +35,10 @@ OPTION(BUILD_APPLICATIONS "Build the applications for SMILI. Use BUILD_GUI_RELAT
 OPTION(BUILD_TESTS "Build the tests for SMILI" OFF)
 OPTION(BUILD_PROTOTYPES "Build the prototype tests for SMILI" OFF)
 
+#-----------------------------------------------------------------------------
+# Enable/Disable Freesurfer support
+OPTION(BUILD_FREESURFER_SUPPORT "Build the Freesurfer support parts of SMILI." OFF)
+
 #dependent options, triggered if another option is set
 DEPENDENT_OPTION(USE_ITK "Build all the ITK components" ON "ITK_LIBRARIES" OFF)
 DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_USE_FILE_INCLUDED" OFF)
@@ -69,6 +73,10 @@ IF(BUILD_PLUGINS)
     OPTION(BUILD_FTL_PLUGIN "Build the Finite Transform Library plugin for MILX Qt Viewer" OFF)
     OPTION(BUILD_REGISTRATION_PLUGIN "Build the Image Registration Plugin for MILX Qt " OFF)
 ENDIF(BUILD_PLUGINS)
+
+IF(BUILD_FREESURFER_SUPPORT)
+    add_definitions(-DFREESURFER_SUPPORT)  
+ENDIF(BUILD_FREESURFER_SUPPORT)
 
 #Check ITK/VTK statuses
 IF(USE_ITK AND NOT USE_VTK)
