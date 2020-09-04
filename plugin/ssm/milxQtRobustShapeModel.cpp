@@ -19,6 +19,15 @@
 
 #include "milxQtRobustShapeModel.h"
 
+//Qt
+#include <QMenu>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QFormLayout>
+#include <QComboBox>
+#include <QPushButton>
+
 //Used for generateModesModel
 #include <vtkPointData.h>
 #include <vtkFloatArray.h>
@@ -444,7 +453,11 @@ void milxQtRobustShapeModel::generateModes()
     meanShape->SetPoints(m_RobustSSM->GetMeanShape()->GetPoints());
 
     vtkSmartPointer<vtkPolyDataNormals> normals = vtkPolyDataNormals::New();
+#if VTK_MAJOR_VERSION <= 5
         normals->SetInput(meanShape);
+#else
+        normals->SetInputData(meanShape);
+#endif
         normals->ComputeCellNormalsOff();
         normals->ComputePointNormalsOn();
         normals->SplittingOff();
@@ -477,16 +490,16 @@ void milxQtRobustShapeModel::generateModes()
     printInfo("Computing Variation");
     for(int i = 0; i < meanShape->GetNumberOfPoints(); i++)
     {
-        vtkFloatingPointType* meanPoint = meanShape->GetPoint(i);
-        vtkFloatingPointType* varPoint  = varShape->GetPoint(i);
+        double* meanPoint = meanShape->GetPoint(i);
+        double* varPoint  = varShape->GetPoint(i);
 
-        vtkFloatingPointType xVal = varPoint[0] - meanPoint[0];
-        vtkFloatingPointType yVal = varPoint[1] - meanPoint[1];
-        vtkFloatingPointType zVal = varPoint[2] - meanPoint[2];
+        double xVal = varPoint[0] - meanPoint[0];
+        double yVal = varPoint[1] - meanPoint[1];
+        double zVal = varPoint[2] - meanPoint[2];
 
         float normalPoint[3];
         normArray->GetTupleValue(i, normalPoint);
-        vtkFloatingPointType var;
+        double var;
         if(flgNormal)
         {
             var = xVal*normalPoint[0] + yVal*normalPoint[1] + zVal*normalPoint[2];
@@ -501,13 +514,13 @@ void milxQtRobustShapeModel::generateModes()
         varShapeVectors->InsertNextTuple3(-xVal, -yVal, -zVal);
         varScalars->InsertNextValue(var);
 
-        vnl_scatter_3x3<vtkFloatingPointType> C;
+        vnl_scatter_3x3<float> C;
         for(int j = 0; j < m_RobustSSM->GetNumberOfShapes(); j++)
         {
-            vtkFloatingPointType point[3];
-            m_RobustSSM->GetPCA()->GetInput(j)->GetPoint(i, point);
+            double point[3];
+            m_RobustSSM->GetShape(j)->GetPoint(i, point);
             // std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
-            vnl_double_3 point_vector;
+            vnl_vector_fixed<float, 3> point_vector;
             point_vector[0] = point[0] - meanPoint[0];
             point_vector[1] = point[1] - meanPoint[1];
             point_vector[2] = point[2] - meanPoint[2];
@@ -720,7 +733,7 @@ void milxQtRobustShapeModel::compactness()
 
         qApp->processEvents();
     }
-    table->Update();
+    //table->Update();
     table->Dump();
 
     QPointer<milxQtPlot> plot = new milxQtPlot;
@@ -794,7 +807,7 @@ void milxQtRobustShapeModel::specificity()
     }
     specific /= n;
     printInfo("Specificity Score: " + QString::number(specific));
-    table->Update();
+    //table->Update();
     table->Dump();
     done(-1);
 
@@ -863,7 +876,7 @@ void milxQtRobustShapeModel::generalisability()
       qApp->processEvents();
     }
     printInfo("Generalisability Score: " + QString::number(generalisability));
-    table->Update();
+    //table->Update();
     table->Dump();
     done(-1);
 
@@ -920,7 +933,7 @@ void milxQtRobustShapeModel::eigenvalues()
 
         qApp->processEvents();
     }
-    table->Update();
+    //table->Update();
     table->Dump();
 
     QPointer<milxQtPlot> plot = new milxQtPlot;
@@ -1046,74 +1059,74 @@ void milxQtRobustShapeModel::reset()
 void milxQtRobustShapeModel::createActions()
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Robust Shape Modelling", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle("Robust Shape Modelling");
 
     actionMean = new QAction(this);
-        actionMean->setText(QApplication::translate("SSM", "&Mean Model", 0, QApplication::UnicodeUTF8));
+        actionMean->setText("&Mean Model");
         actionMean->setShortcut(tr("Alt+m"));
         actionMean->setCheckable(true);
         actionMean->setChecked(false);
     actionAligned = new QAction(this);
-        actionAligned->setText(QApplication::translate("SSM", "&Aligned Points", 0, QApplication::UnicodeUTF8));
+        actionAligned->setText("&Aligned Points");
         actionAligned->setShortcut(tr("Alt+a"));
         actionAligned->setCheckable(true);
         actionAligned->setChecked(false);
     actionOriginal = new QAction(this);
-        actionOriginal->setText(QApplication::translate("SSM", "&Original Points", 0, QApplication::UnicodeUTF8));
+        actionOriginal->setText("&Original Points");
         actionOriginal->setShortcut(tr("Alt+o"));
         actionOriginal->setCheckable(true);
         actionOriginal->setChecked(false);
     actionModesAsVectors = new QAction(this);
-        actionModesAsVectors->setText(QApplication::translate("SSM", "Modes as &Vectors", 0, QApplication::UnicodeUTF8));
+        actionModesAsVectors->setText("Modes as &Vectors");
         actionModesAsVectors->setShortcut(tr("Alt+v"));
         actionModesAsVectors->setCheckable(true);
         actionModesAsVectors->setChecked(false);
     actionModesAsTensors = new QAction(this);
-        actionModesAsTensors->setText(QApplication::translate("SSM", "Modes as &Tensors", 0, QApplication::UnicodeUTF8));
+        actionModesAsTensors->setText("Modes as &Tensors");
         actionModesAsTensors->setShortcut(tr("Alt+t"));
         actionModesAsTensors->setCheckable(true);
         actionModesAsTensors->setChecked(false);
     actionModesAsCollection = new QAction(this);
-        actionModesAsCollection->setText(QApplication::translate("SSM", "Modes as Surface &Collection", 0, QApplication::UnicodeUTF8));
+        actionModesAsCollection->setText("Modes as Surface &Collection");
         actionModesAsCollection->setShortcut(tr("Alt+c"));
     actionCorrespond = new QAction(this);
-        actionCorrespond->setText(QApplication::translate("SSM", "Correspondences as a &Hedgehog", 0, QApplication::UnicodeUTF8));
+        actionCorrespond->setText("Correspondences as a &Hedgehog");
         actionCorrespond->setShortcut(tr("Alt+h"));
         actionCorrespond->setCheckable(true);
         actionCorrespond->setChecked(false);
 
     //plots menu
     actionCompact = new QAction(this);
-        actionCompact->setText(QApplication::translate("SSM", "Compactness", 0, QApplication::UnicodeUTF8));
+        actionCompact->setText("Compactness");
         actionCompact->setShortcut(tr("Shift+Alt+c"));
     actionSpecificity = new QAction(this);
-        actionSpecificity->setText(QApplication::translate("SSM", "Specificity", 0, QApplication::UnicodeUTF8));
+        actionSpecificity->setText("Specificity");
         actionSpecificity->setShortcut(tr("Shift+Alt+s"));
     actionGeneralise = new QAction(this);
-        actionGeneralise->setText(QApplication::translate("SSM", "Generalisability", 0, QApplication::UnicodeUTF8));
+        actionGeneralise->setText("Generalisability");
         actionGeneralise->setShortcut(tr("Shift+Alt+g"));
     actionValues = new QAction(this);
-        actionValues->setText(QApplication::translate("SSM", "Eigenvalues", 0, QApplication::UnicodeUTF8));
+        actionValues->setText("Eigenvalues");
         actionValues->setShortcut(tr("Shift+Alt+v"));
     actionModes = new QAction(this);
-        actionModes->setText(QApplication::translate("SSM", "Primary Eigenmodes", 0, QApplication::UnicodeUTF8));
+        actionModes->setText("Primary Eigenmodes");
         actionModes->setShortcut(tr("Shift+Alt+r"));
     actionParameters = new QAction(this);
-        actionParameters->setText(QApplication::translate("SSM", "Training Shape Parameters", 0, QApplication::UnicodeUTF8));
+        actionParameters->setText("Training Shape Parameters");
         actionParameters->setShortcut(tr("Shift+Alt+p"));
 
     //Procrustes menu
     actionRigid = new QAction(this);
-        actionRigid->setText(QApplication::translate("SSM", "Rigid", 0, QApplication::UnicodeUTF8));
+        actionRigid->setText("Rigid");
         actionRigid->setShortcut(tr("Ctrl+Alt+r"));
         actionRigid->setCheckable(true);
     actionSimilarity = new QAction(this);
-        actionSimilarity->setText(QApplication::translate("SSM", "Similarity", 0, QApplication::UnicodeUTF8));
+        actionSimilarity->setText("Similarity");
         actionSimilarity->setShortcut(tr("Ctrl+Alt+s"));
         actionSimilarity->setCheckable(true);
         actionSimilarity->setChecked(true);
     actionAffine = new QAction(this);
-        actionAffine->setText(QApplication::translate("SSM", "Affine", 0, QApplication::UnicodeUTF8));
+        actionAffine->setText("Affine");
         actionAffine->setShortcut(tr("Ctrl+Alt+a"));
         actionAffine->setCheckable(true);
     alignGroup = new QActionGroup(this);
@@ -1122,23 +1135,23 @@ void milxQtRobustShapeModel::createActions()
         alignGroup->addAction(actionAffine);
 
     actionAlignment = new QAction(this);
-        actionAlignment->setText(QApplication::translate("SSM", "Output &Alignment as Images", 0, QApplication::UnicodeUTF8));
+        actionAlignment->setText("Output &Alignment as Images");
         actionAlignment->setShortcut(tr("Alt+r"));
     actionOriginalMeshes = new QAction(this);
-        actionOriginalMeshes->setText(QApplication::translate("SSM", "Output &Original Meshes", 0, QApplication::UnicodeUTF8));
+        actionOriginalMeshes->setText("Output &Original Meshes");
         actionOriginalMeshes->setShortcut(tr("Shift+Alt+o"));
     actionAlignedMeshes = new QAction(this);
-        actionAlignedMeshes->setText(QApplication::translate("SSM", "Output &Aligned Meshes", 0, QApplication::UnicodeUTF8));
+        actionAlignedMeshes->setText("Output &Aligned Meshes");
         actionAlignedMeshes->setShortcut(tr("Shift+Alt+a"));
     actionPointIDs = new QAction(this);
-        actionPointIDs->setText(QApplication::translate("SSM", "Output &Point IDs as Images", 0, QApplication::UnicodeUTF8));
+        actionPointIDs->setText("Output &Point IDs as Images");
         actionPointIDs->setShortcut(tr("Alt+p"));
     actionCoordinates = new QAction(this);
-        actionCoordinates->setText(QApplication::translate("SSM", "Output &Coordinates as Images", 0, QApplication::UnicodeUTF8));
+        actionCoordinates->setText("Output &Coordinates as Images");
         actionCoordinates->setShortcut(tr("Alt+c"));
 
     actionReplaceOriginal = new QAction(this);
-        actionReplaceOriginal->setText(QApplication::translate("SSM", "Replace Originals with Aligned", 0, QApplication::UnicodeUTF8));
+        actionReplaceOriginal->setText("Replace Originals with Aligned");
         actionReplaceOriginal->setShortcut(tr("Shift+Alt+r"));
 }
 

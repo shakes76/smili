@@ -48,7 +48,7 @@ IF (WIN32)
     set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\smilx.rc")
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/smilx.exe")
 ELSEIF(APPLE)
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/smilx.app")  
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/smilx.app")
     set(SMILX_ICON_FILE ${PROJECT_SOURCE_DIR}/smilx.icns)
     set(MACOSX_BUNDLE_ICON_FILE ${SMILX_ICON_FILE})
     set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -90,7 +90,7 @@ SET(CPACK_PACKAGE_FILE_NAME "smilx-Setup-v${SMILX_VERSION_STRING}")
 ##########################
 # Install the executable #
 ##########################
-INSTALL(TARGETS smilx 
+INSTALL(TARGETS smilx
 	BUNDLE DESTINATION . COMPONENT Runtime
 	RUNTIME DESTINATION bin COMPONENT Runtime)
 
@@ -120,23 +120,23 @@ IF (WIN32)
     SET(CPACK_NSIS_URL_INFO_ABOUT "http://qcplusplus.sourceforge.net/")
     SET(CPACK_NSIS_CONTACT "shakes76@users.sourceforge.net")
     SET(CPACK_NSIS_MODIFY_PATH ON)
-    
+
     # Pull out other dependencies
     SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
-    
+
     #qt5 windeploy - Uncomment this if building the NSIS Windows installer
     #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
     include(Windeployqt)
-    windeployqt(smilx bin) 
+    windeployqt(smilx bin)
     MESSAGE("Windows Qt5 Deployment")
-    
+
     install(CODE "
     file(GLOB_RECURSE PLUGINS
       \"\${CMAKE_INSTALL_PREFIX}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
     " COMPONENT Runtime)
-    
+
     # For windows, use nsis
     SET(CPACK_GENERATOR NSIS)
 ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
@@ -145,7 +145,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     SET(CPACK_PACKAGE_DESCRIPTION "sMILX provides easy ways to do medical image processing and scientific visualisation.")
     SET(CPACK_STRIP_FILES "\${CMAKE_INSTALL_PREFIX}/bin/smilx")
     SET(CPACK_SOURCE_STRIP_FILES "")
-  
+
     configure_file(smilx.sh.in "smilx" @ONLY) #to bin
     configure_file(smilx.sh.in "smilx.sh" @ONLY) #startup
     configure_file(smilx.desktop.in "smilx.desktop" @ONLY)
@@ -155,7 +155,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
         SET(CPACK_BUNDLE_STARTUP_COMMAND "${PROJECT_BINARY_DIR}/smilx.sh")
         #SET(CPACK_BUNDLE_PLIST "${PROJECT_SOURCE_DIR}/Info-CMake.plist")
         SET(CPACK_BUNDLE_ICON ${SMILX_ICON_FILE})
-    
+
     # Set the OS X Bundle specific CMake variables which will be used to populate the plist for
     # the application bundle
     ConfigureMacOSXBundlePlist(${PROJECT_NAME} "" ${PROJECT_SOURCE_DIR} ${SMILX_VERSION_STRING})
@@ -185,10 +185,10 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     set(CPACK_SYSTEM_NAME "OSX")
 
     #Pull out other dependencies
-    SET(LIBRARY_DIRS ${LIBRARY_OUTPUT_PATH};${SMILI_PLUGINS_PATH};${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)    
+    SET(LIBRARY_DIRS ${LIBRARY_OUTPUT_PATH};${SMILI_PLUGINS_PATH};${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
 
-    IF(CPACK_BINARY_PACKAGEMAKER) #Package Maker 
-      set(CMAKE_INSTALL_PREFIX "/Applications") 
+    IF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
+      set(CMAKE_INSTALL_PREFIX "/Applications")
       # install(CODE "
       # file(GLOB_RECURSE PLUGINS
       #   \"\${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
@@ -197,16 +197,16 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
       # fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
       # " COMPONENT Runtime)
     # ELSE(CPACK_BINARY_PACKAGEMAKER)
-      # Install VTK files 
+      # Install VTK files
       # FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
       # INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
       # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
-      
+
             #install Qt files
             # FILE(GLOB qtFiles_QtCore "${QT_LIBRARY_DIR}/QtCore.framework/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
             # INSTALL(FILES ${qtFiles_QtCore} DESTINATION lib COMPONENT Runtime
             # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
-      
+
       #SET(CPACK_GENERATOR Bundle)
     ENDIF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
 
@@ -232,21 +232,21 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
       install(FILES ${PYTHONQT_LIBS} DESTINATION lib
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
     ENDIF(BUILD_PYTHON_PLUGIN)
-    
+
     #Install MSK libraries if built
     IF(BUILD_SSM_PLUGIN)
       FILE(GLOB MSKFiles "${MILXQT_INSTALL_BINARY_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
       install(FILES ${MSKFiles} DESTINATION lib
       PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
     ENDIF(BUILD_SSM_PLUGIN)
-    
+
         # Install MSK libraries if built
         IF(BUILD_SSM_PLUGIN)
             FILE(GLOB MSKFiles "${MILXQT_INSTALL_BINARY_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
             install(FILES ${MSKFiles} DESTINATION lib
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
         ENDIF(BUILD_SSM_PLUGIN)
-    
+
         # Install MSK libraries if built
         IF(BUILD_FTL_PLUGIN)
             FILE(GLOB FTLFiles1 "${NTTW_DIR}/lib/*frtw*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
@@ -256,7 +256,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
             install(FILES ${FTLFiles2} DESTINATION lib
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
         ENDIF(BUILD_FTL_PLUGIN)
-    
+
         # Install ITK libraries
         # USING PACKAGE MANAGER VERSION - Ubuntu 16.04
 #~        IF(ITK_VERSION_MAJOR GREATER 3)
@@ -266,13 +266,14 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
 #~        ENDIF(ITK_VERSION_MAJOR GREATER 3)
 #~        INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
 #~        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-    
+
     #Debian
     SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <Shekhar.Chandra@csiro.au>")
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #10.04
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libinsighttoolkit3.20, libpythonqt2.0, libfftw3-3") #12.04
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
+#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libvtk7.1p-qt, libinsighttoolkit4.13, libfftw3-3")
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
 
     #RPM
@@ -283,25 +284,25 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     SET(CPACK_RPM_PACKAGE_LICENSE "CSIRO BSD License")
     #SET(CPACK_RPM_PACKAGE_REQUIRES "libqt4, vtk, vtk-qt, libfftw3-3") #opensuse 12.3 and 13.1
     SET(CPACK_RPM_PACKAGE_REQUIRES "qt, vtk, vtk-qt, InsightToolkit, pythonqt, fftw3") #Fedora 21
-    
-    # Install VTK files 
+
+    # Install VTK files
     #USING PACKAGE MANAGER VERSION
-    
+
     #Install startup scripts
-    install(FILES "${PROJECT_BINARY_DIR}/smilx" DESTINATION "../../bin" 
+    install(FILES "${PROJECT_BINARY_DIR}/smilx" DESTINATION "../../bin"
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    install(FILES "${PROJECT_BINARY_DIR}/smilx.sh" DESTINATION . 
+    install(FILES "${PROJECT_BINARY_DIR}/smilx.sh" DESTINATION .
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-    
+
     #desktop file for menus
     SET(SMILX_DESKTOP_DIR "/usr/share/applications/")
     SET(SMILX_PIXMAPS_DIR "/usr/share/icons/")
   #~     FIND_PACKAGE(KDE4)
   #~     include(KDE4Internal)
-  #~     install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${XDG_APPS_INSTALL_DIR}) 
-    install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${SMILX_DESKTOP_DIR}) 
-  #~     install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${ICON_INSTALL_DIR}) 
-    install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${SMILX_PIXMAPS_DIR}) 
+  #~     install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
+    install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${SMILX_DESKTOP_DIR})
+  #~     install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${ICON_INSTALL_DIR})
+    install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${SMILX_PIXMAPS_DIR})
   #~     kde4_add_app_icon(smilx.cpp "${SMILI_SOURCE_DIR}/resources/smilx_icon.png")
     find_program(XDG-DESKTOP-MENU_EXECUTABLE xdg-desktop-menu)
     INSTALL(CODE "
