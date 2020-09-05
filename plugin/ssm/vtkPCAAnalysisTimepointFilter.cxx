@@ -30,7 +30,9 @@
 #include "vtkInformationVector.h"
 #include "vtkPointSet.h"
 #include "vtkFloatArray.h"
+#include "vtkPolyData.h"
 #include "vtkMath.h"
+#include "vtkMultiBlockDataSet.h"
 
 vtkStandardNewMacro(vtkPCAAnalysisTimepointFilter);
 
@@ -364,7 +366,7 @@ int vtkPCAAnalysisTimepointFilter::RequestData(
       double y = evecMat2[i*3+1][j];
       double z = evecMat2[i*3+2][j];
 
-      this->GetOutput(j)->GetPoints()->SetPoint(i, x, y, z);
+      vtkPolyData::SafeDownCast(this->GetOutput(j))->GetPoints()->SetPoint(i, x, y, z);
     }
   }
 

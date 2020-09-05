@@ -19,6 +19,8 @@
 #define MILXQTSSMPLUGIN_H
 
 #include <QList>
+#include <QWizard>
+#include <QListWidget>
 
 #include <milxQtPluginInterface.h>
 #include <milxQtMain.h>
@@ -152,6 +154,7 @@ private:
 class MILXQT_PLUGIN_EXPORT milxQtSSMPluginFactory: public QObject, public milxQtPluginFactory
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "milxQt.Plugins.milxQtPluginFactory/1.0")
     Q_INTERFACES(milxQtPluginFactory)
 
 public:

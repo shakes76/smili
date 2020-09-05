@@ -178,6 +178,7 @@ public:
   //! Weights are assigned to each point as a float so its size should
   //! be equal to the number of points of the point set
   //! Call SetNumberOfInputs before calling this function.
+  void SetInput(int idx, vtkPointSet* p); //Assumes weights assigned elsewhere
   void SetInput(int idx, vtkPointSet* p, vtkFloatArray *weights);
   void SetInput(int idx, vtkDataObject* input, vtkFloatArray *weights);
 

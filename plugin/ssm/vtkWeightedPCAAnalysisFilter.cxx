@@ -31,6 +31,7 @@
 #include "vtkMath.h"
 #include "vtkFloatArray.h"
 #include "vtkCommand.h"
+#include "vtkMultiBlockDataSet.h"
 
 #include <vcl_vector.h>
 #include "vnl/vnl_random.h"
@@ -990,7 +991,7 @@ bool vtkWeightedPCAAnalysisFilter::Load(const char * filename)
   cerr << "Loading Robust SSM with FileName " << filename << endl;
 
   typedef int headerType; //long long is 64-bit always
-  typedef vtkFloatingPointType writeType; //vtkFloatingPointType is normally a double
+  typedef double writeType; 
 
   std::ifstream fin(filename, std::ios::binary);
   if (!fin.is_open())
@@ -1066,7 +1067,7 @@ bool vtkWeightedPCAAnalysisFilter::Load(const char * filename)
     aligned->SetPoints(points);
     points->Delete();
 
-    this->SetNthInputConnection(0, idx, aligned ? aligned->GetProducerPort() : 0);
+    this->SetInput(idx, aligned);
   }
 
   MeanShape.set_size(totalMeanPoints);
@@ -1134,7 +1135,7 @@ bool vtkWeightedPCAAnalysisFilter::Save(const char * filename)
   /// We want to save the current model to file
   /// File format is header, aligned (point) data,
   typedef int headerType; //long long is 64-bit always
-  typedef vtkFloatingPointType writeType; //vtkFloatingPointType is normally a double
+  typedef double writeType;
 
   const size_t n = this->GetOutput(0)->GetNumberOfPoints();
   headerType sz = this->GetNumberOfInputConnections(0);
@@ -1266,9 +1267,15 @@ void vtkWeightedPCAAnalysisFilter::SetNumberOfInputs(int n)
 }
 
 //----------------------------------------------------------------------------
+void vtkWeightedPCAAnalysisFilter::SetInput(int idx, vtkPointSet *p)
+{
+  this->SetInputData(idx, p);
+}
+
+//----------------------------------------------------------------------------
 void vtkWeightedPCAAnalysisFilter::SetInput(int idx, vtkPointSet *p, vtkFloatArray *weights)
 {
-  this->SetNthInputConnection(0, idx, p ? p->GetProducerPort() : 0);
+  this->SetInputData(idx, p);
 
   if (Weights.empty())
     Weights.set_size(3*p->GetNumberOfPoints(), this->GetNumberOfInputConnections(0));

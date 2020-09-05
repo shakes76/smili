@@ -19,6 +19,16 @@
 
 #include <qplugin.h>
 
+//Qt
+#include <QMenu>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QWizardPage>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QWizard>
+
 //SMILI
 #include <milxQtFile.h>
 
@@ -607,17 +617,17 @@ void milxQtSSMPlugin::passOnCollection(vtkPolyDataCollection *modelCollection, Q
 void milxQtSSMPlugin::createActions()
 {
     actionMultiModel = new QAction(MainWindow);
-    actionMultiModel->setText(QApplication::translate("SSMPlugin", "Create &Multi-Model", 0, QApplication::UnicodeUTF8));
+    actionMultiModel->setText("Create &Multi-Model");
     actionMultiModel->setShortcut(tr("Ctrl+m"));
     actionFocusModel = new QAction(MainWindow);
-    actionFocusModel->setText(QApplication::translate("SSMPlugin", "Create &Focused Model", 0, QApplication::UnicodeUTF8));
+    actionFocusModel->setText("Create &Focused Model");
     actionFocusModel->setShortcut(tr("Ctrl+f"));
 }
 
 void milxQtSSMPlugin::createMenu()
 {
     menuSSM = new QMenu(MainWindow);
-    menuSSM->setTitle(QApplication::translate("SSMPlugin", "Shape Models", 0, QApplication::UnicodeUTF8));
+    menuSSM->setTitle("Shape Models");
     menuSSM->addAction(actionMultiModel);
     menuSSM->addAction(actionFocusModel);
     actionMultiModel->setDisabled(true);
@@ -707,4 +717,4 @@ void milxQtSSMPlugin::createConnections()
     connect(btnClearSurfaceNames, SIGNAL(clicked()), comboSurfaceNames, SLOT(clear()));
 }
 
-Q_EXPORT_PLUGIN2(SSMPlugin, milxQtSSMPluginFactory);
+//Q_EXPORT_PLUGIN2(SSMPlugin, milxQtSSMPluginFactory);
