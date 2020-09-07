@@ -24,7 +24,10 @@
 #include "itkStatisticalShapeTimepointModel.h"
 //VTK
 #include <vtkProcrustesAlignmentFilter.h>
-#include <vtkMultiBlockDataSet.h>
+#if VTK_MAJOR_VERSION > 5
+  #include <vtkMultiBlockDataGroupFilter.h>
+  #include <vtkMultiBlockDataSet.h>
+#endif
 
 namespace itk
 {
@@ -537,7 +540,7 @@ void
 StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 ::GenerateData()
 {
-//  cerr << "Timepoint SSM GenerateData" << endl;
+  cerr << "Timepoint SSM GenerateData" << endl;
   vtkPCAAnalysisTimepointFilter *PCA = vtkPCAAnalysisTimepointFilter::SafeDownCast(Superclass::m_PCA);
   PCA->SetTimepointMode(m_TimepointMode);
 
@@ -568,6 +571,8 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
   this->RemoveProcrustesAlignedPoints();
 
+  vtkSmartPointer<vtkMultiBlockDataGroupFilter> group = vtkSmartPointer<vtkMultiBlockDataGroupFilter>::New();
+
   if(!m_PreAligned)
   {
       // Use rigid body alignment
@@ -586,15 +591,21 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     procrustesAlign->StartFromCentroidOn();
     for(int i = 0; i < sz; i++)
       {
-  #if VTK_MAJOR_VERSION <= 5
+#if VTK_MAJOR_VERSION <= 5
       procrustesAlign->SetInput(i, this->GetShape(i));
-  #else
-      procrustesAlign->AddInputDataObject(i, this->GetShape(i));
-  #endif
+#else
+      group->AddInputData(this->GetShape(i));
+#endif
       }
+#if VTK_MAJOR_VERSION > 5
+    //procrustesAlign->SetInputData(group->GetOutput());
+    procrustesAlign->SetInputConnection(group->GetOutputPort());
+#endif
     try
       {
+      //cerr << "Procrustes Align" << endl;
       procrustesAlign->Update();
+      //cerr << "Done" << endl;
       }
     catch( itk::ExceptionObject & err )
       {
@@ -605,12 +616,14 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
       {
       vtkPolyData * aligned = vtkPolyData::New();
       vtkPoints * points = vtkPoints::New();
-      points->DeepCopy(vtkPolyData::SafeDownCast(procrustesAlign->GetOutput(i))->GetPoints());
+      //cerr << "Loaded aligned " << i << " shape" << endl;
+      points->DeepCopy(vtkPolyData::SafeDownCast(procrustesAlign->GetOutput()->GetBlock(i))->GetPoints());
       aligned->SetPoints(points);
       points->Delete();
       this->m_ProcrustesAlignedPoints.push_back(aligned);
       }
     procrustesAlign->Delete();
+    //cerr << "Performed Procrustes Alignment with " << sz << " shapes" << endl;
     itkDebugMacro(<< "Performed Procrustes Alignment with " << sz << " shapes");
   }
   else
@@ -653,6 +666,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
   try
   {
+    //cerr << "PCA Update" << endl;
     PCA->Update();
   }
   catch ( itk::ExceptionObject & err )
