@@ -94,6 +94,8 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
 
     imageData = vtkSmartPointer<vtkImageData>::New();
     viewer = vtkSmartPointer<vtkImageViewer3>::New();
+    streamer = vtkSmartPointer<vtkMemoryLimitImageDataStreamer>::New();
+    streamer->SetMemoryLimit(5000);
     observeProgress = itkEventQtObserver::New();
     transformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
@@ -226,7 +228,6 @@ void milxQtImage::setData(const unsigned slice, vnl_matrix<double> &newData)
 void milxQtImage::setData(vtkSmartPointer<vtkImageData> newImg)
 {
     imageData->DeepCopy(newImg);
-
     usingVTKImage = true;
     eightbit = false;
 	integer = false;
@@ -384,7 +385,9 @@ void milxQtImage::generateImage(const bool quietly)
 
         ///Setup Viewer
         //~ viewer->SetInput(magnify->GetOutput());
-        viewer->SetInputData(imageData);
+        //viewer->SetInputData(imageData);
+        streamer->SetInputData(imageData);
+        viewer->SetInputConnection(streamer->GetOutputPort());
 
         if(!viewerSetup)
         {
