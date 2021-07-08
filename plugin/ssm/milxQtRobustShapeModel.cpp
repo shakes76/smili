@@ -352,7 +352,7 @@ void milxQtRobustShapeModel::generateSSM()
     catch( itk::ExceptionObject & err )
     {
         printError("Exception caught while generating an SSM!");
-        cout << err << endl;
+        std::cout << err << std::endl;
         return;
     }
 
@@ -498,7 +498,7 @@ void milxQtRobustShapeModel::generateModes()
         double zVal = varPoint[2] - meanPoint[2];
 
         float normalPoint[3];
-        normArray->GetTupleValue(i, normalPoint);
+        normArray->GetTypedTuple(i, normalPoint);
         double var;
         if(flgNormal)
         {
@@ -644,7 +644,7 @@ void milxQtRobustShapeModel::generateCorrespondences()
     ///Initialise deviation array
     coordinate origin(0.0);
     for(int l = 0; l < noOfPoints; l ++) ///For all shapes
-        maxDeviations->SetTupleValue(l, origin.data_block());
+        maxDeviations->SetTypedTuple(l, origin.data_block());
 
     for(int j = 0; j < n; j ++) ///For all shapes
     {
@@ -670,7 +670,7 @@ void milxQtRobustShapeModel::generateCorrespondences()
                 if(length > currentMaxLength)
                 {
                     //deviation += currentPoint;
-                    maxDeviations->SetTupleValue(l, deviation.data_block());
+                    maxDeviations->SetTypedTuple(l, deviation.data_block());
                 }
             }
 

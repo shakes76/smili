@@ -673,7 +673,7 @@ StatisticalShapeModelBase<TProfileSamplingPrecisionType>
   float * value = new float[1];
   for(int i = 0; i < b->GetNumberOfTuples(); i++)
     {
-    bNew->GetTupleValue(i, value);
+    bNew->GetTypedTuple(i, value);
     b->SetTuple(i, value);
     }
   // Valgrind claims this isn't cleaned up

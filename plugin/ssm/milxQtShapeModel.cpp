@@ -287,7 +287,7 @@ void milxQtShapeModel::generateSSM()
     catch( itk::ExceptionObject & err )
     {
         printError("Exception caught while generating an SSM!");
-        cout << err << endl;
+        std::cout << err << std::endl;
         return;
     }
 
@@ -525,7 +525,7 @@ void milxQtShapeModel::generateModes()
         vtkFloatingPointType zVal = varPoint[2] - meanPoint[2];
 
         float normalPoint[3];
-        normArray->GetTupleValue(i, normalPoint);
+        normArray->GetTypedTuple(i, normalPoint);
         vtkFloatingPointType var;
         if(flgNormal)
         {
@@ -723,7 +723,7 @@ void milxQtShapeModel::generateCorrespondences()
     ///Initialise deviation array
     coordinate origin(0.0);
     for(int l = 0; l < noOfPoints; l ++) ///For all shapes
-        maxDeviations->SetTupleValue(l, origin.data_block());
+        maxDeviations->SetTypedTuple(l, origin.data_block());
 
     for(int j = 0; j < n; j ++) ///For all shapes
     {
@@ -749,7 +749,7 @@ void milxQtShapeModel::generateCorrespondences()
                 if(length > currentMaxLength)
                 {
                     //deviation += currentPoint;
-                    maxDeviations->SetTupleValue(l, deviation.data_block());
+                    maxDeviations->SetTypedTuple(l, deviation.data_block());
                 }
             }
 
@@ -1512,7 +1512,7 @@ void milxQtShapeModel::pointIds()
         color[1] = static_cast<unsigned char>(255.0 * dcolor[1]);
         color[2] = static_cast<unsigned char>(255.0 * dcolor[2]);
 
-        colors->InsertNextTupleValue(color);
+        colors->InsertNextTypedTuple(color);
     }
 
     for(int j = 0; j < n; j ++) ///For all shapes
@@ -1621,7 +1621,7 @@ void milxQtShapeModel::coordinates()
             color[1] = static_cast<unsigned char>(255.0 * dcolor[1]);
             color[2] = static_cast<unsigned char>(255.0 * dcolor[2]);
 
-            colors->SetTupleValue(k, color);
+            colors->SetTypedTuple(k, color);
         }
 
         m_alignedModels[j]->SetScalars(colors); ///Set the point ID colours

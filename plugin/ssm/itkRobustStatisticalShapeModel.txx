@@ -182,7 +182,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   vtkFloatArray * b = vtkFloatArray::New();
   if (bsize == -1)
     bsize = this->m_PCA->GetModesRequiredFor(this->GetPrecision());
-//  cout << "Using " << bsize << " modes" << endl;
+//  cout << "Using " << bsize << " modes" << std::endl;
   b->SetNumberOfValues(bsize);
   m_PCA->GetShapeParameters(newShape, weights, b, bsize);
 
@@ -199,7 +199,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   vtkFloatArray * b = vtkFloatArray::New();
   if (bsize == -1)
     bsize = this->m_PCA->GetModesRequiredFor(this->GetPrecision());
-//  cout << "Using " << bsize << " modes" << endl;
+//  cout << "Using " << bsize << " modes" << std::endl;
   b->SetNumberOfValues(bsize);
   m_PCA->GetShapeParameters(shape, weights, b, bsize);
 
@@ -401,7 +401,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
       m_PCA->SetInput(i, this->m_ProcrustesAlignedPoints[i], m_Weights[i]);
   #endif
     }
-  //    cerr << "Weights Set: \n" << m_PCA->GetWeights() << endl;
+  //    std::cout << "Weights Set: \n" << m_PCA->GetWeights() << std::endl;
   }
 
   try
@@ -413,7 +413,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     itkExceptionMacro(<< "Failed PCA " << err);
   }
 
-//  cerr << "(Weighted-Unweighted) Mean: \n" << m_PCA->GetMeanShape() - m_PCA->GetUnweightedMeanShape() << endl;
+//  std::cout << "(Weighted-Unweighted) Mean: \n" << m_PCA->GetMeanShape() - m_PCA->GetUnweightedMeanShape() << std::endl;
 
   this->m_Modes = m_PCA->GetModesRequiredFor(this->m_Precision);
   itkDebugMacro("Performed PCA Analysis with " << this->m_Modes << " significant modes");
@@ -835,7 +835,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     delete [] data;
     fin.close();
     itkDebugMacro(<< "Tried reading Full Robust SSM data from file. Trying Compact Robust SSM format instead for " << filename);
-    cout << "Tried reading Full Robust SSM data from file. Trying Compact Robust SSM format instead for " << filename << endl;
+    cout << "Tried reading Full Robust SSM data from file. Trying Compact Robust SSM format instead for " << filename << std::endl;
     return LoadCompactModel(filename);
   }
   m_Loaded = true;
@@ -927,7 +927,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
       weightsCount ++;
       //~ cout << weights->GetValue(j) << ", ";
     }
-    //~ cout << endl;
+    //~ cout << std::endl;
 
     polys->Delete();
     //std::cout << "Number of points in shape " << i << " is " << shape->GetNumberOfPoints() << std::endl;
@@ -950,7 +950,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     eigenVals->SetValue(j, data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + j]);
     //~ cout << eigenVals->GetValue(j) << ", ";
   }
-  //~ cout << endl;
+  //~ cout << std::endl;
   m_PCA->SetEigenValues(eigenVals);
   eigenVals->Delete();
   itkDebugMacro(<< "Loaded Eigenvalues: " << m_PCA->GetEigenValues()->GetNumberOfTuples());
@@ -958,39 +958,39 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   //Get Eigenvectors
   vnl_matrix<double> vectors(static_cast<double>(totalEigenvectors)/totalShapes, totalShapes, 0.0);
   double *vectorsPtr = vectors.data_block();
-//  cerr << "Eigenvectors: " << endl;
+//  std::cout << "Eigenvectors: " << std::endl;
   for (int j = 0; j < totalEigenvectors; j ++)
   {
     vectorsPtr[j] = data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + totalEigenvalues + j];
-//    cerr << vectorsPtr[j] << ", ";
+//    std::cout << vectorsPtr[j] << ", ";
   }
-//  cerr << endl;
+//  std::cout << std::endl;
   m_PCA->SetEigenVectors(vectors);
   itkDebugMacro(<< "Loaded Eigenvectors: " << m_PCA->GetEigenVectors().rows() << "x" << m_PCA->GetEigenVectors().cols());
 
   //Get Inv Eigenvectors
   vnl_matrix<double> invVectors(totalShapes, static_cast<double>(totalEigenvectors)/totalShapes, 0.0);
   vectorsPtr = invVectors.data_block();
-//  cerr << "Eigenvectors: " << endl;
+//  std::cout << "Eigenvectors: " << std::endl;
   for (int j = 0; j < totalInvEigenvectors; j ++)
   {
     vectorsPtr[j] = data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + totalEigenvalues + totalEigenvectors + j];
-//    cerr << vectorsPtr[j] << ", ";
+//    std::cout << vectorsPtr[j] << ", ";
   }
-//  cerr << endl;
+//  std::cout << std::endl;
   m_PCA->SetInverseWeightedEigenVectors(invVectors);
   itkDebugMacro(<< "Loaded Inverse Eigenvectors: " << m_PCA->GetInverseWeightedEigenVectors().rows() << "x" << m_PCA->GetInverseWeightedEigenVectors().cols());
 
   //Get datamatrix
   vnl_matrix<double> dataMatrix(static_cast<double>(totalDataMatrix)/totalShapes, totalShapes, 0.0);
   vectorsPtr = dataMatrix.data_block();
-//  cerr << "Eigenvectors: " << endl;
+//  std::cout << "Eigenvectors: " << std::endl;
   for (int j = 0; j < totalDataMatrix; j ++)
   {
     vectorsPtr[j] = data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + totalEigenvalues + totalEigenvectors + totalInvEigenvectors + j];
-//    cerr << vectorsPtr[j] << ", ";
+//    std::cout << vectorsPtr[j] << ", ";
   }
-//  cerr << endl;
+//  std::cout << std::endl;
   m_PCA->SetDataMatrix(dataMatrix);
   itkDebugMacro(<< "Loaded Data: " << m_PCA->GetDataMatrix().rows() << "x" << m_PCA->GetDataMatrix().cols());
 
@@ -1201,7 +1201,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
       weightsCount ++;
       //~ cout << weights->GetValue(j) << ", ";
     }
-    //~ cout << endl;
+    //~ cout << std::endl;
 
     polys->Delete();
     //std::cout << "Number of points in shape " << i << " is " << shape->GetNumberOfPoints() << std::endl;
@@ -1224,7 +1224,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     eigenVals->SetValue(j, data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + j]);
     //~ cout << eigenVals->GetValue(j) << ", ";
   }
-  //~ cout << endl;
+  //~ cout << std::endl;
   m_PCA->SetEigenValues(eigenVals);
   eigenVals->Delete();
   itkDebugMacro(<< "Loaded Eigenvalues: " << m_PCA->GetEigenValues()->GetNumberOfTuples());
@@ -1232,13 +1232,13 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   //Get Eigenvectors
   vnl_matrix<double> vectors(static_cast<double>(totalEigenvectors)/totalShapes, totalShapes, 0.0);
   double *vectorsPtr = vectors.data_block();
-//  cerr << "Eigenvectors: " << endl;
+//  std::cout << "Eigenvectors: " << std::endl;
   for (int j = 0; j < totalEigenvectors; j ++)
   {
     vectorsPtr[j] = data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalWeightValues + totalEigenvalues + j];
-//    cerr << vectorsPtr[j] << ", ";
+//    std::cout << vectorsPtr[j] << ", ";
   }
-//  cerr << endl;
+//  std::cout << std::endl;
   m_PCA->SetEigenVectors(vectors);
   itkDebugMacro(<< "Loaded Eigenvectors: " << m_PCA->GetEigenVectors().rows() << "x" << m_PCA->GetEigenVectors().cols());
 
@@ -1349,7 +1349,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     ///Extract shape points
     itkDebugMacro(<< "Extracting Shapes.");
-    //cerr<< "Extracting Shapes.";
+    //std::cout<< "Extracting Shapes.";
     size_t count = 0;
     writeType value[3];
     for (int i = 0; i < sz; i++)
@@ -1393,7 +1393,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     ///Extract Cells
     itkDebugMacro(<< "Extracting Cells.");
-    //cerr<< "Extracting Cells. Coun was " << count;
+    //std::cout<< "Extracting Cells. Coun was " << count;
     this->GetShape(0)->GetPolys()->InitTraversal();
     //std::cout << "Number of faces is " << this->GetShape(0)->GetPolys()->GetNumberOfCells() << std::endl;
     vtkCellArray *cells = this->GetShape(0)->GetPolys();
@@ -1416,7 +1416,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Weights
-    //cerr<< "Extracting Weights.";
+    //std::cout<< "Extracting Weights.";
     for (int i = 0; i < sz; i++)
     {
       for (int j = 0; j < m_Weights[i]->GetNumberOfTuples(); j++)
@@ -1427,7 +1427,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvalues
-    //cerr<< "Extracting Eigenvalues.";
+    //std::cout<< "Extracting Eigenvalues.";
     vtkFloatArray *eigenVals = m_PCA->GetEigenValues();
     for (int j = 0; j < eigenVals->GetNumberOfTuples(); j++)
     {
@@ -1436,7 +1436,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvectors
-    //cerr<< "Extracting Eigenvectors.";
+    //std::cout<< "Extracting Eigenvectors.";
     vnl_matrix<double> eigenVecs = m_PCA->GetEigenVectors();
     for (size_t j = 0; j < eigenVecs.rows(); j ++)
     {
@@ -1448,7 +1448,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Inv Eigenvectors
-    //cerr<< "Extracting Inv Eigenvectors.";
+    //std::cout<< "Extracting Inv Eigenvectors.";
     vnl_matrix<double> invEigenVecs = m_PCA->GetInverseWeightedEigenVectors();
     for (size_t j = 0; j < invEigenVecs.rows(); j ++)
     {
@@ -1460,7 +1460,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Data matrix
-    //cerr<< "Extracting Data matrix.";
+    //std::cout<< "Extracting Data matrix.";
     vnl_matrix<double> dataMatrix = m_PCA->GetDataMatrix();
     for (size_t j = 0; j < dataMatrix.rows(); j ++)
     {
@@ -1489,7 +1489,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     // Write data to file
     itkDebugMacro(<< "Writing Data to File.");
-    //cerr<< "Writing Data to File.";
+    //std::cout<< "Writing Data to File.";
     fout.write((char *)(header),headerSize*sizeof(headerType));
     fout.write((char *)(writer),sizeData*sizeof(writeType));
     fout.write((char *)(settings),totalSettings*sizeof(settingsType));
@@ -1498,7 +1498,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     delete [] writer;
     delete [] settings;
     itkDebugMacro(<< "Finished writing file " << filename);
-    cerr<< "Finished writing file " << filename << endl;
+    std::cout<< "Finished writing file " << filename << std::endl;
   }
   else
   {
@@ -1556,7 +1556,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     ///Extract shape points
     itkDebugMacro(<< "Extracting Shapes.");
-    //cerr<< "Extracting Shapes.";
+    //std::cout<< "Extracting Shapes.";
     size_t count = 0;
     writeType value[3];
     for (int i = 0; i < sz; i++)
@@ -1600,7 +1600,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     ///Extract Cells
     itkDebugMacro(<< "Extracting Cells.");
-    //cerr<< "Extracting Cells. Coun was " << count;
+    //std::cout<< "Extracting Cells. Coun was " << count;
     this->GetShape(0)->GetPolys()->InitTraversal();
     //std::cout << "Number of faces is " << this->GetShape(0)->GetPolys()->GetNumberOfCells() << std::endl;
     vtkCellArray *cells = this->GetShape(0)->GetPolys();
@@ -1623,7 +1623,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Weights
-    //cerr<< "Extracting Weights.";
+    //std::cout<< "Extracting Weights.";
     for (int i = 0; i < sz; i++)
     {
       for (int j = 0; j < m_Weights[i]->GetNumberOfTuples(); j++)
@@ -1634,7 +1634,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvalues
-    //cerr<< "Extracting Eigenvalues.";
+    //std::cout<< "Extracting Eigenvalues.";
     vtkFloatArray *eigenVals = m_PCA->GetEigenValues();
     for (int j = 0; j < eigenVals->GetNumberOfTuples(); j++)
     {
@@ -1643,7 +1643,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvectors
-    //cerr<< "Extracting Eigenvectors.";
+    //std::cout<< "Extracting Eigenvectors.";
     vnl_matrix<double> eigenVecs = m_PCA->GetEigenVectors();
     for (size_t j = 0; j < eigenVecs.rows(); j ++)
     {
@@ -1672,7 +1672,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
     // Write data to file
     itkDebugMacro(<< "Writing Data to File.");
-    //cerr<< "Writing Data to File.";
+    //std::cout<< "Writing Data to File.";
     fout.write((char *)(header),headerSize*sizeof(headerType));
     fout.write((char *)(writer),sizeData*sizeof(writeType));
     fout.write((char *)(settings),totalSettings*sizeof(settingsType));
@@ -1681,7 +1681,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     delete [] writer;
     delete [] settings;
     itkDebugMacro(<< "Finished writing file " << filename);
-    cerr<< "Finished writing file " << filename << endl;
+    std::cout<< "Finished writing file " << filename << std::endl;
   }
   else
   {
@@ -1717,7 +1717,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
   PointType centroidY = this->GetCentroid(surfaceY);
   double scaleY = this->GetCentroidSize(surfaceY, centroidY);
-  //cout << "GetSurfacePose: ScaleY " << scaleY << endl;
+  //cout << "GetSurfacePose: ScaleY " << scaleY << std::endl;
   scale = scaleX/scaleY;
   itkDebugMacro(<< "GetSurfacePose: Scale " << scale);
 
@@ -1775,11 +1775,11 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   tx = centroidX[0];
   ty = centroidX[1];
   tz = centroidX[2];
-//  cout << "GetSurfacePose: Translation (" << tx << "," << ty << "," << tz << ")" << endl;
+//  cout << "GetSurfacePose: Translation (" << tx << "," << ty << "," << tz << ")" << std::endl;
 
   // The optimal scaling factor is simply derived from the centroid size
   double scaleX = this->GetCentroidSize(surfaceX, centroidX);
-//  cout << "GetSurfacePose: ScaleX " << scaleX << endl;
+//  cout << "GetSurfacePose: ScaleX " << scaleX << std::endl;
 
   // Generate shape we are aligning with
   vtkPolyData * surfaceY;
@@ -1793,10 +1793,10 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   }
   PointType centroidY = this->GetCentroid(surfaceY);
   double scaleY = this->GetCentroidSize(surfaceY, centroidY);
-  //cout << "GetSurfacePose: ScaleY " << scaleY << endl;
+  //cout << "GetSurfacePose: ScaleY " << scaleY << std::endl;
 
   scale = scaleX/scaleY;
-//  cout << "GetSurfacePose: Scale " << scale << endl;
+//  cout << "GetSurfacePose: Scale " << scale << std::endl;
 
   // Filter out translation and scale effects
   vtkTransform * transformX = vtkTransform::New();
@@ -1882,12 +1882,12 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   // Translation is simply the centroid of the surface
   PointType centroidFullX = this->GetCentroid(surfaceX);
   //~ PointType centroidX = this->GetCentroid(clippedSurfaceX);
-//  cout << "GetSurfacePose: Translation (" << tx << "," << ty << "," << tz << ")" << endl;
+//  cout << "GetSurfacePose: Translation (" << tx << "," << ty << "," << tz << ")" << std::endl;
 
   // The optimal scaling factor is simply derived from the centroid size
   double scaleFullX = this->GetCentroidSize(surfaceX, centroidFullX);
   //~ double scaleX = this->GetCentroidSize(clippedSurfaceX, centroidX);
-//  cout << "GetSurfacePose: ScaleX " << scaleX << endl;
+//  cout << "GetSurfacePose: ScaleX " << scaleX << std::endl;
 
   // Generate shape we are aligning with
   vtkPolyData * surfaceY;
@@ -1911,7 +1911,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   double scaleFullY = this->GetCentroidSize(surfaceY, centroidFullY);
   //~ PointType centroidY = this->GetCentroid(clippedSurfaceY);
   //~ double scaleY = this->GetCentroidSize(clippedSurfaceY, centroidY);
-  //cout << "GetSurfacePose: ScaleY " << scaleY << endl;
+  //cout << "GetSurfacePose: ScaleY " << scaleY << std::endl;
 
   tx = centroidFullX[0]-centroidMean[0];
   ty = centroidFullX[1]-centroidMean[1];
@@ -1919,7 +1919,7 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
 
   scale = scaleFullX/scaleMean;
   double scale2 = scaleFullY/scaleMean;
-//  cout << "GetSurfacePose: Scale " << scale << endl;
+//  cout << "GetSurfacePose: Scale " << scale << std::endl;
 
   // Filter out translation and scale effects
   vtkTransform * transformX = vtkTransform::New();
@@ -2149,10 +2149,10 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   transform->SetMatrix(matrix);
 
   //vtkMatrix4x4 * matrix = transform->GetMatrix();
-  //cout << "Use Matrix " << endl;
-  //cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << endl;
-  //cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << endl;
-  //cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << endl;
+  //cout << "Use Matrix " << std::endl;
+  //cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << std::endl;
+  //cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << std::endl;
+  //cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << std::endl;
 
   vtkTransformPolyDataFilter *transformSurface = vtkTransformPolyDataFilter::New();
   transformSurface->SetTransform(transform);
@@ -2170,8 +2170,8 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     //~ writer->Write();
 
 //  PointType centroid = this->GetCentroid(transformSurface->GetOutput());
-//  cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << endl;
-//  cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << endl;
+//  cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << std::endl;
+//  cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << std::endl;
 
   // Now find shape parameters
   vtkFloatArray * bNew = this->GetShapeParametersInPlace(transformSurface->GetOutput(), weights, b->GetNumberOfTuples());
@@ -2197,10 +2197,10 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   transform->SetMatrix(matrix);
 
   //~ vtkMatrix4x4 * matrix = transform->GetMatrix();
-  //~ cout << "Use Matrix " << endl;
-  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << endl;
-  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << endl;
-  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << endl;
+  //~ cout << "Use Matrix " << std::endl;
+  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << std::endl;
+  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << std::endl;
+  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << std::endl;
 
   //Clip surface
   vtkSmartPointer<vtkPolyData> clippedSurface = vtkSmartPointer<vtkPolyData>::New();
@@ -2230,8 +2230,8 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
     //~ writer->Write();
 
   //~ PointType centroid = this->GetCentroid(transformSurface->GetOutput());
-  //~ cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << endl;
-  //~ cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << endl;
+  //~ cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << std::endl;
+  //~ cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << std::endl;
 
   // Now find shape parameters
   vtkFloatArray * bNew = this->GetShapeParametersInPlace(clippedRemappedSurface, weights, b->GetNumberOfTuples());
@@ -2262,10 +2262,10 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
   transform->SetMatrix(matrix);
 
-  //~ cout << "Use Matrix " << endl;
-  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << endl;
-  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << endl;
-  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << endl;
+  //~ cout << "Use Matrix " << std::endl;
+  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << std::endl;
+  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << std::endl;
+  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << std::endl;
 
   vtkSmartPointer<vtkTransformPolyDataFilter> transformSurface = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
   transformSurface->SetTransform(transform);
@@ -2298,10 +2298,10 @@ RobustStatisticalShapeModel<TProfileSamplingPrecisionType>
   transform->SetMatrix(matrix);
 
   //~ vtkMatrix4x4 * matrix = transform->GetMatrix();
-  //~ cout << "Use Matrix " << endl;
-  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << endl;
-  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << endl;
-  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << endl;
+  //~ cout << "Use Matrix " << std::endl;
+  //~ cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << std::endl;
+  //~ cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << std::endl;
+  //~ cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << std::endl;
 
   //~ std::ostringstream toString;
   //~ toString << Counter;

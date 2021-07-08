@@ -21,6 +21,9 @@
 #ifndef __itkStatisticalShapeTimepointModel_txx
 #define __itkStatisticalShapeTimepointModel_txx
 
+#include <iostream>
+#include <string>
+
 #include "itkStatisticalShapeTimepointModel.h"
 //VTK
 #include <vtkProcrustesAlignmentFilter.h>
@@ -78,7 +81,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 ::LoadModel(const char * filename) throw(itk::ExceptionObject)
 {
   itkDebugMacro(<< "Loading FULL SSM with FileName " << filename);
-  cout << "Loading FULL SSM with FileName " << filename << endl;
+  std::cout << "Loading FULL SSM with FileName " << filename << std::endl;
 
   typedef float headerType; //float for backwards compatibility to standard format
   typedef double writeType; 
@@ -137,7 +140,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     delete [] data;
     fin.close();
     itkDebugMacro(<< "Tried reading Full SSM data from file. Trying Standard SSM format instead for " << filename);
-    cerr << "Tried reading Full SSM data from file. Trying Standard SSM format instead for " << filename << endl;
+    std::cerr << "Tried reading Full SSM data from file. Trying Standard SSM format instead for " << filename << std::endl;
     return Superclass::LoadModel(filename);
   }
   m_Loaded = true;
@@ -238,11 +241,11 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     eigenVals->SetValue(j, data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + j]);
 //    cout << eigenVals->GetValue(j) << ", ";
   }
-//  cout << endl;
+//  cout << std::endl;
   PCA->SetEvals(eigenVals);
   eigenVals->Delete();
   itkDebugMacro(<< "Loaded Eigenvalues: " << PCA->GetEvals()->GetNumberOfTuples());
-//  cerr << "Loaded Eigenvalues: " << PCA->GetEvals()->GetNumberOfTuples() << endl;
+//  std::cerr << "Loaded Eigenvalues: " << PCA->GetEvals()->GetNumberOfTuples() << std::endl;
 
   //Get Eigenvectors
   double *matrix = new double[totalPoints*totalShapes];
@@ -250,16 +253,16 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
   for(int i = 0; i < totalPoints; i++) {
     vectors[i] = &matrix[i*totalShapes];
   }
-//  cerr << "Eigenvectors: " << endl;
+//  std::cerr << "Eigenvectors: " << std::endl;
   for (int j = 0; j < totalEigenvectors; j ++)
   {
     matrix[j] = data[totalShapesPoints + totalAlignedPoints + totalMeanPoints + totalCellvalues + totalEigenvalues + j];
-//    cerr << matrix[j] << ", ";
+//    std::cerr << matrix[j] << ", ";
   }
-//  cerr << endl;
+//  std::cerr << std::endl;
   PCA->SetEvectors(vectors);
   itkDebugMacro(<< "Loaded Eigenvectors: " << totalPoints << "x" << totalShapes);
-//  cerr << "Loaded Eigenvectors: " << totalPoints << "x" << totalShapes << endl;
+//  std::cerr << "Loaded Eigenvectors: " << totalPoints << "x" << totalShapes << std::endl;
 
   //Set the weights in the PCA object
   this->UpdatePCA();
@@ -303,7 +306,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 ::SaveModel(const char * filename)
 {
   itkDebugMacro(<< "Saving FULL SSM with filename " << filename);
-  cout << "Saving FULL SSM with filename " << filename << endl;
+  std::cout << "Saving FULL SSM with filename " << filename << std::endl;
   /// We want to save the current model to file
   /// File format is header, shape (point) data, aligned (point) data, connectiveness (triangle) data
   typedef float headerType; //float for backwards compatibility to standard format
@@ -344,7 +347,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
     ///Extract shape points
     itkDebugMacro(<< "Extracting Shapes.");
-    //cerr<< "Extracting Shapes.";
+    //std::cerr<< "Extracting Shapes.";
     size_t count = 0;
     writeType value[3];
     for (int i = 0; i < sz; i++)
@@ -388,7 +391,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
     ///Extract Cells
     itkDebugMacro(<< "Extracting Cells.");
-    //cerr<< "Extracting Cells. Coun was " << count;
+    //std::cerr<< "Extracting Cells. Coun was " << count;
     this->GetShape(0)->GetPolys()->InitTraversal();
     //std::cout << "Number of faces is " << this->GetShape(0)->GetPolys()->GetNumberOfCells() << std::endl;
     vtkCellArray *cells = this->GetShape(0)->GetPolys();
@@ -411,7 +414,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvalues
-    //cerr<< "Extracting Eigenvalues.";
+    //std::cerr<< "Extracting Eigenvalues.";
     vtkFloatArray *eigenVals = PCA->GetEvals();
     for (int j = 0; j < eigenVals->GetNumberOfTuples(); j++)
     {
@@ -420,7 +423,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     }
 
     ///Extract Eigenvectors
-    //cerr<< "Extracting Eigenvectors.";
+    //std::cerr<< "Extracting Eigenvectors.";
     double **eigenVecs = PCA->GetEvectors();
     for (int j = 0; j < totalPoints; j ++)
     {
@@ -433,14 +436,14 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
     // Write data to file
     itkDebugMacro(<< "Writing Data to File.");
-    //cerr<< "Writing Data to File.";
+    //std::cerr<< "Writing Data to File.";
     fout.write((char *)(header),headerSize*sizeof(headerType));
     fout.write((char *)(writer),sizeData*sizeof(writeType));
     fout.close();
     delete [] header;
     delete [] writer;
     itkDebugMacro(<< "Finished writing file " << filename);
-    cerr<< "Finished writing file " << filename << endl;
+    std::cerr<< "Finished writing file " << filename << std::endl;
   }
   else
   {
@@ -532,7 +535,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
   if (this->GetValid() == false)
     this->GenerateData();
 //  else if (m_Loaded)
-//    cout << "Already up-to-date from load." << endl;
+//    cout << "Already up-to-date from load." << std::endl;
 }
 
 template <class TProfileSamplingPrecisionType>
@@ -540,7 +543,7 @@ void
 StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 ::GenerateData()
 {
-  cerr << "Timepoint SSM GenerateData" << endl;
+  std::cout << "Timepoint SSM GenerateData" << std::endl;
   vtkPCAAnalysisTimepointFilter *PCA = vtkPCAAnalysisTimepointFilter::SafeDownCast(Superclass::m_PCA);
   PCA->SetTimepointMode(m_TimepointMode);
 
@@ -603,9 +606,9 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 #endif
     try
       {
-      //cerr << "Procrustes Align" << endl;
+      //std::cerr << "Procrustes Align" << std::endl;
       procrustesAlign->Update();
-      //cerr << "Done" << endl;
+      //std::cerr << "Done" << std::endl;
       }
     catch( itk::ExceptionObject & err )
       {
@@ -616,14 +619,14 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
       {
       vtkPolyData * aligned = vtkPolyData::New();
       vtkPoints * points = vtkPoints::New();
-      //cerr << "Loaded aligned " << i << " shape" << endl;
+      //std::cerr << "Loaded aligned " << i << " shape" << std::endl;
       points->DeepCopy(vtkPolyData::SafeDownCast(procrustesAlign->GetOutput()->GetBlock(i))->GetPoints());
       aligned->SetPoints(points);
       points->Delete();
       this->m_ProcrustesAlignedPoints.push_back(aligned);
       }
     procrustesAlign->Delete();
-    //cerr << "Performed Procrustes Alignment with " << sz << " shapes" << endl;
+    //std::cerr << "Performed Procrustes Alignment with " << sz << " shapes" << std::endl;
     itkDebugMacro(<< "Performed Procrustes Alignment with " << sz << " shapes");
   }
   else
@@ -666,7 +669,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
 
   try
   {
-    //cerr << "PCA Update" << endl;
+    //std::cerr << "PCA Update" << std::endl;
     PCA->Update();
   }
   catch ( itk::ExceptionObject & err )
@@ -721,10 +724,10 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
   transform->SetMatrix(matrix);
   matrix->Delete();
   //vtkMatrix4x4 * matrix = transform->GetMatrix();
-  //cout << "Use Matrix " << endl;
-  //cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << endl;
-  //cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << endl;
-  //cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << endl;
+  //cout << "Use Matrix " << std::endl;
+  //cout << matrix->GetElement(0,0) << "," << matrix->GetElement(0,1) << "," << matrix->GetElement(0,2) << std::endl;
+  //cout << matrix->GetElement(1,0) << "," << matrix->GetElement(1,1) << "," << matrix->GetElement(1,2) << std::endl;
+  //cout << matrix->GetElement(2,0) << "," << matrix->GetElement(2,1) << "," << matrix->GetElement(2,2) << std::endl;
 
   vtkTransformPolyDataFilter *transformSurface = vtkTransformPolyDataFilter::New();
   transformSurface->SetTransform(transform);
@@ -738,8 +741,8 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
   // Transformed surface should have zero origin,
   /*
   PointType centroid = this->GetCentroid(transformSurface->GetOutput());
-  cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << endl;
-  cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << endl;
+  std::cout << "GetSurfaceShapeParams: Translation (" << centroid[0] << "," << centroid[1] << "," << centroid[2] << ")" << std::endl;
+  std::cout << "GetSurfaceShapeParams: Scale " << this->GetCentroidSize(transformSurface->GetOutput()) << std::endl;
 
   vtkPolyDataWriter *writer = vtkPolyDataWriter::New();
 #if VTK_MAJOR_VERSION <= 5
@@ -765,7 +768,7 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
   float * value = new float[1];
   for(int i = 0; i < b->GetNumberOfTuples(); i++)
     {
-    bNew->GetTupleValue(i, value);
+    bNew->GetTypedTuple(i, value);
     b->SetTuple(i, value);
     }
   // Valgrind claims this isn't cleaned up
@@ -879,10 +882,10 @@ StatisticalShapeTimepointModel<TProfileSamplingPrecisionType>
     }
   PointType centroidY = this->GetCentroid(surfaceY);
   double scaleY = this->GetCentroidSize(surfaceY, centroidY);
-  //cout << "GetSurfacePose: ScaleY " << scaleY << endl;
+  //cout << "GetSurfacePose: ScaleY " << scaleY << std::endl;
 
   scale = scaleX/scaleY;
-  //cout << "GetSurfacePose: Scale " << scale << endl;
+  //cout << "GetSurfacePose: Scale " << scale << std::endl;
 
   // Filter out translation and scale effects
   vtkTransform * transformX = vtkTransform::New();
