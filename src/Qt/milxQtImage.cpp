@@ -1618,9 +1618,9 @@ void milxQtImage::rescale()
 
     bool ok1, ok2;
     float newMinValue = QInputDialog::getDouble(this, tr("Please Provide the minimum value of new intensities"),
-                     tr("Minimum:"), minValue, -2147483647, 2147483647, 1, &ok1);
+                     tr("Minimum:"), minValue, -DBL_MAX, DBL_MAX, 1, &ok1);
     float newMaxValue = QInputDialog::getDouble(this, tr("Please Provide the maximum value of new intensities"),
-                     tr("Maximum:"), maxValue, -2147483647, 2147483647, 1, &ok2);
+                     tr("Maximum:"), maxValue, -DBL_MAX, DBL_MAX, 1, &ok2);
 
     if(!ok1 || !ok2)
         return;
@@ -1758,7 +1758,7 @@ void milxQtImage::cannyEdges()
 
     bool ok1, ok2, ok3;
     float variance = QInputDialog::getDouble(this, tr("Please Provide the variance"),
-                     tr("Variance:"), 2.0, 0.0, 1000.0, 5, &ok1);
+                     tr("Variance:"), 2.0, -DBL_MAX, DBL_MAX, 5, &ok1);
     float upper = QInputDialog::getDouble(this, tr("Please Provide the upper threshold"),
                                           tr("Upper Threshold:"), maxValue, minValue, maxValue, 5, &ok2);
     float lower = QInputDialog::getDouble(this, tr("Please Provide the lower threshold"),
@@ -2638,7 +2638,7 @@ void milxQtImage::thresholdAbove(float value, float level)
     if(value == 0 && level == 0)
     {
         value = QInputDialog::getDouble(this, tr("Please Provide Outside Value"),
-                                        tr("Outside Value:"), 0, minValue, maxValue, 5, &ok1);
+                                        tr("Outside Value:"), 0, -DBL_MAX, DBL_MAX, 5, &ok1);
         level = QInputDialog::getDouble(this, tr("Please Provide the threshold upper level"),
                                         tr("Level:"), maxValue, minValue, maxValue, 5, &ok2);
 
@@ -2675,7 +2675,7 @@ void milxQtImage::thresholdBelow(float value, float level)
     if(value == 0 && level == 0)
     {
         value = QInputDialog::getDouble(this, tr("Please Provide Outside Value"),
-                                        tr("Outside Value:"), 0, minValue, maxValue, 5, &ok1);
+                                        tr("Outside Value:"), 0, -DBL_MAX, DBL_MAX, 5, &ok1);
         level = QInputDialog::getDouble(this, tr("Please Provide the threshold lower level"),
                                         tr("Level:"), minValue, minValue, maxValue, 5, &ok2);
 
@@ -2712,7 +2712,7 @@ void milxQtImage::threshold(float value, float blevel, float alevel)
     if(value == 0 && blevel == 0 && alevel == 0)
     {
         value = QInputDialog::getDouble(this, tr("Please Provide Outside Value"),
-                                        tr("Outside Value:"), 0, minValue, maxValue, 5, &ok1);
+                                        tr("Outside Value:"), 0, -DBL_MAX, DBL_MAX, 5, &ok1);
         blevel = QInputDialog::getDouble(this, tr("Please Provide the threshold lower level"),
                                          tr("Lower Level:"), minValue, minValue, maxValue, 5, &ok2);
         alevel = QInputDialog::getDouble(this, tr("Please Provide the threshold upper level"),
@@ -2827,7 +2827,7 @@ void milxQtImage::binaryThreshold(float value, float blevel, float alevel)
     if(value == 0 && blevel == 0 && alevel == 0)
     {
         value = QInputDialog::getDouble(this, tr("Please Provide Inside Value"),
-                                        tr("Inside Value:"), 1.0, 0, 255, 1, &ok1);
+                                        tr("Inside Value:"), 1.0, -DBL_MAX, DBL_MAX, 1, &ok1);
         blevel = QInputDialog::getDouble(this, tr("Please Provide the threshold lower level"),
                                          tr("Lower Level:"), minValue, minValue, maxValue, 5, &ok2);
         alevel = QInputDialog::getDouble(this, tr("Please Provide the threshold upper level"),
@@ -3751,6 +3751,10 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
     {
         bool ok1 = false, ok2 = false;
 
+        minRange = QInputDialog::getDouble(this, tr("Enter Table Range of new Lookup Table"),
+                                          tr("Minimum:"), 0, -DBL_MAX, DBL_MAX, 5, &ok1);
+        maxRange = QInputDialog::getDouble(this, tr("Enter Table Range of new Lookup Table"),
+                                          tr("Maximum:"), 1, -DBL_MAX, DBL_MAX, 5, &ok2);
         noOfLabels = QInputDialog::getInt(this, tr("How many labels to show"),
                                           tr("Labels:"), noOfLabels, 0, 99, 1, &ok1);
         title = QInputDialog::getText(this, tr("Title of Bar"),
@@ -3760,10 +3764,16 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
         if(!ok1 || !ok2)
             return;
 
-        if(milxQtRenderWindow::logScale)
+        if (milxQtRenderWindow::logScale)
+        {
+            logLookupTable->SetRange(minRange, maxRange);
             milxQtRenderWindow::scale->SetLookupTable(logLookupTable);
+        }
         else
+        {
+            lookupTable->SetRange(minRange, maxRange);
             milxQtRenderWindow::scale->SetLookupTable(lookupTable);
+        }
         milxQtRenderWindow::scale->SetNumberOfLabels(noOfLabels);
 
         vtkImageMapToWindowLevelColors *filterColorsOverlay = viewer->GetWindowLevel();
