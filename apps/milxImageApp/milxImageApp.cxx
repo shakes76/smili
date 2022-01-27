@@ -489,10 +489,10 @@ int main(int argc, char *argv[])
     vectorImages = true;
     std::cout << "Read " << vectorCollection.size() << " vector images" << std::endl;
 
-  #if ITK_MAJOR_VERSION > 3
-    if(!infoArg.isSet() && !maskArg.isSet() && !addArg.isSet() && !diffArg.isSet() && !meanArg.isSet())
+  #if (ITK_VERSION_MAJOR > 3)
+    if(!convertArg.isSet() && !infoArg.isSet() && !addArg.isSet() && !diffArg.isSet() && !meanArg.isSet() && !maskArg.isSet() && !cropArg.isSet())
   #else
-    if(!infoArg.isSet() && !addArg.isSet() && !diffArg.isSet() && !meanArg.isSet())
+    if(!convertArg.isSet() && !infoArg.isSet() && !addArg.isSet() && !diffArg.isSet() && !meanArg.isSet())
   #endif
     {
       milx::PrintError("Input Error: Operation provided not supported for vector images yet.");
@@ -551,10 +551,15 @@ int main(int argc, char *argv[])
 
         break;
 
-    #if ITK_MAJOR_VERSION > 3
+    #if (ITK_VERSION_MAJOR > 3)
       case mask:
         milx::Image<vectorImageType>::MaskCollection<charImageType>(vectorCollection, maskImage);
         break;
+    #endif
+
+    #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
+      case crop:
+        milx::Image<vectorImageType>::MaskAndCropCollection<charImageType>(vectorCollection, maskImage, paddingValue);
     #endif
 
       case add:
