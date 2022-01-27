@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << endl;
+            std::cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     {
         if(!imageArg.isSet())
         {
-            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << endl;
+            std::cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
     {
         if(!isoArg.isSet())
         {
-            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << endl;
+            std::cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -239,12 +239,12 @@ int main(int argc, char* argv[])
     bool success = false;
 
     //Read model
-    cout << ">> Animate: Reading Models" << endl;
+    std::cout << ">> Animate: Reading Models" << std::endl;
     vtkSmartPointer<vtkPolyDataCollection> collection;
     success = milx::File::OpenModelCollection(filenames, collection);
     if(!success) //Error printed inside
     {
-        cerr << "Error reading models!" << endl;
+        std::cerr << "Error reading models!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 
     if(n < 1)
     {
-        cerr << "At least one model must be provided!" << endl;
+        std::cerr << "At least one model must be provided!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
     model->SetInputCollection(updatedCollection, files, index);
     if(!model->isLoaded()) //Error printed inside
     {
-        cerr << "Error reading models into animation! Check frameindex or filenames provided." << endl;
+        std::cerr << "Error reading models into animation! Check frameindex or filenames provided." << std::endl;
         exit(EXIT_FAILURE);
     }
     mainWindow.setCentralWidget(model.data());
@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtImage> imgIso(new milxQtImage);  //smart deletion
     if(isoArg.isSet())
     {
-        cout << ">> Animate: Applying Isosurface" << endl;
+        cout << ">> Animate: Applying Isosurface" << std::endl;
         success = reader->openImage(isoName.c_str(), imgIso.data());
             imgIso->setName(isoName.c_str());
             imgIso->generateImage();
@@ -362,7 +362,7 @@ int main(int argc, char* argv[])
 
     if(errorReading)
     {
-        cerr << "Error Reading one or more of the input files. Exiting." << endl;
+        std::cerr << "Error Reading one or more of the input files. Exiting." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
         transform2->PostMultiply();
     if(imageArg.isSet())
     {
-        cout << ">> Animate: Reading Image" << endl;
+        std::cout << ">> Animate: Reading Image" << std::endl;
         errorReading = false;
         success = reader->openImage(imageName.c_str(), img.data());
 
@@ -446,7 +446,7 @@ int main(int argc, char* argv[])
 
         if(errorReading)
         {
-            cerr << "Error Reading the image file. Exiting." << endl;
+            std::cerr << "Error Reading the image file. Exiting." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
         orientTransform->Invert();
         transform2->Concatenate(orientTransform);
 //        transform2->Concatenate(transform->GetMatrix());
-        cout << ">> Animate: Transforming Actors" << endl;
+        std::cout << ">> Animate: Transforming Actors" << std::endl;
     }
 
     ///Display
@@ -482,7 +482,7 @@ int main(int argc, char* argv[])
     }
 
     //Colour maps
-    cout << ">>> Overlay: Setting Colourmap" << endl;
+    std::cout << ">>> Overlay: Setting Colourmap" << std::endl;
     if(jetArg.isSet())
         model->colourMapToJet();
     if(vtkArg.isSet())
@@ -549,7 +549,7 @@ int main(int argc, char* argv[])
     if(wireframesArg.isSet())
         model->generateWireframe();
 
-    cout << ">> Animate: Rendering" << endl;
+    std::cout << ">> Animate: Rendering" << std::endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -557,7 +557,7 @@ int main(int argc, char* argv[])
 
     ///Animate
     model->movie(movieName.c_str(), frames);
-    cout << ">> Complete" << endl;
+    std::cout << ">> Complete" << std::endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
 

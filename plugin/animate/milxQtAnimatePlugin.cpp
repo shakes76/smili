@@ -38,7 +38,7 @@ milxQtAnimatePlugin::~milxQtAnimatePlugin()
 {
     if(isRunning() && threaded)
         quit();
-    cerr << "Animate Plugin Destroyed." << endl;
+    std::cout << "Animate Plugin Destroyed." << std::endl;
 }
 
 QString milxQtAnimatePlugin::name()
@@ -76,11 +76,11 @@ QString milxQtAnimatePlugin::saveFileSupport()
 
 void milxQtAnimatePlugin::SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames)
 {
-    cout << "Loading Collection via the Animate Plugin" << endl;
+    std::cout << "Loading Collection via the Animate Plugin" << std::endl;
     animateModel = new milxQtAnimateModel(MainWindow);
         animateModel->SetInputCollection(collection, filenames);
         animateModel->setConsole(console);
-        cout << "Loaded Collection as an animation." << endl;
+        std::cout << "Loaded Collection as an animation." << std::endl;
 
     ///Update case list in manager
 //    QStringList headingList;
@@ -94,7 +94,7 @@ void milxQtAnimatePlugin::SetInputCollection(vtkPolyDataCollection* collection, 
 //    else
 //        manager->clearTab(caseTabIndex);
 //
-//    cout << "Loading cases into browser." << endl;
+//    std::cout << "Loading cases into browser." << std::endl;
 //    QList< int > cases = shapes.last()->getCaseIDs();
 //    for(int j = 0; j < cases.size(); j ++)
 //    {
@@ -172,4 +172,4 @@ void milxQtAnimatePlugin::createConnections()
     //QObject::connect(denoiseAct, SIGNAL(triggered(bool)), denoiseModel, SLOT(denoise()));
 }
 
-Q_EXPORT_PLUGIN2(animatePlugin, milxQtAnimatePluginFactory);
+//Q_EXPORT_PLUGIN2(animatePlugin, milxQtAnimatePluginFactory);

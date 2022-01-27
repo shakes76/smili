@@ -3,12 +3,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(animatePlugin CXX)
 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
-
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-INCLUDE(${QT_USE_FILE})
-
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
 # Add Headers into List
@@ -26,7 +20,11 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export SMILI
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
 
 # this moc's the above variable and appends to the cxx sources
-QT4_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+    QT5_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
+ELSEIF(VTK_QT_VERSION VERSION_GREATER "4")
+    QT4_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(animatePlugin SHARED milxQtAnimateModel.cpp milxQtAnimatePlugin.cpp ${ANIMATE_MOCS})
 TARGET_LINK_LIBRARIES(animatePlugin milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES})
