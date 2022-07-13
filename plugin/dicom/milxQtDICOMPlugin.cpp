@@ -1203,11 +1203,11 @@ void milxQtDICOMPlugin::createWizardAnonymise()
 void milxQtDICOMPlugin::createConnections()
 {
 //    connect(MainWindow, SIGNAL(windowActivated(QWidget*)), this, SLOT(updateManager(QWidget*)));
-    connect(actionOpenSeries, SIGNAL(activated()), this, SLOT(openSeries()));
-    connect(actionTags, SIGNAL(activated()), this, SLOT(viewTags()));
-    connect(actionConvertStructure, SIGNAL(activated()), this, SLOT(openStructureSet()));
-    connect(actionConvert, SIGNAL(activated()), this, SLOT(convert()));
-    connect(actionAnonymize, SIGNAL(activated()), this, SLOT(anonymize()));
+    connect(actionOpenSeries, SIGNAL(triggered()), this, SLOT(openSeries()));
+    connect(actionTags, SIGNAL(triggered()), this, SLOT(viewTags()));
+    connect(actionConvertStructure, SIGNAL(triggered()), this, SLOT(openStructureSet()));
+    connect(actionConvert, SIGNAL(triggered()), this, SLOT(convert()));
+    connect(actionAnonymize, SIGNAL(triggered()), this, SLOT(anonymize()));
 
     connect(this, SIGNAL(working(int)), MainWindow, SLOT(working(int)));
     connect(this, SIGNAL(done(int)), MainWindow, SLOT(done(int)));

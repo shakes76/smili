@@ -37,6 +37,7 @@
   #include <itkGDCMSeriesFileNames.h>
   #include <itkOrientImageFilter.h> //for dicom orientation
   #include <itkExtractImageFilter.h>
+  #include <itkStreamingImageFilter.h>
   #if (ITK_VERSION_MAJOR > 3)
     #include <itkComposeImageFilter.h>
   #endif
@@ -142,7 +143,7 @@ public:
     Image is also NOT flipped, consider using overloaded OpenImage() with VTK image data which is flipped.
   */
   template<class TImage>
-  static bool OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data);
+  static bool OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits = 1);
 #if (ITK_VERSION_MAJOR > 3)
   /*!
     \fn File::OpenAsVectorImage(const std::string filename, typename itk::SmartPointer< itk::VectorImage< typename TImage::InternalPixelType, typename TImage::ImageDimension-1> > &data)
@@ -182,7 +183,7 @@ public:
     Image is also NOT flipped, consider using overloaded OpenImage() with VTK image data which is flipped.
   */
   template<class TImage>
-  static bool SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io = NULL);
+  static bool SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io = NULL, unsigned int numberOfDivisions = 1);
   /*!
     \fn File::SaveImages(std::vector<std::string> &filenames, const std::vector< typename itk::SmartPointer<TImage> > images)
     \brief Saves a number of images, which are any of the following: JPEG, PNG, DICOM, TIFF, NIFTI etc.
@@ -282,7 +283,7 @@ public:
     This member is inline deliberately to avoid function call overheads.
   */
   template<class TImage>
-  inline static itk::SmartPointer<TImage> ReadImageUsingITK(const std::string filename);
+  inline static itk::SmartPointer<TImage> ReadImageUsingITK(const std::string filename, size_t numOfSplits = 1);
   /**
     \brief Saves the image using the ITK file writer class. Returns NULL if failed and outputs the error to std error.
 
@@ -491,7 +492,7 @@ private:
 
 #ifndef VTK_ONLY
 template<class TImage>
-bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data)
+bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TImage> &data, size_t numOfSplits)
 {
   if(!Exists(filename))
   {
@@ -499,7 +500,7 @@ bool File::OpenImage(const std::string filename, typename itk::SmartPointer<TIma
     return false;
   }
 
-  data = ReadImageUsingITK<TImage>(filename);
+  data = ReadImageUsingITK<TImage>(filename, numOfSplits);
 
   if(!data)
     return false;
@@ -593,7 +594,7 @@ bool File::OpenImages(std::vector<std::string> &filenames, std::vector< typename
 }
 
 template<class TImage>
-bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io)
+bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TImage> data, itk::ImageIOBase *io, unsigned int numberOfDivisions)
 {
   typedef itk::ImageFileWriter<TImage> ImageWriter;
 
@@ -601,6 +602,9 @@ bool File::SaveImage(const std::string filename, typename itk::SmartPointer<TIma
     writer->UseInputMetaDataDictionaryOn();
     writer->SetInput(data);
     writer->SetFileName(filename.c_str());
+    //set streaming divisions
+    //numberOfDivisions = 1000;
+    writer->SetNumberOfStreamDivisions(numberOfDivisions);
     if(io)
       writer->SetImageIO(io);
     writer->AddObserver(itk::ProgressEvent(), ProgressUpdates);
@@ -936,15 +940,21 @@ bool File::OpenDICOMSeriesAndTags(const std::string directoryPath, typename itk:
 
 #ifndef VTK_ONLY
 template<class TImage>
-itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
+itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename, size_t numOfSplits)
 {
   typedef itk::ImageFileReader<TImage, itk::DefaultConvertPixelTraits<typename TImage::InternalPixelType> > ImageReader; //InternalPixelType != PixelType for vector images
   typename ImageReader::Pointer reader = ImageReader::New();
   reader->SetFileName(filename.c_str());
   reader->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  typedef itk::StreamingImageFilter< TImage, TImage > StreamingFilterType;
+  typename StreamingFilterType::Pointer streamingFilter = StreamingFilterType::New();
+  streamingFilter->SetInput( reader->GetOutput() );
+  streamingFilter->SetNumberOfStreamDivisions( numOfSplits ); 
+
   try
   {
-    reader->Update();
+      streamingFilter->Update();
   }
   catch( itk::ExceptionObject & err )
   {
@@ -953,7 +963,7 @@ itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
     return NULL;
   }
 
-  return reader->GetOutput();
+  return streamingFilter->GetOutput();
 }
 
 template<class TImage>
