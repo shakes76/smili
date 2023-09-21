@@ -45,6 +45,7 @@ DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_USE_FILE_INCLUDE
 DEPENDENT_OPTION(BUILD_VTK_EXTENSIONS "Build the VTK Extensions Library" ON "USE_VTK" OFF)
 DEPENDENT_OPTION(BUILD_MILXQT "Build the MILX Qt Library" ON "BUILD_GUI_RELATED" OFF)
 DEPENDENT_OPTION(BUILD_PLUGINS "Build the plugins for the Viewer" OFF "BUILD_VIEWER" OFF)
+OPTION(PYTHON_BINDINGS "Build python bindings" OFF)
 
 IF(BUILD_MILXQT)
     #detect Qt version (depends on VTK-Qt)
@@ -131,6 +132,15 @@ ENDIF(APPLE)
 # Recurse into the "apps" subdirectory. This does not actually
 # cause another cmake executable to run.
 add_subdirectory (src)
+
+IF(PYTHON_BINDINGS)
+  IF(CMAKE_BUILD_TYPE MATCHES "^[Dd]eb" OR ${PROJECT_NAME}_STATIC)
+    MESSAGE(FATAL_ERROR "** Python Bindings are disabled in debug or static builds.")
+  ENDIF()
+ENDIF()
+IF(PYTHON_BINDINGS)
+  add_subdirectory (python)
+ENDIF(PYTHON_BINDINGS)
 
 IF(BUILD_VIEWER)
     add_subdirectory (apps/smilx)
