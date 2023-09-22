@@ -1,10 +1,14 @@
 #
 # This file is part of SMILI.
 #
+# Add include directories
+# Create a library called "milxQt" which includes the source files.
+include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 
 # Auto-Genereate files every class will have his cpp/h files
 set(PySMILI_SRC
     # individual classes
+    ${CMAKE_CURRENT_BINARY_DIR}/milxQtWindow_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/milxQtWindow_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/LabelledAction_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/milxQtRenderWindow_wrapper.h
@@ -15,7 +19,7 @@ set(PySMILI_SRC
 
 # includes necessary to parse and build the classes specified on typesystem
 set(PySMILI_include_paths
-    $<JOIN:$<TARGET_PROPERTY:milxQt,INTERFACE_INCLUDE_DIRECTORIES>,${PATH_SEP}>
+    $<JOIN:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>,${PATH_SEP}>
 )
 
 # A list of paths where shiboken should look for typesystem
@@ -31,7 +35,7 @@ set(PySMILI_target_include_directories
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 set(PySMILI_target_link_libraries
-    milxQt
+    milx-Qt
     Qt${Qt_VERSION_MAJOR}::Core
     Qt${Qt_VERSION_MAJOR}::Gui
     Qt${Qt_VERSION_MAJOR}::Widgets
@@ -65,15 +69,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.cmake ${CMAKE_CURRENT_BIN
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
-    $<TARGET_FILE:milxQt>
+    $<TARGET_FILE:milx-Qt>
   DESTINATION
     ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
 )
 if(NOT WIN32)
   install(
     FILES
-        $<TARGET_LINKER_FILE:milxQt>
-        $<TARGET_SONAME_FILE:milxQt>
+        $<TARGET_LINKER_FILE:milx-Qt>
+        $<TARGET_SONAME_FILE:milx-Qt>
     DESTINATION
         ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
   )

@@ -24,7 +24,7 @@
          -->
         <object-type name="milxQtWindow"/>
         <object-type name="milxQtRenderWindow" >
-            <object-type name="LabelledAction" >
+            <object-type name="LabelledAction"/>
             <!-- this class contains a internal enum, so it should be declared
                  inside of the object-type -->
             <enum-type name="ViewType"/>
