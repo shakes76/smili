@@ -127,7 +127,7 @@ void milxQtManager::exportTab(QString filename)
           if(j < item->columnCount()-1)
              outFile << ", ";
       }
-      outFile << endl;
+      outFile << "\n";
       itemIterator ++;
   }
   txtFile.close();

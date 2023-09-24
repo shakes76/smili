@@ -107,7 +107,7 @@ VTKPolyDataToMesh <TMesh>
   //
   vtkCellArray * triangleStrips = m_PolyData->GetStrips();
 
-  vtkIdType  * cellPoints;
+  const vtkIdType* cellPoints;
   vtkIdType    numberOfCellPoints;
 
   //

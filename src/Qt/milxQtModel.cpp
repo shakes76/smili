@@ -32,6 +32,7 @@
 //Mapper
 #include <vtkGraphicsFactory.h>
 #include <vtkCamera.h>
+#include <vtkTexture.h>
 //Graphing
 #include <vtkDoubleArray.h>
 #include <vtkDataSetMapper.h>
@@ -740,8 +741,6 @@ void milxQtModel::generateModel(float red, float green, float blue)
             scalarsSet = true;
 
         printDebug("Generating Model.");
-        if(largeMode)
-            modelMapper->GlobalImmediateModeRenderingOn();
     #if VTK_MAJOR_VERSION <=5
         modelMapper->SetInput(model.Result());
     #else
@@ -1758,7 +1757,7 @@ void milxQtModel::contour()
         model.GenerateNormals(2); //for polygonal line placer (needs point norms) and interp (needs cell norms)
 
         milxQtRenderWindow::contourWidget = vtkSmartPointer<vtkContourWidget>::New();
-        milxQtRenderWindow::contourWidget->SetInteractor(QVTKWidget::GetInteractor());
+        milxQtRenderWindow::contourWidget->SetInteractor(GetRenderWindow()->GetInteractor());
 
         printInfo("Contour Surface Mode enabled.\nLeft Click to place points, Right click to place end point.");
         printInfo("Delete key to delete point, Shift+Delete key to reset.");
@@ -2281,7 +2280,7 @@ void milxQtModel::enableScale(QString title, const bool quiet, double minRange, 
     }
 
     //Add scale to scale widget
-    scalarBar->SetInteractor(QVTKWidget::GetInteractor());
+    scalarBar->SetInteractor(GetRenderWindow()->GetInteractor());
     scalarBar->SetScalarBarActor(scale);
     scalarBar->EnabledOn();
 

@@ -405,14 +405,6 @@ public:
     {
         largeMode = large;
     }
-    /**
-        \fn milxQtModel::ImmediateModeRenderingOn()
-        \brief Improve rendering performance for large datasets. Assumes generateModel() has already been called.
-    */
-    inline void ImmediateModeRenderingOn()
-    {
-        if(modelled) modelMapper->ImmediateModeRenderingOn();
-    }
 
     //Operators
     /*!

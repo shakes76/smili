@@ -228,8 +228,8 @@ void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn,
         //vtkPlotPoints::SafeDownCast(templatePoints)->SetMarkerStyle(vtkPlotPoints::PLUS);
         templatePoints->Update();
 
-    view->SetInteractor(QVTKWidget::GetInteractor()); //order important, also do not move up
-    QVTKWidget::SetRenderWindow(view->GetRenderWindow());
+    view->SetInteractor(GetRenderWindow()->GetInteractor()); //order important, also do not move up
+    QVTKWidget::setRenderWindow(view->GetRenderWindow());
     milxQtRenderWindow::SetRenderer(view->GetRenderer());
     milxQtRenderWindow::backgroundAct->setChecked(true);
     milxQtRenderWindow::generateRender();
@@ -768,7 +768,7 @@ void milxQtPlot::enableScale(QString title)
     }
 
     //Add scale to scale widget
-    scalarBar->SetInteractor(QVTKWidget::GetInteractor());
+    scalarBar->SetInteractor(GetRenderWindow()->GetInteractor());
     scalarBar->SetScalarBarActor(scale);
     scalarBar->EnabledOn();
 

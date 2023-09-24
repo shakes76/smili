@@ -720,7 +720,7 @@ bool File::SaveCamera(const std::string filename, const vtkSmartPointer<vtkCamer
   if(!camera || filename.empty())
     return false;
 
-  ofstream file(filename.c_str(), ios::out);
+  std::ofstream file(filename.c_str(), ios::out);
 
   if(file.fail())
     return false;
@@ -758,7 +758,7 @@ bool File::LoadCamera(const std::string filename, vtkSmartPointer<vtkCamera> &ca
 	double viewAngle;
 	double up[3];
 
-	ifstream file (filename.c_str());
+    std::ifstream file (filename.c_str());
 
 	if(file.fail())
     return false;

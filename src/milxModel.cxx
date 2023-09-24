@@ -685,7 +685,9 @@ void Model::Clip(const coordinateType belowValue, const coordinateType aboveValu
   #endif
     //~ thresh->ThresholdByLower(clusterID);
     //~ thresh->ThresholdByUpper(value);
-    thresh->ThresholdBetween(belowValue, aboveValue);
+    //thresh->ThresholdBetween(belowValue, aboveValue);
+    thresh->SetUpperThreshold(aboveValue);
+    thresh->SetLowerThreshold(belowValue);
   if(VTKProgressUpdates->IsBeingObserved())
     thresh->AddObserver(vtkCommand::ProgressEvent, VTKProgressUpdates); //Keeps UI responsive
 
@@ -963,7 +965,7 @@ void Model::GenerateVertexScalars()
   #endif
   if(VTKProgressUpdates->IsBeingObserved())
     vertices->AddObserver(vtkCommand::ProgressEvent, VTKProgressUpdates); //Keeps UI responsive
-    vertices->SetIdsArrayName("Point IDs");
+    vertices->SetPointIdsArrayName("Point IDs");
     vertices->PointIdsOn();
     vertices->Update();
 

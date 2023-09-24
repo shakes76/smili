@@ -97,24 +97,24 @@ milxQtRenderWindow::~milxQtRenderWindow()
 void milxQtRenderWindow::contextMenuSystem(bool context)
 {
     renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-    QVTKWidget::SetRenderWindow(renderWindow);
-    QVTKWidget::GetRenderWindow()->StereoRenderOff(); ///Force Stereo Render off
+    QVTKWidget::setRenderWindow(renderWindow);
+    GetRenderWindow()->StereoRenderOff(); ///Force Stereo Render off
   #if(VTK_MAJOR_VERSION < 6)
-    QVTKWidget::GetRenderWindow()->ReportGraphicErrorsOn(); ///Force Error reporting
+    GetRenderWindow()->ReportGraphicErrorsOn(); ///Force Error reporting
   #endif
 
     //widget setups
-    SetupWidgets(QVTKWidget::GetInteractor());
+    SetupWidgets(GetRenderWindow()->GetInteractor());
 
     ///Performance
-    QVTKWidget::GetRenderWindow()->GetInteractor()->SetDesiredUpdateRate(20); //for LOD actors
-    QVTKWidget::GetRenderWindow()->GetInteractor()->SetStillUpdateRate(0.01); //for LOD actors
+    GetRenderWindow()->GetInteractor()->SetDesiredUpdateRate(20); //for LOD actors
+    GetRenderWindow()->GetInteractor()->SetStillUpdateRate(0.01); //for LOD actors
 
     if(context)
     {
         ///Unbind the right mouse button events as Qt uses context menu.
-        QVTKWidget::GetRenderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonPressEvent);
-        QVTKWidget::GetRenderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonReleaseEvent);
+        GetRenderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonPressEvent);
+        GetRenderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonReleaseEvent);
     }
 }
 
@@ -199,7 +199,7 @@ void milxQtRenderWindow::contour()
 {
     if(!contourWidget)
         contourWidget = vtkSmartPointer<vtkContourWidget>::New();
-        contourWidget->SetInteractor(QVTKWidget::GetInteractor());
+        contourWidget->SetInteractor(GetRenderWindow()->GetInteractor());
 
     if(contourAct->isChecked())
     {
@@ -395,7 +395,7 @@ void milxQtRenderWindow::textDisplay()
         textActors.append(textActor);
 
     vtkSmartPointer<vtkTextWidget> textWidget = vtkSmartPointer<vtkTextWidget>::New();
-        textWidget->SetInteractor(QVTKWidget::GetInteractor());
+        textWidget->SetInteractor(GetRenderWindow()->GetInteractor());
         textWidget->SetTextActor(textActor);
         textWidget->On();
         textWidgets.append(textWidget);
@@ -615,7 +615,7 @@ void milxQtRenderWindow::loadView(QString filename)
     }
 
     renderer->SetActiveCamera(camera);
-    QVTKWidget::GetRenderWindow()->Render();
+    GetRenderWindow()->Render();
 }
 
 void milxQtRenderWindow::loadViewFile()
@@ -1388,19 +1388,19 @@ void milxQtRenderWindow::generateRender()
         background();
 
     ///Create the Render Window with renderer
-    if(QVTKWidget::GetRenderWindow()->GetRenderers()->GetNumberOfItems() == 0 || renderer != QVTKWidget::GetRenderWindow()->GetRenderers()->GetFirstRenderer()) //support only single renderer atm
-        QVTKWidget::GetRenderWindow()->AddRenderer(renderer);
+    if(GetRenderWindow()->GetRenderers()->GetNumberOfItems() == 0 || renderer != GetRenderWindow()->GetRenderers()->GetFirstRenderer()) //support only single renderer atm
+        GetRenderWindow()->AddRenderer(renderer);
 
     ///Resize Window
     printDebug("Size of window: " + QString::number(QVTKWidget::size().height()) + "x" + QString::number(QVTKWidget::size().width()));
-    printDebug("Actual Size of window: " + QString::number(QVTKWidget::GetRenderWindow()->GetSize()[0]) + "x" + QString::number(QVTKWidget::GetRenderWindow()->GetSize()[1]));
+    printDebug("Actual Size of window: " + QString::number(GetRenderWindow()->GetSize()[0]) + "x" + QString::number(GetRenderWindow()->GetSize()[1]));
     if(QVTKWidget::size().height() < minWindowSize || QVTKWidget::size().width() < minWindowSize)
     {
-        QVTKWidget::GetRenderWindow()->SetSize(minWindowSize, minWindowSize);
+        GetRenderWindow()->SetSize(minWindowSize, minWindowSize);
         printDebug("Resized to minimum size");
     }
 
-    int *winSize = QVTKWidget::GetRenderWindow()->GetSize();
+    int *winSize = GetRenderWindow()->GetSize();
     QVTKWidget::resize(winSize[0], winSize[1]);
 
     reset();
@@ -1604,7 +1604,7 @@ void milxQtRenderWindow::enableUpdates(QStatusBar *bar)
     if(!dataPicker)
         dataPicker = vtkSmartPointer<vtkPointPicker>::New();
 
-    Connector->Connect( QVTKWidget::GetRenderWindow()->GetInteractor(),
+    Connector->Connect( GetRenderWindow()->GetInteractor(),
                         vtkCommand::MouseMoveEvent,
                         this,
                         SLOT( updateCoords(vtkObject*) ) );
@@ -2131,7 +2131,7 @@ void milxQtRenderWindow::setupHumanGlyph(vtkSmartPointer<vtkMatrix4x4> mat)
     humanGlyph = vtkSmartPointer<vtkOrientationMarkerWidget>::New();
         humanGlyph->SetOutlineColor(0.0, 0, 0.0);
         humanGlyph->SetOrientationMarker(propAssembly);
-        humanGlyph->SetInteractor(QVTKWidget::GetInteractor());
+        humanGlyph->SetInteractor(GetRenderWindow()->GetInteractor());
         humanGlyph->SetViewport(0.0, 0.0, 0.3, 0.3);
         humanGlyph->SetDefaultRenderer(renderer);
 }

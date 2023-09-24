@@ -41,7 +41,7 @@ OPTION(BUILD_FREESURFER_SUPPORT "Build the Freesurfer support parts of SMILI." O
 
 #dependent options, triggered if another option is set
 DEPENDENT_OPTION(USE_ITK "Build all the ITK components" ON "ITK_LIBRARIES" OFF)
-DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_USE_FILE_INCLUDED" OFF)
+DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_LIBRARIES" OFF)
 DEPENDENT_OPTION(BUILD_VTK_EXTENSIONS "Build the VTK Extensions Library" ON "USE_VTK" OFF)
 DEPENDENT_OPTION(BUILD_MILXQT "Build the MILX Qt Library" ON "BUILD_GUI_RELATED" OFF)
 DEPENDENT_OPTION(BUILD_PLUGINS "Build the plugins for the Viewer" OFF "BUILD_VIEWER" OFF)
@@ -91,6 +91,7 @@ IF(USE_VTK AND NOT USE_ITK)
 ENDIF(USE_VTK AND NOT USE_ITK)
 IF(USE_VTK)
   message("VTK Version: ${VTK_VERSION}")
+  add_definitions( -DVTK_MAJOR_VERSION=${VTK_MAJOR_VERSION})
 ENDIF(USE_VTK)
 IF(USE_ITK)
   message("ITK Version: ${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}")

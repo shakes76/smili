@@ -210,9 +210,9 @@ public:
     */
     inline void SetSize(int height, int width)
     {
-		QVTKWidget::GetRenderWindow()->SetSize(width, height);
-        int *winSize = QVTKWidget::GetRenderWindow()->GetSize();
-		QVTKWidget::resize(winSize[0],winSize[1]);
+        GetRenderWindow()->SetSize(width, height);
+        int *winSize = GetRenderWindow()->GetSize();
+        QVTKWidget::resize(winSize[0],winSize[1]);
     }
     /*!
         \fn milxQtRenderWindow::SetLookupTable(vtkSmartPointer<vtkLookupTable> lut)
@@ -331,11 +331,19 @@ public:
         return renderer;
     }
     /*!
+        \fn milxQtRenderWindow::GetRenderer()
+        \brief Returns the VTK Renderer object.
+    */
+    inline vtkRenderWindow* GetRenderWindow()
+    {
+        return QVTKWidget::renderWindow();
+    }
+    /*!
       \brief Get the interactor associated with the view rendering
     */
     inline virtual vtkRenderWindowInteractor* GetVTKInteractor()
     {
-        return QVTKWidget::GetRenderWindow()->GetInteractor();
+        return GetRenderWindow()->GetInteractor();
     }
 
     /*!
@@ -344,7 +352,7 @@ public:
     */
     inline void OffScreenRenderingOn()
     {
-        QVTKWidget::GetRenderWindow()->OffScreenRenderingOn();
+        GetRenderWindow()->OffScreenRenderingOn();
     }
     /*!
         \fn milxQtRenderWindow::OffScreenRenderingOff()
@@ -352,7 +360,7 @@ public:
     */
     inline void OffScreenRenderingOff()
     {
-        QVTKWidget::GetRenderWindow()->OffScreenRenderingOff();
+        GetRenderWindow()->OffScreenRenderingOff();
     }
 
     /*!
@@ -361,7 +369,7 @@ public:
     */
     inline void Render()
     {
-        QVTKWidget::GetRenderWindow()->Render();
+        GetRenderWindow()->Render();
     }
 
     /*!

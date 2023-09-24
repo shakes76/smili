@@ -26,7 +26,10 @@ milxQtConsole::milxQtConsole(QWidget *theParent) : QTabWidget(theParent)
     dockArea = Qt::BottomDockWidgetArea;
 
     dock = new QDockWidget(tr("Console"));
-    dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dock->setFeatures(QDockWidget::DockWidgetClosable
+                      | QDockWidget::DockWidgetMovable
+                      | QDockWidget::DockWidgetVerticalTitleBar
+                      | QDockWidget::DockWidgetFloatable);
     dock->setWidget(this);
     dock->setObjectName("Console");
 

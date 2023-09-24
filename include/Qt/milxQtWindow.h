@@ -20,12 +20,14 @@
 
 #include <QtGui/QtGui>
 //VTK Headers
-#include <QVTKWidget.h>
+#include <QVTKOpenGLStereoWidget.h>
 #include <vtkSmartPointer.h>
 #include <vtkPointPicker.h>
 //milxQt Specific
 #include "milxQtAliases.h"
 #include "milxQtConsole.h"
+
+typedef QVTKOpenGLStereoWidget QVTKWidget;
 
 /*!
     \class milxQtWindow
