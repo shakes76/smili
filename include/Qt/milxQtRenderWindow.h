@@ -26,6 +26,7 @@
 #include <QStatusBar>
 
 #include <vtkSmartPointer.h>
+#include <vtkMatrix4x4.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkCamera.h>

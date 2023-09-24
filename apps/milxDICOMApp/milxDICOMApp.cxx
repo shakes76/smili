@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
       }
       else if(operation == csv) //independent operation from pixel type
       {
-          ofstream outFile(exportName.c_str(), ios::app);
+          std::ofstream outFile(exportName.c_str(), ios::app);
           //outFile << "Tag,Value" << std::endl;
           for (tagiterator tag = tags.begin(); tag != tags.end(); tag++)
               outFile << tag->first << "," << tag->second << std::endl;

@@ -19,7 +19,6 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
-#include <QDesktopWidget>
 
 #include "milxQtFile.h"
 #include "milxQtModel.h"
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
     model->generateModel();
     
     //Setup size
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    QSize desktopSize = qApp->primaryScreen()->availableGeometry().size();
     int newWidth = 2.0*desktopSize.width()/3.0 + 0.5;
     int newHeight = 4.0*desktopSize.height()/5.0 + 0.5;
     int xOffset = (desktopSize.width()-newWidth)/2.0;

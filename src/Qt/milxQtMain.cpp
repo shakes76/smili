@@ -24,7 +24,6 @@
 #include <QInputDialog>
 #include <QToolBar>
 #include <QSplashScreen>
-#include <QDesktopWidget>
 
 //VTK
 #include <vtkWindowToImageFilter.h>
@@ -939,10 +938,10 @@ void milxQtMain::saveScreen(QString filename)
 //        windowVTK->GetRenderWindow()->StereoRenderOff();
 //        windowVTK->GetRenderWindow()->OffScreenRenderingOn();
 //        windowVTK->GetRenderWindow()->SetAlphaBitPlanes(1); //Use alpha channel
-        windowVTK->GetRenderWindow()->Render();
+        windowVTK->renderWindow()->Render();
 
-        windowToImage->SetInput(windowVTK->GetRenderWindow());
-        windowToImage->SetMagnification(magnifyFactor);
+        windowToImage->SetInput(windowVTK->renderWindow());
+        windowToImage->SetScale(magnifyFactor);
 //        windowToImage->SetInputBufferTypeToRGBA(); //also record the alpha (transparency) channel
         windowToImage->ReadFrontBufferOff();
         windowToImage->Update();
@@ -956,7 +955,7 @@ void milxQtMain::saveScreen(QString filename)
         }
 
         QPointer<milxQtFile> writer = new milxQtFile; //Smart deletion
-        windowVTK->GetRenderWindow()->Render();
+        windowVTK->renderWindow()->Render();
 
         //Save screenshot
         int extent[6];
@@ -965,7 +964,7 @@ void milxQtMain::saveScreen(QString filename)
         bool success = writer->saveImage(filename, windowToImage->GetOutput());
 
 //        windowVTK->GetRenderWindow()->OffScreenRenderingOff();
-        windowVTK->GetRenderWindow()->Render(); //Restore rendering
+        windowVTK->renderWindow()->Render(); //Restore rendering
 
         if(!success)
         {
@@ -3481,7 +3480,7 @@ void milxQtMain::resetSettings()
 	QSettings settings("Shekhar Chandra", "milxQt");
 
 	//New defaults
-	QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    QSize desktopSize = qApp->primaryScreen()->availableGeometry().size();
 	int newWidth = 2.0*desktopSize.width() / 3.0 + 0.5;
 	int newHeight = 4.0*desktopSize.height() / 5.0 + 0.5;
 	int xOffset = (desktopSize.width() - newWidth) / 2.0;
@@ -3515,7 +3514,7 @@ void milxQtMain::readSettings()
     QSettings settings("Shekhar Chandra", "milxQt");
 
     //New defaults
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    QSize desktopSize = qApp->primaryScreen()->availableGeometry().size();
     int newWidth = 2.0*desktopSize.width()/3.0 + 0.5;
     int newHeight = 4.0*desktopSize.height()/5.0 + 0.5;
     int xOffset = (desktopSize.width()-newWidth)/2.0;

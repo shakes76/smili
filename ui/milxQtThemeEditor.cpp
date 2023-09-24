@@ -704,10 +704,10 @@ void milxQtThemeEditorForm::saveColourSettings()
 
 	// Check if name update needed
 	if (isEdit) {
-		if (themeNameInput->text().compare(themeName)) {
+		if (themeNameInput->text().compare(*themeName)) {
 			// Name needs updating
 			QDir dir;
-			dir.remove(QString(QDir::currentPath() + "/" + themeName + ".qss"));
+			dir.remove(QString(QDir::currentPath() + "/" + *themeName + ".qss"));
 			prefForm->removeTheme(*themeName);
 		}
 	}

@@ -22,7 +22,6 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QGroupBox>
-#include <QDesktopWidget>
 #include <QScrollArea>
 
 #include "milxQtThemeEditor.h"
@@ -57,7 +56,7 @@ void milxQtPreferencesForm::setupPrefs()
 	//Application options
 	//Window size (text)
 	QLabel *windowSizeLabel = new QLabel(tr("Preferred Window Size:"));
-	QSize desktopSize = qApp->desktop()->availableGeometry().size();
+	QSize desktopSize = qApp->primaryScreen()->availableGeometry().size();
 	windowSizeEdit = new QSpinBox;
 	windowSizeEdit->setMinimum(minWindowSize);
 	windowSizeEdit->setMaximum(milx::Maximum<int>(desktopSize.width(), desktopSize.height()));
