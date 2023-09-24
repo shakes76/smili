@@ -96,8 +96,8 @@ milxQtRenderWindow::~milxQtRenderWindow()
 
 void milxQtRenderWindow::contextMenuSystem(bool context)
 {
-    renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-    QVTKWidget::setRenderWindow(renderWindow);
+    //renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+    //QVTKWidget::setRenderWindow(renderWindow);
     GetRenderWindow()->StereoRenderOff(); ///Force Stereo Render off
   #if(VTK_MAJOR_VERSION < 6)
     GetRenderWindow()->ReportGraphicErrorsOn(); ///Force Error reporting
