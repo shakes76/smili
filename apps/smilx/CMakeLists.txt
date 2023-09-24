@@ -62,9 +62,9 @@ ENDIF (WIN32)
 # Add executable and link libraries #
 #####################################
 ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+#~ IF(VTK_QT_VERSION VERSION_GREATER "4")
+#~   qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
+#~ ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(smilx milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 ##############################################

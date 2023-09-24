@@ -32,12 +32,12 @@ endif (MILXQT_64)
 
 IF(VTK_QT_VERSION VERSION_GREATER "4")
   # generate rules for building source files from the resources
-  QT5_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
+  QT6_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
   # build ui_XXX files from the XML-style .ui files
-  QT5_WRAP_UI(MILXQT_UIS ${MILXQT_SRC_UIS})
+  QT6_WRAP_UI(MILXQT_UIS ${MILXQT_SRC_UIS})
   # this moc's the above variable and appends to the cxx sources
-  QT5_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
-  QT5_WRAP_CPP(MILXQT_UI_MOCS ${MILXQT_SRC_UI_HEADERS_MOC})
+  QT6_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
+  QT6_WRAP_CPP(MILXQT_UI_MOCS ${MILXQT_SRC_UI_HEADERS_MOC})
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   # generate rules for building source files from the resources
   QT4_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
