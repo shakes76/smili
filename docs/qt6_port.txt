@@ -1,0 +1,12 @@
+
+Notes for the porting of SMILI to Qt6
+
+Alot of the work was done by porting to Qt 5.15, so this is the first step.
+
+QDesktopWidget was removed and required changing qApp->desktop() to the qscreen call qApp->primaryScreen()
+
+Needed to replace QVTKWidget with newer QVTKOpenGLStereoWidget. This replaced the GetRenderWindow() with renderWindow() and thus needed small API changes throughout milxQt. 
+
+A few header includes and stl usage had to be improved for newer cpp17 standard. Particularly for MOC generation, if a VTK header was missing, in our case vtkMatrix4x4, it caused a compile error in the vtkSmartPointer class.
+
+Error QVTKOpenGLWindow requires a `vtkGenericOpenGLRenderWindow` was caused by unnecessary calls to set the vtkRenderWindow via SetRenderWindow()
