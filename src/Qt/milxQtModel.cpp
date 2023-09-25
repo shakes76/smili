@@ -774,6 +774,19 @@ void milxQtModel::generateModel(float red, float green, float blue)
         modelActor->GetProperty()->SetAmbient(0.2);
         modelActor->GetProperty()->SetDiffuse(0.8);
 
+        if(QVTKWidget::size().height() < minWindowSize || QVTKWidget::size().width() < minWindowSize)
+        {
+            QVTKWidget::renderWindow()->SetSize(minWindowSize, minWindowSize);
+            printDebug("Resized to minimum size");
+        }
+        else
+            QVTKWidget::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+
+        int *winSize = QVTKWidget::renderWindow()->GetSize();
+        QVTKWidget::resize(winSize[0], winSize[1]);
+        printDebug("Size of Model window: " + QString::number(QVTKWidget::renderWindow()->GetSize()[0]) + "x" + QString::number(QVTKWidget::renderWindow()->GetSize()[1]));
+
+
         modelled = true; //dont move down, ordering necessary
         milxQtRenderWindow::AddActor(modelActor);
         if(!rendered) ///keep view that may be set by user
