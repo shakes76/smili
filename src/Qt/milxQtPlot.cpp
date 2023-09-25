@@ -229,7 +229,7 @@ void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn,
         templatePoints->Update();
 
     view->SetInteractor(GetRenderWindow()->GetInteractor()); //order important, also do not move up
-    QVTKWidget::setRenderWindow(view->GetRenderWindow());
+    //SetRenderWindow(view->GetRenderWindow());
     milxQtRenderWindow::SetRenderer(view->GetRenderer());
     milxQtRenderWindow::backgroundAct->setChecked(true);
     milxQtRenderWindow::generateRender();

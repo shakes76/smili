@@ -332,8 +332,8 @@ public:
         return renderer;
     }
     /*!
-        \fn milxQtRenderWindow::GetRenderer()
-        \brief Returns the VTK Renderer object.
+        \fn milxQtRenderWindow::GetRenderWindow()
+        \brief Returns the VTK Render Window object.
     */
     inline vtkRenderWindow* GetRenderWindow()
     {
@@ -1020,7 +1020,16 @@ protected:
     void setupHumanGlyph(vtkSmartPointer<vtkMatrix4x4> mat = NULL);
 
 private:
+    /*!
+        \fn milxQtRenderWindow::SetRenderWindow(vtkRenderWindow* renWin)
+        \brief Returns the VTK Render Window object.
 
+        Disabled because it upsets QVTKOpenGLWindow etc. during runtime if used.
+    */
+    inline void SetRenderWindow(vtkRenderWindow* renWin)
+    {
+        return QVTKWidget::setRenderWindow(renWin);
+    }
 };
 
 #endif // MILXQTRENDERWINDOW_H

@@ -93,9 +93,11 @@ milxQtImage::milxQtImage(QWidget *theParent, bool contextSystem) : milxQtRenderW
     imageVector = NULL; //rare so allocate as needed
 
     imageData = vtkSmartPointer<vtkImageData>::New();
-    viewer = vtkSmartPointer<vtkImageViewer3>::New();
     observeProgress = itkEventQtObserver::New();
     transformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+
+    viewer = vtkSmartPointer<vtkImageViewer3>::New();
+    viewer->SetRenderWindow(GetRenderWindow()); //Needed
 
     milxQtWindow::setDeletableOnClose(true);
 
@@ -391,7 +393,7 @@ void milxQtImage::generateImage(const bool quietly)
             printDebug("Setting up viewer");
             linkProgressEventOf(viewer);
             milxQtRenderWindow::SetRenderer(viewer->GetRenderer());
-            QVTKWidget::setRenderWindow(viewer->GetRenderWindow());
+            //SetRenderWindow(viewer->GetRenderWindow());
             viewer->SetupInteractor(QVTKWidget::renderWindow()->GetInteractor());
             SetupWidgets(viewer->GetRenderWindow()->GetInteractor());
             if(volume)
