@@ -13,8 +13,8 @@ set(PySMILI_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/LabelledAction_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/milxQtRenderWindow_wrapper.h
     # global module wrapper
-    ${CMAKE_CURRENT_BINARY_DIR}/module_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/python.h
+#~     ${CMAKE_CURRENT_BINARY_DIR}/module_wrapper.cpp
+#~     ${CMAKE_CURRENT_BINARY_DIR}/python.h
 )
 
 # includes necessary to parse and build the classes specified on typesystem

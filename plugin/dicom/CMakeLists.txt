@@ -17,7 +17,6 @@ if("${ITK_VERSION_MAJOR}" LESS 4)
     message("DICOM Plugin requires ITK 4 or above for DICOM RT support. Disabling structure set support.")
 endif("${ITK_VERSION_MAJOR}" LESS 4)
 
-FIND_PACKAGE(Qt5 REQUIRED Widgets WebEngineWidgets)
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
 #########################
@@ -43,7 +42,7 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
 
 # this moc's the above variable and appends to the cxx sources
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-  QT5_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
+  QT6_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   QT4_WRAP_CPP(SSM_MOCS milxQtDICOMPlugin.h)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
