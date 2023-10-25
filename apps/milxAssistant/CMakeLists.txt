@@ -26,7 +26,7 @@ ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 #########################
 file(GLOB MILXQT_SRC_RCCS ${SMILI_SOURCE_DIR}/*.qrc)
 
-QT6_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
+QT_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
 
 #################################################
 # Iconing and APP variable for fixup            #

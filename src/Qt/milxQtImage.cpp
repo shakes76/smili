@@ -394,39 +394,39 @@ void milxQtImage::generateImage(const bool quietly)
             linkProgressEventOf(viewer);
             milxQtRenderWindow::SetRenderer(viewer->GetRenderer());
             //SetRenderWindow(viewer->GetRenderWindow());
-            viewer->SetupInteractor(QVTKWidget::renderWindow()->GetInteractor());
+            viewer->SetupInteractor(milxQtWindow::renderWindow()->GetInteractor());
             SetupWidgets(viewer->GetRenderWindow()->GetInteractor());
             if(volume)
                 viewer->SetSlice(bounds[5]/2); //show middle of volume
 
             if(QVTKWidget::size().height() < minWindowSize || QVTKWidget::size().width() < minWindowSize)
             {
-                QVTKWidget::renderWindow()->SetSize(minWindowSize, minWindowSize);
+                milxQtWindow::renderWindow()->SetSize(minWindowSize, minWindowSize);
                 printDebug("Resized to minimum size");
             }
             else
-                QVTKWidget::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+                milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
 
-            int *winSize = QVTKWidget::renderWindow()->GetSize();
+            int *winSize = milxQtWindow::renderWindow()->GetSize();
             QVTKWidget::resize(winSize[0], winSize[1]);
-            printDebug("Size of Image window: " + QString::number(QVTKWidget::renderWindow()->GetSize()[0]) + "x" + QString::number(QVTKWidget::renderWindow()->GetSize()[1]));
+            printDebug("Size of Image window: " + QString::number(milxQtWindow::renderWindow()->GetSize()[0]) + "x" + QString::number(milxQtWindow::renderWindow()->GetSize()[1]));
 
             //Remove VTK events for the right mouse button for Qt context menu
-            QVTKWidget::renderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonPressEvent);
-            QVTKWidget::renderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonReleaseEvent);
-            Connector->Connect(QVTKWidget::renderWindow()->GetInteractor(),
+            milxQtWindow::renderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonPressEvent);
+            milxQtWindow::renderWindow()->GetInteractor()->RemoveObservers(vtkCommand::RightButtonReleaseEvent);
+            Connector->Connect(milxQtWindow::renderWindow()->GetInteractor(),
                        vtkCommand::EndWindowLevelEvent,
                        this,
                        SLOT( userEvent() ));
-            Connector->Connect(QVTKWidget::renderWindow()->GetInteractor(),
+            Connector->Connect(milxQtWindow::renderWindow()->GetInteractor(),
                        vtkCommand::MouseWheelForwardEvent,
                        this,
                        SLOT( userEvent() ));
-            Connector->Connect(QVTKWidget::renderWindow()->GetInteractor(),
+            Connector->Connect(milxQtWindow::renderWindow()->GetInteractor(),
                        vtkCommand::MouseWheelBackwardEvent,
                        this,
                        SLOT( userEvent() ));
-            Connector->Connect(QVTKWidget::renderWindow()->GetInteractor(),
+            Connector->Connect(milxQtWindow::renderWindow()->GetInteractor(),
                        vtkCommand::KeyPressEvent,
                        this,
                        SLOT( userEvent() ));
@@ -921,7 +921,7 @@ void milxQtImage::contour()
     if(!milxQtRenderWindow::contourWidget)
     {
         milxQtRenderWindow::contourWidget = vtkSmartPointer<vtkContourWidget>::New();
-        milxQtRenderWindow::contourWidget->SetInteractor(QVTKWidget::renderWindow()->GetInteractor());
+        milxQtRenderWindow::contourWidget->SetInteractor(milxQtWindow::renderWindow()->GetInteractor());
         milxQtRenderWindow::contourWidget->FollowCursorOn();
 
         printInfo("Contour Image Mode enabled.\nLeft Click to place points, Right click to place end point.");
@@ -1074,7 +1074,7 @@ void milxQtImage::updateData(const bool orient)
 void milxQtImage::setupEvents()
 {
     //Do not move, needs to be connected after setting up viewer!
-    milxQtRenderWindow::Connector->Connect(QVTKWidget::renderWindow()->GetInteractor(),
+    milxQtRenderWindow::Connector->Connect(milxQtWindow::renderWindow()->GetInteractor(),
                                   vtkCommand::KeyPressEvent,
                                   this,
                                   SLOT( updateSlice(vtkObject *) ),
@@ -3838,7 +3838,7 @@ void milxQtImage::enableScale(QString title, const bool quiet, double minRange, 
     }
 
     //Add scale to scale widget
-    milxQtRenderWindow::scalarBar->SetInteractor(QVTKWidget::renderWindow()->GetInteractor());
+    milxQtRenderWindow::scalarBar->SetInteractor(milxQtWindow::renderWindow()->GetInteractor());
     milxQtRenderWindow::scalarBar->SetScalarBarActor(milxQtRenderWindow::scale);
     milxQtRenderWindow::scalarBar->EnabledOn();
 

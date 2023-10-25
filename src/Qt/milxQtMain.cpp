@@ -929,7 +929,7 @@ void milxQtMain::saveScreen(QString filename)
     {
         QFileDialog *fileSaver = new QFileDialog(this);
         vtkSmartPointer<vtkWindowToImageFilter> windowToImage = vtkSmartPointer<vtkWindowToImageFilter>::New();
-		QVTKWidget* windowVTK = qobject_cast<QVTKWidget *>(activeWindow);
+		milxQtWindow* windowVTK = qobject_cast<milxQtWindow *>(activeWindow);
 
         if(windowVTK == 0)
             return;
@@ -941,7 +941,11 @@ void milxQtMain::saveScreen(QString filename)
         windowVTK->renderWindow()->Render();
 
         windowToImage->SetInput(windowVTK->renderWindow());
+    #if VTK_MAJOR_VERSION <= 8
+        windowToImage->SetMagnification(magnifyFactor);
+    #else
         windowToImage->SetScale(magnifyFactor);
+    #endif
 //        windowToImage->SetInputBufferTypeToRGBA(); //also record the alpha (transparency) channel
         windowToImage->ReadFrontBufferOff();
         windowToImage->Update();

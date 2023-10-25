@@ -22,12 +22,18 @@
 //VTK Headers
 #include <vtkSmartPointer.h>
 #include <vtkPointPicker.h>
-#include <QVTKOpenGLStereoWidget.h>
+#if VTK_MAJOR_VERSION <= 8
+  #include <QVTKWidget.h>
+#else
+  #include <QVTKOpenGLStereoWidget.h>
+#endif
 //milxQt Specific
 #include "milxQtAliases.h"
 #include "milxQtConsole.h"
 
-typedef QVTKOpenGLStereoWidget QVTKWidget;
+#if VTK_MAJOR_VERSION > 8
+  typedef QVTKOpenGLStereoWidget QVTKWidget;
+#endif
 
 /*!
     \class milxQtWindow
@@ -54,6 +60,23 @@ public:
         \brief The standard destructor
     */
     virtual ~milxQtWindow();
+    
+    inline void setRenderWindow(vtkRenderWindow *win)
+    {
+    #if VTK_MAJOR_VERSION <= 8
+        QVTKWidget::SetRenderWindow(win);
+    #else
+        QVTKWidget::setRenderWindow(win); //QVTKOpenGLStereoWidget
+    #endif
+    }
+    inline vtkRenderWindow* renderWindow()
+    {
+    #if VTK_MAJOR_VERSION <= 8
+        return QVTKWidget::GetRenderWindow();
+    #else
+        return QVTKWidget::renderWindow(); //QVTKOpenGLStereoWidget
+    #endif
+    }
 
 public slots:
     //Naming

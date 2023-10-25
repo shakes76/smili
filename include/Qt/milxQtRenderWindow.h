@@ -337,7 +337,7 @@ public:
     */
     inline vtkRenderWindow* GetRenderWindow()
     {
-        return QVTKWidget::renderWindow();
+        return milxQtWindow::renderWindow();
     }
     /*!
       \brief Get the interactor associated with the view rendering
@@ -1028,7 +1028,7 @@ private:
     */
     inline void SetRenderWindow(vtkRenderWindow* renWin)
     {
-        return QVTKWidget::setRenderWindow(renWin);
+        return milxQtWindow::setRenderWindow(renWin);
     }
 };
 

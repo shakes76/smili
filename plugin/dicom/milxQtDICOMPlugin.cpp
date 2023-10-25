@@ -48,7 +48,11 @@ milxQtDICOMPlugin::milxQtDICOMPlugin(QObject *theParent) : milxQtPluginInterface
     manager = new milxQtManager(MainWindow);
         manager->hide();
     dock = new QDockWidget(tr("DICOM Manager"), MainWindow);
-        dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+        dock->setFeatures(QDockWidget::DockWidgetClosable
+                      | QDockWidget::DockWidgetMovable
+                      | QDockWidget::DockWidgetVerticalTitleBar
+                      | QDockWidget::DockWidgetFloatable);
+     
         dock->setWidget(manager);
         dock->setObjectName("DICOM Manager");
 
@@ -1267,7 +1271,7 @@ bool milxQtDICOMPlugin::anonymizeDicomImage(const std::string &input, const QStr
             
             ///And write
             QTextStream out(&file_mapping);
-                out.setCodec("UTF-8");
+                //out.setEncoding(QStringConverter::Utf8);
                 out << QString::fromStdString(name_value) << "," << QString::fromStdString(anonymization_value) << "\n";
                 file_mapping.close();    
         } 
@@ -1615,7 +1619,7 @@ void milxQtDICOMPlugin::writeLog(QString &filename, std::string &output)
 	if (file_log.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Append))
 	{
 		QTextStream out_log(&file_log);
-		out_log.setCodec("UTF-8");
+		//out_log.setEncoding(QStringConverter::Utf8);
 		out_log << QString::fromStdString(output) << "\n";
 		file_log.close();
 	}
