@@ -107,6 +107,7 @@ else()
             )
         else()
             set(SHIBOKEN_LIBRARY_BASENAMES
+                libshiboken2.cpython-38-x86_64-linux-gnu.so.5.15
                 libshiboken2.abi3.so
                 libshiboken2.abi3.so.${SHIBOKEN_MACRO_VERSION}
                 libshiboken2.abi3.so.${SHIBOKEN_MACRO_VERSION}.${SHIBOKEN_MICRO_VERSION}
@@ -159,6 +160,7 @@ else()
         set(PYTHON_LIMITED_LIBRARIES "")
     endif()
 endif()
+
 if(SHIBOKEN_FOUND)
     message(STATUS "Shiboken include dir:       ${SHIBOKEN_INCLUDE_DIR}")
     message(STATUS "Shiboken library:           ${SHIBOKEN_LIBRARY}")
@@ -182,8 +184,6 @@ if(SHIBOKEN_FOUND)
     # Generator target
     add_executable(Shiboken2::shiboken IMPORTED GLOBAL)
     set_property(TARGET Shiboken2::shiboken PROPERTY IMPORTED_LOCATION ${SHIBOKEN_BINARY})
-else()
-    message("Shiboken NOT FOUND!")
 endif()
 
 find_package_handle_standard_args(Shiboken2
