@@ -22,7 +22,9 @@ if(NOT Python3_EXECUTABLE)
         endif()
     endif()
 endif()
-message("Using Python from ${Python3_EXECUTABLE}")
+message("Using Python ${Python3_EXECUTABLE}")
+cmake_path(GET Python3_EXECUTABLE PARENT_PATH Python3_BINPATH)
+message("Using Python path ${Python3_BINPATH}")
 
 # Just to fix warnings with --warn-uninitialized
 if(NOT DEFINED SHIBOKEN_CUSTOM_PREFIX) #look for shiboken in a custom location
@@ -46,11 +48,12 @@ endif()
 find_package(PySide${PYSIDE_MAJOR_VERSION} ${QtWidgets_VERSION} EXACT REQUIRED)
 find_package(Shiboken${PYSIDE_MAJOR_VERSION} REQUIRED)
 
-if(NOT PYTHON_BINDINGS_INSTALL_PREFIX)
-  set(PYTHON_BINDINGS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-endif()
-set(BINDINGS_DIR "${INSTALL_LIBRARY_DIR}/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
-set(PYTHON_BINDINGS_INSTALL_PREFIX "${PYTHON_BINDINGS_INSTALL_PREFIX}/${BINDINGS_DIR}")
+#~ if(NOT PYTHON_BINDINGS_INSTALL_PREFIX)
+#~   set(PYTHON_BINDINGS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+#~ endif()
+#~ set(BINDINGS_DIR "${INSTALL_LIBRARY_DIR}/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
+set(BINDINGS_DIR "${Python3_BINPATH}/../lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
+set(PYTHON_BINDINGS_INSTALL_PREFIX "${BINDINGS_DIR}")
 
 include(PySide${PYSIDE_MAJOR_VERSION}ModuleBuild)
 add_subdirectory(PySMILI)
