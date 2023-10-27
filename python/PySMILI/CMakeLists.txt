@@ -7,11 +7,11 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 
 # Auto-Genereate files every class will have his cpp/h files
 set(PySMILI_SRC
-    # individual classes
-    ${CMAKE_CURRENT_BINARY_DIR}/milxQtWindow_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/milxQtWindow_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/LabelledAction_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/milxQtRenderWindow_wrapper.h
+    # individual classes, must be lower case !!!
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/labelledaction_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtrenderwindow_wrapper.h
     # global module wrapper
 #~     ${CMAKE_CURRENT_BINARY_DIR}/module_wrapper.cpp
 #~     ${CMAKE_CURRENT_BINARY_DIR}/python.h
@@ -50,7 +50,7 @@ set(PySMILI_DEPENDS
 )
 
 create_python_bindings(
-  "SMILI"
+  "${PYTHON_BINDING_NAMESPACE}"
   "${PySMILI_typesystem_paths}"
   "${PySMILI_include_paths}"
   "${PySMILI_SRC}"
