@@ -10,11 +10,12 @@ set(PySMILI_SRC
     # individual classes, must be lower case !!!
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/labelledaction_wrapper.h
+#~     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/labelledaction_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtrenderwindow_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtrenderwindow_wrapper.cpp
     # global module wrapper
-#~     ${CMAKE_CURRENT_BINARY_DIR}/module_wrapper.cpp
-#~     ${CMAKE_CURRENT_BINARY_DIR}/python.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_module_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_python.h
 )
 
 # includes necessary to parse and build the classes specified on typesystem
@@ -39,6 +40,7 @@ set(PySMILI_target_link_libraries
     Qt${Qt_VERSION_MAJOR}::Core
     Qt${Qt_VERSION_MAJOR}::Gui
     Qt${Qt_VERSION_MAJOR}::Widgets
+    PySide2::pyside2
     ${Python3_LIBRARIES}
 )
 
@@ -71,6 +73,9 @@ install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
     $<TARGET_FILE:milx-Qt>
+#~     $<TARGET_FILE:PySide2>
+    ${PYSIDE_LIBRARY}
+    ${SHIBOKEN_LIBRARY}
   DESTINATION
     ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
 )
@@ -79,6 +84,10 @@ if(NOT WIN32)
     FILES
         $<TARGET_LINKER_FILE:milx-Qt>
         $<TARGET_SONAME_FILE:milx-Qt>
+#~         $<TARGET_LINKER_FILE:PySide2>
+#~         $<TARGET_SONAME_FILE:PySide2>
+        ${PYSIDE_LIBRARY}
+        ${SHIBOKEN_LIBRARY}
     DESTINATION
         ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
   )
