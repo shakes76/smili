@@ -18,8 +18,8 @@ set(PySMILI_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtimage_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtimage_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmodel_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmodel_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtfile_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmodel_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtfile_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtfile_wrapper.cpp
     # global module wrapper
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_module_wrapper.cpp
@@ -44,6 +44,8 @@ set(PySMILI_target_include_directories
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 set(PySMILI_target_link_libraries
+    vtk-ext
+    milx-SMILI
     milx-Qt
     Qt${Qt_VERSION_MAJOR}::Core
     Qt${Qt_VERSION_MAJOR}::Gui
@@ -55,8 +57,12 @@ set(PySMILI_target_link_libraries
 # changes on these files should trigger a new generation
 set(PySMILI_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/smili_global.h
+    ${CMAKE_SOURCE_DIR}/include/milxFile.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtWindow.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtRenderWindow.h
+    ${CMAKE_SOURCE_DIR}/include/Qt/milxQtModel.h
+    ${CMAKE_SOURCE_DIR}/include/Qt/milxQtImage.h
+    ${CMAKE_SOURCE_DIR}/include/Qt/milxQtFile.h
 )
 
 create_python_bindings(
@@ -80,8 +86,9 @@ message("Install Bindings at ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}")
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+    $<TARGET_FILE:milx-SMILI>
     $<TARGET_FILE:milx-Qt>
-#~     $<TARGET_FILE:PySide2>
+    $<TARGET_FILE:vtk-ext>
     ${PYSIDE_LIBRARY}
     ${SHIBOKEN_LIBRARY}
   DESTINATION
@@ -90,10 +97,12 @@ install(
 if(NOT WIN32)
   install(
     FILES
+        $<TARGET_LINKER_FILE:milx-SMILI>
+        $<TARGET_SONAME_FILE:milx-SMILI>
         $<TARGET_LINKER_FILE:milx-Qt>
         $<TARGET_SONAME_FILE:milx-Qt>
-#~         $<TARGET_LINKER_FILE:PySide2>
-#~         $<TARGET_SONAME_FILE:PySide2>
+        $<TARGET_LINKER_FILE:vtk-ext>
+        $<TARGET_SONAME_FILE:vtk-ext>
         ${PYSIDE_LIBRARY}
         ${SHIBOKEN_LIBRARY}
     DESTINATION
