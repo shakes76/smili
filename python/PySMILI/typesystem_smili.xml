@@ -6,12 +6,17 @@
         typesystem because it already include gui and core typesystem -->
     <load-typesystem name="typesystem_widgets.xml" generate="no"/>
 
+    <!-- Our classes are declared in a namespace, so we should define this -->
+    <namespace-type name="milx" visible="no">
+        <object-type name="File"/>
+    </namespace-type>
+
         <!-- this is used in a public virtual pure function we need to declare it
             otherwise shiboken will ignore the function and will fail to create a wrapper -->
         <!-- <primitive-type name="DropAreaWithCentralFrame"/>
         <primitive-type name="SideBar"/>-->
 
-        <!-- Some plublic enum and flags -->
+        <!-- Some public enum and flags -->
         <!-- <enum-type name="ViewType"/>
         <enum-type name="ViewerType"/>
         <enum-type name="OrientationType"/>-->
@@ -27,8 +32,11 @@
             <!-- <object-type name="LabelledAction"/>-->
             <!-- this class contains a internal enum, so it should be declared
                  inside of the object-type -->
-            <enum-type name="ViewType"/>
+            <!--<enum-type name="ViewType"/>
             <enum-type name="ViewerType"/>
-            <enum-type name="OrientationType"/>
+            <enum-type name="OrientationType"/> -->
         </object-type>
+        <object-type name="milxQtModel"/>
+        <object-type name="milxQtImage"/>
+        <object-type name="milxQtFile"/>
 </typesystem>

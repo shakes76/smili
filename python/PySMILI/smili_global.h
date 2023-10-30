@@ -10,5 +10,12 @@
 // Define PYTHON_BINDINGS
 #define PYTHON_BINDINGS
 
+//SMILI
+#include "milxFile.h"
+//milxQt
 #include "milxQtWindow.h"
 #include "milxQtRenderWindow.h"
+#include "milxQtModel.h"
+#include "milxQtImage.h"
+#include "milxQtFile.h"
+
