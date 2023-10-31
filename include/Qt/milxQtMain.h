@@ -1070,7 +1070,7 @@ protected:
     QAction* actionSaveScreen; //!< save action
     QAction* actionCloseActive; //!< Close active window in tab action
     QAction* actionCloseAll; //!< Close all windows in tab action
-    QAction* actionsRecentFile[MaxRecentFiles]; //!< Array of recent file actions
+    QList<QAction*> actionsRecentFile; //!< Array of recent file actions
     QAction* actionRecentFileSeparator; //!< Pointer to separator so it can be turned on and off
     QAction* actionExit; //!< Exit action
     //----New---- (hierarchical deletion)

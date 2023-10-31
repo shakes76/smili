@@ -8,6 +8,8 @@
 
     <!-- Our classes are declared in a namespace, so we should define this -->
     <namespace-type name="milx" visible="no">
+        <object-type name="Math" generate="no"/>
+        <object-type name="Model"/>
         <object-type name="File"/>
     </namespace-type>
 
@@ -39,4 +41,5 @@
         <object-type name="milxQtModel"/>
         <object-type name="milxQtImage"/>
         <object-type name="milxQtFile"/>
+        <object-type name="milxQtMain"/>
 </typesystem>

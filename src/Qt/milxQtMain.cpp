@@ -2879,7 +2879,7 @@ void milxQtMain::createMenu()
     actionCloseAll = new QAction(this);
     for (int i = 0; i < MaxRecentFiles; ++i)
     {
-        actionsRecentFile[i] = new QAction(this);
+        actionsRecentFile.insert(i, new QAction(this));
         actionsRecentFile[i]->setVisible(false);
         connect(actionsRecentFile[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
     }
