@@ -9,7 +9,14 @@
 // Make "signals:", "slots:" visible as access specifiers
 #define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
 
+//ITK
+//#include <itkImage.h>
+
 //VTK
+//#include <vtkSmartPointer.h>
+//#include <vtkPointSet.h> //base of vtkPolyData
+#include <vtkPolyData.h>
+//#include <vtkImageData.h>
 #if VTK_MAJOR_VERSION <= 8
   #include <QVTKWidget.h>
 #else

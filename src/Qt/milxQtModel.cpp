@@ -120,7 +120,7 @@ void milxQtModel::AddArray(vtkSmartPointer<vtkDataArray> array)
     loaded = true;
 }
 
-void milxQtModel::SetInput(vtkSmartPointer<vtkPolyData> mesh)
+void milxQtModel::SetInput(vtkPolyData *mesh)
 {
     model.SetInput(mesh);
     resetFlags();

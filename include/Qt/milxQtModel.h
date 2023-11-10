@@ -148,10 +148,10 @@ public:
     */
     void AddArray(vtkSmartPointer<vtkDataArray> array);
     /*!
-        \fn milxQtModel::SetInput(vtkSmartPointer<vtkPolyData> mesh)
+        \fn milxQtModel::SetInput(vtkPolyData *mesh)
         \brief Assigns the mesh provided to the class, preparing for display. Call generateModel() and then show() to display.
     */
-    void SetInput(vtkSmartPointer<vtkPolyData> mesh);
+    void SetInput(vtkPolyData *mesh);
     /*!
         \fn milxQtModel::SetInputPointSet(vtkSmartPointer<vtkPointSet> mesh)
         \brief Assigns the pointset mesh provided to the class, preparing for display. No need to call generateModel(), just show() to display.

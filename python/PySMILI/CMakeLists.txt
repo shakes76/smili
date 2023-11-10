@@ -8,6 +8,12 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 # Auto-Genereate files every class will have his cpp/h files
 set(PySMILI_SRC
     # individual classes, must be lower case !!!
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.h
@@ -56,6 +62,7 @@ set(PySMILI_target_include_directories
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 set(PySMILI_target_link_libraries
+    ${VTK_LIBRARIES}
     vtk-ext
     milx-SMILI
     milx-Qt

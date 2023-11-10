@@ -23,12 +23,22 @@
     <enum-type name="ViewerType"/>
     <enum-type name="OrientationType"/>-->
 
+    <!-- Externals like ITK to detect Arrays and Images -->
+    <!-- <namespace-type name="itk" visible="no">
+        <object-type name="Array" generate="no"/>
+        <object-type name="Image" generate="no"/>
+    </namespace-type> -->
+
     <!-- Externals like VTK to detect QWidget properly -->
+    <!-- <object-type name="vtkSmartPointer" generate="no"/>
+    <object-type name="vtkPointSet" generate="no"/> -->
     <object-type name="QVTKWidget"/>
+    <object-type name="vtkPolyData"/>
+    <!-- <object-type name="vtkImageData"/> -->
 
     <!-- our classes
             For class we can use two types:
-            object-type: class that does not have a copy-contructor and can not be passed as value to functions;
+            object-type: class that does not have a copy-constructor and can not be passed as value to functions;
             value-type: class that can be passed as value for functions
             Here we only use 'object-type' since all our classes are derived from QWidget
         -->
