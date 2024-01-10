@@ -174,6 +174,21 @@ public:
         \brief Sets the points for the model to be generated. Must pass a vtkPoints objects, which is easy to use.
     */
     void SetPoints(vtkSmartPointer<vtkPoints> modelPoints);
+    /*!
+        \fn milxQtModel::InsertNextPoint(double x, double y, double z)
+        \brief Insert a point for the model to be generated. Use repeatedly for all points.
+    */
+    inline void InsertNextPoint(double x, double y, double z)
+    {   
+        model.InsertNextPoint(x, y, z);
+        loaded = true;    
+    }
+    /*!
+        \fn milxQtModel::SetPoint(vtkIdType id, double x, double y, double z)
+        \brief Set a point for the model to be generated. Use repeatedly for all points.
+
+        Assumes points already exist, so ensure PolyData is present or already set via InsertNextPoint
+    */
     inline void SetPoint(vtkIdType id, double x, double y, double z)
     {   model.SetPoint(id, x, y, z);    }
     /*!

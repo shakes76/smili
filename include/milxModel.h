@@ -172,9 +172,18 @@ public:
 	*/
   void SetPoints(vtkSmartPointer<vtkPoints> modelPoints);
   /*!
+    \fn Model::InsertNextPoint(double x, double y, double z)
+    \brief Insert a point to the model, use repeatedly to build model
+
+    Handles points and model object internally, no allocation required.
+    Result() will automatically ensure points are loaded into model.
+	*/
+  void InsertNextPoint(double x, double y, double z);
+  /*!
     \fn Model::SetPoint(vtkIdType id, double x, double y, double z)
     \brief Assign a point to the model, use repeatedly to build model
 
+    Assumes points already exist either via PolyData or InsertNextPoint.
     Handles points and model object internally, no allocation required.
     Result() will automatically ensure points are loaded into model.
 	*/
