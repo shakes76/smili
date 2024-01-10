@@ -10,10 +10,12 @@
 #define QT_ANNOTATE_ACCESS_SPECIFIER(a) __attribute__((annotate(#a)))
 
 //ITK
+//#include <itkArray.h>
 //#include <itkImage.h>
 
 //VTK
 //#include <vtkSmartPointer.h>
+//#include <vtkPoints.h> 
 //#include <vtkPointSet.h> //base of vtkPolyData
 #include <vtkPolyData.h>
 //#include <vtkImageData.h>

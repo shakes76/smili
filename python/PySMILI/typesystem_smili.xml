@@ -24,14 +24,14 @@
     <enum-type name="OrientationType"/>-->
 
     <!-- Externals like ITK to detect Arrays and Images -->
-    <!-- <namespace-type name="itk" visible="no">
-        <object-type name="Array" generate="no"/>
-        <object-type name="Image" generate="no"/>
+    <namespace-type name="itk" visible="no">
+        <!-- <object-type name="Array" generate="no"/>
+        <object-type name="Image"/> -->
     </namespace-type> -->
 
     <!-- Externals like VTK to detect QWidget properly -->
-    <!-- <object-type name="vtkSmartPointer" generate="no"/>
-    <object-type name="vtkPointSet" generate="no"/> -->
+    <!-- <object-type name="vtkSmartPointer" generate="no"/> -->
+    <!-- <object-type name="vtkPoints"/> -->
     <object-type name="QVTKWidget"/>
     <object-type name="vtkPolyData"/>
     <!-- <object-type name="vtkImageData"/> -->

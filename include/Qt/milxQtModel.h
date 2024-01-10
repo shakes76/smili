@@ -174,6 +174,8 @@ public:
         \brief Sets the points for the model to be generated. Must pass a vtkPoints objects, which is easy to use.
     */
     void SetPoints(vtkSmartPointer<vtkPoints> modelPoints);
+    inline void SetPoint(vtkIdType id, double x, double y, double z)
+    {   model.SetPoint(id, x, y, z);    }
     /*!
         \fn milxQtModel::SetPolys(vtkSmartPointer<vtkCellArray> modelPolys)
         \brief Sets the polygons for the model to be generated. Must pass a vtkCellArray objects, which is easy to use.

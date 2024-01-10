@@ -8,10 +8,16 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 # Auto-Genereate files every class will have his cpp/h files
 set(PySMILI_SRC
     # individual classes, must be lower case !!!
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/itk_array_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/itk_array_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/itk_image_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/itk_image_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
@@ -57,6 +63,7 @@ set(PySMILI_typesystem_paths
 
 # Include flags/path that will be set in 'target_include_directories'
 set(PySMILI_target_include_directories
+    ${VTK_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/src
 )
 

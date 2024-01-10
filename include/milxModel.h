@@ -172,6 +172,14 @@ public:
 	*/
   void SetPoints(vtkSmartPointer<vtkPoints> modelPoints);
   /*!
+    \fn Model::SetPoint(vtkIdType id, double x, double y, double z)
+    \brief Assign a point to the model, use repeatedly to build model
+
+    Handles points and model object internally, no allocation required.
+    Result() will automatically ensure points are loaded into model.
+	*/
+  void SetPoint(vtkIdType id, double x, double y, double z);
+  /*!
     \fn Model::SetPolys(vtkSmartPointer<vtkCellArray> modelPolys)
     \brief Assign polygons to the model via the array given.
 	*/
@@ -197,10 +205,9 @@ public:
     \fn Model::Result()
     \brief Returns the current model, i.e. the result of the latest operation.
 
-  Could be NULL, the user must check.
+  Could be NULL, the user must check. Triggers assigning any points set via SetPoint() into model.
 	*/
-  inline vtkSmartPointer<vtkPolyData>& Result()
-  { return CurrentModel;  }
+  vtkSmartPointer<vtkPolyData>& Result();
   /*!
     \fn Model::PreviousResult()
     \brief Returns the previous model, i.e. the result of the penultimate operation.
@@ -775,9 +782,11 @@ public:
 protected:
   vtkSmartPointer<vtkPolyData> InputModel; //!< Holds the initial model in the pipeline
   vtkSmartPointer<vtkPolyData> CurrentModel; //!< Holds the current model in the pipeline
+  vtkSmartPointer<vtkPoints> CurrentPoints; //!< Holds the current points in the pipeline, only used for SetPoint
   vtkSmartPointer<vtkPolyData> PreviousModel; //!< Holds the previous model in the pipeline
   vtkSmartPointer<vtkTransform> CurrentTransform; //!< transform applied to model
 
+  bool PointsChanged; //!< Used to check if points need to be updated in model
   bool InternalInPlaceOperation; //!< Used by the collection members to assign via pointers rather than deep copys
 
   inline bool IsCurrentModel()
