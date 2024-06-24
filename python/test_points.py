@@ -15,15 +15,12 @@ if __name__ == "__main__":
     app.setOrganizationName("PySMILI")
     app.setApplicationName("PolyData Viewer")
 
-    fileIO = milxQtFile()
-    polydata = vtkPolyData()
-
-    fileIO.openModel(filename, polydata)
-
     model = milxQtModel(mainWindow)
-    model.SetInput(polydata)
+    model.InsertNextPoint(1, 0, 0)
+    model.InsertNextPoint(0, 1, 0)
+    model.InsertNextPoint(0, 0, 1)
     model.generateModel()
-    model.colourMapToJet()
+    model.generatePointModel()
     model.setWindowTitle("Model")
 
     mainWindow.setCentralWidget(model)
@@ -32,4 +29,3 @@ if __name__ == "__main__":
 
     app.exec_()
     print("Done")
-
