@@ -127,7 +127,7 @@ IF (WIN32)
     #qt5 windeploy - Uncomment this if building the NSIS Windows installer
     #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
     include(Windeployqt)
-    windeployqt(smilx bin)
+    windeployqt(smilx)
     MESSAGE("Windows Qt5 Deployment")
 
     install(CODE "
@@ -259,22 +259,22 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
 
         # Install ITK libraries
         # USING PACKAGE MANAGER VERSION - Ubuntu 16.04
-#~        IF(ITK_VERSION_MAJOR GREATER 3)
-#~            FILE(GLOB itkFiles "${ITK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-#~        ELSE(ITK_VERSION_MAJOR GREATER 3)
-#~            FILE(GLOB itkFiles "${ITK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-#~        ENDIF(ITK_VERSION_MAJOR GREATER 3)
-#~        INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
-#~        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+#        IF(ITK_VERSION_MAJOR GREATER 3)
+#            FILE(GLOB itkFiles "${ITK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+#        ELSE(ITK_VERSION_MAJOR GREATER 3)
+#            FILE(GLOB itkFiles "${ITK_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+#        ENDIF(ITK_VERSION_MAJOR GREATER 3)
+#        INSTALL(FILES ${itkFiles} DESTINATION lib COMPONENT Runtime
+#        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
     #Debian
     SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shekhar Chandra <Shekhar.Chandra@csiro.au>")
-  #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #10.04
-  #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libinsighttoolkit3.20, libpythonqt2.0, libfftw3-3") #12.04
-#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK
-#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
+  #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #10.04
+  #    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libinsighttoolkit3.20, libpythonqt2.0, libfftw3-3") #12.04
+#     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK
+#    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libvtk7.1p-qt, libinsighttoolkit4.13, libfftw3-3")
-  #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
+  #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
 
     #RPM
     SET(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
@@ -297,13 +297,13 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     #desktop file for menus
     SET(SMILX_DESKTOP_DIR "/usr/share/applications/")
     SET(SMILX_PIXMAPS_DIR "/usr/share/icons/")
-  #~     FIND_PACKAGE(KDE4)
-  #~     include(KDE4Internal)
-  #~     install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
+  #     FIND_PACKAGE(KDE4)
+  #     include(KDE4Internal)
+  #     install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
     install(FILES ${PROJECT_BINARY_DIR}/smilx.desktop DESTINATION ${SMILX_DESKTOP_DIR})
-  #~     install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${ICON_INSTALL_DIR})
+  #     install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${ICON_INSTALL_DIR})
     install(FILES ${SMILI_SOURCE_DIR}/resources/smilx_icon.png DESTINATION ${SMILX_PIXMAPS_DIR})
-  #~     kde4_add_app_icon(smilx.cpp "${SMILI_SOURCE_DIR}/resources/smilx_icon.png")
+  #     kde4_add_app_icon(smilx.cpp "${SMILI_SOURCE_DIR}/resources/smilx_icon.png")
     find_program(XDG-DESKTOP-MENU_EXECUTABLE xdg-desktop-menu)
     INSTALL(CODE "
     execute_process(COMMAND ${XDG-DESKTOP-MENU_EXECUTABLE} install --novendor ${PROJECT_BINARY_DIR}/smilx.desktop)
