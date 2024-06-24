@@ -2,11 +2,11 @@
 # Originally sourced from 
 # https://stackoverflow.com/questions/60854495/qt5-cmake-include-all-libraries-into-executable
 
-find_package(Qt5Core REQUIRED)
+find_package("Qt${VTK_QT_VERSION}Core" REQUIRED)
 
 # get absolute path to qmake, then use it to find windeployqt executable
 
-get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+get_target_property(_qmake_executable "Qt${VTK_QT_VERSION}::qmake" IMPORTED_LOCATION)
 get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
 
 function(windeployqt target)
