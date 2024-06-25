@@ -128,7 +128,7 @@ IF (WIN32)
     #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
     include(Windeployqt)
     windeployqt(smilx)
-    MESSAGE("Windows Qt${VTK_QT_VERSION} Deployment")
+    MESSAGE("Windows Qt5 Deployment")
 
     install(CODE "
     file(GLOB_RECURSE PLUGINS
