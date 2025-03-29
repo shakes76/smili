@@ -30,9 +30,12 @@
 #define __vtkInteractorStyleImage2_h
 
 #include <vtkObjectFactory.h> //For image display from VTK5+
-#if(VTK_MAJOR_VERSION > 5)
+#if(VTK_MAJOR_VERSION > 5 && VTK_MAJOR_VERSION < 8)
   #include <vtkInteractionStyleModule.h> // For export macro
   #define VTK_EXT_STYLE_EXPORT VTKINTERACTIONSTYLE_EXPORT
+#elif(VTK_MAJOR_VERSION > 8)
+  #include <vtkRenderingCoreModule.h> // For export macro
+  #define VTK_EXT_STYLE_EXPORT VTKRENDERINGCORE_EXPORT
 #else
   #define VTK_EXT_STYLE_EXPORT VTK_RENDERING_EXPORT
 #endif

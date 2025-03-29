@@ -27,9 +27,12 @@
 #define vtkTensor_h
 
 #include <vtkObject.h>
-#if(VTK_MAJOR_VERSION > 5)
+#if(VTK_MAJOR_VERSION > 5 && VTK_MAJOR_VERSION < 8)
   #include <vtkCommonDataModelModule.h> // For export macro
   #define VTK_EXT_TENSOR_EXPORT VTKCOMMONDATAMODEL_EXPORT
+#elif(VTK_MAJOR_VERSION > 8)
+  #include <vtkRenderingCoreModule.h> // For export macro
+  #define VTK_EXT_TENSOR_EXPORT VTKRENDERINGCORE_EXPORT
 #else
   #define VTK_EXT_TENSOR_EXPORT VTK_RENDERING_EXPORT
 #endif

@@ -14,12 +14,13 @@ set(VTK_EXT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(VTK_EXT_BINARY_DIR ${PROJECT_BINARY_DIR})
 # Add Headers into List
 file(GLOB VTK_EXT_HEADERS ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
-file(GLOB VTK_EXT_HEADERS_TEMPLATES ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.txx)
 file(GLOB VTK_EXT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
 
 #Win32 requirement for VTK classes in DLLs
 IF(VTK_MAJOR_VERSION VERSION_GREATER "6")
   add_definitions (-DvtkCommonDataModel_EXPORTS)
+  add_definitions (-DRenderingCore_EXPORTS)
+  add_definitions (-DInteractionImage_EXPORTS)
 ENDIF()
 IF(VTK_MAJOR_VERSION VERSION_GREATER "5")
   add_definitions (-DvtkInteractionStyle_EXPORTS)
