@@ -107,6 +107,7 @@ SET(CPACK_PACKAGE_EXECUTABLES milxOverlay milxOverlay milxImageApp milxImageApp 
 #####################
 IF (WIN32)
     set(_add_executable_param WIN32)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 
     SET(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}\\\\smilx.ico")
     SET(CPACK_NSIS_MUI_UNIICON "${PROJECT_SOURCE_DIR}\\\\smilx.ico")
@@ -124,8 +125,7 @@ IF (WIN32)
     # Pull out other dependencies
     SET(LIBRARY_DIRS ${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
 
-    #qt5 windeploy - Uncomment this if building the NSIS Windows installer
-    #only supports one build type at a time, use CMAKE_CONFIGURATION_TYPES to only Release
+    #run qt5 windeploy for Qt platform libs
     include(Windeployqt)
     windeployqt(smilx)
     MESSAGE("Windows Qt${VTK_QT_VERSION} Deployment")
@@ -136,6 +136,11 @@ IF (WIN32)
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
     " COMPONENT Runtime)
+
+    #install Qt platform libs for CPack that windeploy Qt deployed (needed for packaging)
+    FILE(GLOB QtPlatformFiles "${CMAKE_INSTALL_PREFIX}/bin/Release/platforms/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    install(FILES ${QtPlatformFiles} DESTINATION bin/platforms
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
     # For windows, use nsis
     SET(CPACK_GENERATOR NSIS)
