@@ -40,7 +40,7 @@
   #include <vtkPolyDataMapper.h> //For image display from VTK5+
   #include <vtkActor.h> //For image display from VTK5+
 #endif
-#if(VTK_MAJOR_VERSION > 5 && VTK_MAJOR_VERSION < 8)
+#if(VTK_MAJOR_VERSION > 5 && VTK_MAJOR_VERSION < 9)
   #include <vtkRenderingImageModule.h> // For export macro
   #define VTK_EXT_EXPORT VTKRENDERINGIMAGE_EXPORT
 #elif(VTK_MAJOR_VERSION > 8)
