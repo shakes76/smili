@@ -997,7 +997,7 @@ itk::SmartPointer< itk::Transform<TType> > File::OpenTransform(std::string filen
   catch(itk::ExceptionObject &ex)
   {
     PrintError("milxFile: Failed reading Transform " + std::string(ex.GetDescription()));
-    return NULL;
+    return static_cast< itk::Transform<TType> *>(NULL);
   }
 
   return static_cast< itk::Transform<TType> *>( (*(affineReader->GetTransformList()->begin())).GetPointer() );

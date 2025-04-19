@@ -2260,7 +2260,7 @@ std::string Image<TImage>::ImageOrientation(itk::SmartPointer<TImage> img)
 	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
 	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
 	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
+	//codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
 
 	itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
 	std::string orientFlagStr = codeToString[orientFlag];
@@ -3578,13 +3578,13 @@ itk::SmartPointer<TImage> Image<TImage>::MergeLabelledImages(std::vector< typena
   typedef itk::MergeLabelMapFilter<LabelMapType> MergerType;
   typename MergerType::Pointer merger = MergerType::New();
   if(mergeType == 0)
-    merger->SetMethod(MergerType::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
+    merger->SetMethod(itk::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
   else if(mergeType == 1)
-    merger->SetMethod(MergerType::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
+    merger->SetMethod(itk::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
   else if(mergeType == 2)
-    merger->SetMethod(MergerType::PACK); ///relabel all the label objects by order of processing
+    merger->SetMethod(itk::PACK); ///relabel all the label objects by order of processing
   else if(mergeType == 3)
-    merger->SetMethod(MergerType::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+    merger->SetMethod(itk::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
 
   for (size_t i = 0; i < n; i ++)
   {
