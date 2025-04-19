@@ -294,13 +294,13 @@ public:
   template<typename TVector>
   static itk::SmartPointer<TImage> ImportVectorToImage(vnl_vector<TVector> &vec, typename TImage::SizeType size, itk::SmartPointer<TImage> image = NULL);
   /*!
-    \fn Image::ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image = NULL)
+    \fn Image::ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image)
     \brief Imports a VNL matrix to an ITK image object.
 
     Assumes the vector is not empty and that if the image is provided, it is setup correctly (spacing, origin etc.).
   */
   template<typename TMatrix>
-  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image = NULL);
+  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image);
 
   /*!
     \fn Image::BlankImage(const TImage::PixelType value, const TImage::SizeType imgSize)

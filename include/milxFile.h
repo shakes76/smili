@@ -950,7 +950,8 @@ itk::SmartPointer<TImage> File::ReadImageUsingITK(const std::string filename)
   {
     std::cerr << "Reader Encountered the following error." << std::endl;
     std::cerr << err << std::endl;
-    return NULL;
+    itk::SmartPointer<TImage> empty;
+    return empty;
   }
 
   return reader->GetOutput();

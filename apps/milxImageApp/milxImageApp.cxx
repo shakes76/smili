@@ -220,7 +220,11 @@ int main(int argc, char *argv[])
     maskName = maskArg.getValue();
 
   ///Setup ITK Threads
+#if ITK_VERSION_MAJOR < 5
   itk::MultiThreader::SetGlobalDefaultNumberOfThreads(threads);
+#else
+  itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(threads);
+#endif
   milx::PrintInfo("Threads to use: " + milx::NumberToString(threads));
 
   ///Display operation

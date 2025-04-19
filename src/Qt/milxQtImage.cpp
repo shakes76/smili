@@ -209,7 +209,8 @@ void milxQtImage::setData(vnl_matrix<double> &newData)
 	typedef double doublePixelType;
 	typedef itk::Image<doublePixelType, milx::imgDimension> doubleImageType;
 
-	doubleImageType::Pointer imageDouble = milx::Image<doubleImageType>::ImportMatrixToImage<double>(newData);
+    doubleImageType::Pointer image; //empty image
+	doubleImageType::Pointer imageDouble = milx::Image<doubleImageType>::ImportMatrixToImage<double>(newData, image);
 	imageFloat = milx::Image<doubleImageType>::CastImage<floatImageType>(imageDouble);
 	printWarning("Matrix of Double type has been converted to Float type for display");
     loaded = true;
@@ -1399,8 +1400,8 @@ void milxQtImage::computeContour()
         imageChar = milx::Image<charImageType>::BinaryContour(imageChar, minValue, maxValue);
 	else if (integer)
 		imageInt = milx::Image<intImageType>::BinaryContour(imageInt, minValue, maxValue);
-    else if(rgb)
-        imageRGB = milx::Image<rgbImageType>::BinaryContour(imageRGB, minValue, maxValue);
+    //else if(rgb)
+        //imageRGB = milx::Image<rgbImageType>::BinaryContour(imageRGB, minValue, maxValue);
     else
         imageFloat = milx::Image<floatImageType>::BinaryContour(imageFloat, minValue, maxValue);
     emit done(-1);

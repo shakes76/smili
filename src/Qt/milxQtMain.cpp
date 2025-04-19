@@ -127,7 +127,11 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     readSettings();
 
     ///Setup ITK Threads
+#if ITK_VERSION_MAJOR < 5
     itk::MultiThreader::SetGlobalDefaultNumberOfThreads(maxProcessors);
+#else
+    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(maxProcessors);
+#endif
     vtkMultiThreader::SetGlobalDefaultNumberOfThreads(maxProcessors);
 
     ///Program Info
