@@ -183,7 +183,12 @@ int main(int argc, char *argv[])
   size_t flipAxis = flipArg.getValue();
   std::vector<std::string> componentNames = componentsArg.getValue();
 
-  ///Setup ITK Threads
+  ///Setup VTK Threads
+//#if ITK_VERSION_MAJOR < 5
+//  itk::MultiThreader::SetGlobalDefaultNumberOfThreads(threads);
+//#else
+//  itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(threads);
+//#endif
   vtkMultiThreader::SetGlobalDefaultNumberOfThreads(threads);
   milx::PrintInfo("Threads to use: " + milx::NumberToString(threads));
 

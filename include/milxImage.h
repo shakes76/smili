@@ -3577,14 +3577,25 @@ itk::SmartPointer<TImage> Image<TImage>::MergeLabelledImages(std::vector< typena
   typedef itk::LabelImageToLabelMapFilter<TImage, LabelMapType> LabelImageToLabelMapType;
   typedef itk::MergeLabelMapFilter<LabelMapType> MergerType;
   typename MergerType::Pointer merger = MergerType::New();
+#if ITK_VERSION_MAJOR < 5
   if(mergeType == 0)
-    merger->SetMethod(itk::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
+    merger->SetMethod(MergerType::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
   else if(mergeType == 1)
-    merger->SetMethod(itk::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
+    merger->SetMethod(MergerType::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
   else if(mergeType == 2)
-    merger->SetMethod(itk::PACK); ///relabel all the label objects by order of processing
+    merger->SetMethod(MergerType::PACK); ///relabel all the label objects by order of processing
   else if(mergeType == 3)
+    merger->SetMethod(MergerType::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+#else
+  if (mergeType == 0)
+    merger->SetMethod(itk::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
+  else if (mergeType == 1)
+    merger->SetMethod(itk::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
+  else if (mergeType == 2)
+    merger->SetMethod(itk::PACK); ///relabel all the label objects by order of processing
+  else if (mergeType == 3)
     merger->SetMethod(itk::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+#endif
 
   for (size_t i = 0; i < n; i ++)
   {
