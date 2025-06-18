@@ -35,6 +35,7 @@ OPTION(BUILD_APPLICATIONS "Build the applications for SMILI. Use BUILD_GUI_RELAT
 #~ OPTION(BUILD_PROJECTS "Build project binaries that use SMILI" OFF)
 OPTION(BUILD_TESTS "Build the tests for SMILI" OFF)
 OPTION(BUILD_PROTOTYPES "Build the prototype tests for SMILI" OFF)
+OPTION(BUILD_ITKIO_SUPPORT "Build support for ITK IO (MGH, FDF etc.)" OFF)
 
 #dependent options, triggered if another option is set
 DEPENDENT_OPTION(USE_ITK "Build all the ITK components" ON "ITK_LIBRARIES" OFF)
@@ -103,6 +104,10 @@ IF(APPLE)
        SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
     ENDIF("${isSystemDir}" STREQUAL "-1")
 ENDIF(APPLE)
+
+IF(BUILD_ITKIO_SUPPORT)
+  add_definitions(-DITKIO_SUPPORT)
+ENDIF(BUILD_ITKIO_SUPPORT)
 
 # Recurse into the "apps" subdirectory. This does not actually
 # cause another cmake executable to run.

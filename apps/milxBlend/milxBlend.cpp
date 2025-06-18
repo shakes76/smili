@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
     //    transform2->PostMultiply();
     if(imageArg.isSet())
     {
-        cout << ">> Blend: Reading Image" << endl;
+		std::cout << ">> Blend: Reading Image" << std::endl;
         errorReading = false;
         success = reader->openImage(imageName.c_str(), img.data());
 
@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
 
         if(errorReading)
         {
-            cerr << "Error Reading the image file. Exiting." << endl;
+			std::cerr << "Error Reading the image file. Exiting." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -374,14 +374,14 @@ int main(int argc, char* argv[])
     //Correct the blending image
     if(gagCestArg.isSet())
     {
-        cout << ">> Blend: GagCEST scaling applied" << endl;
+		std::cout << ">> Blend: GagCEST scaling applied" << std::endl;
         //CEST[%]=(RGB-2048)/2000*SF
         CorrectCESTMapping<floatImageType>(img->GetFloatImage());
         img->generateImage();
     }
 
     ///Colour maps
-    cout << ">>> Blend: Setting Colourmap" << endl;
+	std::cout << ">>> Blend: Setting Colourmap" << std::endl;
     img->colourMapToJet();
     if (vtkArg.isSet())
       img->colourMapToVTK();
@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
     qApp->processEvents();
 
     //Blend
-    cout << ">> Blend: Begining ..." << endl;
+	std::cout << ">> Blend: Begining ..." << std::endl;
     QPointer<milxQtImage> blendImage = imagesBlend(image.data(), img.data(), opacity);
 
     //Transfer scalar bar
@@ -448,10 +448,10 @@ int main(int argc, char* argv[])
     //if(transformArg.isSet())
     //    image->SetTransform(transform);
 
-    cout << ">> Blend: Rendering" << endl;
+	std::cout << ">> Blend: Rendering" << std::endl;
     if (onscreenArg.isSet())
     {
-        cout << ">> Blend: Displaying Onscreen" << endl;
+        std::cout << ">> Blend: Displaying Onscreen" << std::endl;
         if (axialArg.isSet())
             blendImage->viewToAxial();
         if (coronalArg.isSet())
@@ -464,7 +464,7 @@ int main(int argc, char* argv[])
         mainWindow.show();
     }
     else
-        cout << ">> Blend: Output to File" << endl;
+		std::cout << ">> Blend: Output to File" << std::endl;
 
     QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
     if (!onscreenArg.isSet())
@@ -477,7 +477,7 @@ int main(int argc, char* argv[])
         milx::PrintDebug("Output has number of components of " + milx::NumberToString(blendImage->GetOutput()->GetNumberOfScalarComponents()));
         writer->saveImage(outName.c_str(), blendImage->GetOutput());
     }
-    cout << ">> Complete" << endl;
+	std::cout << ">> Complete" << std::endl;
 
     //blendImage->OffScreenRenderingOff(); //Required to prevent double-free*/
     if(!onscreenArg.isSet())

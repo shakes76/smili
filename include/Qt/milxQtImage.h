@@ -831,6 +831,15 @@ public slots:
     */
     void invertIntensity();
     /**
+      \fn milxQtImage::projectIntensity(bool xAxis = false, bool yAxis = false, bool zAxis = false)
+      \brief Computes the intensity projection (mean, min or max) of the image and displays it.
+
+      Automatically changes view to axis selected since the dimension is reduced by 1.
+
+      Currently supports maximum intensity projection (MIP)
+    */
+    void projectIntensity(bool xAxis = false, bool yAxis = false, bool zAxis = false);
+    /**
         \fn milxQtImage::matchInfo(milxQtImage *imageToMatch)
         \brief Matches the info of another image to the current image. See generateMatchedInformation() for more info.
     */
@@ -1439,6 +1448,7 @@ protected:
     QAction* highPassAct; //!< Action for high pass filtering of image
     QAction* normAct; //!< Action for normalization of image
     QAction* invertAct; //!< Action for invert intensity of image
+    QAction* projectAct; //!< Action for intensity projection of image
     QAction* relabelAct; //!< Action for relabelling image
     //------------------
     QMenu* transformMenu; //!< Transform Menu
