@@ -25,14 +25,14 @@
 #if VTK_MAJOR_VERSION <= 8
   #include <QVTKWidget.h>
 #else
-  #include <QVTKOpenGLStereoWidget.h>
+  #include <QVTKOpenGLNativeWidget.h>
 #endif
 //milxQt Specific
 #include "milxQtAliases.h"
 #include "milxQtConsole.h"
 
 #if VTK_MAJOR_VERSION > 8
-  typedef QVTKOpenGLStereoWidget QVTKWidget;
+  typedef QVTKOpenGLNativeWidget QVTKWidget;
 #endif
 
 /*!

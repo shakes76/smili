@@ -482,16 +482,21 @@ void milxQtModel::generatePointModel(double newScale, float red, float green, fl
     if(loaded)
     {
         emit working(-1);
+        bool ok1 = false;
         double bounds[6];
         model.Result()->GetBounds(bounds);
         double scaling = ( (bounds[1]-bounds[0]) + (bounds[3]-bounds[2]) + (bounds[5]-bounds[4]) )/150;
+        double newScaling = QInputDialog::getDouble(this, tr("Please enter scaling for the vector field"),
+          tr("Scaling:"), scaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
-        if(newScale == 1) //default scaling, so do automatically
-            scaling *= newScale;
-        else
-            scaling = newScale;
+        if (ok1)
+          newScale = newScaling;
+        printInfo("Point models will be scaled by " + QString::number(newScale) + " for display.");
 
-        model.GeneratePointModel(scaling);
+        if(newScale == 0.0) //default scaling, so do automatically
+            newScale = scaling;
+
+        model.GeneratePointModel(newScale);
         emit done(-1);
 
         ///Generate the model
@@ -570,7 +575,7 @@ void milxQtModel::generateVectorField(double newScale, float red, float green, f
                                 tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
             if(!ok1)
-                newScale = 0.0;
+                newScale = 1.0;
             else
                 newScale = newScaling;
             printInfo("Vectors will be scaled by " + QString::number(newScale) + " for display.");
@@ -614,7 +619,7 @@ void milxQtModel::generateTensorField(double newScale, float red, float green, f
                             tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
         if(!ok1)
-            newScale = 0.0;
+            newScale = 1.0;
         else
             newScale = newScaling;
         printInfo("Vectors will be scaled by " + QString::number(newScale) + " for display.");
@@ -695,6 +700,53 @@ void milxQtModel::generateHedgehog(double newScale, float red, float green, floa
     if(loaded)
     {
         emit working(-1);
+        //Check for vectors
+        bool useNormals = false;
+        vtkSmartPointer<vtkFloatArray> vectorArray;
+        if (!GetVectors()) //use scalars instead
+        {
+          printInfo("No Vectors found.");
+          if (!GetNormals())
+          {
+            printInfo("Generating Vector Field from Scalars (with normals).");
+            model.GenerateNormals();
+          }
+
+          ///Use Glyphs (vtkGlyph3D) at each point in the set with normals
+          vectorArray = vtkFloatArray::SafeDownCast(model.GetNormals());
+          useNormals = true;
+        }
+        else
+        {
+          printInfo("Generating Vector Field from Vectors.");
+          vectorArray = vtkFloatArray::SafeDownCast(model.GetVectors());
+        }
+
+        if (newScale == 0.0 && vectorArray) //auto rescale
+        {
+          coordinate meanDirection(0.0); //used to set scale
+          for (vtkIdType j = 0; j < model.GetNumberOfPoints(); j++)
+          {
+            coordinate vectorData(vectorArray->GetTuple3(j));
+
+            meanDirection += vectorData;
+          }
+          meanDirection /= model.GetNumberOfPoints();
+          printDebug("Mean Vector: " + QString::number(meanDirection[0]) + ", " + QString::number(meanDirection[1]) + ", " + QString::number(meanDirection[2]) + ", ");
+          printDebug("Mean Vector L2 Norm: " + QString::number(meanDirection.two_norm()));
+
+          bool ok1 = false;
+          double newScaling = 1.0 / meanDirection.two_norm();
+          newScaling = QInputDialog::getDouble(this, tr("Please enter scaling for the vector field"),
+            tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
+
+          if (!ok1)
+            newScale = 1.0;
+          else
+            newScale = newScaling;
+          printInfo("Lines will be scaled by " + QString::number(newScale) + " for display.");
+        }
+
         printInfo("Generated Hedgehog.");
         model.GenerateHedgehog(newScale);
         emit done(-1);
@@ -779,13 +831,14 @@ void milxQtModel::generateModel(float red, float green, float blue)
             milxQtWindow::renderWindow()->SetSize(minWindowSize, minWindowSize);
             printDebug("Resized to minimum size");
         }
+    #if VTK_MAJOR_VERSION <=7
         else
             milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
 
         int *winSize = milxQtWindow::renderWindow()->GetSize();
         QVTKWidget::resize(winSize[0], winSize[1]);
         printDebug("Size of Model window: " + QString::number(milxQtWindow::renderWindow()->GetSize()[0]) + "x" + QString::number(milxQtWindow::renderWindow()->GetSize()[1]));
-
+    #endif // VTK_MAJOR_VERSION
 
         modelled = true; //dont move down, ordering necessary
         milxQtRenderWindow::AddActor(modelActor);

@@ -28,8 +28,8 @@
 
 int main(int argc, char* argv[])
 {
-	vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
-	QApplication app(argc,argv);
+	  vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
+	  QApplication app(argc,argv);
 
     QPixmap icon(":resources/smilx_icon.png");
     app.setWindowIcon(QIcon(icon));
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	
     milxQtMain Main;
     Main.setWindowTitle("SMILX");
-	Main.setMinimumSize(800, 600);
+	  Main.setMinimumSize(800, 600);
     Main.show();
     splash.finish(&Main);
 		

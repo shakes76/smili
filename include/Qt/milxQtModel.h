@@ -800,13 +800,13 @@ public slots:
         generateTubes(red, blue, green);
     }
     /*!
-        \fn milxQtModel::generatePointModel(double newScale = 1.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
+        \fn milxQtModel::generatePointModel(double newScale = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
         \brief Generates a point model, i.e. glyphs at each point for the dataset. Arguments provided are for the colours of the edges of the graph.
         \warning Modifies the PolyData pipeline so that GetOutput() will return the glyphs. Use generatePoints() to avoid changing the pipeline.
 
         You should have set the points (using SetPoints()) before call this member.
     */
-    void generatePointModel(double newScale = 1.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour);
+    void generatePointModel(double newScale = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour);
     /*!
         \fn milxQtModel::generateSampledPoints(float distance = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
         \brief Generates points sampled "distance" apart on the model with glyphs at each point.
