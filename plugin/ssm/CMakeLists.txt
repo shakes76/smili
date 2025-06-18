@@ -1,14 +1,7 @@
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-cmake_minimum_required(VERSION 2.6)
-
 PROJECT(SSMPlugin CXX)
-
-include(find)
-
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-INCLUDE(${QT_USE_FILE})
 
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
@@ -53,8 +46,11 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export milxQt
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export milxQt
 
 # this moc's the above variable and appends to the cxx sources
-QT4_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
-
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+    QT5_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+    QT4_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 set(SSM_USE_LOCAL_FILE false CACHE BOOL "Use a local version of the vtkPCAAnalysisTimepointFilter*, vtkWeightedPCAAnalysisFilter* etc. files")
 IF (SSM_USE_LOCAL_FILE)

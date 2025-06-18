@@ -17,11 +17,11 @@
 =========================================================================*/
 #ifndef __MILXIMAGE_H
 #define __MILXIMAGE_H
-
+//ITK 4.13
+#include <itkSpatialOrientationAdapter.h>
 //ITK
 #include <itkVectorImage.h>
 #include <itkImageDuplicator.h>
-#include <itkSpatialOrientationAdapter.h>
 #include <itkRescaleIntensityImageFilter.h>
 #include <itkAdaptiveHistogramEqualizationImageFilter.h>
 #if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
@@ -242,8 +242,8 @@ public:
   */
   static vtkSmartPointer<vtkImageData> ConvertITKVectorImageToVTKImage(itk::SmartPointer<TImage> img);
 
-  template<typename TRefImage, class TPrecision>
-  static itk::SmartPointer<TImage> ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TRefImage> refImage, const bool labelledImage, const bool flipY = true, const bool ignoreDirection = false);
+  template<typename TPrecision>
+  static itk::SmartPointer<TImage> ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY = true, const bool ignoreDirection = false);
 #ifndef ITK_ONLY //Requires VTK
   /*!
     \fn Image:: ApplyOrientationToVTKImage(vtkSmartPointer<vtkImageData> img, itk::SmartPointer<TImage> refImage, vtkSmartPointer<vtkMatrix4x4> &transformMatrix, const bool labelledImage, const bool flipY = true)
@@ -294,13 +294,13 @@ public:
   template<typename TVector>
   static itk::SmartPointer<TImage> ImportVectorToImage(vnl_vector<TVector> &vec, typename TImage::SizeType size, itk::SmartPointer<TImage> image = NULL);
   /*!
-    \fn Image::ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image = NULL)
+    \fn Image::ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image)
     \brief Imports a VNL matrix to an ITK image object.
 
     Assumes the vector is not empty and that if the image is provided, it is setup correctly (spacing, origin etc.).
   */
   template<typename TMatrix>
-  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image = NULL);
+  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image);
 
   /*!
     \fn Image::BlankImage(const TImage::PixelType value, const TImage::SizeType imgSize)
@@ -952,8 +952,8 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ConvertITKVectorImageToVTKImage(itk
 }
 
 template<class TImage>
-template<class TRefImage, class TPrecision>
-itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TRefImage> refImage, const bool labelledImage, const bool flipY, const bool ignoreDirection)
+template<typename TPrecision>
+itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPointer<TImage> img, itk::SmartPointer<TImage> refImage, const bool labelledImage, const bool flipY, const bool ignoreDirection)
 {
   typename TImage::DirectionType direction = refImage->GetDirection();
   typename TImage::PointType origin = refImage->GetOrigin();
@@ -965,10 +965,6 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   else
     interpolator = itk::LinearInterpolateImageFunction<TImage, TPrecision>::New();
 
-  typedef itk::IdentityTransform<TPrecision, 3> TransformType;
-  typename TransformType::Pointer identityTransform = TransformType::New();
-
-  /*
   typename TImage::DirectionType identityMatrix;
   identityMatrix.SetIdentity();
 //  typename TImage::PointType axesOrigin;
@@ -1017,19 +1013,91 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
 //    new_origin[i] = matrix2->GetElement(i,3);
     offset[i] = matrix2->GetElement(i,3);
   }
-  matrix2->Print(cout);*/
+  matrix2->Print(cout);
 
   typedef itk::ResampleImageFilter<TImage, TImage, TPrecision> ResampleImageFilterType;
+  /*typename ResampleImageFilterType::Pointer stripInfo = ResampleImageFilterType::New();
+    stripInfo->SetInput(img);
+    stripInfo->SetDefaultPixelValue(0.0);
+    stripInfo->SetSize( refImage->GetLargestPossibleRegion().GetSize() );
+//    stripInfo->SetOutputOrigin(  axesOrigin );
+    stripInfo->SetOutputSpacing( refImage->GetSpacing() );
+//    stripInfo->SetOutputDirection( identityMatrix ); // 1 1 1 direction
+    stripInfo->SetInterpolator(interpolator);
+    stripInfo->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
+  typedef typename AffineTransformType::Pointer AffineTransformPointer;
+  AffineTransformPointer stripTransform = AffineTransformType::New();
+  stripTransform->SetIdentity();
+  typename TImage::DirectionType matrix = direction.GetInverse();
+  stripTransform->SetMatrix(matrix);
+  stripTransform->Translate(origin.GetVectorFromOrigin());
+//  stripTransform->SetCenter(axesOrigin);
+//  stripTransform->SetTranslation(origin.GetVectorFromOrigin());
+  AffineTransformPointer stripInvTransform = AffineTransformType::New();
+  stripInvTransform->GetInverse(stripTransform);
+
+  stripInfo->SetTransform(stripInvTransform);*/
+
+  typename TImage::SizeType inputSize = refImage->GetLargestPossibleRegion().GetSize();
+  typename TImage::SizeType outputSize;
+  typedef typename TImage::SizeType::SizeValueType SizeValueType;
+  outputSize[0] = static_cast<SizeValueType>(inputSize[0] * 1);
+  outputSize[1] = static_cast<SizeValueType>(inputSize[1] * 1);
+  outputSize[2] = static_cast<SizeValueType>(inputSize[2] * 1);
+
   typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
-    resample->SetInput(img);
+    resample->SetInput(stripInfo->GetOutput());
+//    resample->SetInput(img);
     resample->SetDefaultPixelValue(0.0);
-    resample->SetTransform(identityTransform);
-    resample->SetSize(refImage->GetLargestPossibleRegion().GetSize());
-//    resample->SetOutputOrigin(  axesOrigin );
-    resample->SetOutputSpacing(refImage->GetSpacing());
-//    resample->SetOutputDirection( identityMatrix ); // 1 1 1 direction
+    resample->SetSize( outputSize );
+    resample->SetOutputStartIndex( refImage->GetLargestPossibleRegion().GetIndex() );
+//    resample->SetOutputOrigin(  refImage->GetOrigin() );
+    resample->SetOutputSpacing( refImage->GetSpacing() );
     resample->SetInterpolator(interpolator);
     resample->AddObserver(itk::ProgressEvent(), ProgressUpdates);
+
+  ///Up cast transform to correct type
+  typedef itk::AffineTransform< TPrecision, milx::imgDimension > AffineTransformType;
+  typedef typename AffineTransformType::Pointer AffineTransformPointer;
+  AffineTransformPointer affineTransform = AffineTransformType::New();
+  affineTransform->SetIdentity();
+
+  ///Transform
+//  typename TImage::DirectionType matrix;
+//  if(ignoreDirection)
+//    matrix = identityMatrix;
+//  else
+//    matrix = direction.GetInverse();
+//  if(flipY)
+//    matrix(1,1) *= -1; //flip y
+//  affineTransform->SetMatrix(matrix);
+  affineTransform->SetMatrix(orientMatrix);
+
+  affineTransform->SetOffset(offset);
+//  affineTransform->SetCenter(origin);
+//  affineTransform->SetTranslation(origin.GetVectorFromOrigin());
+
+//  AffineTransformPointer invTransform = AffineTransformType::New();
+//  invTransform->GetInverse(affineTransform);
+
+  ///Origin
+  AffineTransformPointer affineTransform2 = AffineTransformType::New();
+  affineTransform2->SetIdentity();
+//  typename TImage::DirectionType invOrientMatrix(orientMatrix.GetInverse());
+//  affineTransform2->SetMatrix(invOrientMatrix);
+  affineTransform2->SetMatrix(orientMatrix);
+  //get zeroth point
+  typename TImage::IndexType originIndex;
+  originIndex.Fill(0);
+  typename TImage::PointType old_origin;
+  refImage->TransformIndexToPhysicalPoint(originIndex, old_origin);
+  typename TImage::PointType new_origin = affineTransform2->TransformPoint(old_origin);
+  resample->SetOutputOrigin(new_origin);
+//  resample->SetOutputOrigin(origin);
+
+  resample->SetTransform(affineTransform);
 
   try
   {
@@ -1043,6 +1111,8 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   }
 
   return resample->GetOutput();
+//  stripInfo->Update();
+//  return stripInfo->GetOutput();
 }
 
 #ifndef ITK_ONLY //Requires VTK
@@ -2111,7 +2181,6 @@ void Image<TImage>::Information(itk::SmartPointer<TImage> img)
     }
     std::cout << " |" << std::endl;
   }
-  std::cout << "\nOrientation Flag: " << ImageOrientation(img) << std::endl;
 }
 
 template<class TImage>
@@ -2141,62 +2210,62 @@ double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
 template<class TImage>
 std::string Image<TImage>::ImageOrientation(itk::SmartPointer<TImage> img)
 {
-  std::map<itk::SpatialOrientation::ValidCoordinateOrientationFlags, std::string> codeToString;
+	std::map<itk::SpatialOrientation::ValidCoordinateOrientationFlags, std::string> codeToString;
 
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIL] = "AIL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASL] = "ASL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAI] = "RAI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAI] = "LAI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPS] = "RPS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPS] = "LPS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIP] = "RIP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIP] = "LIP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSP] = "RSP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSP] = "LSP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIA] = "RIA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIA] = "LIA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA] = "RSA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA] = "LSA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRP] = "IRP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILP] = "ILP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRP] = "SRP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLP] = "SLP";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRA] = "IRA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILA] = "ILA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRA] = "SRA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLA] = "SLA";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPI] = "RPI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPI] = "LPI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAS] = "RAS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAS] = "LAS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRI] = "PRI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLI] = "PLI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARI] = "ARI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALI] = "ALI";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRS] = "PRS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLS] = "PLS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARS] = "ARS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALS] = "ALS";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPR] = "IPR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPR] = "SPR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAR] = "IAR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAR] = "SAR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPL] = "IPL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPL] = "SPL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAL] = "IAL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAL] = "SAL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIR] = "PIR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSR] = "PSR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIR] = "AIR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
-  codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIL] = "AIL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASL] = "ASL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAI] = "RAI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAI] = "LAI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPS] = "RPS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPS] = "LPS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIP] = "RIP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIP] = "LIP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSP] = "RSP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSP] = "LSP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIA] = "RIA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIA] = "LIA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA] = "RSA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA] = "LSA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRP] = "IRP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILP] = "ILP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRP] = "SRP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLP] = "SLP";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRA] = "IRA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILA] = "ILA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRA] = "SRA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLA] = "SLA";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPI] = "RPI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPI] = "LPI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAS] = "RAS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAS] = "LAS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRI] = "PRI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLI] = "PLI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARI] = "ARI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALI] = "ALI";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRS] = "PRS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLS] = "PLS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARS] = "ARS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALS] = "ALS";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPR] = "IPR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPR] = "SPR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAR] = "IAR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAR] = "SAR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPL] = "IPL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPL] = "SPL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAL] = "IAL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAL] = "SAL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIR] = "PIR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSR] = "PSR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIR] = "AIR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
+	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
+	//codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
 
-  itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
-  std::string orientFlagStr = codeToString[orientFlag];
+	itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
+	std::string orientFlagStr = codeToString[orientFlag];
 
-  return orientFlagStr;
+	return orientFlagStr;
 }
 
 //Filters
@@ -2707,7 +2776,7 @@ itk::SmartPointer<TImage> Image<TImage>::MaskImage(itk::SmartPointer<TImage> img
   typename MaskFilterType::Pointer maskFilter = MaskFilterType::New();
   maskFilter->SetInput(img);
   maskFilter->AddObserver(itk::ProgressEvent(), ProgressUpdates);
-#if ITK_VERSION_MAJOR > 3
+#if ITK_MAJOR_VERSION > 3
   maskFilter->SetCoordinateTolerance(CoordinateTolerance);
   maskFilter->SetDirectionTolerance(DirectionTolerance);
   maskFilter->SetMaskImage(maskImg);
@@ -3508,6 +3577,7 @@ itk::SmartPointer<TImage> Image<TImage>::MergeLabelledImages(std::vector< typena
   typedef itk::LabelImageToLabelMapFilter<TImage, LabelMapType> LabelImageToLabelMapType;
   typedef itk::MergeLabelMapFilter<LabelMapType> MergerType;
   typename MergerType::Pointer merger = MergerType::New();
+#if ITK_VERSION_MAJOR < 5
   if(mergeType == 0)
     merger->SetMethod(MergerType::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
   else if(mergeType == 1)
@@ -3516,6 +3586,16 @@ itk::SmartPointer<TImage> Image<TImage>::MergeLabelledImages(std::vector< typena
     merger->SetMethod(MergerType::PACK); ///relabel all the label objects by order of processing
   else if(mergeType == 3)
     merger->SetMethod(MergerType::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+#else
+  if (mergeType == 0)
+    merger->SetMethod(itk::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
+  else if (mergeType == 1)
+    merger->SetMethod(itk::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
+  else if (mergeType == 2)
+    merger->SetMethod(itk::PACK); ///relabel all the label objects by order of processing
+  else if (mergeType == 3)
+    merger->SetMethod(itk::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+#endif
 
   for (size_t i = 0; i < n; i ++)
   {

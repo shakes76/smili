@@ -1,0 +1,96 @@
+.QWidget {
+    background-color: beige;
+}
+
+QPushButton {
+    background-color: palegoldenrod;
+    color: black;
+    border-color: darkkhaki;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 5;
+    padding: 3px;
+    min-width: 9ex;
+    min-height: 2.5ex;
+}
+
+QPushButton:hover {
+    background-color: darkkhaki;
+}
+
+QPushButton:pressed {
+    background-color: darkkhaki;
+    padding-left: 5px;
+    padding-top: 5px;
+}
+
+QLabel, QAbstractButton {
+    font: bold;
+}
+
+QStatusBar QLabel {
+    font: normal;
+}
+
+QListView {
+    background-color: beige;
+    color: black;
+}
+
+QLabel {
+    color: black;
+    border: 0px;
+    padding: 0;
+    background: none;
+}
+
+QLineEdit:focus, QFrame:focus {
+    border-width: 3px;
+    padding: 0px;
+}
+
+QToolTip {
+    background-color: beige;
+    color: black;
+    border-color: darkkhaki;
+    border-width: 2px;
+    border-style: solid;
+    padding: 5px;
+    border-radius: 3px;
+    opacity: 200;
+}
+
+QDialogButtonBox {
+    button-layout: 0;
+}
+
+QMenuBar {
+    background-color: ghostwhite;
+    color: black;
+}
+
+QTabBar::tab {
+    background: lightgray;
+    color: black;
+}
+
+QTabBar::tab:selected {
+    background: floralwhite;
+    color: black;
+}
+
+QToolBar {
+    background: ghostwhite;
+}
+
+QCheckBox {
+    color: black;
+}
+
+QGroupBox::title {
+    color: black;
+}
+
+QMessageBox {
+    background: none;
+}

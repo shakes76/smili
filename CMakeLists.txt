@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.2)
  
 PROJECT(SMILI)
 
@@ -32,17 +32,39 @@ OPTION(BUILD_SHARED_LIBS "Build the Libraries as shared libraries" ON)
 OPTION(BUILD_GUI_RELATED "Build the MILX Qt Related Components" ON)
 OPTION(BUILD_VIEWER "Build the MILX Qt Viewer Application" ON)
 OPTION(BUILD_APPLICATIONS "Build the applications for SMILI. Use BUILD_GUI_RELATED to enable Qt applications." ON)
-#~ OPTION(BUILD_PROJECTS "Build project binaries that use SMILI" OFF)
 OPTION(BUILD_TESTS "Build the tests for SMILI" OFF)
 OPTION(BUILD_PROTOTYPES "Build the prototype tests for SMILI" OFF)
 OPTION(BUILD_ITKIO_SUPPORT "Build support for ITK IO (MGH, FDF etc.)" OFF)
 
+#-----------------------------------------------------------------------------
+# Enable/Disable Freesurfer support
+OPTION(BUILD_FREESURFER_SUPPORT "Build the Freesurfer support parts of SMILI." OFF)
+
 #dependent options, triggered if another option is set
 DEPENDENT_OPTION(USE_ITK "Build all the ITK components" ON "ITK_LIBRARIES" OFF)
-DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_USE_FILE_INCLUDED" OFF)
+DEPENDENT_OPTION(USE_VTK "Build all the VTK components" ON "VTK_LIBRARIES" OFF)
 DEPENDENT_OPTION(BUILD_VTK_EXTENSIONS "Build the VTK Extensions Library" ON "USE_VTK" OFF)
 DEPENDENT_OPTION(BUILD_MILXQT "Build the MILX Qt Library" ON "BUILD_GUI_RELATED" OFF)
 DEPENDENT_OPTION(BUILD_PLUGINS "Build the plugins for the Viewer" OFF "BUILD_VIEWER" OFF)
+OPTION(PYTHON_BINDINGS "Build python bindings" OFF)
+
+IF(BUILD_MILXQT)
+    #detect Qt version (depends on VTK-Qt)
+    #VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
+    MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
+    IF(VTK_QT_VERSION GREATER "4")
+        find_package("Qt${VTK_QT_VERSION}" COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED)
+#~         qt_standard_project_setup()
+        include_directories(${Qt${QT_VERSION_MAJOR}Core_INCLUDE_DIRS} ${Qt${QT_VERSION_MAJOR}WebEngineWidgets_INCLUDE_DIRS})
+        add_definitions(${Qt${QT_VERSION_MAJOR}Core_DEFINITIONS})
+        qt_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
+        set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::WebEngineWidgets)
+        set(${PROJECT_NAME}_QT${VTK_QT_VERSION} TRUE)
+    ELSE(VTK_QT_VERSION GREATER "4")
+        FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
+        INCLUDE(${QT_USE_FILE})
+    ENDIF(VTK_QT_VERSION GREATER "4")
+ENDIF(BUILD_MILXQT)
  
 IF(BUILD_PLUGINS)
     OPTION(BUILD_PYTHON_PLUGIN "Build the Python plugin for MILX Qt Viewer" OFF)
@@ -55,6 +77,10 @@ IF(BUILD_PLUGINS)
     OPTION(BUILD_REGISTRATION_PLUGIN "Build the Image Registration Plugin for MILX Qt " OFF)
 ENDIF(BUILD_PLUGINS)
 
+IF(BUILD_FREESURFER_SUPPORT)
+    add_definitions(-DFREESURFER_SUPPORT)  
+ENDIF(BUILD_FREESURFER_SUPPORT)
+
 #Check ITK/VTK statuses
 IF(USE_ITK AND NOT USE_VTK)
   add_definitions(-DITK_ONLY)
@@ -66,6 +92,7 @@ IF(USE_VTK AND NOT USE_ITK)
 ENDIF(USE_VTK AND NOT USE_ITK)
 IF(USE_VTK)
   message("VTK Version: ${VTK_VERSION}")
+  add_definitions( -DVTK_MAJOR_VERSION=${VTK_MAJOR_VERSION})
 ENDIF(USE_VTK)
 IF(USE_ITK)
   message("ITK Version: ${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}")
@@ -113,6 +140,15 @@ ENDIF(BUILD_ITKIO_SUPPORT)
 # cause another cmake executable to run.
 add_subdirectory (src)
 
+IF(PYTHON_BINDINGS)
+  IF(CMAKE_BUILD_TYPE MATCHES "^[Dd]eb" OR ${PROJECT_NAME}_STATIC)
+    MESSAGE(FATAL_ERROR "** Python Bindings are disabled in debug or static builds.")
+  ENDIF()
+ENDIF()
+IF(PYTHON_BINDINGS)
+  add_subdirectory (python)
+ENDIF(PYTHON_BINDINGS)
+
 IF(BUILD_VIEWER)
     add_subdirectory (apps/smilx)
 ENDIF(BUILD_VIEWER)
@@ -124,10 +160,6 @@ ENDIF(BUILD_PLUGINS)
 IF(BUILD_APPLICATIONS)
     add_subdirectory (apps)
 ENDIF(BUILD_APPLICATIONS)
-
-#~ IF(BUILD_PROJECTS)
-#~     add_subdirectory (projects)
-#~ ENDIF(BUILD_PROJECTS)
 
 IF(BUILD_TESTS)
     add_subdirectory (tests)

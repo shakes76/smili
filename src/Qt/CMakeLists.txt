@@ -1,21 +1,6 @@
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#detect Qt version (depends on VTK-Qt)
-#VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
-MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
-IF(VTK_QT_VERSION VERSION_GREATER "4")
-  MESSAGE("Using Qt 5 for build")
-  FIND_PACKAGE(Qt5Widgets REQUIRED QUIET)
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
-  add_definitions(${Qt5Widgets_DEFINITIONS})
-  qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
-ELSE(VTK_QT_VERSION VERSION_GREATER "4")
-  FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-  INCLUDE(${QT_USE_FILE})
-ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
-
 PROJECT(milx-Qt)
 
 # Add Sources
@@ -47,12 +32,12 @@ endif (MILXQT_64)
 
 IF(VTK_QT_VERSION VERSION_GREATER "4")
   # generate rules for building source files from the resources
-  QT5_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
+  QT_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
   # build ui_XXX files from the XML-style .ui files
-  QT5_WRAP_UI(MILXQT_UIS ${MILXQT_SRC_UIS})
+  QT_WRAP_UI(MILXQT_UIS ${MILXQT_SRC_UIS})
   # this moc's the above variable and appends to the cxx sources
-  QT5_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
-  QT5_WRAP_CPP(MILXQT_UI_MOCS ${MILXQT_SRC_UI_HEADERS_MOC})
+  QT_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
+  QT_WRAP_CPP(MILXQT_UI_MOCS ${MILXQT_SRC_UI_HEADERS_MOC})
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
   # generate rules for building source files from the resources
   QT4_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})

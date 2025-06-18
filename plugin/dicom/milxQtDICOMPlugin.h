@@ -21,6 +21,12 @@
 #include <QThread>
 #include <QMenu>
 #include <QDockWidget>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QWizardPage>
+#include <QApplication>
+
 //ITK
 #include <itkImageSeriesReader.h>
 #include <itkGDCMImageIO.h>
@@ -335,7 +341,6 @@ protected:
     QCheckBox *anonPatientInfo;
     QCheckBox *anonPhysician;
     QCheckBox *anonOperator;
-    QCheckBox *anonScanDate;
 
     //data
     milxQtImage *image; //main window owner
@@ -372,6 +377,7 @@ private:
 class MILXQT_PLUGIN_EXPORT milxQtDICOMPluginFactory: public QObject, public milxQtPluginFactory
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "milxQt.Plugins.milxQtPluginFactory/1.0")
     Q_INTERFACES(milxQtPluginFactory)
 
 public:

@@ -24,6 +24,9 @@
 */
 //Qt
 #include <QApplication>
+//Qt5 backwards compatibility to Qt4 is not sure.
+#include <QMessageBox>
+#include <QMainWindow>
 
 #include "milxQtImage.h"
 //#include "milxQtMain.h"

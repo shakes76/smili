@@ -1,15 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
-
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(milxHausdorffDistance)
-
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
-
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE(${ITK_USE_FILE})
 
 ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX

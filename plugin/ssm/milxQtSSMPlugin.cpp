@@ -19,6 +19,16 @@
 
 #include <qplugin.h>
 
+//Qt
+#include <QMenu>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QWizardPage>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QWizard>
+
 //SMILI
 #include <milxQtFile.h>
 
@@ -63,7 +73,7 @@ milxQtSSMPlugin::~milxQtSSMPlugin()
 {
     shapes.clear();
     robustShapes.clear();
-    cerr << "SSM Destroyed" << endl;
+    std::cout << "SSM Destroyed" << std::endl;
 }
 
 QString milxQtSSMPlugin::name()
@@ -107,7 +117,7 @@ QString milxQtSSMPlugin::saveFileSupport()
 
 void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStringList &filenames)
 {
-    cout << "Loading Collection via the SSM Plugin" << endl;
+    std::cout << "Loading Collection via the SSM Plugin" << std::endl;
     addShapeModel( new milxQtShapeModel );
         currentModel = shapes.last();
         shapes.last()->setConsole(console);
@@ -115,7 +125,7 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStr
         connect(shapes.last(), SIGNAL(resultAvailable(milxQtRenderWindow*)), MainWindow, SLOT(display(milxQtRenderWindow*)));
         connect(shapes.last(), SIGNAL(resultAvailable(milxQtModel*)), MainWindow, SLOT(display(milxQtModel*)));
         connect(shapes.last(), SIGNAL(collectionAvailable(vtkPolyDataCollection*, QStringList&)), this, SLOT(passOnCollection(vtkPolyDataCollection*, QStringList&)));
-        cout << "Loaded Collection as a Normal SSM." << endl;
+        std::cout << "Loaded Collection as a Normal SSM." << std::endl;
 
     ///Update case list in manager
     QStringList headingList;
@@ -129,7 +139,7 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStr
     else
         manager->clearTab(caseTabIndex);
 
-    cout << "Loading cases into browser." << endl;
+    std::cout << "Loading cases into browser." << std::endl;
     QList< int > cases = shapes.last()->getCaseIDs();
     for(int j = 0; j < cases.size(); j ++)
     {
@@ -141,12 +151,12 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, QStr
     }
 
     manager->show();
-    cout << "Done." << endl;
+    std::cout << "Done." << std::endl;
 }
 
 void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, vtkPolyData *atlasSurface, QStringList &filenames)
 {
-  cout << "Loading Collection via the SSM Plugin" << endl;
+  std::cout << "Loading Collection via the SSM Plugin" << std::endl;
   addShapeModel( new milxQtRobustShapeModel );
       currentModel = robustShapes.last();
       robustShapes.last()->setConsole(console);
@@ -154,11 +164,11 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, vtkP
       connect(robustShapes.last(), SIGNAL(resultAvailable(milxQtRenderWindow*)), MainWindow, SLOT(display(milxQtRenderWindow*)));
       connect(robustShapes.last(), SIGNAL(resultAvailable(milxQtModel*)), MainWindow, SLOT(display(milxQtModel*)));
       connect(robustShapes.last(), SIGNAL(collectionAvailable(vtkPolyDataCollection*, QStringList&)), this, SLOT(passOnCollection(vtkPolyDataCollection*, QStringList&)));
-      cout << "Loaded Collection as a Robust SSM." << endl;
+      std::cout << "Loaded Collection as a Robust SSM." << std::endl;
 
   if(!robustShapes.last()->isLoaded())
   {
-      cout << "Model failed to be loaded. See log/terminal output." << endl;
+      std::cout << "Model failed to be loaded. See log/terminal output." << std::endl;
       return;
   }
 
@@ -174,7 +184,7 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, vtkP
   else
     manager->clearTab(caseTabIndex);
 
-  cout << "Loading cases into browser." << endl;
+  std::cout << "Loading cases into browser." << std::endl;
   QList< int > cases = robustShapes.last()->getCaseIDs();
   for(int j = 0; j < cases.size(); j ++)
     {
@@ -186,14 +196,14 @@ void milxQtSSMPlugin::SetInputCollection(vtkPolyDataCollection* collection, vtkP
     }
 
   manager->show();
-  cout << "Done." << endl;
+  std::cout << "Done." << std::endl;
 }
 
 void milxQtSSMPlugin::open(QString filename)
 {
     if(filename.contains(".rssm", Qt::CaseInsensitive))
     {
-        cout << "Loading as Robust Shape Model" << endl;
+        std::cout << "Loading as Robust Shape Model" << std::endl;
         addShapeModel( new milxQtRobustShapeModel );
             currentModel = robustShapes.last();
             robustShapes.last()->setConsole(console);
@@ -204,7 +214,7 @@ void milxQtSSMPlugin::open(QString filename)
     }
     else if(filename.contains(".ssm", Qt::CaseInsensitive))
     {
-        cout << "Loading as Normal Shape Model" << endl;
+        std::cout << "Loading as Normal Shape Model" << std::endl;
         addShapeModel( new milxQtShapeModel );
             currentModel = shapes.last();
             shapes.last()->setConsole(console);
@@ -215,36 +225,36 @@ void milxQtSSMPlugin::open(QString filename)
     }
     else
     {
-        cout << "File extension not supported." << endl;
+        std::cout << "File extension not supported." << std::endl;
         return;
     }
 
     dataName = filename;
-    cout << "Loaded SSM File." << endl;
+    std::cout << "Loaded SSM File." << std::endl;
 }
 
 void milxQtSSMPlugin::save(QString filename)
 {
-    cout << "Saving as an SSM file" << endl;
+    std::cout << "Saving as an SSM file" << std::endl;
     if(filename.contains(".rssm", Qt::CaseInsensitive))
         robustShapes.last()->saveModel(filename);
     else if(filename.contains(".ssm", Qt::CaseInsensitive))
         shapes.last()->saveModel(filename);
     else
     {
-        cout << "File Extension not support!" << endl;
+        std::cout << "File Extension not support!" << std::endl;
         return;
     }
 
     dataName = filename;
-    cout << "Done." << endl;
+    std::cout << "Done." << std::endl;
 }
 
 milxQtRenderWindow* milxQtSSMPlugin::genericResult()
 {
     if(!isPluginRobustWindow(currentModel))
     {
-        cout << "Creating Normal SSM Model for display." << endl;
+        std::cout << "Creating Normal SSM Model for display." << std::endl;
             shapes.last()->generateMeanModel();
             shapes.last()->setName(dataName);
             shapes.last()->generateRender();
@@ -252,7 +262,7 @@ milxQtRenderWindow* milxQtSSMPlugin::genericResult()
         return shapes.last();
     }
 
-    cout << "Creating Robust SSM Model for display." << endl;
+    std::cout << "Creating Robust SSM Model for display." << std::endl;
         robustShapes.last()->generateMeanModel();
         robustShapes.last()->setName(dataName);
         robustShapes.last()->generateRender();
@@ -320,16 +330,16 @@ milxQtShapeModel* milxQtSSMPlugin::pluginWindow(QWidget *window)
 
 void milxQtSSMPlugin::preStartTasks()
 {
-    cout << "Pre Start Tasks" << endl;
+    std::cout << "Pre Start Tasks" << std::endl;
     if(dataName.contains(".rssm", Qt::CaseInsensitive))
     {
-        cout << "Loading as Robust Shape Model" << endl;
+        std::cout << "Loading as Robust Shape Model" << std::endl;
         addShapeModel( new milxQtRobustShapeModel );
         currentModel = robustShapes.last();
     }
     else if(dataName.contains(".ssm", Qt::CaseInsensitive))
     {
-        cout << "Loading as Normal Shape Model" << endl;
+        std::cout << "Loading as Normal Shape Model" << std::endl;
         addShapeModel( new milxQtShapeModel );
         currentModel = shapes.last();
     }
@@ -337,7 +347,7 @@ void milxQtSSMPlugin::preStartTasks()
 
 void milxQtSSMPlugin::postStartTasks()
 {
-    cout << "Post Start Tasks" << endl;
+    std::cout << "Post Start Tasks" << std::endl;
     if(dataName.contains(".rssm", Qt::CaseInsensitive))
     {
         robustShapes.last()->generateMeanModel();
@@ -349,12 +359,12 @@ void milxQtSSMPlugin::postStartTasks()
         shapes.last()->generateRender();
     }
 
-    cout << "Creating Shape Model Display" << endl;
+    std::cout << "Creating Shape Model Display" << std::endl;
     milxQtRenderWindow *rnd = genericResult();
-    cout << "Creating Mean Display" << endl;
+    std::cout << "Creating Mean Display" << std::endl;
     milxQtModel *mdl = modelResult();
 
-    cout << "Updating Plugin" << endl;
+    std::cout << "Updating Plugin" << std::endl;
     update();
 
     emit resultAvailable(rnd);
@@ -370,7 +380,7 @@ void milxQtSSMPlugin::run()
     QTime *timer = new QTime;
 
     timer->start();
-    cout << "Executing load." << endl;
+    std::cout << "Executing load." << std::endl;
 		if(dataName.contains(".rssm", Qt::CaseInsensitive))
         {
             robustShapes.last()->setName(dataName);
@@ -384,20 +394,20 @@ void milxQtSSMPlugin::run()
             shapes.last()->generateSSM();
         }
 
-//		cout << "Creating Shape Model Display" << endl;
+//		std::cout << "Creating Shape Model Display" << std::endl;
 //        milxQtRenderWindow *rnd = genericResult();
-//		cout << "Creating Mean Display" << endl;
+//		std::cout << "Creating Mean Display" << std::endl;
 //        milxQtModel *mdl = modelResult();
 //
-//		cout << "Updating Plugin" << endl;
+//		std::cout << "Updating Plugin" << std::endl;
 //		update();
 //
 //        emit resultAvailable(rnd);
 //        emit resultAvailable(mdl);
-    cout << "Completed load." << endl;
+    std::cout << "Completed load." << std::endl;
 
     duration = timer->elapsed();
-    cout << "Computation took: " << QString::number(duration/1000.0).toStdString() << " secs" << endl;
+    std::cout << "Computation took: " << QString::number(duration/1000.0).toStdString() << " secs" << std::endl;
     delete timer;
 
     //exec();
@@ -480,7 +490,7 @@ void milxQtSSMPlugin::multiModel()
 
     const int n = shapes.last()->GetNumberOfShapes();
 
-    cout << "Creating a Multi-Model by Fusing " << n << " Shapes together." << endl;
+    std::cout << "Creating a Multi-Model by Fusing " << n << " Shapes together." << std::endl;
     vtkPolyDataCollection* collection = vtkPolyDataCollection::New();
     for(int j = 0; j < n; j ++)
     {
@@ -504,11 +514,11 @@ void milxQtSSMPlugin::multiModel()
     }
     hybridShapeModel->SetInputCollection(collection);
 
-    cout << "Display Hybrid Shape Model with " << hybridShapeModel->GetNumberOfShapes() << " shapes" << endl;
+    std::cout << "Display Hybrid Shape Model with " << hybridShapeModel->GetNumberOfShapes() << " shapes" << std::endl;
     addShapeModel(hybridShapeModel);
     currentModel = shapes.last();
     MainWindow->display( genericResult() );
-    cout << "Displayed Hybrid Shape." << endl;
+    std::cout << "Displayed Hybrid Shape." << std::endl;
     MainWindow->display( modelResult() );
 
     update();
@@ -527,7 +537,7 @@ void milxQtSSMPlugin::focusedModel()
     atlasFilename = txtAtlasName->text();
 
     //open atlas
-    cout << "Opening atlas model" << endl;
+    std::cout << "Opening atlas model" << std::endl;
     vtkSmartPointer<vtkPolyData> atlasMesh;
     milx::File::OpenModel(atlasFilename.toStdString(), atlasMesh);
     QPointer<milxQtModel> atlasModel = new milxQtModel;
@@ -545,12 +555,12 @@ void milxQtSSMPlugin::focusedModel()
     QPointer<milxQtFile> file = new milxQtFile;
     if(!file->openModelCollection(modelCollection, surfaceFilenames))
     {
-        cout << "Unable to read selected files." << endl;
+        std::cout << "Unable to read selected files." << std::endl;
         return;
     }
 
     //create model
-    cout << "Computing Model..." << endl;
+    std::cout << "Computing Model..." << std::endl;
     SetInputCollection(modelCollection, atlasMesh, surfaceFilenames);
 
     //emit results for display
@@ -600,24 +610,24 @@ void milxQtSSMPlugin::closedSSM(QWidget *win)
 
 void milxQtSSMPlugin::passOnCollection(vtkPolyDataCollection *modelCollection, QStringList &filenames)
 {
-    cout << "Passing On Collection Signal" << endl;
+    std::cout << "Passing On Collection Signal" << std::endl;
     emit resultAvailable(modelCollection, filenames);
 }
 
 void milxQtSSMPlugin::createActions()
 {
     actionMultiModel = new QAction(MainWindow);
-    actionMultiModel->setText(QApplication::translate("SSMPlugin", "Create &Multi-Model", 0, QApplication::UnicodeUTF8));
+    actionMultiModel->setText("Create &Multi-Model");
     actionMultiModel->setShortcut(tr("Ctrl+m"));
     actionFocusModel = new QAction(MainWindow);
-    actionFocusModel->setText(QApplication::translate("SSMPlugin", "Create &Focused Model", 0, QApplication::UnicodeUTF8));
+    actionFocusModel->setText("Create &Focused Model");
     actionFocusModel->setShortcut(tr("Ctrl+f"));
 }
 
 void milxQtSSMPlugin::createMenu()
 {
     menuSSM = new QMenu(MainWindow);
-    menuSSM->setTitle(QApplication::translate("SSMPlugin", "Shape Models", 0, QApplication::UnicodeUTF8));
+    menuSSM->setTitle("Shape Models");
     menuSSM->addAction(actionMultiModel);
     menuSSM->addAction(actionFocusModel);
     actionMultiModel->setDisabled(true);
@@ -707,4 +717,4 @@ void milxQtSSMPlugin::createConnections()
     connect(btnClearSurfaceNames, SIGNAL(clicked()), comboSurfaceNames, SLOT(clear()));
 }
 
-Q_EXPORT_PLUGIN2(SSMPlugin, milxQtSSMPluginFactory);
+//Q_EXPORT_PLUGIN2(SSMPlugin, milxQtSSMPluginFactory);

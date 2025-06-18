@@ -98,11 +98,13 @@ namespace milx
 
 Model::Model()
 {
+  PointsChanged = false;
   InternalInPlaceOperation = false;
 }
 
 Model::Model(vtkSmartPointer<vtkPolyData> model)
 {
+  PointsChanged = false;
   InternalInPlaceOperation = false;
   SetInput(model);
 }
@@ -199,6 +201,26 @@ void Model::SetPoints(vtkSmartPointer<vtkPoints> modelPoints)
   CurrentModel->SetPoints(modelPoints);
 }
 
+void Model::InsertNextPoint(double x, double y, double z)
+{
+  if(!CurrentPoints)
+    CurrentPoints = vtkSmartPointer<vtkPoints>::New();
+
+  PrintDebug("Inserting Point");
+  CurrentPoints->InsertNextPoint(x, y, z);
+  PointsChanged = true;
+}
+
+void Model::SetPoint(vtkIdType id, double x, double y, double z)
+{
+  if(CurrentPoints)
+  {
+    PrintDebug("Setting Point");
+    CurrentPoints->SetPoint(id, x, y, z);
+    PointsChanged = true;
+  }
+}
+
 void Model::SetPolys(vtkSmartPointer<vtkCellArray> modelPolys)
 {
   if(!IsCurrentModel())
@@ -280,6 +302,18 @@ void Model::RemoveArrays()
   ClearArrays(mesh);
 
   UpdateModelStateFromModel(mesh);
+}
+
+vtkSmartPointer<vtkPolyData>& Model::Result()
+{ 
+  if(PointsChanged)
+  {
+    PrintDebug("Updating Points");
+    SetPoints(CurrentPoints);
+    PointsChanged = false;
+  }
+
+  return CurrentModel;
 }
 
 //Filters
@@ -685,7 +719,12 @@ void Model::Clip(const coordinateType belowValue, const coordinateType aboveValu
   #endif
     //~ thresh->ThresholdByLower(clusterID);
     //~ thresh->ThresholdByUpper(value);
+  #if VTK_MAJOR_VERSION <= 8
     thresh->ThresholdBetween(belowValue, aboveValue);
+  #else
+    thresh->SetUpperThreshold(aboveValue);
+    thresh->SetLowerThreshold(belowValue);
+  #endif
   if(VTKProgressUpdates->IsBeingObserved())
     thresh->AddObserver(vtkCommand::ProgressEvent, VTKProgressUpdates); //Keeps UI responsive
 
@@ -963,7 +1002,11 @@ void Model::GenerateVertexScalars()
   #endif
   if(VTKProgressUpdates->IsBeingObserved())
     vertices->AddObserver(vtkCommand::ProgressEvent, VTKProgressUpdates); //Keeps UI responsive
+  #if VTK_MAJOR_VERSION <= 8
     vertices->SetIdsArrayName("Point IDs");
+  #else
+    vertices->SetPointIdsArrayName("Point IDs");
+  #endif
     vertices->PointIdsOn();
     vertices->Update();
 

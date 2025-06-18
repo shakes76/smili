@@ -1,26 +1,4 @@
 /*=========================================================================
-Program: SMILI
-Module: milxModelViewer.cxx
-Author: Shekhar Chandra
-Language: C++
-Created: 15 August 2012
-
-Copyright: (c) 2012 CSIRO, Australia.
-
-This software is protected by international copyright laws.
-Any unauthorised copying, distribution or reverse engineering is prohibited.
-
-Licence:
-All rights in this Software are reserved to CSIRO. You are only permitted
-to have this Software in your possession and to make use of it if you have
-agreed to a Software License with CSIRO.
-
-BioMedIA Lab: http://www.ict.csiro.au/BioMedIA/
-=========================================================================*/
-//Qt
-#include <QApplication>
-#include <QMainWindow>
-/*=========================================================================
   The Software is copyright (c) Commonwealth Scientific and Industrial Research Organisation (CSIRO)
   ABN 41 687 119 230.
   All rights reserved.
@@ -37,6 +15,11 @@ BioMedIA Lab: http://www.ict.csiro.au/BioMedIA/
   See the License for the specific language governing permissions and
   limitations under the License.
 =========================================================================*/
+#include <QApplication>
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QMenu>
+
 #include "milxQtFile.h"
 #include "milxQtModel.h"
 
@@ -50,11 +33,11 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        cerr << "milxModelViewer Application:" << endl;
-        cerr << "For quick and fast display of model/surface/polydata files." << endl;
-        cerr << "View configuration always matches sMILX settings wherever possible." << endl;
-        cerr << "Usage:" << endl;
-        cerr << "<Model Filename> " << endl;
+        cerr << "milxModelViewer Application:" << std::endl;
+        cerr << "For quick and fast display of model/surface/polydata files." << std::endl;
+        cerr << "View configuration always matches sMILX settings wherever possible." << std::endl;
+        cerr << "Usage:" << std::endl;
+        cerr << "<Model Filename> " << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -67,14 +50,14 @@ int main(int argc, char *argv[])
 
     if(!success)
     {
-      cerr << "Error opening model file." << endl;
+      cerr << "Error opening model file." << std::endl;
       return EXIT_FAILURE;
     }
 
     model->generateModel();
     
     //Setup size
-    QSize desktopSize = qApp->desktop()->availableGeometry().size();
+    QSize desktopSize = qApp->primaryScreen()->availableGeometry().size();
     int newWidth = 2.0*desktopSize.width()/3.0 + 0.5;
     int newHeight = 4.0*desktopSize.height()/5.0 + 0.5;
     int xOffset = (desktopSize.width()-newWidth)/2.0;

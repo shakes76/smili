@@ -148,10 +148,10 @@ public:
     */
     void AddArray(vtkSmartPointer<vtkDataArray> array);
     /*!
-        \fn milxQtModel::SetInput(vtkSmartPointer<vtkPolyData> mesh)
+        \fn milxQtModel::SetInput(vtkPolyData *mesh)
         \brief Assigns the mesh provided to the class, preparing for display. Call generateModel() and then show() to display.
     */
-    void SetInput(vtkSmartPointer<vtkPolyData> mesh);
+    void SetInput(vtkPolyData *mesh);
     /*!
         \fn milxQtModel::SetInputPointSet(vtkSmartPointer<vtkPointSet> mesh)
         \brief Assigns the pointset mesh provided to the class, preparing for display. No need to call generateModel(), just show() to display.
@@ -174,6 +174,23 @@ public:
         \brief Sets the points for the model to be generated. Must pass a vtkPoints objects, which is easy to use.
     */
     void SetPoints(vtkSmartPointer<vtkPoints> modelPoints);
+    /*!
+        \fn milxQtModel::InsertNextPoint(double x, double y, double z)
+        \brief Insert a point for the model to be generated. Use repeatedly for all points.
+    */
+    inline void InsertNextPoint(double x, double y, double z)
+    {   
+        model.InsertNextPoint(x, y, z);
+        loaded = true;    
+    }
+    /*!
+        \fn milxQtModel::SetPoint(vtkIdType id, double x, double y, double z)
+        \brief Set a point for the model to be generated. Use repeatedly for all points.
+
+        Assumes points already exist, so ensure PolyData is present or already set via InsertNextPoint
+    */
+    inline void SetPoint(vtkIdType id, double x, double y, double z)
+    {   model.SetPoint(id, x, y, z);    }
     /*!
         \fn milxQtModel::SetPolys(vtkSmartPointer<vtkCellArray> modelPolys)
         \brief Sets the polygons for the model to be generated. Must pass a vtkCellArray objects, which is easy to use.
@@ -405,14 +422,6 @@ public:
     {
         largeMode = large;
     }
-    /**
-        \fn milxQtModel::ImmediateModeRenderingOn()
-        \brief Improve rendering performance for large datasets. Assumes generateModel() has already been called.
-    */
-    inline void ImmediateModeRenderingOn()
-    {
-        if(modelled) modelMapper->ImmediateModeRenderingOn();
-    }
 
     //Operators
     /*!
@@ -437,27 +446,16 @@ public slots:
         generateModel(colourRed, colourGreen, colourBlue);
     }
     /*!
-        \fn milxQtModel::toggleInterpolation(bool quiet = false)
+        \fn milxQtModel::toggleInterpolation()
         \brief Toggles the interpolation of the mesh between Phong and Gouraud. Default is Gouraud.
     */
-    void toggleInterpolation(bool quiet = false);
-    inline void interpolateDisplay(bool quiet = false)
-    {   toggleInterpolation(quiet);    }
-    inline void disableInterpolateDisplay(bool quiet = false)
-    {   interpAct->setChecked(false);   interpolateDisplay(quiet);   }
-    inline void enableInterpolateDisplay(bool quiet = false)
-    {   interpAct->setChecked(true);   interpolateDisplay(quiet);   }
-    /*!
-        \fn milxQtModel::toggleSpecular(bool quiet = false)
-        \brief Toggles the specular or shininess of the mesh between Flat and Shiny. Default is Shiny.
-    */
-    void toggleSpecular(bool quiet = false);
-    inline void specularDisplay(bool quiet = false)
-    {   toggleSpecular(quiet);    }
-    inline void disableSpecularDisplay(bool quiet = false)
-    {   specularAct->setChecked(false);   specularDisplay(quiet);    }
-    inline void enableSpecularDisplay(bool quiet = false)
-    {   specularAct->setChecked(true);   specularDisplay(quiet);    }
+    void toggleInterpolation();
+    inline void interpolateDisplay()
+    {   toggleInterpolation();    }
+    inline void disableInterpolateDisplay()
+    {   interpAct->setChecked(false);   interpolateDisplay();   }
+    inline void enableInterpolateDisplay()
+    {   interpAct->setChecked(true);   interpolateDisplay();   }
     /*!
         \fn milxQtModel::copyToContextMenu(QMenu *copyMenu)
         \brief Copies the menu, by duplicating the entries, to the context menu. Connections are assumed to be made before hand.
@@ -802,13 +800,13 @@ public slots:
         generateTubes(red, blue, green);
     }
     /*!
-        \fn milxQtModel::generatePointModel(double newScale = 1.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
+        \fn milxQtModel::generatePointModel(double newScale = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
         \brief Generates a point model, i.e. glyphs at each point for the dataset. Arguments provided are for the colours of the edges of the graph.
         \warning Modifies the PolyData pipeline so that GetOutput() will return the glyphs. Use generatePoints() to avoid changing the pipeline.
 
         You should have set the points (using SetPoints()) before call this member.
     */
-    void generatePointModel(double newScale = 1.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour);
+    void generatePointModel(double newScale = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour);
     /*!
         \fn milxQtModel::generateSampledPoints(float distance = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
         \brief Generates points sampled "distance" apart on the model with glyphs at each point.
@@ -1065,7 +1063,6 @@ protected:
     //------------------
     QAction* colourAct; //!< Action for changing colours of a model
     QAction* interpAct; //!< Action for changing the interpolation of a model
-    QAction* specularAct; //!< Action for changing the specular of a model to flat
 
     //View Menu
     //------------------

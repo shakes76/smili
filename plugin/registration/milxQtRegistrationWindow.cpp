@@ -214,8 +214,7 @@ void milxQtRegistrationWindow::updateImageListCombo()
 // Update the list of open images that we can use for the registration
 void milxQtRegistrationWindow::updateOpenImages()
 {
-    QWidgetList windows;
-    windows = MainWindow->getListOfWindows();
+    QList<QMdiSubWindow*> windows = MainWindow->getListOfWindows();
 
     MainWindow->initialiseWindowTraversal();
     for (int i = 0; i < MainWindow->getNumberOfWindows(); i ++)

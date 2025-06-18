@@ -19,6 +19,8 @@
 #define MILXQTSSMPLUGIN_H
 
 #include <QList>
+#include <QWizard>
+#include <QListWidget>
 
 #include <milxQtPluginInterface.h>
 #include <milxQtMain.h>
@@ -126,16 +128,16 @@ protected:
     void run();
     inline void addShapeModel(milxQtShapeModel *newShapeModel)
     {
-        cout << "Adding Normal Shape Model to System." << endl;
+        std::cout << "Adding Normal Shape Model to System." << std::endl;
         shapes.append(newShapeModel);
         currentModel = qobject_cast<QWidget *>(newShapeModel);
         if(isPluginWindow(currentModel))
-            cout << "Successfully added normal model to system" << endl;
+            std::cout << "Successfully added normal model to system" << std::endl;
         connect(shapes.last(), SIGNAL(closing(QWidget *)), this, SLOT(closedSSM(QWidget *)));
     }
     inline void addShapeModel(milxQtRobustShapeModel *newShapeModel)
     {
-        cout << "Adding Robust Shape Model to System." << endl;
+        std::cout << "Adding Robust Shape Model to System." << std::endl;
         robustShapes.append(newShapeModel);
         currentModel = qobject_cast<QWidget *>(newShapeModel);
         connect(robustShapes.last(), SIGNAL(closing(QWidget *)), this, SLOT(closedSSM(QWidget *)));
@@ -152,6 +154,7 @@ private:
 class MILXQT_PLUGIN_EXPORT milxQtSSMPluginFactory: public QObject, public milxQtPluginFactory
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "milxQt.Plugins.milxQtPluginFactory/1.0")
     Q_INTERFACES(milxQtPluginFactory)
 
 public:

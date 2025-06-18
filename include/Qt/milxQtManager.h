@@ -19,6 +19,8 @@
 #define MILXQTMANAGER_H
 
 #include <QtGui/QtGui>
+#include <QTabWidget>
+#include <QAction>
 //milxQt Specific
 #include "milxQtAliases.h"
 

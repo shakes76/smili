@@ -20,7 +20,13 @@
 
 #include "milxQtWindow.h"
 
+#include <QWidgetAction>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QStatusBar>
+
 #include <vtkSmartPointer.h>
+#include <vtkMatrix4x4.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkCamera.h>
@@ -205,8 +211,8 @@ public:
     */
     inline void SetSize(int height, int width)
     {
-        QVTKWidget::GetRenderWindow()->SetSize(width, height);
-        int *winSize = QVTKWidget::GetRenderWindow()->GetSize();
+        GetRenderWindow()->SetSize(width, height);
+        int *winSize = GetRenderWindow()->GetSize();
         QVTKWidget::resize(winSize[0],winSize[1]);
     }
     /*!
@@ -326,11 +332,19 @@ public:
         return renderer;
     }
     /*!
+        \fn milxQtRenderWindow::GetRenderWindow()
+        \brief Returns the VTK Render Window object.
+    */
+    inline vtkRenderWindow* GetRenderWindow()
+    {
+        return milxQtWindow::renderWindow();
+    }
+    /*!
       \brief Get the interactor associated with the view rendering
     */
     inline virtual vtkRenderWindowInteractor* GetVTKInteractor()
     {
-        return QVTKWidget::GetRenderWindow()->GetInteractor();
+        return GetRenderWindow()->GetInteractor();
     }
 
     /*!
@@ -339,7 +353,7 @@ public:
     */
     inline void OffScreenRenderingOn()
     {
-        QVTKWidget::GetRenderWindow()->OffScreenRenderingOn();
+        GetRenderWindow()->OffScreenRenderingOn();
     }
     /*!
         \fn milxQtRenderWindow::OffScreenRenderingOff()
@@ -347,7 +361,7 @@ public:
     */
     inline void OffScreenRenderingOff()
     {
-        QVTKWidget::GetRenderWindow()->OffScreenRenderingOff();
+        GetRenderWindow()->OffScreenRenderingOff();
     }
 
     /*!
@@ -356,7 +370,7 @@ public:
     */
     inline void Render()
     {
-        QVTKWidget::GetRenderWindow()->Render();
+        GetRenderWindow()->Render();
     }
 
     /*!
@@ -1006,7 +1020,16 @@ protected:
     void setupHumanGlyph(vtkSmartPointer<vtkMatrix4x4> mat = NULL);
 
 private:
+    /*!
+        \fn milxQtRenderWindow::SetRenderWindow(vtkRenderWindow* renWin)
+        \brief Returns the VTK Render Window object.
 
+        Disabled because it upsets QVTKOpenGLWindow etc. during runtime if used.
+    */
+    inline void SetRenderWindow(vtkRenderWindow* renWin)
+    {
+        return milxQtWindow::setRenderWindow(renWin);
+    }
 };
 
 #endif // MILXQTRENDERWINDOW_H

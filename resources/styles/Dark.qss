@@ -1,0 +1,96 @@
+.QWidget {
+    background-color: dimgrey;
+}
+
+QPushButton {
+    background-color: darkgrey;
+    color: aliceblue;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 5;
+    padding: 3px;
+    min-width: 9ex;
+    min-height: 2.5ex;
+}
+
+QPushButton:hover {
+    background-color: slategrey;
+}
+
+QPushButton:pressed {
+    background-color: black;
+    padding-left: 5px;
+    padding-top: 5px;
+}
+
+QLabel, QAbstractButton {
+    font: bold;
+}
+
+QStatusBar QLabel {
+    font: normal;
+}
+
+QListView {
+    background-color: dimgrey;
+    color: aliceblue;
+}
+
+QLabel {
+    color: aliceblue;
+    border: 0px;
+    padding: 0;
+    background: none;
+}
+
+QLineEdit:focus, QFrame:focus {
+    border-width: 3px;
+    padding: 0px;
+}
+
+QToolTip {
+    background-color: dimgrey;
+    color: aliceblue;
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+    padding: 5px;
+    border-radius: 3px;
+    opacity: 200;
+}
+
+QDialogButtonBox {
+    button-layout: 0;
+}
+
+QMenuBar {
+    background-color: grey;
+    color: aliceblue;
+}
+
+QTabBar::tab {
+    background: darkgrey;
+    color: black;
+}
+
+QTabBar::tab:selected {
+    background: dimgrey;
+    color: aliceblue;
+}
+
+QToolBar {
+    background: grey;
+}
+
+QCheckBox {
+    color: aliceblue;
+}
+
+QGroupBox::title {
+    color: aliceblue;
+}
+
+QMessageBox {
+    background: dimgrey;
+}

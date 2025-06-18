@@ -93,7 +93,11 @@ int main(int argc, char* argv[])
     const size_t caseID = caseArg.getValue();
 
     ///Setup ITK Threads
+#if ITK_VERSION_MAJOR < 5
     itk::MultiThreader::SetGlobalDefaultNumberOfThreads(milx::NumberOfProcessors()/2);
+#else
+    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(milx::NumberOfProcessors()/2);
+#endif
 
     //Check arguments
     //Most of the checking is done by TCLAP

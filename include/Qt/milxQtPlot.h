@@ -18,6 +18,10 @@
 #ifndef MILXQTPLOT_H
 #define MILXQTPLOT_H
 
+//Qt
+#include <QSlider>
+#include <QSlider>
+
 //VTK
 #include <vtkChartXY.h>
 #include <vtkSmartVolumeMapper.h>

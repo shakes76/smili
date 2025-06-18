@@ -18,6 +18,14 @@
 #include "milxQtAnimateModel.h"
 
 #include <time.h>
+//Qt 
+#include <QMenu>
+#include <QDialog>
+#include <QInputDialog>
+#include <QFileDialog>
+#include <QFormLayout>
+#include <QComboBox>
+#include <QPushButton>
 //VTK
 #include <vtkWindowToImageFilter.h>
 #include <vtkFFMPEGWriter.h>
@@ -366,27 +374,27 @@ void milxQtAnimateModel::movie(QString filename, int frames)
 void milxQtAnimateModel::createActions()
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(QApplication::translate("MainWindow", "Animation", 0, QApplication::UnicodeUTF8));
+    contextMenu->setTitle("Animation");
 
     startAct = new QAction(this);
-        startAct->setText(QApplication::translate("Model", "Start/Restart", 0, QApplication::UnicodeUTF8));
+        startAct->setText("Start/Restart");
         startAct->setShortcut(tr("Alt+s"));
     pauseAct = new QAction(this);
-        pauseAct->setText(QApplication::translate("Model", "Pause/Unpause", 0, QApplication::UnicodeUTF8));
+        pauseAct->setText("Pause/Unpause");
         pauseAct->setShortcut(tr("Alt+p"));
     intervalAct = new QAction(this);
-        intervalAct->setText(QApplication::translate("Model", "Change Interval", 0, QApplication::UnicodeUTF8));
+        intervalAct->setText("Change Interval");
         intervalAct->setShortcut(tr("Alt+i"));
     rotationIntervalAct = new QAction(this);
-        rotationIntervalAct->setText(QApplication::translate("Model", "Change Rotation Interval", 0, QApplication::UnicodeUTF8));
+        rotationIntervalAct->setText("Change Rotation Interval");
         rotationIntervalAct->setShortcut(tr("Shift+Alt+r"));
     rotationAct = new QAction(this);
-        rotationAct->setText(QApplication::translate("Model", "Rotate View", 0, QApplication::UnicodeUTF8));
+        rotationAct->setText("Rotate View");
         rotationAct->setShortcut(tr("Alt+r"));
         rotationAct->setCheckable(true);
         rotationAct->setChecked(false);
     movieAct = new QAction(this);
-        movieAct->setText(QApplication::translate("Model", "Record as Movie", 0, QApplication::UnicodeUTF8));
+        movieAct->setText("Record as Movie");
         movieAct->setShortcut(tr("Alt+m"));
 }
 

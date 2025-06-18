@@ -1,7 +1,5 @@
- 
-# Recurse into the "apps" subdirectory. This does not actually
+ # Recurse into the "apps" subdirectory. This does not actually
 # cause another cmake executable to run.
-add_subdirectory (milxAssistant)
 
 IF(USE_VTK)
   add_subdirectory (milxModelApp)
@@ -13,6 +11,9 @@ IF(USE_ITK)
 ENDIF(USE_ITK)
 
 IF(BUILD_MILXQT)
+  set(CMAKE_AUTOMOC ON)
+  add_subdirectory (milxAssistant)
+
   IF(${ITK_VERSION_MAJOR} VERSION_GREATER 3 OR ITK_USE_REVIEW)
     add_subdirectory (milxLabelVisualisation)
   ELSE(${ITK_VERSION_MAJOR} VERSION_GREATER 3 OR ITK_USE_REVIEW)
