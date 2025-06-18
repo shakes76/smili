@@ -34,7 +34,6 @@ OPTION(BUILD_VIEWER "Build the MILX Qt Viewer Application" ON)
 OPTION(BUILD_APPLICATIONS "Build the applications for SMILI. Use BUILD_GUI_RELATED to enable Qt applications." ON)
 OPTION(BUILD_TESTS "Build the tests for SMILI" OFF)
 OPTION(BUILD_PROTOTYPES "Build the prototype tests for SMILI" OFF)
-OPTION(BUILD_ITKIO_SUPPORT "Build support for ITK IO (MGH, FDF etc.)" OFF)
 
 #-----------------------------------------------------------------------------
 # Enable/Disable Freesurfer support
