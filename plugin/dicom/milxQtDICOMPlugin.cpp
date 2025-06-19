@@ -1584,9 +1584,9 @@ void milxQtDICOMPlugin::makeFilename(const QString &path, ImageIOType::Pointer g
 	filename = filename + index_dcm.str() + ".IMA";
 }
 
-void milxQtDICOMPlugin::removeForbiddenChar(std::string &str, char* charsToRemove)
+void milxQtDICOMPlugin::removeForbiddenChar(std::string &str, std::string charsToRemove)
 {
-	for (unsigned int i = 0; i < strlen(charsToRemove); ++i)
+	for (unsigned int i = 0; i < charsToRemove.length(); ++i)
 	{
 		str.erase(remove(str.begin(), str.end(), charsToRemove[i]), str.end());
 	}
