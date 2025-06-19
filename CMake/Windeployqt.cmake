@@ -1,3 +1,8 @@
+# Simplified Windeployqt
+# Originally sourced from 
+# https://blog.nathanosman.com/2017/11/24/using-windeployqt-with-cpack.html
+# part of the nitroshare-desktop project: https://github.com/nitroshare/nitroshare-desktop
+
 # The MIT License (MIT)
 #
 # Copyright (c) 2017 Nathan Osman
