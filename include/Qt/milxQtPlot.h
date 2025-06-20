@@ -24,7 +24,6 @@
 
 //VTK
 #include <vtkChartXY.h>
-#include <vtkSmartVolumeMapper.h>
 #include <vtkVolume.h>
 
 #include "milxQtModel.h"
@@ -306,7 +305,6 @@ protected:
     vtkSmartPointer<vtkImageData> imageData; //!< data presented as a image
     vtkSmartPointer<vtkChartXY> templateChart; //!< chart (used only for xy scatter plot)
     vtkSmartPointer<vtkVolume> volume; //! Maintains volume rendering when needed
-    vtkSmartPointer<vtkSmartVolumeMapper> volumeFixedMapper; //!< Volume rendering member
 
     //------------------
     //Context Menu

@@ -36,6 +36,10 @@
 #include <vtkColorTransferFunction.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkVolumeProperty.h>
+#include <vtkSmartVolumeMapper.h>
+
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
 
 milxQtPlot::milxQtPlot(QWidget *theParent, bool contextSystem) : milxQtModel(theParent, contextSystem)
 {
@@ -414,8 +418,7 @@ void milxQtPlot::volumePlot(vtkSmartPointer<vtkImageData> img, const bool eightb
 
     //Construct rendering
     emit working(-1);
-    generateRender();
-    milxQtRenderWindow::generateRender(); // make sure we have an OpenGL context.
+    generateRender(); // make sure we have an OpenGL context.
 
     printDebug("Colour Function Setup");
     vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
