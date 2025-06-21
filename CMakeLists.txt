@@ -17,6 +17,8 @@ include(find)
 include(macros)
 include(version)
 
+find_package(GTest REQUIRED) #for mac ports builds
+
 #Add compiler flags
 #GCC
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -54,14 +56,17 @@ IF(BUILD_MILXQT)
     IF(VTK_QT_VERSION GREATER "4")
         find_package("Qt${VTK_QT_VERSION}" COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED)
 #~         qt_standard_project_setup()
-        include_directories(${Qt${QT_VERSION_MAJOR}Core_INCLUDE_DIRS} ${Qt${QT_VERSION_MAJOR}WebEngineWidgets_INCLUDE_DIRS})
-        add_definitions(${Qt${QT_VERSION_MAJOR}Core_DEFINITIONS})
+        include_directories(${Qt${VTK_QT_VERSION}Core_INCLUDE_DIRS} ${Qt${VTK_QT_VERSION}WebEngineWidgets_INCLUDE_DIRS})
+        add_definitions(${Qt${VTK_QT_VERSION}Core_DEFINITIONS})
         qt_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-        set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::WebEngineWidgets)
+        set(QT_LIBRARIES Qt${VTK_QT_VERSION}::Core Qt${VTK_QT_VERSION}::WebEngineWidgets)
         set(${PROJECT_NAME}_QT${VTK_QT_VERSION} TRUE)
+	set(DESIRED_QT_VERSION ${DESIRED_QT_VERSION})
+	MESSAGE("Qt Version: ${VTK_QT_VERSION}")
     ELSE(VTK_QT_VERSION GREATER "4")
         FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
         INCLUDE(${QT_USE_FILE})
+	set(DESIRED_QT_VERSION ${VTK_QT_VERSION})
     ENDIF(VTK_QT_VERSION GREATER "4")
 ENDIF(BUILD_MILXQT)
  

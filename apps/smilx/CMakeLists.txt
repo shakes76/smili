@@ -61,10 +61,7 @@ ENDIF (WIN32)
 #####################################
 # Add executable and link libraries #
 #####################################
-ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOSX_BUNDLE since custom one created
-#~ IF(VTK_QT_VERSION VERSION_GREATER "4")
-#~   qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
-#~ ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
+ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) 
 TARGET_LINK_LIBRARIES(smilx milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
 
 ##############################################
@@ -158,7 +155,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     IF(APPLE) #Assumes MAC OSX
         SET(CPACK_BUNDLE_NAME "sMILX")
         SET(CPACK_BUNDLE_STARTUP_COMMAND "${PROJECT_BINARY_DIR}/smilx.sh")
-        #SET(CPACK_BUNDLE_PLIST "${PROJECT_SOURCE_DIR}/Info-CMake.plist")
+        SET(CPACK_BUNDLE_PLIST "${PROJECT_SOURCE_DIR}/Info-CMake.plist")
         SET(CPACK_BUNDLE_ICON ${SMILX_ICON_FILE})
 
     # Set the OS X Bundle specific CMake variables which will be used to populate the plist for
@@ -193,7 +190,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     SET(LIBRARY_DIRS ${LIBRARY_OUTPUT_PATH};${SMILI_PLUGINS_PATH};${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
 
     IF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
-      set(CMAKE_INSTALL_PREFIX "/Applications")
+      #set(CMAKE_INSTALL_PREFIX "/Applications")
       # install(CODE "
       # file(GLOB_RECURSE PLUGINS
       #   \"\${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
@@ -201,11 +198,11 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
       # include(BundleUtilities)
       # fixup_bundle(\"${APPS}\" \"\${PLUGINS}\" \"${LIBRARY_DIRS}\")
       # " COMPONENT Runtime)
-    # ELSE(CPACK_BINARY_PACKAGEMAKER)
+    ELSE(CPACK_BINARY_PACKAGEMAKER)
       # Install VTK files
-      # FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-      # INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
-      # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+      #FILE(GLOB vtkFiles "${VTK_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+      #INSTALL(FILES ${vtkFiles} DESTINATION lib COMPONENT Runtime
+      #PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
             #install Qt files
             # FILE(GLOB qtFiles_QtCore "${QT_LIBRARY_DIR}/QtCore.framework/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
@@ -213,17 +210,48 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
             # PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
       #SET(CPACK_GENERATOR Bundle)
+
     ENDIF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
 
-    include(DeployQt4)
-    set(EXECUTABLE "${PROJECT_NAME}.app")
-    FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-    #INSTALL_QT4_PLUGIN_PATH("${PLUGINS}" "${EXECUTABLE}" FALSE ${EXECUTABLE_OUTPUT_PATH}/${CONFIGURATION}/smilx.app/Contents ${SMILI_PLUGINS_PATH})
-    INSTALL_QT4_PLUGIN("${PLUGINS}" "${EXECUTABLE}" FALSE SMILI_PLUGINS_INSTALL_PATH plugins)
-    #FILE(GLOB INSTALLED_PLUGINS "${SMILI_PLUGINS_INSTALL_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-    INSTALL_QT4_EXECUTABLE("${EXECUTABLE}" "${PLUGINS} qsqlite" "${SMILI_PLUGINS_INSTALL_PATH}" ${LIBRARY_DIRS} plugins)
-    MESSAGE("Plugins to be Installed: ${SMILI_PLUGINS_INSTALL_PATH}")
+    #set(EXECUTABLE "${PROJECT_NAME}.app")
+    #FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    
+    # --- Deployment for macOS ---
+    get_target_property(_qmake_executable "Qt${VTK_QT_VERSION}::qmake" IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    #find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS \"\${_qt_bin_dir}\")
+    #get_target_property(MACDEPLOYQT_EXECUTABLE "Qt${VTK_QT_VERSION}::macdeployqt" IMPORTED_LOCATION)
+    set(MACDEPLOYQT_EXECUTABLE ${_qt_bin_dir}/macdeployqt)
 
+    # Example of a custom CMake function to run macdeployqt
+    #function(deploy_qt_app target_name)
+    #    execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${target_name}.app
+    #                    RESULT_VARIABLE result)
+    #    if (result)
+    #        message(FATAL_ERROR "macdeployqt failed for ${target_name}.app")
+    #    endif()
+    #endfunction()
+
+    #deploy_qt_app(smilx)
+
+    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in
+                  CONTENT "execute_process(COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"${EXECUTABLE_OUTPUT_PATH}/smilx.app\" -always-overwrite)")
+
+    # Call the function after building the application
+    message("Deploy Exe ${MACDEPLOYQT_EXECUTABLE}")
+    message("Qt Bin ${_qt_bin_dir}")
+    #message("Script ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in")
+    #add_custom_command(TARGET smilx POST_BUILD COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in)
+    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in COMPONENT Runtime)
+    include(InstallRequiredSystemLibraries)
+
+    # Generate the deployment script
+    #qt_generate_deploy_app_script(
+    #    TARGET smilx
+    #    DEPLOY_SCRIPT deploy_script_file
+    #)
+    #install(SCRIPT "${deploy_script_file}")
+    
   ELSE(APPLE) #UNIX etc.
     set(_add_executable_param UNIX)
 
