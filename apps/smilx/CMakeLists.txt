@@ -279,8 +279,12 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt2.0, libfftw3-3") #12.04, no ITK
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.8, libvtk5.8-qt4, libpythonqt-dev, libinsighttoolkit4.5, libfftw3-3")
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libinsighttoolkit4.9, libfftw3-3") #Ubuntu 16.04
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libfftw3-3") #Ubuntu 19.10
+#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5widgets5 libqt5webengine5 vtk7 libvtk7.1p-qt libinsighttoolkit4.13 libfftw3-bin") #Ubuntu 22.04
+#~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5widgets5, libqt5webengine5 vtk7") #Ubuntu 22.04
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
+    
+    SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS "${SMILI_BINARY_DIR}/lib")
+    SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
     #RPM
     SET(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
