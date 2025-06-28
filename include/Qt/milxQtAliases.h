@@ -105,7 +105,7 @@ The export command is
 #endif
 
 static const float milxQtVersion = static_cast<float>(2.00);
-static const int minWindowSize = 256;
+static const int minWindowSize = 320;
 static const int maxAASamples = 2; //Anti-Aliasing
 
 #ifndef DEF_EXTS
