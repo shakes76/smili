@@ -272,12 +272,12 @@ public slots:
     void makeFilename(const QString &path, ImageIOType::Pointer gdcmImageIO, unsigned int index, std::string &filename, unsigned int index_subject);
 
 	/**
-	\fn milxQtDICOMPlugin::makeFilename()
+	\fn milxQtDICOMPlugin::removeForbiddenChar()
 	\brief Small helper to remove unwanted characters under windows
 	\param std: string to strip
 	\param charsToRemove: unwanted characters
 	*/
-	void removeForbiddenChar(std::string &str, char* charsToRemove);
+	void removeForbiddenChar(std::string &str, std::string charsToRemove);
 
 	void writeLog(QString &filename, std::string &output);
     

@@ -30,7 +30,11 @@ else(ITK_USE_REVIEW OR "${ITK_VERSION_MAJOR}" GREATER 3)
 endif(ITK_USE_REVIEW OR "${ITK_VERSION_MAJOR}" GREATER 3)
 
 FIND_PACKAGE(VTK)
-include_directories(${VTK_INCLUDE_DIRS})
+IF("${VTK_MAJOR_VERSION}" LESS 9) #If not VTK 9 or above
+    include(${VTK_USE_FILE})
+ELSE()
+    include_directories(${VTK_INCLUDE_DIRS})
+ENDIF()
 
 IF(NOT SMILI_FIND_MESSAGE)
     message("Using VTK from ${VTK_DIR}")

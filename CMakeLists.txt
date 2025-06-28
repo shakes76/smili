@@ -131,6 +131,10 @@ IF(APPLE)
     ENDIF("${isSystemDir}" STREQUAL "-1")
 ENDIF(APPLE)
 
+IF(BUILD_ITKIO_SUPPORT)
+  add_definitions(-DITKIO_SUPPORT)
+ENDIF(BUILD_ITKIO_SUPPORT)
+
 # Recurse into the "apps" subdirectory. This does not actually
 # cause another cmake executable to run.
 add_subdirectory (src)

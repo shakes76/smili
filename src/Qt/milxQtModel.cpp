@@ -834,11 +834,11 @@ void milxQtModel::generateModel(float red, float green, float blue)
     #if VTK_MAJOR_VERSION <=7
         else
             milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+    #endif // VTK_MAJOR_VERSION
 
         int *winSize = milxQtWindow::renderWindow()->GetSize();
         QVTKWidget::resize(winSize[0], winSize[1]);
         printDebug("Size of Model window: " + QString::number(milxQtWindow::renderWindow()->GetSize()[0]) + "x" + QString::number(milxQtWindow::renderWindow()->GetSize()[1]));
-    #endif // VTK_MAJOR_VERSION
 
         modelled = true; //dont move down, ordering necessary
         milxQtRenderWindow::AddActor(modelActor);
