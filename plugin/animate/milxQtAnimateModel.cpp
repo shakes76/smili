@@ -26,6 +26,9 @@
 #include <QFormLayout>
 #include <QComboBox>
 #include <QPushButton>
+#if QT_VERSION > 0x050000
+  #include <QtCore5Compat/QRegExp>
+#endif
 //VTK
 #include <vtkWindowToImageFilter.h>
 #include <vtkFFMPEGWriter.h>
@@ -135,7 +138,7 @@ void milxQtAnimateModel::SetInputCollection(vtkPolyDataCollection* meshes, QStri
     }
     done(-1);
 
-    qDebug() << "IDs: " << m_caseIDs << endl;
+    qDebug() << "IDs: " << m_caseIDs;
 
     printInfo("Starting Animation Loop");
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateAnimation()));

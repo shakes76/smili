@@ -8,6 +8,11 @@ set(SMILI_DIR ${SMILI_SOURCE_DIR})
 # Add Headers into List
 file(GLOB SMILI_HEADERS ${SMILI_DIR}/include/*.h)
 
+IF(VTK_QT_VERSION VERSION_GREATER "5")
+    find_package(Qt6 REQUIRED COMPONENTS Core Core5Compat) # Or Qt5 if targeting Qt5 directly
+    SET(QT5_COMPAT_LIB Qt6::Core5Compat)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "5")
+
 include_directories (${MILXQT_INCLUDE_DIRS})
 link_directories(${SMILI_BINARY_DIR}/lib)
 
@@ -21,13 +26,13 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
 
 # this moc's the above variable and appends to the cxx sources
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-    QT5_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
+    QT_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
 ELSEIF(VTK_QT_VERSION VERSION_GREATER "4")
     QT4_WRAP_CPP(ANIMATE_MOCS milxQtAnimatePlugin.h milxQtAnimateModel.h)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(animatePlugin SHARED milxQtAnimateModel.cpp milxQtAnimatePlugin.cpp ${ANIMATE_MOCS})
-TARGET_LINK_LIBRARIES(animatePlugin milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES})
+TARGET_LINK_LIBRARIES(animatePlugin milx-Qt ${QT5_COMPAT_LIB} ${QT_LIBRARIES} ${VTK_LIBRARIES})
 
 IF(BUILD_ANIMATE_PLUGIN)
   install(TARGETS animatePlugin
