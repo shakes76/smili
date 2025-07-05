@@ -51,6 +51,7 @@
 #include <QTextCursor>
 #include <QDebug>
 #include <QCompleter>
+#include <QAbstractItemView>
 #include <QStringListModel>
 #include <QScrollBar>
 #include <QSettings>
@@ -687,21 +688,21 @@ void milxQtPythonConsole::createActions()
 {
     copyAct = new QAction(this);
         copyAct->setIcon(QIcon(":/resources/toolbar/copy.png"));
-        copyAct->setText(QApplication::translate("Console", "Copy", 0, QApplication::UnicodeUTF8));
+        copyAct->setText(tr("Copy"));
         copyAct->setShortcut(tr("Ctrl+c"));
 
     cutAct = new QAction(this);
         cutAct->setIcon(QIcon(":/resources/toolbar/cut.png"));
-        cutAct->setText(QApplication::translate("Console", "Cut", 0, QApplication::UnicodeUTF8));
+        cutAct->setText(tr("Cut"));
         cutAct->setShortcut(tr("Ctrl+x"));
 
     pasteAct = new QAction(this);
         pasteAct->setIcon(QIcon(":/resources/toolbar/paste.png"));
-        pasteAct->setText(QApplication::translate("Console", "Paste", 0, QApplication::UnicodeUTF8));
+        pasteAct->setText(tr("Paste"));
         pasteAct->setShortcut(tr("Ctrl+v"));
 
     clearAct = new QAction(this);
-        clearAct->setText(QApplication::translate("Console", "Clear", 0, QApplication::UnicodeUTF8));
+        clearAct->setText(tr("Clear"));
         clearAct->setShortcut(tr("F5"));
 }
 

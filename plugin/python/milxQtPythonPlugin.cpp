@@ -34,7 +34,7 @@ milxQtPythonPlugin::milxQtPythonPlugin(QObject *theParent) : milxQtPluginInterfa
     setupPython();
 
     dock = new QDockWidget(tr("Python Console"));
-        dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+        dock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
         dock->setWidget(pyConsole);
 
     //Syntax Highlight
@@ -48,7 +48,7 @@ milxQtPythonPlugin::~milxQtPythonPlugin()
 {
     if(isRunning() && threaded)
         quit();
-    cerr << "Python Plugin Destroyed." << endl;
+    std::cerr << "Python Plugin Destroyed." << std::endl;
 }
 
 QString milxQtPythonPlugin::name()
@@ -188,7 +188,7 @@ void milxQtPythonPlugin::resizeForFloat(bool floating)
     }
 }
 
-Q_EXPORT_PLUGIN2(PythonPlugin, milxQtPythonPluginFactory);
+//Q_EXPORT_PLUGIN2(PythonPlugin, milxQtPythonPluginFactory);
 
 //Syntax class implementation
 milxQtPythonSyntaxHighlighter::milxQtPythonSyntaxHighlighter(QTextEdit *textEdit) : QSyntaxHighlighter(textEdit)

@@ -98,14 +98,17 @@ private:
 
 };
 
-class MILXQT_PLUGIN_EXPORT milxQtPythonPluginFactory: public QObject, public milxQtPluginFactory
+class MILXQT_PLUGIN_EXPORT milxQtPythonPluginFactory : public QObject, public milxQtPluginFactory
 {
-    Q_OBJECT
+  Q_OBJECT
+    Q_PLUGIN_METADATA(IID "milxQt.Plugins.milxQtPluginFactory/1.0")
     Q_INTERFACES(milxQtPluginFactory)
 
 public:
-    milxQtPluginInterface* newPlugin(QObject *theParent = 0)
-    {   return new milxQtPythonPlugin(theParent);  }
+  milxQtPluginInterface* newPlugin(QObject* theParent = 0)
+  {
+    return new milxQtPythonPlugin(theParent);
+  }
 };
 
 //Syntax Highlighter
