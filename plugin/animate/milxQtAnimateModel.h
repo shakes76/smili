@@ -53,7 +53,7 @@ public slots:
     void pauseAnimation();
     void interval(int newInterval = 0);
     void intervalRotation(int newInterval = 0);
-    void movie(QString filename = "", int frames = 0);
+    void movie(QString filename = "", int frames = 0, int compress = 0);
     inline void setInterval(const int delay)
     {   m_interval = delay; }
     inline int getInterval()
