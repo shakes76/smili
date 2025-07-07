@@ -26,7 +26,7 @@
 #include <QFormLayout>
 #include <QComboBox>
 #include <QPushButton>
-#if QT_VERSION > 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
   #include <QtCore5Compat/QRegExp>
 #endif
 //VTK
