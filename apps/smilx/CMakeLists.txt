@@ -185,6 +185,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     set(CPACK_DMG_FORMAT "UDBZ")
     set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}")
     set(CPACK_SYSTEM_NAME "OSX")
+    set(CMAKE_MACOSX_RPATH ON)
 
     #Pull out other dependencies
     SET(LIBRARY_DIRS ${LIBRARY_OUTPUT_PATH};${SMILI_PLUGINS_PATH};${SMILI_BINARY_DIR}/lib;${MILXQT_INSTALL_BINARY_DIR};${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS};${QT_LIBRARY_DIR};${PYTHONQT_DIR}/lib)
@@ -224,29 +225,13 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CONTENTS_DIRECTORY}/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CONTENTS_DIRECTORY}/Frameworks")
 
-    macdeployqt(smilx)
-
     # Prepare the plist file for the app bundle
     configure_file(${PROJECT_SOURCE_DIR}/Info.plist.in "${CONTENTS_DIRECTORY}/Info.plist")
 
     # Copy the icon to the Resources directory
     #file(COPY ${PROJECT_SOURCE_DIR}/smilx.icns DESTINATION "${CONTENTS_DIRECTORY}/Resources")
 
-    # Add a target for building the DMG
-    set(sym "${OUTPUT_PREFIX}/Applications")
-    set(dmg "${CMAKE_BINARY_DIR}/smili-${PROJECT_VERSION}-osx.dmg")
-    add_custom_target(dmg
-        COMMAND rm -f \"${sym}\" \"${dmg}\"
-        COMMAND ln -s /Applications \"${sym}\"
-        COMMAND hdiutil create
-            -srcfolder \"${OUTPUT_PREFIX}\"
-            -volname "${PROJECT_NAME}"
-            -fs HFS+
-            -size 30m
-            \"${dmg}\"
-        DEPENDS smilx
-        COMMENT "Building disk image..."
-    )
+    macdeployqt(smilx)
     
   ELSE(APPLE) #UNIX etc.
     set(_add_executable_param UNIX)
