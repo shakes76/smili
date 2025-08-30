@@ -54,7 +54,7 @@
 #if ITK_VERSION_MAJOR > 4
   typedef itk::IOFileModeEnum IOFileMode;
 #else
-  typedef itk::ImageIOFactory::ReadMode IOFileMode;
+  typedef itk::ImageIOFactory IOFileMode;
 #endif
 
 namespace milx

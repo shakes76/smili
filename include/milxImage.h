@@ -2266,7 +2266,11 @@ std::string Image<TImage>::ImageOrientation(itk::SmartPointer<TImage> img)
 	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
 	//codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";*/
 
+#if (ITK_VERSION_MAJOR > 4)
 	itk::SpatialOrientationEnums::ValidCoordinateOrientations orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
+#else
+	itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
+#endif
 
     std::ostringstream oss;
     oss << orientFlag;
