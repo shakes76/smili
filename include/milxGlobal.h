@@ -26,8 +26,14 @@
 #include <iostream>
 
 #ifndef VTK_ONLY
-  //VNL
-  #include <vnl/vnl_vector_fixed.h>
+  //#if ITK_VERSION_MAJOR > 4
+    //#include <itkVector.h>
+    ////typedef itk::Vector vnl_vector;
+    ////typedef itk::FixedArray vnl_vector_fixed;
+  //#else
+    //VNL
+    #include <vnl/vnl_vector_fixed.h>
+  //#endif
   //ITK
   #include <itkCommand.h>
 #endif
@@ -63,7 +69,11 @@ static bool VerboseMode = true;
 typedef double coordinateType; //compatible with >= VTK 5
 #ifndef VTK_ONLY
   typedef unsigned vnl_size_t;
-  typedef vnl_vector_fixed<coordinateType,3> coordinate;
+  //#if ITK_VERSION_MAJOR > 4
+    //typedef itk::FixedArray<coordinateType,3> coordinate;
+  //#else
+    typedef vnl_vector_fixed<coordinateType,3> coordinate;
+  //#endif
 #endif
 #ifdef VTK_ONLY
   typedef coordinateType* coordinate;

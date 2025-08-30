@@ -1608,11 +1608,13 @@ itk::SmartPointer<TOutImage> Image<TImage>::TransformImage(itk::SmartPointer<TIm
   typedef typename AffineTransformType::Pointer AffineTransformPointer;
   typedef itk::VersorRigid3DTransform<TPrecision> VersorRigidTransformType;
   typedef typename VersorRigidTransformType::Pointer VersorRigidTransformPointer;
-#if ITK_VERSION_MAJOR > 3 //New() member issues, see ITK4 tests for detail
-  typedef itkv3::Rigid3DTransform<TPrecision> RigidTransformType;
-#else
+//#if ITK_VERSION_MAJOR > 3 && ITK_VERSION_MAJOR < 5 //New() member issues, see ITK4 tests for detail
+//  typedef itkv3::Rigid3DTransform<TPrecision> RigidTransformType;
+//#elif ITK_VERSION_MAJOR == 3
   typedef itk::Rigid3DTransform<TPrecision> RigidTransformType;
-#endif
+//#else
+//  typedef itk::v3::Rigid3DTransform<TPrecision> RigidTransformType;
+//#endif
   typedef typename RigidTransformType::Pointer RigidTransformPointer;
   typedef itk::CenteredEuler3DTransform<TPrecision> CenteredEuler3DTransformType;
   typedef typename CenteredEuler3DTransformType::Pointer CenteredEuler3DTransformPointer;
@@ -1769,11 +1771,13 @@ itk::SmartPointer<TOutImage> Image<TImage>::TransformImage(itk::SmartPointer<TIm
   typedef typename AffineTransformType::Pointer AffineTransformPointer;
   typedef itk::VersorRigid3DTransform<TPrecision> VersorRigidTransformType;
   typedef typename VersorRigidTransformType::Pointer VersorRigidTransformPointer;
-#if ITK_VERSION_MAJOR > 3 //New() member issues, see ITK4 tests for detail
-  typedef itkv3::Rigid3DTransform<TPrecision> RigidTransformType;
-#else
+//#if ITK_VERSION_MAJOR > 3 && ITK_VERSION_MAJOR < 5 //New() member issues, see ITK4 tests for detail
+//  typedef itkv3::Rigid3DTransform<TPrecision> RigidTransformType;
+//#elif ITK_VERSION_MAJOR == 3
   typedef itk::Rigid3DTransform<TPrecision> RigidTransformType;
-#endif
+//#else
+//  typedef itk::v3::Rigid3DTransform<TPrecision> RigidTransformType;
+//#endif
   typedef typename RigidTransformType::Pointer RigidTransformPointer;
   typedef itk::CenteredEuler3DTransform<TPrecision> CenteredEuler3DTransformType;
   typedef typename CenteredEuler3DTransformType::Pointer CenteredEuler3DTransformPointer;
@@ -2210,62 +2214,68 @@ double Image<TImage>::ImageMinimum(itk::SmartPointer<TImage> img)
 template<class TImage>
 std::string Image<TImage>::ImageOrientation(itk::SmartPointer<TImage> img)
 {
-	std::map<itk::SpatialOrientation::ValidCoordinateOrientationFlags, std::string> codeToString;
+	/*std::map<itk::SpatialOrientation::ValidCoordinateOrientationFlags, std::string> codeToString;
 
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIL] = "AIL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASL] = "ASL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAI] = "RAI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAI] = "LAI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPS] = "RPS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPS] = "LPS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIP] = "RIP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIP] = "LIP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSP] = "RSP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSP] = "LSP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RIA] = "RIA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LIA] = "LIA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RSA] = "RSA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LSA] = "LSA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRP] = "IRP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILP] = "ILP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRP] = "SRP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLP] = "SLP";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IRA] = "IRA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ILA] = "ILA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SRA] = "SRA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SLA] = "SLA";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RPI] = "RPI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LPI] = "LPI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_RAS] = "RAS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_LAS] = "LAS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRI] = "PRI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLI] = "PLI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARI] = "ARI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALI] = "ALI";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PRS] = "PRS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PLS] = "PLS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ARS] = "ARS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ALS] = "ALS";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPR] = "IPR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPR] = "SPR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAR] = "IAR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAR] = "SAR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IPL] = "IPL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SPL] = "SPL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_IAL] = "IAL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_SAL] = "SAL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIR] = "PIR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSR] = "PSR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_AIR] = "AIR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
-	codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
-	//codeToString[itk::SpatialOrientation::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_AIL] = "AIL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ASL] = "ASL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RAI] = "RAI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LAI] = "LAI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RPS] = "RPS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LPS] = "LPS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RIP] = "RIP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LIP] = "LIP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RSP] = "RSP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LSP] = "LSP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RIA] = "RIA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LIA] = "LIA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RSA] = "RSA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LSA] = "LSA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IRP] = "IRP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ILP] = "ILP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SRP] = "SRP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SLP] = "SLP";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IRA] = "IRA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ILA] = "ILA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SRA] = "SRA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SLA] = "SLA";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RPI] = "RPI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LPI] = "LPI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_RAS] = "RAS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_LAS] = "LAS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PRI] = "PRI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PLI] = "PLI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ARI] = "ARI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ALI] = "ALI";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PRS] = "PRS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PLS] = "PLS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ARS] = "ARS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ALS] = "ALS";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IPR] = "IPR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SPR] = "SPR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IAR] = "IAR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SAR] = "SAR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IPL] = "IPL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SPL] = "SPL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_IAL] = "IAL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_SAL] = "SAL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PIR] = "PIR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PSR] = "PSR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_AIR] = "AIR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_ASR] = "ASR";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PIL] = "PIL";
+	codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_PSL] = "PSL";
+	//codeToString[itk::SpatialOrientationEnums::ValidCoordinateOrientations::ITK_COORDINATE_ORIENTATION_INVALID] = "Unknown";*/
 
+#if (ITK_VERSION_MAJOR > 4)
+	itk::SpatialOrientationEnums::ValidCoordinateOrientations orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
+#else
 	itk::SpatialOrientation::ValidCoordinateOrientationFlags orientFlag = itk::SpatialOrientationAdapter().FromDirectionCosines(img->GetDirection());
-	std::string orientFlagStr = codeToString[orientFlag];
+#endif
 
-	return orientFlagStr;
+    std::ostringstream oss;
+    oss << orientFlag;
+
+	return oss.str();
 }
 
 //Filters
@@ -3588,13 +3598,13 @@ itk::SmartPointer<TImage> Image<TImage>::MergeLabelledImages(std::vector< typena
     merger->SetMethod(MergerType::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
 #else
   if (mergeType == 0)
-    merger->SetMethod(itk::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
+    merger->SetMethod(itk::MergeLabelMapFilterEnums::ChoiceMethod::KEEP); ///do its best to keep the label unchanged, but if a label is already used in a previous label map
   else if (mergeType == 1)
-    merger->SetMethod(itk::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
+    merger->SetMethod(itk::MergeLabelMapFilterEnums::ChoiceMethod::AGGREGATE); ///If the same label is found several times in the label maps, the label objects with the same label are merged
   else if (mergeType == 2)
-    merger->SetMethod(itk::PACK); ///relabel all the label objects by order of processing
+    merger->SetMethod(itk::MergeLabelMapFilterEnums::ChoiceMethod::PACK); ///relabel all the label objects by order of processing
   else if (mergeType == 3)
-    merger->SetMethod(itk::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
+    merger->SetMethod(itk::MergeLabelMapFilterEnums::ChoiceMethod::STRICT); ///keeps the labels unchanged and raises an exception if the same label is found in several images
 #endif
 
   for (size_t i = 0; i < n; i ++)

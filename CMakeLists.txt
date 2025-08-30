@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.2)
- 
+cmake_minimum_required(VERSION 3.5)
+
 PROJECT(SMILI)
 
 #Set output paths
@@ -64,7 +64,7 @@ IF(BUILD_MILXQT)
         INCLUDE(${QT_USE_FILE})
     ENDIF(VTK_QT_VERSION GREATER "4")
 ENDIF(BUILD_MILXQT)
- 
+
 IF(BUILD_PLUGINS)
     OPTION(BUILD_PYTHON_PLUGIN "Build the Python plugin for MILX Qt Viewer" OFF)
     OPTION(BUILD_DICOM_PLUGIN "Build the DICOM plugin for MILX Qt Viewer" OFF)
@@ -77,7 +77,7 @@ IF(BUILD_PLUGINS)
 ENDIF(BUILD_PLUGINS)
 
 IF(BUILD_FREESURFER_SUPPORT)
-    add_definitions(-DFREESURFER_SUPPORT)  
+    add_definitions(-DFREESURFER_SUPPORT)
 ENDIF(BUILD_FREESURFER_SUPPORT)
 
 #Check ITK/VTK statuses
@@ -91,10 +91,11 @@ IF(USE_VTK AND NOT USE_ITK)
 ENDIF(USE_VTK AND NOT USE_ITK)
 IF(USE_VTK)
   message("VTK Version: ${VTK_VERSION}")
-  add_definitions( -DVTK_MAJOR_VERSION=${VTK_MAJOR_VERSION})
+  add_definitions(-DVTK_MAJOR_VERSION=${VTK_MAJOR_VERSION})
 ENDIF(USE_VTK)
 IF(USE_ITK)
   message("ITK Version: ${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}")
+  add_definitions(-DITK_VERSION_MAJOR=${ITK_VERSION_MAJOR})
 ENDIF(USE_ITK)
 
 #advanced options
@@ -116,7 +117,7 @@ IF(APPLE)
 
     # when building, don't use the install RPATH already
     # (but later on when installing)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
     #SET(CMAKE_SKIP_RPATH TRUE)
     SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 

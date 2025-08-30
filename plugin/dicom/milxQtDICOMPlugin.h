@@ -584,9 +584,13 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
       typename TImage::IndexType pixelIndex;
       typedef itk::PolygonSpatialObject<2> PolygonType;
       typedef itk::SpatialObjectPoint<2> PolygonPointType;
-      PolygonType::PointListType pointList ;
+  #if (ITK_VERSION_MAJOR > 4)
+      PolygonType::PolygonPointListType pointList;
+  #else
+      PolygonType::PointListType pointList;
+  #endif
       PolygonPointType p;
-      PolygonType::Pointer polygon = PolygonType::New();;
+      PolygonType::Pointer polygon = PolygonType::New();
       typedef itk::GroupSpatialObject<2> GroupType;
       typedef itk::SpatialObjectToImageFilter<GroupType, ImageSliceType> SpatialObjectToImageFilterType;
       GroupType::Pointer group = GroupType::New();
@@ -623,7 +627,11 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
             iPointsOutsideBoundary++;
           }
 
-          p.SetPosition(pixelIndex[0] ,pixelIndex[1],pixelIndex[2]);
+  #if (ITK_VERSION_MAJOR > 4)
+          p.SetPositionInObjectSpace(pixelIndex[0], pixelIndex[1], pixelIndex[2]);
+  #else
+          p.SetPosition(pixelIndex[0],pixelIndex[1],pixelIndex[2]);
+  #endif
 
           p.SetRed(1);
           p.SetBlue(1);
@@ -640,7 +648,11 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
         resetImage<ImageSliceType>(temp2Dimage);
 
         //need to create a 2D slice here, put the polygon on it, and insert it back into the 3D volume...
+  #if (ITK_VERSION_MAJOR > 4)
+        group->AddChild(polygon); //add a new polygon group
+  #else
         group->AddSpatialObject(polygon); //add a new polygon group
+  #endif
 
         try
         {
@@ -661,7 +673,11 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
         mergeImages<TImage>(temp2Dimage, data, iCurrentSlice);
 
          //remove the polygon and clean up pointlist
+  #if (ITK_VERSION_MAJOR > 4)
+        group->RemoveChild(polygon);
+  #else
         group->RemoveSpatialObject(polygon);
+  #endif
         pointList.clear();
       }
 

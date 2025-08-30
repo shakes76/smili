@@ -1,7 +1,6 @@
 ############################
 # MILXASSISTANT CMAKE FILE #
 ############################
-cmake_minimum_required(VERSION 3.2.0)
 
 PROJECT(milxAssistant)
 cmake_policy(SET CMP0053 NEW)
@@ -39,6 +38,6 @@ ADD_EXECUTABLE(milxAssistant WIN32 MACOSX_BUNDLE milxAssistant.cpp ${MILXQT_RCCS
 TARGET_LINK_LIBRARIES(milxAssistant ${QT_LIBRARIES})
 
 # Installs the executable
-INSTALL(TARGETS milxAssistant 
+INSTALL(TARGETS milxAssistant
 	BUNDLE DESTINATION . COMPONENT Runtime
         RUNTIME DESTINATION bin COMPONENT Runtime)
