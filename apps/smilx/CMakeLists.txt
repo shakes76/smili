@@ -214,43 +214,39 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     ENDIF(CPACK_BINARY_PACKAGEMAKER) #Package Maker
 
     #set(EXECUTABLE "${PROJECT_NAME}.app")
-    #FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    FILE(GLOB PLUGINS "${SMILI_PLUGINS_PATH}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
+    INSTALL(FILES ${PLUGINS} DESTINATION plugins COMPONENT Runtime PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
     
     # --- Deployment for macOS ---
-    get_target_property(_qmake_executable "Qt${VTK_QT_VERSION}::qmake" IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-    #find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS \"\${_qt_bin_dir}\")
-    #get_target_property(MACDEPLOYQT_EXECUTABLE "Qt${VTK_QT_VERSION}::macdeployqt" IMPORTED_LOCATION)
-    set(MACDEPLOYQT_EXECUTABLE ${_qt_bin_dir}/macdeployqt)
+    include(DeployQt)
 
-    # Example of a custom CMake function to run macdeployqt
-    #function(deploy_qt_app target_name)
-    #    execute_process(COMMAND ${MACDEPLOYQT_EXECUTABLE} ${EXECUTABLE_OUTPUT_PATH}/${target_name}.app
-    #                    RESULT_VARIABLE result)
-    #    if (result)
-    #        message(FATAL_ERROR "macdeployqt failed for ${target_name}.app")
-    #    endif()
-    #endfunction()
+    set(CONTENTS_DIRECTORY "${CMAKE_BINARY_DIR}/smilx.app/Contents")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CONTENTS_DIRECTORY}/MacOS")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CONTENTS_DIRECTORY}/Frameworks")
 
-    #deploy_qt_app(smilx)
+    macdeployqt(smilx)
 
-    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in
-                  CONTENT "execute_process(COMMAND \"${MACDEPLOYQT_EXECUTABLE}\" \"${EXECUTABLE_OUTPUT_PATH}/smilx.app\" -always-overwrite)")
+    # Prepare the plist file for the app bundle
+    configure_file(${PROJECT_SOURCE_DIR}/Info.plist.in "${CONTENTS_DIRECTORY}/Info.plist")
 
-    # Call the function after building the application
-    message("Deploy Exe ${MACDEPLOYQT_EXECUTABLE}")
-    message("Qt Bin ${_qt_bin_dir}")
-    #message("Script ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in")
-    #add_custom_command(TARGET smilx POST_BUILD COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in)
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/CPackMacDeployQt.cmake.in COMPONENT Runtime)
-    include(InstallRequiredSystemLibraries)
+    # Copy the icon to the Resources directory
+    #file(COPY ${PROJECT_SOURCE_DIR}/smilx.icns DESTINATION "${CONTENTS_DIRECTORY}/Resources")
 
-    # Generate the deployment script
-    #qt_generate_deploy_app_script(
-    #    TARGET smilx
-    #    DEPLOY_SCRIPT deploy_script_file
-    #)
-    #install(SCRIPT "${deploy_script_file}")
+    # Add a target for building the DMG
+    set(sym "${OUTPUT_PREFIX}/Applications")
+    set(dmg "${CMAKE_BINARY_DIR}/smili-${PROJECT_VERSION}-osx.dmg")
+    add_custom_target(dmg
+        COMMAND rm -f \"${sym}\" \"${dmg}\"
+        COMMAND ln -s /Applications \"${sym}\"
+        COMMAND hdiutil create
+            -srcfolder \"${OUTPUT_PREFIX}\"
+            -volname "${PROJECT_NAME}"
+            -fs HFS+
+            -size 30m
+            \"${dmg}\"
+        DEPENDS smilx
+        COMMENT "Building disk image..."
+    )
     
   ELSE(APPLE) #UNIX etc.
     set(_add_executable_param UNIX)
