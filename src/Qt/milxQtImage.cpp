@@ -460,7 +460,7 @@ void milxQtImage::generateImage(const bool quietly)
         viewer->GetRenderer()->ResetCamera(); //Reset window view as if pressing 'Shift+r'
         viewer->UpdateCursor();
         viewer->Render();
-		
+
         ///Check for magnification
         if(!viewerSetup)
         {
@@ -3262,7 +3262,10 @@ void milxQtImage::zeros(const unsigned long xSize, const unsigned long ySize, co
           blankSize[1]  = ySize;  // size along Y
           blankSize[2]  = zSize;  // size along Z
 
-        imageRGB = milx::Image<rgbImageType>::BlankImage(0.0, blankSize);
+        rgbPixelType pixel; // Default constructed
+          pixel.Fill(0);    // Now all components are 0
+
+        imageRGB = milx::Image<rgbImageType>::BlankImage(pixel, blankSize);
 
         if(refImage)
         {

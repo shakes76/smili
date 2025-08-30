@@ -24,6 +24,7 @@
 #include "milxFile.h"
 //ITK
 #ifndef VTK_ONLY
+  #include <itkImageIOFactory.h>
   #include <itkAffineTransform.h>
   #include <itkVersorRigid3DTransform.h>
   #include <itkRigid3DTransform.h>
@@ -50,13 +51,19 @@
 
 #include <zlib.h>
 
+#if ITK_VERSION_MAJOR > 4
+  typedef itk::IOFileModeEnum IOFileMode;
+#else
+  typedef itk::ImageIOFactory::ReadMode IOFileMode;
+#endif
+
 namespace milx
 {
 
 #ifndef VTK_ONLY
   bool File::CanReadImage(const std::string filename)
   {
-    itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(filename.c_str(), itk::ImageIOFactory::ReadMode);
+    itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(filename.c_str(), IOFileMode::ReadMode);
 
     if(!imageIO)
       return false;
@@ -68,7 +75,7 @@ namespace milx
   {
     if(CanReadImage(filename))
     {
-      itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(filename.c_str(), itk::ImageIOFactory::ReadMode);
+      itk::ImageIOBase::Pointer imageIO = itk::ImageIOFactory::CreateImageIO(filename.c_str(), IOFileMode::ReadMode);
       imageIO->SetFileName(filename.c_str());
       try
       {
@@ -175,7 +182,7 @@ namespace milx
       matrix->Identity();
 
       typedef itk::TransformFileReader        TransformReaderType;
-      typedef TransformReaderType::TransformListType * TransformListType;
+      typedef TransformReaderType::TransformListType TransformListType;
       typedef itk::AffineTransform< double, 3 > AffineTransformType;
       typedef AffineTransformType::Pointer AffineTransformPointer;
       typedef itk::VersorRigid3DTransform<double> VersorRigidTransformType;
@@ -199,7 +206,7 @@ namespace milx
           PrintError("milxFile: Failed reading Transform " + std::string(ex.GetDescription()));
           return matrix;
       }
-      TransformListType transforms = affineReader->GetTransformList();
+      const TransformListType * transforms = affineReader->GetTransformList();
       TransformReaderType::TransformListType::const_iterator tit = transforms->begin();
       AffineTransformPointer affineTransform;
       VersorRigidTransformPointer versorRigidTransform;

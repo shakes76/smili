@@ -72,7 +72,7 @@ public:
   ///
   /// Overloaded for points, which are common in vtkPolyData
   /// norm allows the scale to be average scale per point
-  static Type CentroidSize(vtkPoints *points, const vnl_vector<Type> &centroid, bool norm = false);
+  static Type CentroidSize(vtkPoints *points, const vnl_vector_fixed<Type,3> &centroid, bool norm = false);
 #endif
 #endif
 #ifdef VTK_ONLY
@@ -122,7 +122,7 @@ public:
   /// The result is a nxn matrix where n is the number of variables
   /// The diagonal should contain the variances of the variables
   /// Overloaded for points, which are common in vtkPolyData
-  static vnl_matrix<Type> CovarianceMatrix(vtkPoints *points, const vnl_vector<Type> &centroid);
+  static vnl_matrix<Type> CovarianceMatrix(vtkPoints *points, const vnl_vector_fixed<Type,3> &centroid);
 #endif
 #endif
 
@@ -215,7 +215,7 @@ Type Math<Type>::CentroidSize(const vnl_matrix<Type> &data, const vnl_vector<Typ
     ///Accumulate the squared distance from centroid
     newScale += vtkMath::Distance2BetweenPoints(rowVector.data_block(), centroid.data_block());
   }
-  
+
   if(norm)
     newScale /= n;
 
@@ -241,7 +241,7 @@ vnl_vector<Type> Math<Type>::Centroid(vtkPoints *points)
 }
 
 template<class Type>
-Type Math<Type>::CentroidSize(vtkPoints *points, const vnl_vector<Type> &centroid, bool norm)
+Type Math<Type>::CentroidSize(vtkPoints *points, const vnl_vector_fixed<Type,3> &centroid, bool norm)
 {
   Type newScale = 0;
 
@@ -252,7 +252,7 @@ Type Math<Type>::CentroidSize(vtkPoints *points, const vnl_vector<Type> &centroi
     ///Accumulate the squared distance from centroid
     newScale += vtkMath::Distance2BetweenPoints(location.data_block(), centroid.data_block());
   }
-  
+
   if(norm)
     newScale /= points->GetNumberOfPoints();
 
@@ -272,7 +272,7 @@ Type* Math<Type>::Centroid(vtkPoints *points)
   for (vtkIdType j = 0; j < n; j ++)
   {
     Type location[3];
-    
+
     points->GetPoint(j, location);
 
     centroid[0] += location[0]/n; ///Sum
@@ -291,13 +291,13 @@ Type Math<Type>::CentroidSize(vtkPoints *points, const Type* centroid, bool norm
   for (vtkIdType j = 0; j < points->GetNumberOfPoints(); j ++)
   {
     Type location[3];
-    
+
     points->GetPoint(j, location);
 
     ///Accumulate the squared distance from centroid
     newScale += vtkMath::Distance2BetweenPoints(location, centroid);
   }
-  
+
   if(norm)
     newScale /= points->GetNumberOfPoints();
 
@@ -390,7 +390,7 @@ vnl_matrix<Type> Math<Type>::CovarianceMatrix(const vnl_matrix<Type> &data)
 
 #ifndef ITK_ONLY
 template<class Type>
-vnl_matrix<Type> Math<Type>::CovarianceMatrix(vtkPoints *points, const vnl_vector<Type> &centroid)
+vnl_matrix<Type> Math<Type>::CovarianceMatrix(vtkPoints *points, const vnl_vector_fixed<Type,3> &centroid)
 {
   const vnl_size_t n = points->GetNumberOfPoints();
   vnl_size_t norm = 1;

@@ -1,11 +1,6 @@
 ########################
 # SMILX APP CMAKE FILE #
 ########################
-IF(APPLE) #Assumes MAC OSX
-    cmake_minimum_required(VERSION 2.8.11) #for deplotqt module
-ELSE(APPLE)
-    cmake_minimum_required(VERSION 3.2.0)
-ENDIF(APPLE)
 
 PROJECT(smilx)
 #~ cmake_policy(SET CMP0053 NEW)
