@@ -45,7 +45,7 @@ endif()
 #                            a doc generator is also available
 # --enable-parent-ctor-heuristic: Enable heuristics to detect parent relationship on constructors,
 #                           this try to guess parent ownership based on the arguments of the constructors
-# --enable-pyside-extensionsL: This will generate code for Qt based classes, adding extra attributes,
+# --enable-pyside-extensions: This will generate code for Qt based classes, adding extra attributes,
 #                           like signal, slot;
 # --enable-return-value-heuristic: Similar as --enable-parent-ctor-heuristic this use some logic to guess
 #                           parent child relationship based on the returned argument

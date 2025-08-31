@@ -23,6 +23,7 @@
 #include <vtkCheckerboardWidget.h>
 #include <vtkImageCheckerboard.h>
 
+#include "milxQtRenderWindow.h"
 #include "milxQtImage.h"
 #include "milxQtModel.h"
 

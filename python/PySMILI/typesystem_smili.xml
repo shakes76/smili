@@ -32,8 +32,8 @@
     <!-- Externals like VTK to detect QWidget properly -->
     <!-- <object-type name="vtkSmartPointer" generate="no"/> -->
     <!-- <object-type name="vtkPoints"/> -->
-    <object-type name="QVTKWidget"/>
-    <object-type name="vtkPolyData"/>
+    <!-- <object-type name="QVTKWidget"/> -->
+    <!-- <object-type name="vtkPolyData"/> -->
     <!-- <object-type name="vtkImageData"/> -->
 
     <!-- our classes
@@ -43,7 +43,7 @@
             Here we only use 'object-type' since all our classes are derived from QWidget
         -->
     <object-type name="milxQtWindow"/>
-    <object-type name="milxQtUnifiedWindow"/>
+    <!-- <object-type name="milxQtUnifiedWindow"/> -->
     <object-type name="milxQtRenderWindow" >
         <!-- <object-type name="LabelledAction"/>-->
         <!-- this class contains a internal enum, so it should be declared

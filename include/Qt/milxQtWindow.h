@@ -19,6 +19,9 @@
 #define MILXQTSUBWINDOW_H
 
 #include <QtGui/QtGui>
+#include <QAction>
+#include <QMenu>
+#include <QWidget>
 //VTK Headers
 #include <vtkSmartPointer.h>
 #include <vtkPointPicker.h>
@@ -60,7 +63,7 @@ public:
         \brief The standard destructor
     */
     virtual ~milxQtWindow();
-    
+
     inline void setRenderWindow(vtkRenderWindow *win)
     {
     #if VTK_MAJOR_VERSION <= 8

@@ -3,7 +3,7 @@
 #
 set(PYTHON_BINDING_NAMESPACE "PySMILI")
 
-#~ find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 # Use provided python interpreter if given.
 if(NOT Python3_EXECUTABLE)
     if(WIN32 AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -36,7 +36,7 @@ endif()
 
 if(${PROJECT_NAME}_QT6)
   set(PYSIDE_MAJOR_VERSION "6")
-  set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
+  #set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
   set(QtWidgets_VERSION ${Qt6Widgets_VERSION})
 else()
   set(PYSIDE_MAJOR_VERSION "2")
@@ -44,17 +44,23 @@ else()
 endif()
 message("Using PySide ${PYSIDE_MAJOR_VERSION}")
 
-#~ set(Python_ROOT_DIR "C:/Users/uqscha22/.conda/envs/vtk")
 find_package(PySide${PYSIDE_MAJOR_VERSION} ${QtWidgets_VERSION} EXACT REQUIRED)
 find_package(Shiboken${PYSIDE_MAJOR_VERSION} REQUIRED)
 
-if(NOT PYTHON_BINDINGS_INSTALL_PREFIX)
-  set(${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+if(NOT ${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX)
+    # cmake-lint: disable=C0103
+    set(${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX
+        ${INSTALL_LIBRARY_DIR}
+        CACHE FILEPATH "Custom path to install python bindings."
+    )
 endif()
-#~ set(BINDINGS_DIR "${INSTALL_LIBRARY_DIR}/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
-#~ set(BINDINGS_DIR "${Python3_BINPATH}/../lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
-set(BINDINGS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX "${BINDINGS_DIR}")
+if(NOT WIN32)
+    set(Python3_VERSION_MAJORMINOR "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
+    set(BINDINGS_DIR "python${Python3_VERSION_MAJORMINOR}/site-packages/${PYTHON_BINDING_NAMESPACE}")
+else()
+    set(BINDINGS_DIR "site-packages/${PYTHON_BINDING_NAMESPACE}")
+endif()
+set(${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX "${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}/${BINDINGS_DIR}")
 
 # Enable rpaths so that the built shared libraries find their dependencies.
 set(CMAKE_SKIP_BUILD_RPATH FALSE)

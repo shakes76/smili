@@ -18,10 +18,10 @@ set(PySMILI_SRC
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_model_wrapper.h
@@ -31,8 +31,8 @@ set(PySMILI_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtwindow_wrapper.cpp
 #~     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/labelledaction_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtunifiedwindow_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtunifiedwindow_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtunifiedwindow_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtunifiedwindow_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtrenderwindow_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtrenderwindow_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtimage_wrapper.h
@@ -53,6 +53,7 @@ set(PySMILI_SRC
 # includes necessary to parse and build the classes specified on typesystem
 set(PySMILI_include_paths
     $<JOIN:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>,${PATH_SEP}>
+    ${MILXQT_INCLUDE_DIRS}
 )
 
 # A list of paths where shiboken should look for typesystem
@@ -62,10 +63,7 @@ set(PySMILI_typesystem_paths
 )
 
 # Include flags/path that will be set in 'target_include_directories'
-set(PySMILI_target_include_directories
-    ${VTK_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/src
-)
+set(PySMILI_target_include_directories ${CMAKE_SOURCE_DIR}/src)
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 set(PySMILI_target_link_libraries
@@ -88,7 +86,7 @@ set(PySMILI_DEPENDS
     # ${CMAKE_SOURCE_DIR}/include/milxModel.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtWindow.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtRenderWindow.h
-    ${CMAKE_SOURCE_DIR}/include/Qt/milxQtUnifiedWindow.h
+    #${CMAKE_SOURCE_DIR}/include/Qt/milxQtUnifiedWindow.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtModel.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtImage.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtFile.h
