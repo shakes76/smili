@@ -5,6 +5,7 @@
         PySide has one typesystem for each module, here we use only the widgets
         typesystem because it already include gui and core typesystem -->
     <load-typesystem name="typesystem_widgets.xml" generate="no"/>
+    <load-typesystem name="typesystem_openglwidgets.xml" generate="no"/>
 
     <!-- Our classes are declared in a namespace, so we should define this -->
     <namespace-type name="milx" visible="no">
@@ -33,7 +34,7 @@
     <object-type name="vtkSmartPointer" generate="no"/>
     <!-- <object-type name="vtkPoints"/> -->
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
-    <object-type name="QVTKOpenGLNativeWidget" generate="no"/>
+    <object-type name="QVTKOpenGLNativeWidget"/>
     <!-- <object-type name="vtkPolyData"/> -->
     <!-- <object-type name="vtkImageData"/> -->
 

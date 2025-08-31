@@ -26,10 +26,6 @@
   #include <QVTKOpenGLNativeWidget.h>
 #endif
 
-#if VTK_MAJOR_VERSION > 8
-  typedef QVTKOpenGLNativeWidget QVTKWidget;
-#endif
-
 //SMILI
 //#include "milxMath.h"
 // #include "milxModel.h"

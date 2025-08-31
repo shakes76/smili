@@ -136,6 +136,7 @@ if(PYSIDE6_FOUND)
                  ${PYSIDE_INCLUDE_DIR}/QtCore/
                  ${PYSIDE_INCLUDE_DIR}/QtGui/
                  ${PYSIDE_INCLUDE_DIR}/QtWidgets/
+                 ${PYSIDE_INCLUDE_DIR}/QtOpenGLWidgets/
                  ${Python3_INCLUDE_DIRS}
     )
 endif()

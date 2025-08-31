@@ -20,6 +20,8 @@ set(PySMILI_SRC
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.h
@@ -74,6 +76,7 @@ set(PySMILI_target_link_libraries
     Qt${Qt_VERSION_MAJOR}::Core
     Qt${Qt_VERSION_MAJOR}::Gui
     Qt${Qt_VERSION_MAJOR}::Widgets
+    Qt${Qt_VERSION_MAJOR}::OpenGLWidgets
     # PySide2::pyside2
     ${Python3_LIBRARIES}
 )

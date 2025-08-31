@@ -2,10 +2,11 @@
 Test the Python SMILI bindings with polydata
 '''
 import sys
-from PySMILI import vtkPolyData, milxQtModel, milxQtFile
-from PySide2 import QtWidgets
+from PySMILI import milxQtModel, milxQtFile
+# from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
-filename = "femur.vtk"
+filename = "Bunny.vtp"
 
 if __name__ == "__main__":
     #setup Qt app
@@ -16,20 +17,19 @@ if __name__ == "__main__":
     app.setApplicationName("PolyData Viewer")
 
     fileIO = milxQtFile()
-    polydata = vtkPolyData()
+    model = milxQtModel()
 
-    fileIO.openModel(filename, polydata)
+    fileIO.openModel(filename, model)
 
-    model = milxQtModel(mainWindow)
-    model.SetInput(polydata)
+    # model = milxQtModel(mainWindow)
+    # model.SetInput(polydata)
     model.generateModel()
     model.colourMapToJet()
-    model.setWindowTitle("Model")
+    # model.setWindowTitle("Model")
 
     mainWindow.setCentralWidget(model)
-    mainWindow.resize(256, 256)
+    mainWindow.resize(512, 512)
     mainWindow.show()
 
     app.exec_()
     print("Done")
-
