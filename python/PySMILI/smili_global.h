@@ -14,20 +14,21 @@
 //#include <itkImage.h>
 
 //VTK
-//#include <vtkSmartPointer.h>
+#include <vtkSmartPointer.h>
+#include <vtkDataObject.h>
 //#include <vtkPoints.h>
 //#include <vtkPointSet.h> //base of vtkPolyData
 // #include <vtkPolyData.h>
 //#include <vtkImageData.h>
-// #if VTK_MAJOR_VERSION <= 8
-//   #include <QVTKWidget.h>
-// #else
-//   #include <QVTKOpenGLNativeWidget.h>
-// #endif
+#if VTK_MAJOR_VERSION <= 8
+  #include <QVTKWidget.h>
+#else
+  #include <QVTKOpenGLNativeWidget.h>
+#endif
 
-// #if VTK_MAJOR_VERSION > 8
-//   typedef QVTKOpenGLNativeWidget QVTKWidget;
-// #endif
+#if VTK_MAJOR_VERSION > 8
+  typedef QVTKOpenGLNativeWidget QVTKWidget;
+#endif
 
 //SMILI
 //#include "milxMath.h"

@@ -30,9 +30,10 @@
     </namespace-type> -->
 
     <!-- Externals like VTK to detect QWidget properly -->
-    <!-- <object-type name="vtkSmartPointer" generate="no"/> -->
+    <object-type name="vtkSmartPointer" generate="no"/>
     <!-- <object-type name="vtkPoints"/> -->
-    <!-- <object-type name="QVTKWidget"/> -->
+    <!-- <object-type name="QVTKWidget" generate="no"/> -->
+    <object-type name="QVTKOpenGLNativeWidget" generate="no"/>
     <!-- <object-type name="vtkPolyData"/> -->
     <!-- <object-type name="vtkImageData"/> -->
 
@@ -42,7 +43,9 @@
             value-type: class that can be passed as value for functions
             Here we only use 'object-type' since all our classes are derived from QWidget
         -->
-    <object-type name="milxQtWindow"/>
+    <object-type name="milxQtWindow">
+        <include file-name="pysidesignal.h" location="global"/>
+    </object-type>
     <!-- <object-type name="milxQtUnifiedWindow"/> -->
     <object-type name="milxQtRenderWindow" >
         <!-- <object-type name="LabelledAction"/>-->

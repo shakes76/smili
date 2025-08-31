@@ -155,7 +155,7 @@ macro(
         set_target_properties(${TARGET_NAME} PROPERTIES SUFFIX ".pyd")
     endif()
 
-    target_include_directories(${TARGET_NAME} PUBLIC ${targetIncludeDirs})
+    target_include_directories(${TARGET_NAME} PUBLIC ${targetIncludeDirs} ${PYSIDE_INCLUDE_DIR} ${SHIBOKEN_INCLUDE_DIR})
 
     target_link_libraries(${TARGET_NAME} ${targetLinkLibraries} PySide6::pyside6 Shiboken6::libshiboken)
     target_compile_definitions(${TARGET_NAME} PRIVATE Py_LIMITED_API=0x03050000)

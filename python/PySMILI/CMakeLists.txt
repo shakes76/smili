@@ -124,7 +124,7 @@ install(
     ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
 )
 if(NOT WIN32)
-  install(
+    install(
     FILES
         $<TARGET_LINKER_FILE:milx-SMILI>
         $<TARGET_SONAME_FILE:milx-SMILI>
