@@ -21,15 +21,13 @@ if __name__ == "__main__":
 
     fileIO.openModel(filename, model)
 
-    # model = milxQtModel(mainWindow)
-    # model.SetInput(polydata)
     model.generateModel()
     model.colourMapToJet()
-    # model.setWindowTitle("Model")
+    model.setWindowTitle("Model")
 
     mainWindow.setCentralWidget(model)
     mainWindow.resize(512, 512)
     mainWindow.show()
 
-    app.exec_()
+    app.exec()
     print("Done")

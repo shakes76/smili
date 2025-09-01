@@ -20,9 +20,16 @@
     <primitive-type name="SideBar"/>-->
 
     <!-- Some public enum and flags -->
-    <!-- <enum-type name="ViewType"/>
+    <enum-type name="vtkTypesDataObject"/>
+    <enum-type name="vnl_matrix_type"/>
+    <enum-type name="vtkEventDataDevice"/>
+    <enum-type name="vtkEventDataDeviceInput"/>
+    <enum-type name="vtkEventDataAction"/>
+    <enum-type name="VTKCellType"/>
+    <enum-type name="ViewType"/>
     <enum-type name="ViewerType"/>
-    <enum-type name="OrientationType"/>-->
+    <enum-type name="OrientationType"/>
+    <enum-type name="GlyphType"/>
 
     <!-- Externals like ITK to detect Arrays and Images -->
     <namespace-type name="itk" visible="no">
@@ -31,7 +38,8 @@
     </namespace-type> -->
 
     <!-- Externals like VTK to detect QWidget properly -->
-    <object-type name="vtkSmartPointer" generate="no"/>
+    <!-- <object-type name="vtkSmartPointer" generate="no"/>
+    <object-type name="vtkMatrix4x4" generate="no"/> -->
     <!-- <object-type name="vtkPoints"/> -->
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
     <object-type name="QVTKOpenGLNativeWidget"/>
