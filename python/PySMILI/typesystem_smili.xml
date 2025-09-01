@@ -40,11 +40,18 @@
     <!-- Externals like VTK to detect QWidget properly -->
     <!-- <object-type name="vtkSmartPointer" generate="no"/>
     <object-type name="vtkMatrix4x4" generate="no"/> -->
-    <!-- <object-type name="vtkPoints"/> -->
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
     <object-type name="QVTKOpenGLNativeWidget"/>
-    <!-- <object-type name="vtkPolyData"/> -->
+    <object-type name="vtkObject"/>
+    <object-type name="vtkPolyData"/>
+    <object-type name="vtkPoints"/>
     <!-- <object-type name="vtkImageData"/> -->
+
+    <!-- Reject classes or functions -->
+    <!-- <rejection class="vtkPolyData" field-name="GetCellBounds" argument-type="*" /> -->
+    <rejection class="*" function-name="GetCellBounds"/>
+    <rejection class="*" function-name="GetCell"/>
+    <rejection class="*" function-name="GetCellPoints"/>
 
     <!-- our classes
             For class we can use two types:

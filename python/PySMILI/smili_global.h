@@ -17,9 +17,10 @@
 #include <vtkSmartPointer.h>
 // #include <vtkMatrix4x4.h>
 // #include <vtkDataObject.h>
-//#include <vtkPoints.h>
+#include <vtkObject.h>
+#include <vtkPoints.h>
 //#include <vtkPointSet.h> //base of vtkPolyData
-// #include <vtkPolyData.h>
+#include <vtkPolyData.h>
 // #include <vtkImageData.h>
 #if VTK_MAJOR_VERSION <= 8
   #include <QVTKWidget.h>
