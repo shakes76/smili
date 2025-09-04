@@ -7,7 +7,6 @@
     <!-- <load-typesystem name="shiboken_builtins.xml" /> -->
     <!-- <load-typesystem name="shiboken_containers.xml" /> -->
     <load-typesystem name="typesystem_widgets.xml" generate="no" />
-    <load-typesystem name="typesystem_openglwidgets.xml" generate="no" />
 
     <!-- Our classes are declared in a namespace, so we should define this -->
     <namespace-type name="milx" visible="no">
@@ -49,9 +48,9 @@
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
     <object-type name="vtkPolyData" />
-    <object-type name="vtkPointSet" />
-    <object-type name="vtkPoints" />
-    <object-type name="vtkImageData" />
+    <!-- <object-type name="vtkPointSet" /> -->
+    <!-- <object-type name="vtkPoints" /> -->
+    <!-- <object-type name="vtkImageData" /> -->
     <!-- <object-type name="vtkDataSet"/> -->
     <object-type name="vtkDataObject" />
 
@@ -72,7 +71,7 @@
     <rejection class="*" function-name="GetDimensions" />
     <rejection class="*" function-name="GenerateGhostArray" />
 
-    <rejection
+    <!-- <rejection
         class="vtkImageData"
         function-name="GetOrigin"
         argument-type="double[3]"
@@ -94,6 +93,11 @@
     />
     <rejection
         class="vtkImageData"
+        function-name="GetDimensions"
+        argument-type="int[3]"
+    />
+    <rejection
+        class="vtkImageData"
         function-name="SetDimensions"
         argument-type="const int[3]"
     />
@@ -107,6 +111,11 @@
         function-name="GetScalarIndex"
         argument-type="int[3]"
     />
+    <rejection
+        class="vtkPoints"
+        function-name="GetBounds"
+        argument-type="double[6]"
+    /> -->
     <rejection
         class="vtkDataSet"
         function-name="GetScalarRange"

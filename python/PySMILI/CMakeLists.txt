@@ -5,6 +5,23 @@
 # Create a library called "milxQt" which includes the source files.
 include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 
+if(PYSIDE_MAJOR_VERSION GREATER "2")
+    set(PySMILI_pyside6_link_libraries Qt${Qt_VERSION_MAJOR}::OpenGLWidgets)
+    set(PySMILI_pyside6_src 
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.h
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.h
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpointset_wrapper.h
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpointset_wrapper.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.h
+        ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.cpp
+    )
+    set(PySMILI_pyside_xml ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_pyside6_smili.xml)
+else()
+    set(PySMILI_pyside_xml ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_smili.xml)
+endif()
+
 # Auto-Genereate files every class will have his cpp/h files
 set(PySMILI_SRC
     # individual classes, must be lower case !!!
@@ -24,20 +41,13 @@ set(PySMILI_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataobject_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpointset_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpointset_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkopenglnativewidget_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
+    ${PySMILI_pyside6_src}
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_math_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milx_model_wrapper.h
@@ -90,7 +100,7 @@ set(PySMILI_target_link_libraries
     Qt${Qt_VERSION_MAJOR}::Core
     Qt${Qt_VERSION_MAJOR}::Gui
     Qt${Qt_VERSION_MAJOR}::Widgets
-    Qt${Qt_VERSION_MAJOR}::OpenGLWidgets
+    ${PySMILI_pyside6_link_libraries}
     # PySide2::pyside2
     ${Python3_LIBRARIES}
 )
@@ -119,7 +129,7 @@ create_python_bindings(
   "${PySMILI_target_include_directories}"
   "${PySMILI_target_link_libraries}"
   ${CMAKE_CURRENT_SOURCE_DIR}/smili_global.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_smili.xml
+  ${PySMILI_pyside_xml}
   "${PySMILI_DEPENDS}"
   ${CMAKE_CURRENT_BINARY_DIR}
 )
