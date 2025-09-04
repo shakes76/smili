@@ -209,7 +209,12 @@ void milxQtModel::SetInput(const std::vector<double>& inputPoints)
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
         points->SetData(pointsArray);
 
-    SetPoints(points);
+    //SetPoints(points);
+    // Create the vtkPolyData object and set the points.
+    vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+        polyData->SetPoints(points);
+
+    SetInput(polyData);
 }
 
 void milxQtModel::SetPoints(vtkSmartPointer<vtkPoints> modelPoints)
