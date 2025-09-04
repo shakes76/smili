@@ -20,9 +20,10 @@
 // #include <vtkObjectBase.h>s
 // #include <vtkObject.h>
 #include <vtkPoints.h>
-// #include <vtkDataSet.h> //base of vtkPointSet
+#include <vtkDataObject.h> //base of vtkDataSet
 #include <vtkPointSet.h> //base of vtkPolyData
 #include <vtkPolyData.h>
+// #include <vtkDataSet.h> //base of vtkImageData
 #include <vtkImageData.h>
 #if VTK_MAJOR_VERSION <= 8
   #include <QVTKWidget.h>

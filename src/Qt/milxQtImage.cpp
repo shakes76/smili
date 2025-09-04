@@ -244,6 +244,42 @@ void milxQtImage::setData(vtkSmartPointer<vtkImageData> newImg)
     //~ histogram(256, 0, 255, false);
 }
 
+void milxQtImage::setData(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing)
+{
+    //Get a pointer to the raw data
+    const float* dataPtr = inputImage.data();
+    size_t numElements = inputImage.size();
+    // std::cout << "Vector size: " << numElements << std::endl;
+    printInfo("Vector size "+QString::number(numElements)+" to convert to ("+QString::number(width)+"x"+QString::number(height)+"x"+QString::number(depth)+")");
+
+    // Verify the vector size matches the dimensions.
+    if (numElements != static_cast<size_t>(width * height * depth)) {
+        printError("Vector data size does not match image dimensions. Ignoring.");
+        return;
+    }
+
+    // Create the vtkImageData object and properties
+    vtkSmartPointer<vtkImageData> image = vtkSmartPointer<vtkImageData>::New();
+        image->SetDimensions(width, height, depth);
+        image->SetExtent(0, width - 1, 0, height - 1, 0, depth - 1);
+        image->SetSpacing(spacing, spacing, spacing);
+        image->SetOrigin(0.0, 0.0, 0.0);
+
+    // Create a vtkFloatArray and use SetVoidArray to link to the vector's data.
+    vtkSmartPointer<vtkFloatArray> scalars = vtkSmartPointer<vtkFloatArray>::New();
+        scalars->SetNumberOfComponents(1);
+        scalars->SetNumberOfTuples(numElements);
+
+    // Allocate the vector data to the VTK Array
+    const int save = 1; //1 is to keep the class from deleting the array when it cleans up or reallocates memory
+    scalars->SetVoidArray(const_cast<float*>(dataPtr), numElements, save);
+
+    // Set the scalars of the vtkImageData
+    image->GetPointData()->SetScalars(scalars);
+
+    setData(image);
+}
+
 void milxQtImage::setDisplayData(QPointer<milxQtImage> newImg)
 {
     if(newImg->is8BitImage())

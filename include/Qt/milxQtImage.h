@@ -284,6 +284,11 @@ public:
     */
     void setData(const unsigned slice, vnl_matrix<double> &newData);
     /*!
+        \fn milxQtImage::setData(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0)
+        \brief Assigns the STD vector to image, suitable to use in Python when using bindings. You will need to call generate image after this.
+    */
+    void setData(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0);
+    /*!
       \fn milxQtImage::setDisplayData(QPointer<milxQtImage> newImg)
       \brief Shares the milxQtImage data to current image. You will need to call generate image after this.
 

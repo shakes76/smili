@@ -2,7 +2,7 @@
 Test the Python SMILI bindings with polydata
 '''
 import sys
-from PySMILI import vtkPoints, vtkPolyData, milxQtModel, milxQtFile
+from PySMILI import vtkPolyData, milxQtModel, milxQtFile
 # from PySide2 import QtWidgets
 from PySide6 import QtWidgets
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     fileIO = milxQtFile()
 
-    # 4. Create vtkPolyData and set its points and cells
+    # Load vtkPolyData
     polydata = vtkPolyData()
     fileIO.openModel(filename, polydata)
 

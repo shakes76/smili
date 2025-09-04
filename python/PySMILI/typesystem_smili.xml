@@ -1,11 +1,13 @@
-<?xml version="1.0"?>
+<?xml version="1.0" ?>
 <!-- The package name -->
 <typesystem package="PySMILI">
     <!-- Pre-defined typesystem that contains types used by our class
         PySide has one typesystem for each module, here we use only the widgets
         typesystem because it already include gui and core typesystem -->
-    <load-typesystem name="typesystem_widgets.xml" generate="no"/>
-    <load-typesystem name="typesystem_openglwidgets.xml" generate="no"/>
+    <!-- <load-typesystem name="shiboken_builtins.xml" /> -->
+    <!-- <load-typesystem name="shiboken_containers.xml" /> -->
+    <load-typesystem name="typesystem_widgets.xml" generate="no" />
+    <load-typesystem name="typesystem_openglwidgets.xml" generate="no" />
 
     <!-- Our classes are declared in a namespace, so we should define this -->
     <namespace-type name="milx" visible="no">
@@ -20,16 +22,16 @@
     <primitive-type name="SideBar"/>-->
 
     <!-- Some public enum and flags -->
-    <enum-type name="vtkTypesDataObject"/>
-    <enum-type name="vnl_matrix_type"/>
-    <enum-type name="vtkEventDataDevice"/>
-    <enum-type name="vtkEventDataDeviceInput"/>
-    <enum-type name="vtkEventDataAction"/>
-    <enum-type name="VTKCellType"/>
-    <enum-type name="ViewType"/>
-    <enum-type name="ViewerType"/>
-    <enum-type name="OrientationType"/>
-    <enum-type name="GlyphType"/>
+    <enum-type name="vtkTypesDataObject" />
+    <enum-type name="vnl_matrix_type" />
+    <enum-type name="vtkEventDataDevice" />
+    <enum-type name="vtkEventDataDeviceInput" />
+    <enum-type name="vtkEventDataAction" />
+    <enum-type name="VTKCellType" />
+    <enum-type name="ViewType" />
+    <enum-type name="ViewerType" />
+    <enum-type name="OrientationType" />
+    <enum-type name="GlyphType" />
 
     <!-- Externals like ITK to detect Arrays and Images -->
     <namespace-type name="itk" visible="no">
@@ -43,38 +45,73 @@
     <object-type name="vtkSmartPointer"/>
     <object-type name="vtkMatrix4x4" generate="no"/> -->
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
-    <object-type name="QVTKOpenGLNativeWidget"/>
+    <object-type name="QVTKOpenGLNativeWidget" />
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
-    <object-type name="vtkPolyData"/>
-    <object-type name="vtkPointSet"/>
+    <object-type name="vtkPolyData" />
+    <object-type name="vtkPointSet" />
+    <object-type name="vtkPoints" />
+    <object-type name="vtkImageData" />
     <!-- <object-type name="vtkDataSet"/> -->
-    <object-type name="vtkPoints"/>
-    <object-type name="vtkImageData"/>
+    <object-type name="vtkDataObject" />
 
     <!-- <overload-removal type="long long int" replaces="int"/> -->
 
     <!-- Reject classes or functions -->
     <!-- <rejection class="vtkPolyData" field-name="GetCellBounds" argument-type="*" /> -->
-    <rejection class="*" function-name="GetCellBounds"/>
-    <rejection class="*" function-name="GetCell"/>
-    <rejection class="*" function-name="GetCellPoints"/>
-    <rejection class="*" function-name="GetPoint"/>
-    <rejection class="*" function-name="FindPoint"/>
-    <rejection class="*" function-name="ComputeCellId"/>
-    <rejection class="*" function-name="ComputePointId"/>
-    <rejection class="*" function-name="CopyAndCastFrom"/>
-    <rejection class="*" function-name="GetScalarPointer"/>
-    <rejection class="*" function-name="GetIncrements"/>
-    <rejection class="*" function-name="GetDimensions"/>
+    <rejection class="*" function-name="GetCellBounds" />
+    <rejection class="*" function-name="GetCell" />
+    <rejection class="*" function-name="GetCellPoints" />
+    <rejection class="*" function-name="GetPoint" />
+    <rejection class="*" function-name="FindPoint" />
+    <rejection class="*" function-name="ComputeCellId" />
+    <rejection class="*" function-name="ComputePointId" />
+    <rejection class="*" function-name="CopyAndCastFrom" />
+    <rejection class="*" function-name="GetScalarPointer" />
+    <rejection class="*" function-name="GetIncrements" />
+    <rejection class="*" function-name="GetDimensions" />
+    <rejection class="*" function-name="GenerateGhostArray" />
 
-    <rejection class="vtkImageData" function-name="GetOrigin" argument-type="double[3]"/>
-    <rejection class="vtkImageData" function-name="SetOrigin" argument-type="const double[3]"/>
-    <rejection class="vtkImageData" function-name="SetExtent" argument-type="int[6]"/>
-    <rejection class="vtkImageData" function-name="SetDirectionMatrix" argument-type="const double[9]"/>
-    <rejection class="vtkImageData" function-name="SetDimensions" argument-type="const int[3]"/>
-    <rejection class="vtkImageData" function-name="TransformPhysicalPlaneToContinuousIndex" argument-type="double[4]"/>
-    <rejection class="vtkImageData" function-name="GetScalarIndex" argument-type="int[3]"/>
+    <rejection
+        class="vtkImageData"
+        function-name="GetOrigin"
+        argument-type="double[3]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="SetOrigin"
+        argument-type="const double[3]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="SetExtent"
+        argument-type="int[6]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="SetDirectionMatrix"
+        argument-type="const double[9]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="SetDimensions"
+        argument-type="const int[3]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="TransformPhysicalPlaneToContinuousIndex"
+        argument-type="double[4]"
+    />
+    <rejection
+        class="vtkImageData"
+        function-name="GetScalarIndex"
+        argument-type="int[3]"
+    />
+    <rejection
+        class="vtkDataSet"
+        function-name="GetScalarRange"
+        argument-type="double[2]"
+    />
 
     <!-- our classes
             For class we can use two types:
@@ -83,10 +120,10 @@
             Here we only use 'object-type' since all our classes are derived from QWidget
         -->
     <object-type name="milxQtWindow">
-        <include file-name="pysidesignal.h" location="global"/>
+        <include file-name="pysidesignal.h" location="global" />
     </object-type>
     <!-- <object-type name="milxQtUnifiedWindow"/> -->
-    <object-type name="milxQtRenderWindow" >
+    <object-type name="milxQtRenderWindow">
         <!-- <object-type name="LabelledAction"/>-->
         <!-- this class contains a internal enum, so it should be declared
                 inside of the object-type -->
@@ -94,9 +131,16 @@
         <enum-type name="ViewerType"/>
         <enum-type name="OrientationType"/> -->
     </object-type>
-    <object-type name="milxQtModel"/>
-    <object-type name="milxQtImage"/>
-    <object-type name="milxQtFile"/>
-    <object-type name="milxQtPlot"/>
+    <object-type name="milxQtModel" />
+    <object-type name="milxQtImage">
+        <!-- <function
+            name="setData"
+            signature="setData(const std::vector&lt;double&gt;&amp; inputImage, const int width, const int height, const int depth, const double spacing)"
+        >
+            <argument index="0" name="inputImage" />
+        </function> -->
+    </object-type>
+    <object-type name="milxQtFile" />
+    <object-type name="milxQtPlot" />
     <!-- <object-type name="milxQtMain"/> -->
 </typesystem>
