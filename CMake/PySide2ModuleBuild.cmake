@@ -125,7 +125,7 @@ macro(CREATE_PYTHON_BINDINGS
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Running generator for ${LIBRARY_NAME} binding...")
 
-        set(TARGET_NAME "Py${LIBRARY_NAME}")
+        set(TARGET_NAME "${LIBRARY_NAME}")
         set(MODULE_NAME "${LIBRARY_NAME}")
         add_library(${TARGET_NAME} MODULE ${OUTPUT_SOURCES})
 
