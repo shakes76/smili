@@ -184,6 +184,34 @@ void milxQtModel::SetInputPointSet(vtkSmartPointer<vtkPointSet> mesh)
 //    appended = true;
 //}
 
+void milxQtModel::SetInput(const std::vector<double>& inputPoints)
+{
+    //Get a pointer to the raw data
+    const double* dataPtr = inputPoints.data();
+    size_t numElements = inputPoints.size();
+    size_t numComponents = 3;
+    printInfo("Vector size "+QString::number(numElements)+" to convert to 3D points");
+
+    // Create vtkDoubleArray for point coordinates.
+    vtkSmartPointer<vtkDoubleArray> pointsArray = vtkSmartPointer<vtkDoubleArray>::New();
+
+    // Set the number of components to 3 for 3D points
+    pointsArray->SetNumberOfComponents(numComponents);
+
+    // Set the total number of values.
+    pointsArray->SetNumberOfTuples(numElements);
+
+    // Use SetVoidArray to link to the NumPy data.
+    const int save = 1; //1 is to keep the class from deleting the array when it cleans up or reallocates memory
+    pointsArray->SetVoidArray(const_cast<double*>(dataPtr), numElements * numComponents, save);
+
+    // Create vtkPoints object and set array as its data
+    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+        points->SetData(pointsArray);
+
+    SetPoints(points);
+}
+
 void milxQtModel::SetPoints(vtkSmartPointer<vtkPoints> modelPoints)
 {
     model.SetPoints(modelPoints);

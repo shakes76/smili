@@ -170,6 +170,13 @@ public:
     */
 //    void SetInput(const int index, vtkSmartPointer<vtkPolyData> mesh);
     /*!
+        \fn milxQtImage::SetInput(const std::vector<double>& inputPoints)
+        \brief Assigns the STD vector to model, suitable to use in Python when using bindings. You will need to call generate model after this.
+
+        Useful for importing Numpy 3-tuple (3D real-space coordinate) arrays into SMILI/VTK. Assumes data is ravelled (i.e. numpy.ravel is applied to array) so that its a 1D array.
+    */
+    void SetInput(const std::vector<double>& inputPoints);
+    /*!
         \fn milxQtModel::SetPoints(vtkSmartPointer<vtkPoints> modelPoints)
         \brief Sets the points for the model to be generated. Must pass a vtkPoints objects, which is easy to use.
     */
@@ -179,9 +186,9 @@ public:
         \brief Insert a point for the model to be generated. Use repeatedly for all points.
     */
     inline void InsertNextPoint(double x, double y, double z)
-    {   
+    {
         model.InsertNextPoint(x, y, z);
-        loaded = true;    
+        loaded = true;
     }
     /*!
         \fn milxQtModel::SetPoint(vtkIdType id, double x, double y, double z)

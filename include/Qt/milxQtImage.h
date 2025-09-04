@@ -213,6 +213,14 @@ public:
         setData(newImg, flipY);
     }
     /*!
+        \fn milxQtImage::SetInput(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0)
+        \brief Assigns the STD vector to image, suitable to use in Python when using bindings, alias for setData().
+    */
+    inline void SetInput(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0)
+    {
+        setData(inputImage, width, height, depth, spacing);
+    }
+    /*!
 		\fn milxQtImage::SetTransform(vtkSmartPointer<vtkTransform> transform)
 		\brief Sets the transform for the image that will be generated. Must pass a vtkTransform objects, which is easy to use.
 
@@ -286,6 +294,8 @@ public:
     /*!
         \fn milxQtImage::setData(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0)
         \brief Assigns the STD vector to image, suitable to use in Python when using bindings. You will need to call generate image after this.
+
+        Useful for importing Numpy 3D arrays into SMILI/VTK. Assumes data is ravelled (i.e. numpy.ravel is applied to array) so that its a 1D array.
     */
     void setData(const std::vector<float>& inputImage, const int width, const int height, const int depth, const double spacing = 1.0);
     /*!
