@@ -7,7 +7,7 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
 
 if(PYSIDE_MAJOR_VERSION GREATER "2")
     set(PySMILI_pyside6_link_libraries Qt${Qt_VERSION_MAJOR}::OpenGLWidgets)
-    set(PySMILI_pyside6_src 
+    set(PySMILI_pyside6_src
         ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.h
         ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkimagedata_wrapper.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpoints_wrapper.h
@@ -69,8 +69,8 @@ set(PySMILI_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtfile_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtplot_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtplot_wrapper.cpp
-    # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmain_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmain_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmain_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/milxqtmain_wrapper.cpp
     # global module wrapper
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_module_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_python.h

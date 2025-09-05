@@ -43,6 +43,6 @@
 #include "milxQtImage.h"
 #include "milxQtFile.h"
 #include "milxQtPlot.h"
-// #include "milxQtMain.h"
+#include "milxQtMain.h"
 
 #endif // Define PYTHON_BINDINGS
