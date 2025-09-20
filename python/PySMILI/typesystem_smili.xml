@@ -151,5 +151,5 @@
     </object-type>
     <object-type name="milxQtFile" />
     <object-type name="milxQtPlot" />
-    <!-- <object-type name="milxQtMain"/> -->
+    <object-type name="milxQtMain"/>
 </typesystem>
