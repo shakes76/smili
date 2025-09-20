@@ -403,6 +403,11 @@ public:
         return imageData;
     }
     /*!
+        \fn milxQtImage::getData()
+        \brief Returns the image data as a std vector. Support Numpy in bindings.
+    */
+    std::vector<double> getData();
+    /*!
         \fn milxQtImage::GetCharImage()
         \brief Returns the internal unsigned char image data.
     */

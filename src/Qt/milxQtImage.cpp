@@ -396,6 +396,27 @@ void milxQtImage::SetTransform(vtkSmartPointer<vtkTransform> newTransform)
     }
 }
 
+std::vector<double> milxQtImage::getData()
+{
+    //Get the scalar data array
+    vtkDataArray* scalars = GetOutput()->GetPointData()->GetScalars();
+
+    //Get the number of elements
+    vtkIdType numElements = scalars->GetNumberOfTuples() * scalars->GetNumberOfComponents();
+
+    //Get the raw void pointer to the data
+    void* voidPtr = scalars->GetVoidPointer(0);
+
+    //Cast the void pointer to the expected data type (double*)
+    double* dataPtr = static_cast<double*>(voidPtr);
+
+    //Construct a std::vector from the raw pointer
+    //The vector shares the same memory as the VTK array
+    std::vector<double> dataView(dataPtr, dataPtr + numElements);
+
+    return dataView;
+}
+
 void milxQtImage::generateImage(const bool quietly)
 {
     if (loaded)
