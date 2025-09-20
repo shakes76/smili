@@ -403,8 +403,18 @@ public:
         return imageData;
     }
     /*!
+        \fn milxQtImage::get8BitData()
+        \brief Returns the image data as a unsigned char std vector. Support in bindings.
+    */
+    std::vector<charPixelType> get8BitData();
+    /*!
+        \fn milxQtImage::getFloatData()
+        \brief Returns the image data as a float std vector. Support in bindings.
+    */
+    std::vector<floatPixelType> getFloatData();
+    /*!
         \fn milxQtImage::getData()
-        \brief Returns the image data as a std vector. Support Numpy in bindings.
+        \brief Returns the image data as a double std vector, forces data to double. Support in bindings.
     */
     std::vector<double> getData();
     /*!
@@ -466,7 +476,7 @@ public:
         return viewer->GetImageActor();
     }
     /*!
-    \fn milxQtImage::GetCursorActor(vtkResliceCursor *newCursor)
+    \fn milxQtImage::SetCursor(vtkResliceCursor *newCursor)
     \brief Set the internal cursor used for display.
     */
 #if(VTK_MAJOR_VERSION > 5)
@@ -481,7 +491,7 @@ public:
     }
 #endif
     /*!
-    \fn milxQtImage::GetCursorActor()
+    \fn milxQtImage::GetCursor()
     \brief Get the internal cursor used for display.
     */
 #if(VTK_MAJOR_VERSION > 5)
@@ -518,6 +528,27 @@ public:
     {
         return viewer->GetCursorActor();
     }
+    /*!
+        \fn milxQtImage::GetExtent()
+        \brief Returns the extent of the image data, i.e the data extents.
+    */
+    inline int* GetExtent()
+    {
+        return GetOutput()->GetExtent();
+    }
+    /*!
+        \fn milxQtImage::GetDimensions()
+        \brief Returns the dimensions of the image data, i.e the data dimensions/size.
+    */
+    inline int* GetDimensions()
+    {
+        return GetOutput()->GetDimensions();
+    }
+    /*!
+        \fn milxQtImage::shape()
+        \brief Similar to GetDimensions, but returns vector of dimensions of the data
+    */
+    std::vector<int> shape();
     /*!
         \fn milxQtImage::GetDisplayExtent()
         \brief Returns the current display extent of the image data, i.e the current slice dimensions/extents.

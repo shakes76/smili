@@ -7,8 +7,6 @@ from PySMILI import milxQtImage
 # from PySide2 import QtWidgets
 from PySide6 import QtWidgets
 
-filename = "vase_1comp.vti"
-
 if __name__ == "__main__":
     #setup Qt app
     app = QtWidgets.QApplication(sys.argv)

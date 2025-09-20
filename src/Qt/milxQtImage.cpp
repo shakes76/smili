@@ -25,6 +25,7 @@
 //ITK
 //#include <itkImageToHistogramFilter.h>
 //VTK Libraries
+#include <milxGlobal.h>
 #include <vtkCamera.h>
 #include <vtkImageMagnify.h>
 #include <vtkRenderer.h>
@@ -396,25 +397,77 @@ void milxQtImage::SetTransform(vtkSmartPointer<vtkTransform> newTransform)
     }
 }
 
+std::vector<charPixelType> milxQtImage::get8BitData()
+{
+    //Check image type, and convert to double if necessary
+    if(!is8BitImage())
+    {
+        printError("Image Data is not 8-bit data. Ignoring operation.");
+        return std::vector<charPixelType>();
+    }
+
+    //Get the image buffer's pointer and size
+    const charPixelType* bufferPointer = GetCharImage()->GetBufferPointer();
+    size_t bufferSize = GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels();
+
+    // Create a std::vector from the buffer pointer and size
+    std::vector<charPixelType> imageVector(bufferPointer, bufferPointer + bufferSize);
+
+    return imageVector;
+}
+
+std::vector<floatPixelType> milxQtImage::getFloatData()
+{
+    //Check image type, and convert to double if necessary
+    if(!isFloatingPointImage())
+    {
+        printError("Image Data is not floating point data. Ignoring operation.");
+        return std::vector<floatPixelType>();
+    }
+
+    //Get the image buffer's pointer and size
+    const floatPixelType* bufferPointer = GetFloatImage()->GetBufferPointer();
+    size_t bufferSize = GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels();
+
+    // Create a std::vector from the buffer pointer and size
+    std::vector<floatPixelType> imageVector(bufferPointer, bufferPointer + bufferSize);
+
+    return imageVector;
+}
+
 std::vector<double> milxQtImage::getData()
 {
+    //cast the data to float array.
+    vtkSmartPointer<vtkImageCast> castFilter = vtkSmartPointer<vtkImageCast>::New();
+        castFilter->SetInputData(GetOutput());
+        castFilter->SetOutputScalarTypeToFloat();
+        castFilter->Update();
+
     //Get the scalar data array
-    vtkDataArray* scalars = GetOutput()->GetPointData()->GetScalars();
+    vtkDataArray* scalars = castFilter->GetOutput()->GetPointData()->GetScalars();
+
+    //Cast the vtkDataArray to the concrete type vtkFloatArray
+    //This allows us to use the GetPointer method.
+    vtkFloatArray* floatArray = vtkFloatArray::SafeDownCast(scalars);
 
     //Get the number of elements
-    vtkIdType numElements = scalars->GetNumberOfTuples() * scalars->GetNumberOfComponents();
+    vtkIdType numElements = floatArray->GetNumberOfTuples() * floatArray->GetNumberOfComponents();
 
-    //Get the raw void pointer to the data
-    void* voidPtr = scalars->GetVoidPointer(0);
-
-    //Cast the void pointer to the expected data type (double*)
-    double* dataPtr = static_cast<double*>(voidPtr);
+    //Get the raw pointer to the data from the vtkFloatArray.
+    float* dataPtr = floatArray->GetPointer(0);
 
     //Construct a std::vector from the raw pointer
     //The vector shares the same memory as the VTK array
     std::vector<double> dataView(dataPtr, dataPtr + numElements);
 
     return dataView;
+}
+
+std::vector<int> milxQtImage::shape()
+{
+    int* dims = GetDimensions();
+    std::vector<int> dims_vector(dims, dims + milx::imgDimension);
+    return dims_vector;
 }
 
 void milxQtImage::generateImage(const bool quietly)
