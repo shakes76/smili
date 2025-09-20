@@ -285,14 +285,27 @@ void milxQtModel::SetGraph(vtkSmartPointer<vtkMutableUndirectedGraph> graph)
 }
 
 //Gets
-vtkSmartPointer<vtkPolyData> milxQtModel::GetPolyDataInput()
+std::vector<double> milxQtModel::getData()
 {
-    return model.PreviousResult();
-}
+    //Get the vtkDataArray from the points
+    vtkDataArray* dataArray = GetPoints()->GetData();
 
-vtkSmartPointer<vtkPolyData> milxQtModel::GetOutput()
-{
-    return model.Result();
+    //Cast the vtkDataArray to the concrete type vtkDoubleArray
+    vtkDoubleArray* doubleArray = vtkDoubleArray::SafeDownCast(dataArray);
+
+    //Get the raw void pointer
+    void* voidPtr = doubleArray->GetVoidPointer(0);
+
+    //Cast the void pointer to the expected data type (double*)
+    double* dataPtr = static_cast<double*>(voidPtr);
+
+    //Get the total number of elements
+    vtkIdType numElements = doubleArray->GetNumberOfTuples() * doubleArray->GetNumberOfComponents();
+
+    //Construct a std::vector from the raw pointer as a shallow copy
+    std::vector<double> dataView(dataPtr, dataPtr + numElements);
+
+    return dataView;
 }
 
 //Operators

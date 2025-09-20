@@ -252,12 +252,23 @@ public:
 
         This is different to VTK in the sense that it may return a PolyData set by SetGraph() or SetInput().
     */
-    vtkSmartPointer<vtkPolyData> GetPolyDataInput();
+    inline vtkSmartPointer<vtkPolyData> GetPolyDataInput()
+    {
+        return model.PreviousResult();
+    }
     /*!
         \fn milxQtModel::GetOutput()
         \brief Returns the mesh data object (PolyData) used internally VTK style.
     */
-    vtkSmartPointer<vtkPolyData> GetOutput();
+    inline vtkSmartPointer<vtkPolyData> GetOutput()
+    {
+        return model.Result();
+    }
+    /*!
+        \fn milxQtModel::getData()
+        \brief Returns the model data as a std vector. Support Numpy in bindings.
+    */
+    std::vector<double> getData();
 #if VTK_MAJOR_VERSION <=5
     /*!
         \fn milxQtModel::GetOutputPort()
