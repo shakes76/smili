@@ -8,7 +8,8 @@ from PySMILI import milxQtImage, milxQtFile
 from PySide6 import QtWidgets
 import matplotlib.pyplot as plt
 
-filename = "vase_1comp.vti"
+# filename = "vase_1comp.vti"
+filename = "brainweb165a10f17.mha" #ITKData
 
 if __name__ == "__main__":
     #setup Qt app
@@ -26,8 +27,8 @@ if __name__ == "__main__":
     image.generateImage()
     image.setWindowTitle("Image")
 
-    image_array = image.getData()
-    # image_array = image.get8BitData()
+    # image_array = image.getData()
+    image_array = image.get8BitData()
     image_shape = image.shape()
     print("image shape:", image_shape)
     image_array = np.array(image_array)

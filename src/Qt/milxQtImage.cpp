@@ -435,7 +435,7 @@ std::vector<floatPixelType> milxQtImage::getFloatData()
     return imageVector;
 }
 
-std::vector<double> milxQtImage::getData()
+std::vector<float> milxQtImage::getData()
 {
     //cast the data to float array.
     vtkSmartPointer<vtkImageCast> castFilter = vtkSmartPointer<vtkImageCast>::New();
@@ -458,7 +458,7 @@ std::vector<double> milxQtImage::getData()
 
     //Construct a std::vector from the raw pointer
     //The vector shares the same memory as the VTK array
-    std::vector<double> dataView(dataPtr, dataPtr + numElements);
+    std::vector<float> dataView(dataPtr, dataPtr + numElements);
 
     return dataView;
 }

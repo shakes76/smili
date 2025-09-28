@@ -7,7 +7,8 @@ from PySMILI import milxQtImage, milxQtFile, milxQtMain
 # from PySide2 import QtWidgets
 from PySide6 import QtWidgets
 
-filename = "vase_1comp.vti"
+# filename = "vase_1comp.vti"
+filename = "brainweb165a10f17.mha" #ITKData
 
 if __name__ == "__main__":
     #setup Qt app
@@ -24,6 +25,8 @@ if __name__ == "__main__":
     fileIO.openImage(filename, image)
     image.generateImage()
     image.setWindowTitle("Image")
+    image_shape = image.shape()
+    print("image shape:", image_shape)
 
     mainWindow.addImage(image)
 

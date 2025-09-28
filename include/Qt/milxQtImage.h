@@ -416,7 +416,7 @@ public:
         \fn milxQtImage::getData()
         \brief Returns the image data as a double std vector, forces data to double. Support in bindings.
     */
-    std::vector<double> getData();
+    std::vector<float> getData();
     /*!
         \fn milxQtImage::GetCharImage()
         \brief Returns the internal unsigned char image data.
