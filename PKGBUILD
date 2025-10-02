@@ -26,6 +26,7 @@ makedepends=(
   # graphical toolkits
   qt6-tools
   eigen
+  libtiff
 )
 optdepends=(
   # additional tools not listed in makedepends
@@ -68,7 +69,6 @@ build() {
   cmake -B build -S ${pkgname}-${pkgver}${pkgtype} -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_INSTALL_LICENSEDIR=share/licenses/${pkgname} \
     -DCMAKE_SKIP_RPATH=OFF \
     -DCMAKE_SKIP_INSTALL_RPATH=ON \
     -DBUILD_SHARED_LIBS=ON \
