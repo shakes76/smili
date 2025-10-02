@@ -1,8 +1,9 @@
 # Maintainer: shakes
 
 pkgname=smili
-pkgver=2.0
+pkgver=2.1
 pkgrel=1
+pkgtype=Alpha
 pkgdesc="SMILI and sMILX provides easy medical image processing and scientific visualisation."
 arch=(x86_64)
 url="https://github.com/shakes76/smili"
@@ -54,17 +55,17 @@ optdepends=(
 )
 # options=(staticlibs)
 source=(
-  $url/archive/refs/tags/v${pkgver}Full.zip
+  $url/archive/refs/tags/v${pkgver}${pkgtype}.zip
 )
-sha256sums=('233dcefd2cd5c20d9e1e967520e41215e94d4934de75ed3bdc3c2884490e9588')
+sha256sums=('4c6e94b8cf3652f51301d8635221c4740a4f17f27e90eb5eea7dc2d30f9a96d9')
 
 prepare() {
-  cd ${pkgname}-${pkgver}Full
+  cd ${pkgname}-${pkgver}${pkgtype}
   _fast_float_version=$(pacman -Q fast_float | sed -e 's/.* //; s/-.*//g')
 }
 
 build() {
-  cmake -B build -S ${pkgname}-${pkgver}Full -G Ninja \
+  cmake -B build -S ${pkgname}-${pkgver}${pkgtype} -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LICENSEDIR=share/licenses/${pkgname} \
@@ -79,18 +80,4 @@ build() {
 
 package() {
   DESTDIR="${pkgdir}" cmake --install build
-
-  # Move the vtk.jar to the arch-specific location…
-  install -dv "${pkgdir}"/usr/share/java/vtk
-  mv -v "${pkgdir}"/usr/lib/java/vtk.jar "${pkgdir}"/usr/share/java/vtk
-  # …and the libs to the proper place
-  mv "${pkgdir}"/usr/lib/java/vtk-Linux-${CARCH}/*.so "${pkgdir}"/usr/lib/
-  rmdir "${pkgdir}"/usr/lib/java/{vtk-Linux-${CARCH}/,}
-
-  # byte-compile python modules since the CMake build does not do it
-  local site_packages=$(python -c "import site; print(site.getsitepackages()[0])")
-  python -m compileall -o 0 -o 1 -o 2 --hardlink-dupes -s "${pkgdir}" "${pkgdir}"${site_packages}
-
-  # Remove third party CMake patching for older versions than ours
-  rm -rv "${pkgdir}"/usr/lib/cmake/vtk/patches/3.*
 }
