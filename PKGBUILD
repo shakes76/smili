@@ -56,22 +56,23 @@ optdepends=(
 source=(
   $url/archive/refs/tags/v${pkgver}Full.zip
 )
-# sha256sums=('cee64b98d270ff7302daf1ef13458dff5d5ac1ecb45d47723835f7f7d562c989')
-# b2sums=('6e7dab56c4f48d066ca44637f8839e9abc973d2831381ef5aec860aa1daa49ac9beca223e439c12dda2c33056b45395043f2edc54f55f9d169719b6c96499f40')
+sha256sums=('233dcefd2cd5c20d9e1e967520e41215e94d4934de75ed3bdc3c2884490e9588')
 
 prepare() {
-  cd ${pkgname^^}-${pkgver}Full
+  cd ${pkgname}-${pkgver}Full
   _fast_float_version=$(pacman -Q fast_float | sed -e 's/.* //; s/-.*//g')
 }
 
 build() {
-  cmake -B build -S ${pkgname^^}-${pkgver}Full -G Ninja \
+  cmake -B build -S ${pkgname}-${pkgver}Full -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LICENSEDIR=share/licenses/${pkgname} \
     -DCMAKE_SKIP_RPATH=OFF \
     -DCMAKE_SKIP_INSTALL_RPATH=ON \
     -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_PLUGINS=ON \
+    -DBUILD_DICOM_PLUGIN=ON \
     -Wno-dev
   cmake --build build
 }
