@@ -23,9 +23,13 @@
 #include <QDialog>
 #include <QInputDialog>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QFormLayout>
 #include <QComboBox>
 #include <QPushButton>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+  #include <QtCore5Compat/QRegExp>
+#endif
 //VTK
 #include <vtkWindowToImageFilter.h>
 #include <vtkFFMPEGWriter.h>
@@ -135,7 +139,7 @@ void milxQtAnimateModel::SetInputCollection(vtkPolyDataCollection* meshes, QStri
     }
     done(-1);
 
-    qDebug() << "IDs: " << m_caseIDs << endl;
+    qDebug() << "IDs: " << m_caseIDs;
 
     printInfo("Starting Animation Loop");
     connect(&timer, SIGNAL(timeout()), this, SLOT(updateAnimation()));
@@ -279,7 +283,7 @@ void milxQtAnimateModel::intervalRotation(int newInterval)
         m_rotationInterval = newInterval;
 }
 
-void milxQtAnimateModel::movie(QString filename, int frames)
+void milxQtAnimateModel::movie(QString filename, int frames, int compress)
 {
     m_pause = true; //Force pause of animation
     timer.stop(); //Pause current animation
@@ -298,16 +302,30 @@ void milxQtAnimateModel::movie(QString filename, int frames)
     if(!filename.isEmpty())
     {
         const int n = m_meshes->GetNumberOfItems();
-        const int frameRate = 1000.0/m_interval;
+        const int frameRate = 1000.0/m_interval; //fps
+        const int quality = 2; //2 - highest, 0 - worst
+        int compressRet = QMessageBox::No;
         bool ok = false;
 
         if(frames == 0)
         {
             frames = static_cast<int>( QInputDialog::getInt(this, tr("Please Provide the total frames to write"),
-                                  tr("Frames:"), n, 0, 8192, 1, &ok) );
+                                  tr("Frames:"), n, 1, INT_MAX, 1, &ok) );
+
+            QMessageBox msgBox;
+            msgBox.setText("Choose compress video option");
+            msgBox.setInformativeText("Do you want to compress the video?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            compressRet = msgBox.exec();
 
             if(!ok)
                 return;
+        }
+
+        if(compress == 0 && frames != 0)
+        {
+            compressRet = QMessageBox::Yes;
         }
 
         milxQtRenderWindow::OffScreenRenderingOn(); //Ensure no UI stuff interfers
@@ -319,13 +337,19 @@ void milxQtAnimateModel::movie(QString filename, int frames)
         vtkSmartPointer<vtkFFMPEGWriter> writer = vtkSmartPointer<vtkFFMPEGWriter>::New();
             writer->SetFileName(filename.toStdString().c_str());
             writer->SetInputConnection(windowToImage->GetOutputPort());
+            writer->SetQuality(quality);
             writer->SetRate(frameRate);
+        if (compressRet == QMessageBox::Yes) //3D
+            writer->CompressionOn();
+        else
+            writer->CompressionOff();
             linkProgressEventOf(writer);
             writer->Start();
 
         //camera rotation
         vtkCamera* srcCamera = milxQtRenderWindow::GetRenderer()->GetActiveCamera(); //!< Get callers camera
 
+        printDebug("Frame Rate:" + QString::number(frameRate));
         printDebug("Movie Write Begin");
         for(int j = 0; j < frames; j ++)
         {
