@@ -96,10 +96,10 @@ IF(BUILD_PLUGINS AND NOT APPLE)
 ENDIF(BUILD_PLUGINS AND NOT APPLE)
 
 SET(CPACK_PACKAGE_EXECUTABLES milxOverlay milxOverlay milxImageApp milxImageApp milxModelApp milxModelApp milxDeformableModelApp milxDeformableModelApp milxLabelVisualisation milxLabelVisualisation milxDICOMApp milxDICOMApp smilx sMILX)
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "sMILX is a lightweight 3D/4D viewer and graphical frontend for medical image processing.")
+SET(CPACK_PACKAGE_DESCRIPTION "sMILX provides easy medical image processing and scientific visualisation.")
 
-#####################
-# Setup for Windows #
-#####################
+# Setup packages for Windows etc.
 IF (WIN32)
     set(_add_executable_param WIN32)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
@@ -112,8 +112,8 @@ IF (WIN32)
     SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "smilx ${CPACK_PACKAGE_VERSION}")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\smilx.exe")
     SET(CPACK_NSIS_DISPLAY_NAME "SMILX")
-    SET(CPACK_NSIS_HELP_LINK "http://qcplusplus.sourceforge.net/")
-    SET(CPACK_NSIS_URL_INFO_ABOUT "http://qcplusplus.sourceforge.net/")
+    SET(CPACK_NSIS_HELP_LINK "https://smili-project.sourceforge.io/")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "https://smili-project.sourceforge.io/")
     SET(CPACK_NSIS_CONTACT "shakes76@users.sourceforge.net")
     SET(CPACK_NSIS_MODIFY_PATH ON)
 
@@ -141,8 +141,6 @@ IF (WIN32)
     SET(CPACK_GENERATOR NSIS)
 ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
     SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local/sMILX.${CPACK_PACKAGE_VERSION}")
-    SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "sMILX is a lightweight 3D viewer and graphical frontend for medical image processing.")
-    SET(CPACK_PACKAGE_DESCRIPTION "sMILX provides easy ways to do medical image processing and scientific visualisation.")
     SET(CPACK_STRIP_FILES "\${CMAKE_INSTALL_PREFIX}/bin/smilx")
     SET(CPACK_SOURCE_STRIP_FILES "")
 
