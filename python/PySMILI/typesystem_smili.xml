@@ -47,12 +47,12 @@
     <object-type name="QVTKOpenGLNativeWidget" />
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
-    <object-type name="vtkPolyData" />
+    <!-- <object-type name="vtkPolyData" /> -->
     <!-- <object-type name="vtkPointSet" /> -->
     <!-- <object-type name="vtkPoints" /> -->
     <!-- <object-type name="vtkImageData" /> -->
     <!-- <object-type name="vtkDataSet"/> -->
-    <object-type name="vtkDataObject" />
+    <!-- <object-type name="vtkDataObject" /> -->
 
     <!-- <overload-removal type="long long int" replaces="int"/> -->
 

@@ -108,6 +108,8 @@ else()
         else()
             set(SHIBOKEN_LIBRARY_BASENAMES
                 libshiboken2.cpython-38-x86_64-linux-gnu.so.5.15
+                libshiboken2.cpython-39-x86_64-linux-gnu.so.5.15
+                libshiboken2.cpython-310-x86_64-linux-gnu.so.5.15
                 libshiboken2.abi3.so
                 libshiboken2.abi3.so.${SHIBOKEN_MACRO_VERSION}
                 libshiboken2.abi3.so.${SHIBOKEN_MACRO_VERSION}.${SHIBOKEN_MICRO_VERSION}
