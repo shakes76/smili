@@ -3,6 +3,7 @@
 #
 set(PYTHON_BINDING_NAMESPACE "PySMILI")
 
+set(Python3_ROOT_DIR "") # Replace with the actual path, such as your venv
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 # Use provided python interpreter if given.
 if(NOT Python3_EXECUTABLE)
