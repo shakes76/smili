@@ -37,14 +37,14 @@ set(PySMILI_SRC
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobjectbase_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobject_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobject_wrapper.cpp
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataobject_wrapper.h
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataobject_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataobject_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataobject_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
     ${PySMILI_pyside6_src}
