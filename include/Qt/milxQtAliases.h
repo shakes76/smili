@@ -108,6 +108,32 @@ static const float milxQtVersion = static_cast<float>(2.00);
 static const int minWindowSize = 320;
 static const int maxAASamples = 2; //Anti-Aliasing
 
+#if(VTK_MAJOR_VERSION > 8)
+  #include <QSurfaceFormat>
+  #include <QVTKOpenGLNativeWidget.h>
+  #include <vtkOutputWindow.h>
+
+  // before initializing QApplication, set the default surface format.
+  // needed to ensure appropriate OpenGL context is created for VTK rendering.
+  struct milxQtVTKInit {
+        milxQtVTKInit() {
+            // This code runs when the library is loaded, usually before main()
+            QSurfaceFormat fmt = QVTKOpenGLNativeWidget::defaultFormat();
+            
+            // Optional: Customize needed depth/samples if SMILI has specific needs
+            fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+            // fmt.setSamples(4); 
+            
+            QSurfaceFormat::setDefaultFormat(fmt);
+
+            vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
+        }
+    };
+
+  // Static instance triggers the constructor
+  static milxQtVTKInit milxInitInstance;
+#endif
+
 #ifndef DEF_EXTS
 #define DEF_EXTS
 /**

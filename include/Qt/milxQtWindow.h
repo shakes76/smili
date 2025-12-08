@@ -69,7 +69,7 @@ public:
     #if VTK_MAJOR_VERSION <= 8
         QVTKWidget::SetRenderWindow(win);
     #else
-        QVTKWidget::setRenderWindow(win); //QVTKOpenGLStereoWidget
+        QVTKWidget::setRenderWindow(win); //QVTKOpenGLNativeWidget
     #endif
     }
     inline vtkRenderWindow* renderWindow()
@@ -77,7 +77,7 @@ public:
     #if VTK_MAJOR_VERSION <= 8
         return QVTKWidget::GetRenderWindow();
     #else
-        return QVTKWidget::renderWindow(); //QVTKOpenGLStereoWidget
+        return QVTKWidget::renderWindow(); //QVTKOpenGLNativeWidget
     #endif
     }
 

@@ -24,12 +24,13 @@
 #include <QSplashScreen>
 
 #include "milxQtMain.h"
-#include "vtkOutputWindow.h"
 
 int main(int argc, char* argv[])
 {
-	  vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
-	  QApplication app(argc,argv);
+	// before initializing QApplication, set the default surface format.
+    milxQtVTKInit smilxInitInstance;
+    
+	QApplication app(argc,argv);
 
     QPixmap icon(":resources/smilx_icon.png");
     app.setWindowIcon(QIcon(icon));
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
     milxQtMain Main;
     Main.setWindowTitle("SMILX");
 	  Main.setMinimumSize(800, 600);
-    Main.show();
+      Main.show();
     splash.finish(&Main);
 		
     ///Open files if provided
