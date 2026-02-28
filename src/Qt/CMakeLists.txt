@@ -74,6 +74,8 @@ set_target_properties(milx-Qt
                       # Example of setting a built-in property:
                       PROJECT_LABEL "MILXQT MOCS")
 
+set_target_properties(milx-Qt PROPERTIES INTERFACE_LINK_DIRECTORIES "${ITK_LIBRARY_DIRS};${VTK_LIBRARY_DIRS};${LIBRARY_OUTPUT_PATH}")
+
 #Needed to prevent imporoper linking when VTK 5 is installed side-by-side with VTK 6
 IF("${VTK_MAJOR_VERSION}" LESS 6) #If not VTK 6 or above
   set(VTK_QT_LIBRARIES ${VTK_LIBRARIES} QVTK)
