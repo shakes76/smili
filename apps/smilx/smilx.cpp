@@ -27,10 +27,12 @@
 
 int main(int argc, char* argv[])
 {
-	// before initializing QApplication, set the default surface format.
+#if(VTK_MAJOR_VERSION > 8)
+	  // before initializing QApplication, set the default surface format.
     milxQtVTKInit smilxInitInstance;
+#endif
     
-	QApplication app(argc,argv);
+	  QApplication app(argc,argv);
 
     QPixmap icon(":resources/smilx_icon.png");
     app.setWindowIcon(QIcon(icon));
