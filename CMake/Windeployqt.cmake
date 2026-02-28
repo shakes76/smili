@@ -1,5 +1,5 @@
 # Simplified Windeployqt
-# Originally sourced from 
+# Originally sourced from
 # https://blog.nathanosman.com/2017/11/24/using-windeployqt-with-cpack.html
 # part of the nitroshare-desktop project: https://github.com/nitroshare/nitroshare-desktop
 
@@ -44,7 +44,7 @@ endif()
 # Add commands that copy the Qt runtime to the target's output directory after
 # build and install the Qt runtime to the specified directory
 # CPack package builds use set CMAKE_BUILD_TYPE to Release
-function(windeployqt target)
+function(windeployqt target dest_path)
 
     # Run windeployqt immediately after build
     add_custom_command(TARGET ${target} POST_BUILD
@@ -84,7 +84,8 @@ function(windeployqt target)
                 list(GET _files 1 _dest)
                 execute_process(
                     COMMAND \"${CMAKE_COMMAND}\" -E
-                        copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/bin/\${_dest}\"
+#~                         copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/bin/\${_dest}\"
+                        copy \${_src} \"\${dest_path}/\${_dest}\"
                 )
                 list(REMOVE_AT _files 0 1)
             endwhile()

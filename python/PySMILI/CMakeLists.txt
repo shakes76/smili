@@ -8,6 +8,7 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES} ${SMILI_INCLUDE_DIR
 # get milx Qt MOCS and Libs for linking later
 get_target_property(MILXQT_MOCS milx-Qt MILXQT_MOCS)
 get_target_property(MILXQT_INSTALL_BINARY_DIR milx-Qt INTERFACE_LINK_DIRECTORIES)
+get_target_property(SMILX_EXE smilx OUTPUT_NAME)
 
 message("MILXQT_MOCS ${MILXQT_MOCS}")
 
@@ -187,31 +188,42 @@ create_python_bindings(
 # Make module import from build dir work
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.cmake ${CMAKE_CURRENT_BINARY_DIR}/__init__.py @ONLY)
 
-get_target_property(QT_CORE_LOCATION Qt6::Core LOCATION)
-get_target_property(QT_GUI_LOCATION Qt6::Gui LOCATION)
-get_target_property(QT_WIDGETS_LOCATION Qt6::Widgets LOCATION)
+#~ get_target_property(QT_CORE_LOCATION Qt6::Core LOCATION)
+#~ get_target_property(QT_GUI_LOCATION Qt6::Gui LOCATION)
+#~ get_target_property(QT_WIDGETS_LOCATION Qt6::Widgets LOCATION)
+#~ get_target_property(QT_WEBENGINEWIDGETS_LOCATION Qt6::WebEngineWidgets LOCATION)
+#~ get_target_property(QT_OPENGLWIDGETS_LOCATION Qt6::OpenGLWidgets LOCATION)
+#~ get_target_property(QT_OPENGL_LOCATION Qt6::OpenGL LOCATION)
+#~ get_target_property(QT_QUICK_LOCATION Qt6::Quick LOCATION)
+#~ get_target_property(QT_QUICKWIDGETS_LOCATION Qt6::QuickWidgets LOCATION)
+#~ get_target_property(QT_PRINTSUPPORT_LOCATION Qt6::PrintSupport LOCATION)
+
+#~ # Retrieve the INTERFACE_LINK_LIBRARIES property
+#~ get_target_property(MILXQT_LINKED_LIBS milx-Qt INTERFACE_LINK_LIBRARIES)
+#~ # Print the list of linked libraries
+#~ #message(STATUS "milx-Qt Libraries: ${MILXQT_LINKED_LIBS}")
 
 # 1. Initialize an empty list to store the filenames
-set(VTK_FILENAMES "")
+set(MILXQT_FILENAMES "")
 # 2. Iterate through the VTK_LIBRARIES list
-foreach(LIB_ITEM ${VTK_LIBRARIES})
+foreach(LIB_ITEM ${MILXQT_LINKED_LIBS})
     # Check if the item is a known CMake target (e.g., VTK::CommonCore)
     if(TARGET ${LIB_ITEM})
         # Retrieve the full path to the library file
         get_target_property(LIB_PATH ${LIB_ITEM} IMPORTED_LOCATION_RELEASE)
-        
+
         if(LIB_PATH)
             # Extract just the filename (e.g., libvtkCommonCore-9.2.so)
             #get_filename_component(LIB_NAME "${LIB_PATH}" NAME)
-            list(APPEND VTK_FILENAMES "${LIB_PATH}")
+            list(APPEND MILXQT_FILENAMES "${LIB_PATH}")
         endif()
     else()
         # If it's a raw path instead of a target, extract the name directly
         #get_filename_component(LIB_NAME "${LIB_ITEM}" NAME)
-        list(APPEND VTK_FILENAMES "${LIB_ITEM}")
+        list(APPEND MILXQT_FILENAMES "${LIB_ITEM}")
     endif()
 endforeach()
-message("VTK FILENAMES: ${VTK_FILENAMES}")
+message("MILXQT FILENAMES: ${MILXQT_FILENAMES}")
 
 # install
 message("Install Bindings at ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}")
@@ -220,13 +232,20 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
     $<TARGET_FILE:milx-SMILI>
     $<TARGET_FILE:milx-Qt>
+#~     $<TARGET_RUNTIME_DLLS:milx-Qt>
     $<TARGET_FILE:vtk-ext>
     ${PYSIDE_LIBRARY}
     ${SHIBOKEN_LIBRARY}
-    ${QT_CORE_LOCATION}
-    ${QT_GUI_LOCATION}
-    ${QT_WIDGETS_LOCATION}
-    ${VTK_FILENAMES}
+#~     ${QT_CORE_LOCATION}
+#~     ${QT_GUI_LOCATION}
+#~     ${QT_WIDGETS_LOCATION}
+#~     ${QT_WEBENGINEWIDGETS_LOCATION}
+#~     ${QT_OPENGLWIDGETS_LOCATION}
+#~     ${QT_OPENGL_LOCATION}
+#~     ${QT_QUICK_LOCATION}
+#~     ${QT_QUICKWIDGETS_LOCATION}
+#~     ${QT_PRINTSUPPORT_LOCATION}
+#~     ${MILXQT_FILENAMES}
   DESTINATION
     ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
 )
@@ -246,20 +265,33 @@ if(NOT WIN32)
   )
 endif()
 
+##########################
+# Install the executable #
+##########################
+#~ INSTALL(TARGETS ${PYTHON_BINDING_NAMESPACE}
+#~ 	BUNDLE DESTINATION . COMPONENT Runtime
+#~ 	RUNTIME DESTINATION python COMPONENT Runtime)
+
+install(TARGETS ${PYTHON_BINDING_NAMESPACE}
+        DESTINATION "python"
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+
 INCLUDE(InstallRequiredSystemLibraries)
 
 #set(APPS "${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}/${PYTHON_BINDING_NAMESPACE}.pyd")
-#set(APPS "${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}/${PYTHON_BINDING_NAMESPACE}.pyd")
+#~ set(APPS "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYTHON_BINDING_NAMESPACE}.pyd")
+set(APPS "${SMILX_EXE}")
 
 # Pull out other dependencies
 #SET(LIBRARY_DIRS ${MILXQT_INSTALL_BINARY_DIR};${SMILI_BINARY_DIR}/lib;${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS})
 
 #run qt5 windeploy for Qt platform libs
-#include(Windeployqt)
-#windeployqt(${PYTHON_BINDING_NAMESPACE})
-#MESSAGE("Windows Qt${VTK_QT_VERSION} Bindings Deployment")
+include(Windeployqt)
+windeployqt(${PYTHON_BINDING_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR})
+windeployqt(${PYTHON_BINDING_NAMESPACE} ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX})
+MESSAGE("Windows Qt${VTK_QT_VERSION} Bindings Deployment")
 
-#install(CODE "
-#include(BundleUtilities)
-#fixup_bundle(\"${APPS}\" \"${PySMILI_target_link_libraries}\" \"${LIBRARY_DIRS}\")
-#" COMPONENT Runtime)
+#~ install(CODE "
+#~ include(BundleUtilities)
+#~ fixup_bundle(\"${APPS}\" \"${Plugins}\" \"${MILXQT_INSTALL_BINARY_DIR}\")
+#~ " COMPONENT Runtime)

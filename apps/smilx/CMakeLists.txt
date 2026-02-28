@@ -122,7 +122,7 @@ IF (WIN32)
 
     #run qt5 windeploy for Qt platform libs
     include(Windeployqt)
-    windeployqt(smilx)
+    windeployqt(smilx ${CMAKE_INSTALL_PREFIX}/bin)
     MESSAGE("Windows Qt${VTK_QT_VERSION} Deployment")
 
     install(CODE "
@@ -275,7 +275,7 @@ ELSE(WIN32) # Rest of the OSes (Unix and Apple atm)
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5widgets5 libqt5webengine5 vtk7 libvtk7.1p-qt libinsighttoolkit4.13 libfftw3-bin") #Ubuntu 22.04
 #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt5widgets5, libqt5webengine5 vtk7") #Ubuntu 22.04
   #~     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libqtcore4, libqtgui4, libqt4-xmlpatterns, libqt4-sql, libqt4-opengl, libqt4-network, libvtk5.6, libvtk5.6-qt4, libfftw3-3") #11.10
-    
+
     SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS_PRIVATE_DIRS "${SMILI_BINARY_DIR}/lib")
     SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 

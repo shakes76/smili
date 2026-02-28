@@ -2,9 +2,9 @@
 Test the Python SMILI bindings with polydata
 '''
 import sys
-from PySMILI import milxQtModel, milxQtFile
 #from PySide2 import QtWidgets
 from PySide6 import QtWidgets
+from PySMILI import milxQtModel, milxQtFile
 
 if __name__ == "__main__":
     #setup Qt app
