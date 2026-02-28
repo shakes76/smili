@@ -1,7 +1,14 @@
 <?xml version="1.0" ?>
 <!-- The package name -->
 <typesystem package="PySMILI">
-	<!-- Pre-defined typesystem that contains types used by our class
+    <!-- Example of turning off the 'using' directive for a namespace -->
+    <!-- <namespace-type name="std" generate-using="yes"/>
+    
+    <extra-includes>
+        <include file-name="limits" system="yes"/>
+    </extra-includes> -->
+    
+    <!-- Pre-defined typesystem that contains types used by our class
         PySide has one typesystem for each module, here we use only the widgets
         typesystem because it already include gui and core typesystem -->
     <!-- <load-typesystem name="shiboken_builtins.xml" /> -->

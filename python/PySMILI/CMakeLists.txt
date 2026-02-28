@@ -96,25 +96,11 @@ set(PySMILI_SRC
     ${MILXQT_MOCS}
 )
 
-foreach(vtk_target ${VTK_LIBRARIES})
-    get_target_property(target_includes ${vtk_target} INTERFACE_INCLUDE_DIRECTORIES)
-    if(target_includes)
-        list(APPEND MY_CUSTOM_INCLUDE_LIST ${target_includes})
-    endif()
-endforeach()
-
-# Remove duplicates from your custom list
-#message("PATHS PRE DUPE ${MY_CUSTOM_INCLUDE_LIST}")
-if(MY_CUSTOM_INCLUDE_LIST)
-    list(REMOVE_DUPLICATES MY_CUSTOM_INCLUDE_LIST)
-endif()
-#message("PATHS POST DUPE ${MY_CUSTOM_INCLUDE_LIST}")
-
 # includes necessary to parse and build the classes specified on typesystem
 set(PySMILI_include_paths
     #${My_Paths}
     #${MY_CUSTOM_INCLUDE_LIST}
-    $<REMOVE_DUPLICATES:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<JOIN:$<REMOVE_DUPLICATES:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>>, >
     #$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>
     #$<TARGET_PROPERTY:VTK::CommonCore,INTERFACE_INCLUDE_DIRECTORIES>
     #$<TARGET_PROPERTY:ITKCommon,INTERFACE_INCLUDE_DIRECTORIES>
@@ -268,10 +254,6 @@ endif()
 ##########################
 # Install the executable #
 ##########################
-#~ INSTALL(TARGETS ${PYTHON_BINDING_NAMESPACE}
-#~ 	BUNDLE DESTINATION . COMPONENT Runtime
-#~ 	RUNTIME DESTINATION python COMPONENT Runtime)
-
 install(TARGETS ${PYTHON_BINDING_NAMESPACE}
         DESTINATION "python"
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
@@ -280,16 +262,18 @@ INCLUDE(InstallRequiredSystemLibraries)
 
 #set(APPS "${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}/${PYTHON_BINDING_NAMESPACE}.pyd")
 #~ set(APPS "${CMAKE_CURRENT_BINARY_DIR}/Release/${PYTHON_BINDING_NAMESPACE}.pyd")
-set(APPS "${SMILX_EXE}")
+#~ set(APPS "${SMILX_EXE}")
 
 # Pull out other dependencies
 #SET(LIBRARY_DIRS ${MILXQT_INSTALL_BINARY_DIR};${SMILI_BINARY_DIR}/lib;${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS})
 
 #run qt5 windeploy for Qt platform libs
-include(Windeployqt)
-windeployqt(${PYTHON_BINDING_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR})
-windeployqt(${PYTHON_BINDING_NAMESPACE} ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX})
-MESSAGE("Windows Qt${VTK_QT_VERSION} Bindings Deployment")
+if(WIN32)
+    include(Windeployqt)
+    #~ windeployqt(${PYTHON_BINDING_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR})
+    windeployqt(${PYTHON_BINDING_NAMESPACE} ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX})
+    MESSAGE("Windows Qt${VTK_QT_VERSION} Bindings Deployment")
+endif()
 
 #~ install(CODE "
 #~ include(BundleUtilities)

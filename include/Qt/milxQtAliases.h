@@ -47,15 +47,16 @@
 #include <vnl/vnl_vector_fixed.h>
 #include "milxGlobal.h"
 
-//using namespace std;
 using milx::coordinate; //allow to enable cleaner looking code
 using milx::coordinateType; //allow to enable cleaner looking code
 
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+  #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
 #else
-#include <unistd.h>
+  #include <unistd.h>
+  
+  using namespace std; //might be needed for python binding and shiboken 6.9.3
 #endif
 
 ///Define Windows DLL importing
