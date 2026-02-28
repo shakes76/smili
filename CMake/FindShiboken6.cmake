@@ -83,7 +83,7 @@ if(SHIBOKEN_BASEDIR)
     elseif(CYGWIN)
         set(SHIBOKEN_LIBRARY_BASENAMES "")
     elseif(WIN32)
-        set(SHIBOKEN_LIBRARY_BASENAMES "libshiboken6.${PYSIDE2_SUFFIX}")
+        set(SHIBOKEN_LIBRARY_BASENAMES "libshiboken6.${PYSIDE6_SUFFIX}")
     elseif(APPLE)
         set(SHIBOKEN_LIBRARY_BASENAMES
             libshiboken6.abi3.dylib libshiboken6.abi3.${SHIBOKEN_MACRO_VERSION}.dylib

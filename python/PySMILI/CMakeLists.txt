@@ -3,7 +3,23 @@
 #
 # Add include directories
 # Create a library called "milxQt" which includes the source files.
-include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES})
+include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES} ${SMILI_INCLUDE_DIRS} ${ITK_LIBRARY_DIRS})
+
+# get milx Qt MOCS for linking later
+get_target_property(MILXQT_MOCS milx-Qt MILXQT_MOCS)
+
+message("MILXQT_MOCS ${MILXQT_MOCS}")
+
+# Need to rebuild the Qt MOCS and UIs etc. for linking
+# Add Headers into List
+#file(GLOB MILXQT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/Qt/*.h)
+#file(GLOB MILXQT_SRC_UIS ${SMILI_SOURCE_DIR}/ui/*.ui)
+#file(GLOB MILXQT_SRC_UI_HEADERS_MOC ${SMILI_SOURCE_DIR}/ui/*.h)
+# build ui_XXX files from the XML-style .ui files
+#QT_WRAP_UI(MILXQT_UIS ${MILXQT_SRC_UIS})
+# this moc's the above variable and appends to the cxx sources
+#QT_WRAP_CPP(MILXQT_MOCS ${MILXQT_HEADERS_MOC})
+#QT_WRAP_CPP(MILXQT_UI_MOCS ${MILXQT_SRC_UI_HEADERS_MOC})
 
 if(PYSIDE_MAJOR_VERSION GREATER "2")
     set(PySMILI_pyside6_link_libraries Qt${Qt_VERSION_MAJOR}::OpenGLWidgets)
@@ -74,12 +90,45 @@ set(PySMILI_SRC
     # global module wrapper
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_module_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/pysmili_python.h
+
+    ${MILXQT_MOCS}
 )
+
+foreach(vtk_target ${VTK_LIBRARIES})
+    get_target_property(target_includes ${vtk_target} INTERFACE_INCLUDE_DIRECTORIES)
+    if(target_includes)
+        list(APPEND MY_CUSTOM_INCLUDE_LIST ${target_includes})
+    endif()
+endforeach()
+
+# Remove duplicates from your custom list
+#message("PATHS PRE DUPE ${MY_CUSTOM_INCLUDE_LIST}")
+if(MY_CUSTOM_INCLUDE_LIST)
+    list(REMOVE_DUPLICATES MY_CUSTOM_INCLUDE_LIST)
+endif()
+#message("PATHS POST DUPE ${MY_CUSTOM_INCLUDE_LIST}")
 
 # includes necessary to parse and build the classes specified on typesystem
 set(PySMILI_include_paths
-    $<JOIN:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>,${PATH_SEP}>
+    #${My_Paths}
+    #${MY_CUSTOM_INCLUDE_LIST}
+    $<REMOVE_DUPLICATES:$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>>
+    #$<TARGET_PROPERTY:milx-Qt,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:VTK::CommonCore,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:ITKCommon,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:itkvcl,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:itkvnl_algo,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:itkvnl,INTERFACE_INCLUDE_DIRECTORIES>
+    #${ITK_DIR}/../Modules/ThirdParty/VNL/src/vxl/core
+    #$<TARGET_PROPERTY:ITKVNLInstantiation,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:VTK::CommonDataModel,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:VTK::RenderingAnnotation,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:VTK::FiltersModeling,INTERFACE_INCLUDE_DIRECTORIES>
+    #$<TARGET_PROPERTY:VTK::GUISupportQt,INTERFACE_INCLUDE_DIRECTORIES>
+    #${VTK_DIR}/../GUISupport/Qt
     ${MILXQT_INCLUDE_DIRS}
+    ${SMILI_INCLUDE_DIRS}
+    #${ITK_LIBRARY_DIRS}
 )
 
 # A list of paths where shiboken should look for typesystem
@@ -118,7 +167,7 @@ set(PySMILI_DEPENDS
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtImage.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtFile.h
     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtPlot.h
-    # ${CMAKE_SOURCE_DIR}/include/Qt/milxQtMain.h
+    ${CMAKE_SOURCE_DIR}/include/Qt/milxQtMain.h
 )
 
 create_python_bindings(

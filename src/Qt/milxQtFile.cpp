@@ -197,7 +197,7 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
 QString milxQtFile::supportedImageFormats()
 {
   QString exts = "";
-  vector<string> extensions = milx::File::GetSupportedImageFileExtensions();
+  std::vector<std::string> extensions = milx::File::GetSupportedImageFileExtensions();
 
   for(size_t j = 0; j < extensions.size(); j ++)
     exts += "*" + QString(extensions[j].c_str()) + " ";

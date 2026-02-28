@@ -749,10 +749,10 @@ public slots:
 
     //Image-Model Inter-Members
     /*!
-        \fn milxQtMain::imageToSurface(vtkSmartPointer<vtkImageData> img, const float value = numeric_limits<float>::max())
+        \fn milxQtMain::imageToSurface(vtkSmartPointer<vtkImageData> img, const float value = std::numeric_limits<float>::max())
         \brief Compute image to surface process.
     */
-    void imageToSurface(vtkSmartPointer<vtkImageData> img, const float value = numeric_limits<float>::max());
+    void imageToSurface(vtkSmartPointer<vtkImageData> img, const float value = std::numeric_limits<float>::max());
     /*!
         \fn milxQtMain::imageToPolyData(vtkSmartPointer<vtkImageData> img)
         \brief Compute image to poly data process.

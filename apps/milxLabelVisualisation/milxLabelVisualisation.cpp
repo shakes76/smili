@@ -214,8 +214,8 @@ int main(int argc, char* argv[])
 
 if(volumeArg.isSet())
 {
-//    float minVolumeValue = numeric_limits<float>::max();
-//    float maxVolumeValue = numeric_limits<float>::min();
+//    float minVolumeValue = std::numeric_limits<float>::max();
+//    float maxVolumeValue = std::numeric_limits<float>::min();
     std::vector<float> colourValuesAsFloat, opacityValuesAsFloat;
     opacityValuesAsFloat.push_back(0.0); //background transparent
     colourValuesAsFloat.push_back(0.0); //background

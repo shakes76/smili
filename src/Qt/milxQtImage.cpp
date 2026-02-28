@@ -943,7 +943,7 @@ void milxQtImage::updateSlice(vtkObject *obj)
 {
     vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
 
-    string keyPressed = iren->GetKeySym();
+    std::string keyPressed = iren->GetKeySym();
 
     //printDebug("Updating Slice Display");
     if (keyPressed == "Up")

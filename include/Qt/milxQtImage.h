@@ -1003,12 +1003,12 @@ public slots:
     */
     void flip(bool xAxis = false, bool yAxis = false, bool zAxis = false, bool aboutOrigin = true);
     /**
-        \fn milxQtImage::surface(const float value = numeric_limits<float>::max())
+        \fn milxQtImage::surface(const float value = std::numeric_limits<float>::max())
         \brief Converts the image to a surface using the Marching Cubes algorithm. Ideally suited for binary images.
 
         Note that this only emits a signal so that a class like milxQtMain can redirect it to the milxQtModel class for processing.
     */
-    void surface(const float value = numeric_limits<float>::max());
+    void surface(const float value = std::numeric_limits<float>::max());
     /**
         \fn milxQtImage::polyData()
         \brief Converts the image to polygonal data. Ideally suited for any type of image.

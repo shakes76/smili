@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!-- The package name -->
 <typesystem package="PySMILI">
-    <!-- Pre-defined typesystem that contains types used by our class
+	<!-- Pre-defined typesystem that contains types used by our class
         PySide has one typesystem for each module, here we use only the widgets
         typesystem because it already include gui and core typesystem -->
     <!-- <load-typesystem name="shiboken_builtins.xml" /> -->
@@ -34,10 +34,10 @@
     <enum-type name="GlyphType" />
 
     <!-- Externals like ITK to detect Arrays and Images -->
-    <namespace-type name="itk" visible="no">
+	<!-- <namespace-type name="itk" visible="no">  -->
         <!-- <object-type name="Array" generate="no"/>
         <object-type name="Image"/> -->
-    </namespace-type> -->
+	<!-- </namespace-type> -->
 
     <!-- Externals like VTK to detect QWidget properly -->
     <!-- <object-type name="vtkWeakPointerBase" generate="no"/>
@@ -48,9 +48,9 @@
     <object-type name="QVTKOpenGLNativeWidget" />
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
-    <object-type name="vtkPolyData" />
     <object-type name="vtkPointSet" />
     <object-type name="vtkPoints" />
+	<object-type name="vtkPolyData" />
     <object-type name="vtkImageData" />
     <!-- <object-type name="vtkDataSet"/> -->
     <object-type name="vtkDataObject" />

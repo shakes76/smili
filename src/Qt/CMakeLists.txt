@@ -62,6 +62,18 @@ SET_TARGET_PROPERTIES(milx-Qt
                       VERSION 1.0.0
                       SOVERSION 1)
 
+#store for later use
+foreach(PATH IN LISTS MILXQT_MOCS)
+    cmake_path(ABSOLUTE_PATH PATH OUTPUT_VARIABLE ABS_VAL)
+    list(APPEND MILXQT_MOCS_ABS "${ABS_VAL}")
+endforeach()
+
+set_target_properties(milx-Qt 
+                      PROPERTIES 
+                      MILXQT_MOCS "${MILXQT_MOCS_ABS}"
+                      # Example of setting a built-in property:
+                      PROJECT_LABEL "MILXQT MOCS")
+
 #Needed to prevent imporoper linking when VTK 5 is installed side-by-side with VTK 6
 IF("${VTK_MAJOR_VERSION}" LESS 6) #If not VTK 6 or above
   set(VTK_QT_LIBRARIES ${VTK_LIBRARIES} QVTK)

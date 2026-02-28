@@ -740,14 +740,14 @@ bool milxQtMain::loadFile(const QString &filename)
 
                 bool ok1 = true, ok2 = true, ok3 = true;
                 xCol = QInputDialog::getInt(this, tr("Please Provide column number for x axis"),
-                                      tr("Column:"), 0, 0, numeric_limits<int>::max(), 1, &ok1);
+                                      tr("Column:"), 0, 0, std::numeric_limits<int>::max(), 1, &ok1);
                 yCol = QInputDialog::getInt(this, tr("Please Provide column number for y axis"),
-                                      tr("Column:"), 1, 0, numeric_limits<int>::max(), 1, &ok2);
+                                      tr("Column:"), 1, 0, std::numeric_limits<int>::max(), 1, &ok2);
 
                 if(dimensionRet == QMessageBox::Yes) //3D
                 {
                     zCol = QInputDialog::getInt(this, tr("Please Provide column number for z axis"),
-                                      tr("Column:"), 2, 0, numeric_limits<int>::max(), 1, &ok3);
+                                      tr("Column:"), 2, 0, std::numeric_limits<int>::max(), 1, &ok3);
                 }
 
                 if(!ok1 || !ok2 || !ok3)
@@ -2061,7 +2061,7 @@ void milxQtMain::imageToSurface(vtkSmartPointer<vtkImageData> img, const float v
 {
     //Check if value provided
     int contourNumber = 1;
-    if(value == numeric_limits<float>::max())
+    if(value == std::numeric_limits<float>::max())
         contourNumber = -1;
     else
         printInfo("Using iso value provided");

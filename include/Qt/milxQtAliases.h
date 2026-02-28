@@ -47,7 +47,7 @@
 #include <vnl/vnl_vector_fixed.h>
 #include "milxGlobal.h"
 
-using namespace std;
+//using namespace std;
 using milx::coordinate; //allow to enable cleaner looking code
 using milx::coordinateType; //allow to enable cleaner looking code
 
@@ -119,11 +119,11 @@ static const int maxAASamples = 2; //Anti-Aliasing
         milxQtVTKInit() {
             // This code runs when the library is loaded, usually before main()
             QSurfaceFormat fmt = QVTKOpenGLNativeWidget::defaultFormat();
-            
+
             // Optional: Customize needed depth/samples if SMILI has specific needs
             fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
-            // fmt.setSamples(4); 
-            
+            // fmt.setSamples(4);
+
             QSurfaceFormat::setDefaultFormat(fmt);
 
             vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
@@ -140,26 +140,26 @@ static const int maxAASamples = 2; //Anti-Aliasing
     These common constant strings are used in file open/save dialogs
 */
 //Opens
-static string openImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm)";
-static string openSeriesImageExts = "Image Series (*.ima *.dcm *.dicom *.gz)";
-static string openMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz)";
-static string openOtherImageExts = "Other Images (*.vti)"; ///\todo add raw support, not working atm
-static string openOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
-static string openModelExts = "Model or Polygonal Files (*.vtp *.vtk *.ply *.obj *.stl)";
-static string extensionsOpen = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl *.csv *.dat *.txt";
-static string allFileExts = "All Files (*.*)";
-static string openSupportedExts = "Images and Model Files (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.vti *.mrc *.rec *.vtp *.vtk *.ply *.obj *.stl)";
-static string openExts = openSupportedExts + ";;" + openModelExts + ";;" + openMedImageExts + ";;" + openImageExts + ";;" + openOtherImageExts + ";;" + openOtherExts + ";;" + allFileExts;
+static std::string openImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm)";
+static std::string openSeriesImageExts = "Image Series (*.ima *.dcm *.dicom *.gz)";
+static std::string openMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz)";
+static std::string openOtherImageExts = "Other Images (*.vti)"; ///\todo add raw support, not working atm
+static std::string openOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
+static std::string openModelExts = "Model or Polygonal Files (*.vtp *.vtk *.ply *.obj *.stl)";
+static std::string extensionsOpen = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.gipl *.spr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl *.csv *.dat *.txt";
+static std::string allFileExts = "All Files (*.*)";
+static std::string openSupportedExts = "Images and Model Files (*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.pbm *.pgm *.ppm *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.vti *.mrc *.rec *.vtp *.vtk *.ply *.obj *.stl)";
+static std::string openExts = openSupportedExts + ";;" + openModelExts + ";;" + openMedImageExts + ";;" + openImageExts + ";;" + openOtherImageExts + ";;" + openOtherExts + ";;" + allFileExts;
 //Saves
-static string saveImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif)";
-static string saveMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.mgh *.mgz)";
-static string saveOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
-static string saveOtherImageExts = "Other Images (*.vti)";
-static string saveModelExts = "Model or Polygonal File (*.vtp *.vtk *.ply *.obj *.stl)";
-static string extensionsSave = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl";
-static string saveExtsForImages = saveMedImageExts + ";;" + saveImageExts + ";;" + saveOtherImageExts;
-static string saveExtsForScreens = saveImageExts;
-static string saveExtsForModels = saveModelExts;
+static std::string saveImageExts = "Images (*.png *.jpeg *.jpg *.bmp *.tiff *.tif)";
+static std::string saveMedImageExts = "Medical Images (*.nii *.gz *.ima *.dcm *.dicom *.mha *.mhd *.img *.hdr *.mgh *.mgz)";
+static std::string saveOtherExts = "Text Delimited Files (*.csv *.dat *.txt)";
+static std::string saveOtherImageExts = "Other Images (*.vti)";
+static std::string saveModelExts = "Model or Polygonal File (*.vtp *.vtk *.ply *.obj *.stl)";
+static std::string extensionsSave = "*.png *.jpeg *.jpg *.bmp *.tiff *.tif *.nii *.gz *.ima *.dcm *.dicom *.mhd *.img *.hdr *.mgh *.mgz *.vti *.vtp *.vtk *.ply *.obj *.stl";
+static std::string saveExtsForImages = saveMedImageExts + ";;" + saveImageExts + ";;" + saveOtherImageExts;
+static std::string saveExtsForScreens = saveImageExts;
+static std::string saveExtsForModels = saveModelExts;
 #endif //DEF_EXTS
 
 #endif // MILXQTALIASES_H_INCLUDED
