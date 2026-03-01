@@ -36,7 +36,6 @@
 //Graphing
 #include <vtkDoubleArray.h>
 #include <vtkDataSetMapper.h>
-#include <vtkIdFilter.h>
 #include <vtkSelectVisiblePoints.h>
 //Contouring
 #include <vtkGlyph3D.h>
@@ -53,6 +52,11 @@
 //#include <vtkStreamLine.h>
 #include <vtkStreamTracer.h>
 #include <vtkLogLookupTable.h>
+#if VTK_MAJOR_VERSION > 8 && VTK_MINOR_VERSION > 4 //from 9.6 onwards
+    #include <vtkGenerateIds.h>
+#else
+    #include <vtkIdFilter.h>
+#endif
 //SMILI
 #include "milxMath.h"
 #include "milxColourMap.h"
@@ -906,7 +910,11 @@ void milxQtModel::generateLabels()
         if(!labelled)
             modelLabelsActor = vtkSmartPointer<vtkActor2D>::New();
 
+    #if VTK_MAJOR_VERSION > 8 && VTK_MINOR_VERSION > 4 //from 9.6 onwards
+        vtkSmartPointer<vtkGenerateIds> ids = vtkSmartPointer<vtkGenerateIds>::New();
+    #else
         vtkSmartPointer<vtkIdFilter> ids = vtkSmartPointer<vtkIdFilter>::New();
+    #endif
     #if VTK_MAJOR_VERSION <=5
         ids->SetInput(model.Result());
     #else
@@ -1660,8 +1668,8 @@ void milxQtModel::modelInfo()
     if(!loaded)
         return;
 
-    cout << "Centroid: " << centroid() << " with Size: " << centroidSize() << std::endl;
-    cout << "Covariance Matrix: " << std::endl << covarianceMatrix() << std::endl;
+    std::cout << "Centroid: " << centroid() << " with Size: " << centroidSize() << std::endl;
+    std::cout << "Covariance Matrix: " << std::endl << covarianceMatrix() << std::endl;
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPoints()) + " points.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfPolys()) + " polygons.");
     printInfo("There are " + QString::number(model.Result()->GetNumberOfLines()) + " lines.");

@@ -1769,10 +1769,10 @@ void milxQtMain::updateWindowsWithCursors()
     while (currentWindow())
     {
         milxQtWindow *win = currentWindow();
-        cout << "Weeee1: " << win->strippedBaseName().toStdString() << std::endl;
+        std::cout << "Weeee1: " << win->strippedBaseName().toStdString() << std::endl;
         if (isImage(win))
         {
-            cout << "Weeee2: " << win->strippedBaseName().toStdString() << std::endl;
+            std::cout << "Weeee2: " << win->strippedBaseName().toStdString() << std::endl;
             milxQtImage *img = qobject_cast<milxQtImage *>(win);
             img->enableCrosshair();
         }
@@ -2327,7 +2327,7 @@ void milxQtMain::imageToStreamLines(vectorImageType::Pointer img, floatImageType
 //    const size_t components = img->GetNumberOfComponentsPerPixel();
     vectorImageType::Pointer imgSubSampled = milx::Image<vectorImageType>::SubsampleImage(img, subsampleSizes);
     floatImageType::Pointer magImgSubSampled = milx::Image<floatImageType>::SubsampleImage(magImg, sliceSubsampleSizes);
-    cout << "Slice Information: " << std::endl;
+    std::cout << "Slice Information: " << std::endl;
     milx::Image<floatImageType>::Information(magImg);
 
     ///Need to flip y-axis because of VTK's CG coordinate system

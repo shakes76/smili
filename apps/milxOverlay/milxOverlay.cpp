@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
+            std::cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
     {
         if(!imageArg.isSet())
         {
-            cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << std::endl;
+            std::cerr << "Error in arguments! View/Slice arguments need to be used with the image argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
     {
         if(!isoArg.isSet())
         {
-            cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << std::endl;
+            std::cerr << "Error in arguments! Isovalue argument needs to be used with the isosurface argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -249,12 +249,12 @@ int main(int argc, char* argv[])
     bool success = false;
 
     //Read model
-    cout << ">> Overlay: Reading Models" << std::endl;
+    std::cout << ">> Overlay: Reading Models" << std::endl;
     vtkSmartPointer<vtkPolyDataCollection> collection;
     success = milx::File::OpenModelCollection(filenames, collection);
     if(!success) //Error printed inside
     {
-        cerr << "Error reading models!" << std::endl;
+        std::cerr << "Error reading models!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
 
     if(n < 1)
     {
-        cerr << "At least one model must be provided!" << std::endl;
+        std::cerr << "At least one model must be provided!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
     }
     model = models[0];
     mainWindow.setCentralWidget(model.data());
-    cerr << "Done" << std::endl;
+    std::cerr << "Done" << std::endl;
 
     //Read vectors model
     QScopedPointer<milxQtModel> modelVectors(new milxQtModel); //smart deletion
@@ -347,7 +347,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(vectorsName.c_str(), modelVectors.data());
       if(success)
       {
-          cout << ">> Applying Vectors" << std::endl;
+          std::cout << ">> Applying Vectors" << std::endl;
           modelVectors->setName(vectorsName.c_str());
           modelVectors->generateModel();
           modelVectors->generateVectorField();
@@ -364,7 +364,7 @@ int main(int argc, char* argv[])
       success = reader->openModel(scalarMaskName.c_str(), modelMask.data());
       if(success)
       {
-          cout << ">> Overlay: Applying Mask" << std::endl;
+          std::cout << ">> Overlay: Applying Mask" << std::endl;
           modelMask->setName(scalarMaskName.c_str());
           modelMask->generateModel();
 
@@ -381,7 +381,7 @@ int main(int argc, char* argv[])
 
           if(model->GetNumberOfPoints() == 0)
           {
-              cerr << "Error using scalar mask. Model no longer has any points!" << std::endl;
+              std::cerr << "Error using scalar mask. Model no longer has any points!" << std::endl;
               exit(EXIT_FAILURE);
           }
       }
@@ -393,7 +393,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtImage> imgIso(new milxQtImage);  //smart deletion
     if(isoArg.isSet())
     {
-        cout << ">> Overlay: Applying Isosurface" << std::endl;
+        std::cout << ">> Overlay: Applying Isosurface" << std::endl;
         success = reader->openImage(isoName.c_str(), imgIso.data());
             imgIso->setName(isoName.c_str());
             imgIso->generateImage();
@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
 
     if(errorReading)
     {
-        cerr << "Error Reading one or more of the input files. Exiting." << std::endl;
+        std::cerr << "Error Reading one or more of the input files. Exiting." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
         transform2->PostMultiply();
     if(imageArg.isSet())
     {
-        cout << ">> Overlay: Reading Image" << std::endl;
+        std::cout << ">> Overlay: Reading Image" << std::endl;
         errorReading = false;
         success = reader->openImage(imageName.c_str(), img.data());
 
@@ -488,7 +488,7 @@ int main(int argc, char* argv[])
 
         if(errorReading)
         {
-            cerr << "Error Reading the image file. Exiting." << std::endl;
+            std::cerr << "Error Reading the image file. Exiting." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -498,7 +498,7 @@ int main(int argc, char* argv[])
         orientTransform->Invert();
         transform2->Concatenate(orientTransform);
 //        transform2->Concatenate(transform->GetMatrix());
-        cout << ">> Overlay: Transforming Actors" << std::endl;
+        std::cout << ">> Overlay: Transforming Actors" << std::endl;
     }
 
     ///Display
@@ -528,7 +528,7 @@ int main(int argc, char* argv[])
     }
 
     //Colour maps
-    cout << ">>> Overlay: Setting Colourmap" << std::endl;
+    std::cout << ">>> Overlay: Setting Colourmap" << std::endl;
     if(jetArg.isSet())
         model->colourMapToJet();
     if(vtkArg.isSet())
@@ -609,7 +609,7 @@ int main(int argc, char* argv[])
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
 
-    cout << ">> Overlay: Rendering" << std::endl;
+    std::cout << ">> Overlay: Rendering" << std::endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
     model->GetRenderWindow()->Render();
     writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
-    cout << ">> Complete" << std::endl;
+    std::cout << ">> Complete" << std::endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
     if(!onscreenArg.isSet())

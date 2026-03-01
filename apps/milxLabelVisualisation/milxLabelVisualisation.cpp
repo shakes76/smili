@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     {
         if(!transformArg.isSet())
         {
-            cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
+            std::cerr << "Error in arguments! Inverse argument needs to be used with the transform argument." << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -329,7 +329,7 @@ else
             exit(EXIT_FAILURE);
         }
 
-        cout << ">> Overlaying surface" << std::endl;
+        std::cout << ">> Overlaying surface" << std::endl;
         surface->setName(surfaceName.c_str());
         surface->generateModel();
 
@@ -347,7 +347,7 @@ else
         model->loadView();
     if(loadViewFileArg.isSet())
         model->loadView(loadViewName.c_str());
-    cout << ">> Overlay: Rendering" << std::endl;
+    std::cout << ">> Overlay: Rendering" << std::endl;
     if(!onscreenArg.isSet())
         model->OffScreenRenderingOn();
     else
@@ -365,7 +365,7 @@ else
     QScopedPointer<milxQtFile> writer(new milxQtFile); //Smart deletion
     model->GetRenderWindow()->Render();
     writer->saveImage(screenName.c_str(), windowToImage->GetOutput());
-    cout << ">> Complete" << std::endl;
+    std::cout << ">> Complete" << std::endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
     if(!onscreenArg.isSet())

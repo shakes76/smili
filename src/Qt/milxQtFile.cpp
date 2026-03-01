@@ -155,14 +155,14 @@ bool milxQtFile::openImage(const QString filename, vtkImageData* data)
             }
             else
             {
-                cerr << "VTI Reader Encountered the following error." << std::endl;
-                cerr << errorObserver->GetMessage() << std::endl;
+                std::cerr << "VTI Reader Encountered the following error." << std::endl;
+                std::cerr << errorObserver->GetMessage() << std::endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Could not load VTI file!" << std::endl;
+            std::cerr << "Could not load VTI file!" << std::endl;
             return false;
         }
     }
@@ -213,7 +213,7 @@ bool milxQtFile::isIntegerFormat(const QString filename, bool &errorEncountered)
   //Check type of medical image
   if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
   {
-      cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
+      std::cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
       errorEncountered = true;
       return false;
   }
@@ -234,7 +234,7 @@ bool milxQtFile::isFieldFormat(const QString filename, bool &errorEncountered)
   //Check type of medical image
   if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
   {
-      cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
+      std::cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
       errorEncountered = true;
       return false;
   }
@@ -278,12 +278,12 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
     if(!vtkFormat && !pnmImage)
     {
-        cerr << "Trying to read image header ..." << std::endl;
+        std::cerr << "Trying to read image header ..." << std::endl;
         //Check type of medical image
         std::string pixelType, componentType;
         if(!milx::File::ReadImageInformation(filename.toStdString(), pixelType, componentType, dataDimensions))
         {
-            cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
+            std::cerr << "Failed reading header of image. File may not be an image. Exiting" << std::endl;
             return false;
         }
         dataPixelType = pixelType.c_str();
@@ -301,7 +301,7 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
         data->setActualNumberOfDimensions(dataDimensions);
     }
 
-//    cerr << "Open Image" << std::endl;
+//    std::cerr << "Open Image" << std::endl;
     vtkSmartPointer<vtkErrorWarning> errorObserver = vtkSmartPointer<vtkErrorWarning>::New();
     if(integerFormat)
     {
@@ -327,14 +327,14 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
                 data->SetInput(reader->GetOutput());
             else
             {
-                cerr << "VTI Reader Encountered the following error." << std::endl;
-                cerr << errorObserver->GetMessage() << std::endl;
+                std::cerr << "VTI Reader Encountered the following error." << std::endl;
+                std::cerr << errorObserver->GetMessage() << std::endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Could not load VTI file!" << std::endl;
+            std::cerr << "Could not load VTI file!" << std::endl;
             return false;
         }
     }
@@ -351,19 +351,19 @@ bool milxQtFile::openImage(const QString filename, milxQtImage* data)
 
             if(!errorObserver->ReportsFailure())
             {
-                cout << "Image Description: " << reader->GetDescriptiveName() << std::endl;
+                std::cout << "Image Description: " << reader->GetDescriptiveName() << std::endl;
                 data->SetInput(reader->GetOutput());
             }
             else
             {
-                cerr << "PNM Reader Encountered the following error." << std::endl;
-                cerr << errorObserver->GetMessage() << std::endl;
+                std::cerr << "PNM Reader Encountered the following error." << std::endl;
+                std::cerr << errorObserver->GetMessage() << std::endl;
                 return false;
             }
         }
         else
         {
-            cerr << "Could not load PNM file!" << std::endl;
+            std::cerr << "Could not load PNM file!" << std::endl;
             return false;
         }
     }
@@ -468,19 +468,19 @@ bool milxQtFile::openImageSeries(milxQtImage* data, QString directoryPath)
   }
   else if(UIDs.empty())
   {
-      cerr << "Error. No DICOM series was found in directory" << std::endl;
+      std::cerr << "Error. No DICOM series was found in directory" << std::endl;
       return false;
   }
   else
       seriesName = UIDs.begin()->c_str();
 
-  cout << "Reading series as float images" << std::endl;
+  std::cout << "Reading series as float images" << std::endl;
   std::string caseID;
   floatImageType::Pointer floatImg;
   milx::File::OpenDICOMSeries<floatImageType>(directoryPath.toStdString(), floatImg, seriesName, caseID);
   data->SetInput(floatImg, false);
   data->setName(seriesName.c_str());
-  cout << "Completed Reading Series: " << seriesName << std::endl;
+  std::cout << "Completed Reading Series: " << seriesName << std::endl;
 
   //save path
   QFileInfo fi(directoryPath);
@@ -574,8 +574,8 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
 
             if(errorObserver->ReportsFailure())
             {
-                cerr << "VTI Writer Encountered the following error." << std::endl;
-                cerr << errorObserver->GetMessage() << std::endl;
+                std::cerr << "VTI Writer Encountered the following error." << std::endl;
+                std::cerr << errorObserver->GetMessage() << std::endl;
             }
             else
                 success = true;
@@ -645,7 +645,7 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
             linkProgressEventOf(imageReorient);
             imageReorient->Update();
 
-        cout << "Converted VTK Image to ITK Image since saving requested medical image format" << std::endl;
+        std::cout << "Converted VTK Image to ITK Image since saving requested medical image format" << std::endl;
         floatImageType::Pointer ITKImage = milx::Image<floatImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
         data->SetInput(ITKImage);
         data->generateImage();
@@ -668,8 +668,8 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
 
             if(errorObserver->ReportsFailure())
             {
-                cerr << "VTI Writer Encountered the following error." << std::endl;
-                cerr << errorObserver->GetMessage() << std::endl;
+                std::cerr << "VTI Writer Encountered the following error." << std::endl;
+                std::cerr << errorObserver->GetMessage() << std::endl;
             }
             else
                 success = true;
@@ -731,8 +731,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
             data->DeepCopy(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -748,8 +748,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
             data->DeepCopy(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -765,8 +765,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
             data->DeepCopy(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -782,8 +782,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
             data->DeepCopy(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -798,8 +798,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
             data->DeepCopy(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -835,8 +835,8 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
             data->SetInput(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -852,8 +852,8 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
             data->SetInput(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -869,8 +869,8 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
             data->SetInput(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -886,8 +886,8 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
             data->SetInput(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -903,8 +903,8 @@ bool milxQtFile::openModel(const QString filename, milxQtModel* data)
             data->SetInput(reader->GetOutput());
         else
         {
-            cerr << "Reader Encountered the following error." << std::endl;
-            cerr << errorObserver->GetMessage() << std::endl;
+            std::cerr << "Reader Encountered the following error." << std::endl;
+            std::cerr << errorObserver->GetMessage() << std::endl;
             return false;
         }
     }
@@ -942,11 +942,11 @@ bool milxQtFile::openModelCollection(vtkPolyDataCollection* collection, QStringL
 
         if(!success)
         {
-            cerr << "Encountered Error in Reading model. Aborting Collection Read." << std::endl;
+            std::cerr << "Encountered Error in Reading model. Aborting Collection Read." << std::endl;
             break;
         }
         else
-            cout << "Opened " << filenames[j].toStdString() << " into collection." << std::endl;
+            std::cout << "Opened " << filenames[j].toStdString() << " into collection." << std::endl;
 
         collection->AddItem(data);
 
@@ -1028,8 +1028,8 @@ bool milxQtFile::saveModel(const QString filename, vtkPolyData* data, const bool
 
     if(errorObserver->ReportsFailure())
     {
-        cerr << "Writer Encountered the following error." << std::endl;
-        cerr << errorObserver->GetMessage() << std::endl;
+        std::cerr << "Writer Encountered the following error." << std::endl;
+        std::cerr << errorObserver->GetMessage() << std::endl;
         return false;
     }
 
@@ -1082,7 +1082,7 @@ bool milxQtFile::saveModel(const QString filename, milxQtModel* data, const bool
     {
         vtkSmartPointer<vtkOBJExporter> writer = vtkSmartPointer<vtkOBJExporter>::New();
             QString namePrefix = fileInfo.path() + "/" + fileInfo.baseName();
-            cout << "Exporting with prefix " << namePrefix.toStdString().c_str() << std::endl;
+            std::cout << "Exporting with prefix " << namePrefix.toStdString().c_str() << std::endl;
             writer->SetFilePrefix(namePrefix.toStdString().c_str());
             data->disableOrient();
             writer->SetInput(data->GetRenderWindow());
@@ -1122,8 +1122,8 @@ bool milxQtFile::saveModel(const QString filename, milxQtModel* data, const bool
 
     if(errorObserver->ReportsFailure())
     {
-        cerr << "Writer Encountered the following error." << std::endl;
-        cerr << errorObserver->GetMessage() << std::endl;
+        std::cerr << "Writer Encountered the following error." << std::endl;
+        std::cerr << errorObserver->GetMessage() << std::endl;
         return false;
     }
 

@@ -17,6 +17,8 @@
 =========================================================================*/
 #include "vtkImageViewer3.h"
 
+#include <iostream>
+
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
 #include <vtkCommand.h>

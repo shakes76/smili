@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
     {
         if(!labelArg.isSet())
         {
-            cerr << "Error in arguments! Label argument needs to be used with the label value argument." << endl;
+            std::cerr << "Error in arguments! Label argument needs to be used with the label value argument." << endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -114,18 +114,18 @@ int main(int argc, char* argv[])
     bool success = false;
 
     //Load Models
-    cout << ">> Hausdorff Distance: Reading Models" << endl;
+    std::cout << ">> Hausdorff Distance: Reading Models" << endl;
     vtkSmartPointer<vtkPolyDataCollection> collection;
     success = milx::File::OpenModelCollection(filenames, collection);
     if(!success) //Error printed inside
     {
-        cerr << "Error reading models!" << endl;
+        std::cerr << "Error reading models!" << endl;
         exit(EXIT_FAILURE);
     }
     const size_t n = collection->GetNumberOfItems();
     if(n < 1)
     {
-        cerr << "At least one model must be provided!" << endl;
+        std::cerr << "At least one model must be provided!" << endl;
         exit(EXIT_FAILURE);
     }
     collection->InitTraversal();
@@ -141,28 +141,28 @@ int main(int argc, char* argv[])
     const unsigned char objectValue = 255;
     if(labelArg.isSet())
     {
-        cout << ">> Hausdorff Distance: Using Labelling" << endl;
-        cout << "Loading... " << endl;
+        std::cout << ">> Hausdorff Distance: Using Labelling" << endl;
+        std::cout << "Loading... " << endl;
         success = milx::File::OpenImage<LabelImageType>(labelName, labelledImage);
 
-        cout << "Thresholding... " << endl;
+        std::cout << "Thresholding... " << endl;
         //~ thresholdedImage = milx::Image<LabelImageType>::BinaryThresholdImage<LabelImageType>(resizedLabelledImage, 0, objectValue, labelValue, labelValue);
         thresholdedImage = milx::Image<LabelImageType>::BinaryThresholdImage<LabelImageType>(labelledImage, 0, objectValue, labelValue, labelValue);
 
-        cout << "Computing Distance Map of Label... " << endl;
+        std::cout << "Computing Distance Map of Label... " << endl;
         distanceMap = milx::Image<LabelImageType>::DistanceMap<FloatImageType>(thresholdedImage, binary, signedDistance, insideDistance, squaredDistance);
 
 //        success = milx::File::SaveImage<FloatImageType>(prefixName + "_dmap.nii.gz", distanceMap);
     }
     if(!success)
     {
-        cerr << "Error Reading one or more of the input files. Exiting." << endl;
+        std::cerr << "Error Reading one or more of the input files. Exiting." << endl;
         exit(EXIT_FAILURE);
     }
 
     //Read labels and generate iso surface
     //Clip mesh to ensure same FoV
-    cout << ">> Hausdorff Distance: Computing Absolute Surface Distances... " << endl;
+    std::cout << ">> Hausdorff Distance: Computing Absolute Surface Distances... " << endl;
     vtkSmartPointer<vtkFloatArray> weights = vtkSmartPointer<vtkFloatArray>::New();
     milx::DeformableModel model(surface);
     model.RemoveScalars(); //remove because mark will not set as 1.0, causing problems with meshes having scalars already
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     model.SetScalars(scalars);
 
     //Restore correspondence to copy scalars over to full (unclipped) mesh, since the mesh is clipped to ensure same FoV
-    cout << "Regions of Surface Outside the Image are marked with -1." << endl;
+    std::cout << "Regions of Surface Outside the Image are marked with -1." << endl;
     weights->FillComponent(0, -1.0); //resized within MarkSurfaceInsideImage function
     for(int j = 0; j < model.GetOutput()->GetNumberOfPoints(); j ++)
     {
@@ -195,14 +195,14 @@ int main(int argc, char* argv[])
         model.GetOutput()->GetBounds(bounds);
         vtkSmartPointer<vtkImageData> voxelisedModel = model.Voxelise(objectValue, labelSpacing.GetDataPointer(), bounds);
         LabelImageType::Pointer modelLabel = milx::Image<LabelImageType>::ConvertVTKImageToITKImage(voxelisedModel);
-        cout << "Computing Distance Map of Surface... " << endl;
+        std::cout << "Computing Distance Map of Surface... " << endl;
         itk::SmartPointer<FloatImageType> modelDistanceMap = milx::Image<LabelImageType>::DistanceMap<FloatImageType>(modelLabel, binary, signedDistance, insideDistance, squaredDistance);
 
         //~ //Debug, write distance map
         //~ milx::File::SaveImage(prefixName + "_model_distance_map.nii.gz", modelDistanceMap);
 
         //Isosurface label
-        cout << "Generating Iso Surface... " << endl;
+        std::cout << "Generating Iso Surface... " << endl;
         vtkSmartPointer<vtkImageData> labelledImageVTK = vtkSmartPointer<vtkImageData>::New();
         labelledImageVTK->DeepCopy( milx::Image<LabelImageType>::ConvertITKImageToVTKImage(thresholdedImage) ); //no orientation kept here
         milx::PrintDebug("Apply orientation to VTK Image form of Labelled Image");
@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 //        cout << "Saving Iso Surface Result... " << endl;
 //        milx::File::SaveModel(prefixName + milx::NumberToString(caseID) + "_isosurface.vtp", isoSurface.GetOutput());
 
-        cout << ">> Hausdorff Distance: Computing Backward Absolute Surface Distances... " << endl;
+        std::cout << ">> Hausdorff Distance: Computing Backward Absolute Surface Distances... " << endl;
         vtkSmartPointer<vtkFloatArray> weights2 = vtkSmartPointer<vtkFloatArray>::New();
         symmetricModel.SetInput(isoSurface.GetOutput());
         symmetricModel.RemoveScalars(); //remove because mark will not set as 1.0, causing problems with meshes having scalars already
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
         std::cout << "Hausdorff Distance: " << milx::Maximum<double>(range1[1], range2[1]) << std::endl;
 
         //Write result
-        cout << "Saving Backward Result... " << endl;
+        std::cout << "Saving Backward Result... " << endl;
         milx::File::SaveModel(prefixName + milx::NumberToString(caseID) + "_backward.vtp", isoSurface.GetOutput());
       }
     }
@@ -265,9 +265,9 @@ int main(int argc, char* argv[])
     surface->GetPointData()->SetScalars(weights);
 
     //Write result
-    cout << "Saving Result... " << endl;
+    std::cout << "Saving Result... " << endl;
     milx::File::SaveModel(outputName, surface);
 
-    cout << ">> Hausdorff Distance: Operation Complete" << endl;
+    std::cout << ">> Hausdorff Distance: Operation Complete" << endl;
     return EXIT_SUCCESS;
 }

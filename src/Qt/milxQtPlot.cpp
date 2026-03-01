@@ -80,7 +80,7 @@ milxQtPlot::~milxQtPlot()
 
 void milxQtPlot::createMenu(QMenu *menu)
 {
-    cout << "Creating Plot Menu 1" << std::endl;
+    std::cout << "Creating Plot Menu 1" << std::endl;
     if(!menu)
         return;
 
@@ -88,7 +88,7 @@ void milxQtPlot::createMenu(QMenu *menu)
     if(plotTypeSurface || plotType3D)
         menu->addMenu(milxQtModel::basicContextMenu()); ///Have all the basic model options
 
-    cout << "Creating Plot Menu 2" << std::endl;
+    std::cout << "Creating Plot Menu 2" << std::endl;
     if(plotTypeVolume)
     {
       foreach(QAction *currAct, actionsToAdd)
@@ -178,7 +178,7 @@ void milxQtPlot::generatePlot()
 
     if(table->GetNumberOfColumns() == 1) //bar chart
     {
-        cerr << "One column is not supported yet." << std::endl;
+        std::cerr << "One column is not supported yet." << std::endl;
     }
     else if(table->GetNumberOfColumns() == 2) //2D scatter
     {

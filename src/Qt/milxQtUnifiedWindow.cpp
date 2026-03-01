@@ -297,7 +297,7 @@ void milxQtUnifiedWindow::generateCheckerBoard()
         {
             printDebug("Adding " + img->getName() + " to checkerboard");
             int *displayExtents = img->GetDisplayExtent();
-            cerr   << "Slice: " << displayExtents[0] << ", " << displayExtents[1] << ", " << displayExtents[2]
+            std::cerr   << "Slice: " << displayExtents[0] << ", " << displayExtents[1] << ", " << displayExtents[2]
                    << ", " << displayExtents[3] << ", " << displayExtents[4] << ", " << displayExtents[5] << std::endl;
             vtkSmartPointer<vtkImageReslice> slice = vtkSmartPointer<vtkImageReslice>::New();
             #if VTK_MAJOR_VERSION <=5

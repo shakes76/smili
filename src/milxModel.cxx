@@ -58,7 +58,6 @@
 #include <vtkExtractEdges.h>
 #include <vtkTubeFilter.h>
 #include <vtkVertexGlyphFilter.h>
-#include <vtkIdFilter.h>
 #include <vtkGlyph3D.h>
 #include <vtkPolyDataPointSampler.h>
 #include <vtkTensorGlyph.h>
@@ -85,6 +84,11 @@
 #if VTK_MAJOR_VERSION > 5
   #include <vtkMultiBlockDataSet.h>
   #include <vtkMultiBlockDataGroupFilter.h>
+#endif
+#if VTK_MAJOR_VERSION > 8 && VTK_MINOR_VERSION > 4 //from 9.6 onwards
+    #include <vtkGenerateIds.h>
+#else
+    #include <vtkIdFilter.h>
 #endif
 //VTK Extension
 //#include "vtkAreaSimplificationMetric.h"
@@ -994,7 +998,11 @@ void Model::GenerateVertexScalars()
   if(!IsCurrentModel())
     return;
 
-  vtkSmartPointer<vtkIdFilter> vertices = vtkSmartPointer<vtkIdFilter>::New();
+  #if VTK_MAJOR_VERSION > 8 && VTK_MINOR_VERSION > 4 //from 9.6 onwards
+    vtkSmartPointer<vtkGenerateIds> vertices = vtkSmartPointer<vtkGenerateIds>::New();
+  #else
+    vtkSmartPointer<vtkIdFilter> vertices = vtkSmartPointer<vtkIdFilter>::New();
+  #endif
   #if VTK_MAJOR_VERSION <= 5
     vertices->SetInput(CurrentModel);
   #else

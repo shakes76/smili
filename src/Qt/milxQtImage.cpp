@@ -2477,8 +2477,8 @@ void milxQtImage::transform(QString filename, QString refImgFilename, bool inver
     typedef itk::Transform<transformType> TransformType;
     TransformType::Pointer transf = milx::File::OpenTransform<transformType>(filename.toStdString()); //!< Use ITK transform function
 
-    cout << "Transform to be used: ";
-    transf.Print(cout);
+    std::cout << "Transform to be used: ";
+    transf.Print(std::cout);
 
     QPointer<milxQtImage> imageToMatch = new milxQtImage;
     QPointer<milxQtFile> reader = new milxQtFile;
@@ -3026,7 +3026,7 @@ void milxQtImage::flip(bool xAxis, bool yAxis, bool zAxis, bool aboutOrigin)
 	{
 		imageInt = milx::Image<intImageType>::FlipImage(imageInt, xAxis, yAxis, zAxis, aboutOrigin);
 		//~ direction = imageInt->GetDirection();
-		//~ cout << "Flipped Direction: " << imageInt->GetDirection() << endl;
+		//~ std::cout << "Flipped Direction: " << imageInt->GetDirection() << endl;
 		//~ flipped = !flipped;
 		//~ imageInt->GetDirection()(1,1) *= -1;
 	}
@@ -4110,7 +4110,7 @@ void milxQtImage::histogram(int bins, float belowValue, float aboveValue, bool p
             hist->IgnoreZeroOff();
         linkProgressEventOf(hist);
         hist->Update();
-        hist->Print(cout);
+        hist->Print(std::cout);
 
     const coordinate meanTuple( hist->GetMean() );
     const coordinate stddevTuple(hist->GetStandardDeviation());

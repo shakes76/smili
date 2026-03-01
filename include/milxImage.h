@@ -1013,7 +1013,7 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
 //    new_origin[i] = matrix2->GetElement(i,3);
     offset[i] = matrix2->GetElement(i,3);
   }
-  matrix2->Print(cout);
+  matrix2->Print(std::cout);
 
   typedef itk::ResampleImageFilter<TImage, TImage, TPrecision> ResampleImageFilterType;
   /*typename ResampleImageFilterType::Pointer stripInfo = ResampleImageFilterType::New();

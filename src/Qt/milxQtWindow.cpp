@@ -103,7 +103,7 @@ void milxQtWindow::printError(QString msg)
     if(consoleAssigned)
         console->printError(msg);
     else
-        cerr << "ERROR: " << msg.toStdString() << std::endl;
+        std::cerr << "ERROR: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printWarning(QString msg)
@@ -114,7 +114,7 @@ void milxQtWindow::printWarning(QString msg)
     if(consoleAssigned)
         console->printWarning(msg);
     else
-        cerr << "Warning: " << msg.toStdString() << std::endl;
+        std::cerr << "Warning: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printDebug(QString msg)
@@ -125,7 +125,7 @@ void milxQtWindow::printDebug(QString msg)
     if(consoleAssigned)
         console->printDebug(msg);
     else
-        cerr << "Debug: " << msg.toStdString() << std::endl;
+        std::cerr << "Debug: " << msg.toStdString() << std::endl;
 }
 
 void milxQtWindow::printInfo(QString msg)
@@ -136,5 +136,5 @@ void milxQtWindow::printInfo(QString msg)
     if(consoleAssigned)
         console->printInfo(msg);
     else
-        cerr << msg.toStdString() << std::endl;
+        std::cerr << msg.toStdString() << std::endl;
 }

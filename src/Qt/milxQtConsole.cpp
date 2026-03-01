@@ -85,7 +85,7 @@ void milxQtConsole::printError(QString msg)
     if(!timestamps)
         timeStr = "";
 
-    cerr << timeStr.toStdString() << msg.toStdString() << endl;
+    std::cerr << timeStr.toStdString() << msg.toStdString() << endl;
     //<font color="red">This is some text!</font>
     msg.prepend("Error: ");
     msg.prepend(timeStr);
@@ -102,7 +102,7 @@ void milxQtConsole::printWarning(QString msg)
     if(!timestamps)
         timeStr = "";
 
-    cerr << timeStr.toStdString() << msg.toStdString() << endl;
+    std::cerr << timeStr.toStdString() << msg.toStdString() << endl;
     msg.prepend("Warning: ");
     msg.prepend(timeStr);
     msg.prepend("<font color='blue'>");
@@ -118,7 +118,7 @@ void milxQtConsole::printDebug(QString msg)
     if(!timestamps)
         timeStr = "";
 
-    cerr << timeStr.toStdString() << msg.toStdString() << endl;
+    std::cerr << timeStr.toStdString() << msg.toStdString() << endl;
     msg.prepend("Debug: ");
     msg.prepend(timeStr);
     msg.prepend("<font color='orange'>");
@@ -134,7 +134,7 @@ void milxQtConsole::printInfo(QString msg)
     if(!timestamps)
         timeStr = "";
 
-    cout << timeStr.toStdString() << msg.toStdString() << endl;
+    std::cout << timeStr.toStdString() << msg.toStdString() << endl;
     msg.prepend(timeStr);
     //msg.prepend("<font color='black'>");
     //msg.append("</font>");

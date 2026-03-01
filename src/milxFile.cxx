@@ -340,20 +340,20 @@ namespace milx
       gzFile fin = ::gzopen( filename.c_str(), "rb" );
       if(fin == NULL)
       {
-          cerr << "Cannot read " << filename << endl;
+          std::cerr << "Cannot read " << filename << endl;
           delete [] buffer;
       }
       buffer = ::gzgets (fin, buffer, 512);
       if(buffer[0] != '(')
       {
-          cerr << "File is not a transform file" << endl;
+          std::cerr << "File is not a transform file" << endl;
       }
       buffer = ::gzgets (fin, buffer, 512);
       if((buffer[0] != 0) && (buffer[1] != '8'))
       {
           // Failed Magic number test ;)
-          cerr << buffer << endl;
-          cerr << "File is not a transform file" << endl;
+          std::cerr << buffer << endl;
+          std::cerr << "File is not a transform file" << endl;
       }
       char str1 [128];
       char str2 [128];
@@ -375,8 +375,8 @@ namespace milx
       buffer = ::gzgets (fin, buffer, 512);
       if(buffer[0] != ')')
       {
-          cerr << buffer << endl;
-          cerr << "File is not a transform file" << endl;
+          std::cerr << buffer << endl;
+          std::cerr << "File is not a transform file" << endl;
       }
       delete [] buffer;
       gzclose(fin);
@@ -437,7 +437,7 @@ namespace milx
 
       if(fout == NULL)
       {
-        cerr << "Cannot open for writing: " << filename << endl;
+        std::cerr << "Cannot open for writing: " << filename << endl;
       }
 
       ::gzputs(fout, "(\n08\n");
@@ -456,7 +456,7 @@ namespace milx
 
       if(fout == NULL)
       {
-        cerr << "Cannot open for writing: " << filename << endl;
+        std::cerr << "Cannot open for writing: " << filename << endl;
       }
 
       ::fputs("(\n08\n", fout);

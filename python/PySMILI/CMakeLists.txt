@@ -10,7 +10,7 @@ get_target_property(MILXQT_MOCS milx-Qt MILXQT_MOCS)
 get_target_property(MILXQT_INSTALL_BINARY_DIR milx-Qt INTERFACE_LINK_DIRECTORIES)
 get_target_property(SMILX_EXE smilx OUTPUT_NAME)
 
-message("MILXQT_MOCS ${MILXQT_MOCS}")
+#~ message("MILXQT_MOCS ${MILXQT_MOCS}")
 
 # Need to rebuild the Qt MOCS and UIs etc. for linking
 # Add Headers into List
@@ -126,7 +126,7 @@ set(PySMILI_typesystem_paths
 )
 
 # Include flags/path that will be set in 'target_include_directories'
-set(PySMILI_target_include_directories ${CMAKE_SOURCE_DIR}/src)
+set(PySMILI_target_include_directories ${CMAKE_SOURCE_DIR}/src/Qt)
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 set(PySMILI_target_link_libraries

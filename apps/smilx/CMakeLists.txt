@@ -39,7 +39,7 @@ link_directories(${MILXQT_INSTALL_BINARY_DIR})
 set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/smilx")
 IF (WIN32)
     # There is a bug in NSI that does not handle full unix paths properly.
-    set(SMILX_ICON_FILE ${PROJECT_SOURCE_DIR}/smilx.rc)
+#~     set(SMILX_ICON_FILE ${PROJECT_SOURCE_DIR}/smilx.rc)
     set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\smilx.rc")
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/smilx.exe")
 ELSEIF(APPLE)

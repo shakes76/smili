@@ -33,11 +33,11 @@ int main(int argc, char *argv[])
 
     if (argc < 2)
     {
-        cerr << "milxModelViewer Application:" << std::endl;
-        cerr << "For quick and fast display of model/surface/polydata files." << std::endl;
-        cerr << "View configuration always matches sMILX settings wherever possible." << std::endl;
-        cerr << "Usage:" << std::endl;
-        cerr << "<Model Filename> " << std::endl;
+        std::cerr << "milxModelViewer Application:" << std::endl;
+        std::cerr << "For quick and fast display of model/surface/polydata files." << std::endl;
+        std::cerr << "View configuration always matches sMILX settings wherever possible." << std::endl;
+        std::cerr << "Usage:" << std::endl;
+        std::cerr << "<Model Filename> " << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
     if(!success)
     {
-      cerr << "Error opening model file." << std::endl;
+      std::cerr << "Error opening model file." << std::endl;
       return EXIT_FAILURE;
     }
 
