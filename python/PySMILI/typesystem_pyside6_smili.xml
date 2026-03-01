@@ -48,21 +48,21 @@
 
     <!-- Externals like VTK to detect QWidget properly -->
     <!-- <object-type name="vtkWeakPointerBase" generate="no"/>
-    <object-type name="vtkSmartPointerBase" generate="no"/>
-    <object-type name="vtkSmartPointer"/>
-    <object-type name="vtkMatrix4x4" generate="no"/> -->
+    <object-type name="vtkSmartPointerBase" generate="no"/> -->
+    <object-type name="vtkSmartPointer" generate="no"/>
+    <object-type name="vtkMatrix4x4" generate="no"/>
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
     <object-type name="QVTKOpenGLNativeWidget" />
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
     <object-type name="vtkPointSet" />
     <object-type name="vtkPoints" />
-	<object-type name="vtkPolyData" />
-    <object-type name="vtkImageData" />
-    <!-- <object-type name="vtkDataSet"/> -->
-    <object-type name="vtkDataObject" />
+	<!-- <object-type name="vtkPolyData" /> -->
+	<object-type name="vtkImageData" />
+    <!-- <object-type name="vtkDataSet"/>
+    <object-type name="vtkDataObject" generate="no"/> -->
 
-    <!-- <overload-removal type="long long int" replaces="int"/> -->
+	<!-- <overload-removal type="long long int" replaces="int"/> -->
 
     <!-- Reject classes or functions -->
     <!-- <rejection class="vtkPolyData" field-name="GetCellBounds" argument-type="*" /> -->
@@ -114,10 +114,15 @@
         function-name="GetScalarIndex"
         argument-type="int[3]"
     />
-    <rejection
+	<rejection
         class="vtkDataSet"
         function-name="GetScalarRange"
         argument-type="double[2]"
+    />
+    <rejection
+        class="milxQtModel"
+        function-name="enableOutline"
+        argument-type="vtkDataObject*"
     />
 
     <!-- our classes

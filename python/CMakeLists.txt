@@ -29,26 +29,31 @@ message("Using Python path ${Python3_BINPATH}")
 message("Using Python stdlib ${Python3_STDLIB}")
 message("Using Python sitelib ${Python3_SITELIB}")
 
-# Just to fix warnings with --warn-uninitialized
-if(NOT DEFINED SHIBOKEN_CUSTOM_PREFIX) #look for shiboken in a custom location
-    set(SHIBOKEN_CUSTOM_PREFIX "")
-endif()
-if(NOT DEFINED PYSIDE_CUSTOM_PREFIX) #look for pyside in a custom location
-    set(PYSIDE_CUSTOM_PREFIX "")
-endif()
+#~ # Just to fix warnings with --warn-uninitialized
+#~ if(NOT DEFINED SHIBOKEN_CUSTOM_PREFIX) #look for shiboken in a custom location
+#~     set(SHIBOKEN_CUSTOM_PREFIX "")
+#~ endif()
+#~ if(NOT DEFINED PYSIDE_CUSTOM_PREFIX) #look for pyside in a custom location
+#~     set(PYSIDE_CUSTOM_PREFIX "")
+#~ endif()
 
-if(${PROJECT_NAME}_QT6)
-    set(PYSIDE_MAJOR_VERSION "6")
-    #set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
-    set(QtWidgets_VERSION ${Qt6Widgets_VERSION})
-else()
-    set(PYSIDE_MAJOR_VERSION "2")
-    set(QtWidgets_VERSION ${Qt5Widgets_VERSION})
-endif()
-message("Using PySide ${PYSIDE_MAJOR_VERSION}")
+#~ if(${PROJECT_NAME}_QT6)
+#~     set(PYSIDE_MAJOR_VERSION "6")
+#~     #set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
+#~     set(QtWidgets_VERSION ${Qt6Widgets_VERSION})
+#~ else()
+#~     set(PYSIDE_MAJOR_VERSION "2")
+#~     set(QtWidgets_VERSION ${Qt5Widgets_VERSION})
+#~ endif()
+#~ message("Using PySide ${PYSIDE_MAJOR_VERSION}")
 
-find_package(PySide${PYSIDE_MAJOR_VERSION} ${QtWidgets_VERSION} EXACT REQUIRED)
-find_package(Shiboken${PYSIDE_MAJOR_VERSION} REQUIRED)
+#~ find_package(PySide${PYSIDE_MAJOR_VERSION} ${QtWidgets_VERSION} EXACT REQUIRED)
+
+list(APPEND CMAKE_PREFIX_PATH
+    "${Python3_SITELIB}/shiboken6_generator/lib/cmake"
+)
+set(Python_EXECUTABLE ${Python3_EXECUTABLE}) #for Shiboken Tools later
+find_package(Shiboken6Tools REQUIRED)
 
 if(NOT WIN32)
     set(Python3_VERSION_MAJORMINOR "${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}")
@@ -75,7 +80,7 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH ${SHIBOKEN_BASEDIR} ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-include(PySide${PYSIDE_MAJOR_VERSION}ModuleBuild)
+#~ include(PySide${PYSIDE_MAJOR_VERSION}ModuleBuild)
 add_subdirectory(PySMILI)
 #~ if(${PROJECT_NAME}_TESTS)
 #~   add_subdirectory(tests)
