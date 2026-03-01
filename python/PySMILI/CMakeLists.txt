@@ -8,8 +8,9 @@ include_directories (${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES} ${SMILI_INCLUDE_DIR
 # get milx Qt MOCS and Libs for linking later
 get_target_property(MILXQT_MOCS milx-Qt MILXQT_MOCS)
 get_target_property(MILXQT_INSTALL_BINARY_DIR milx-Qt INTERFACE_LINK_DIRECTORIES)
-get_target_property(SMILX_EXE smilx OUTPUT_NAME)
+#~ get_target_property(SMILX_EXE smilx OUTPUT_NAME)
 #~ message("MILXQT_MOCS ${MILXQT_MOCS}")
+#~ message("SMILX_EXE ${SMILX_EXE}")
 
 if(PYSIDE_MAJOR_VERSION GREATER "2")
     set(PySMILI_pyside6_link_libraries Qt${Qt_VERSION_MAJOR}::OpenGLWidgets)
@@ -37,8 +38,8 @@ set(PySMILI_SRC
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/itk_image_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointerbase_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointerbase_wrapper.cpp
-    # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.cpp
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.h
+    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtksmartpointer_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobjectbase_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobjectbase_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkobject_wrapper.h
@@ -49,8 +50,8 @@ set(PySMILI_SRC
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkdataset_wrapper.cpp
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
-    #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.h
+    ${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/vtkpolydata_wrapper.cpp
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.h
     #${CMAKE_CURRENT_BINARY_DIR}/${PYTHON_BINDING_NAMESPACE}/qvtkwidget_wrapper.cpp
     ${PySMILI_pyside6_src}
@@ -108,18 +109,6 @@ set(PySMILI_include_paths
     ${SMILI_INCLUDE_DIRS}
     #${ITK_LIBRARY_DIRS}
 )
-message("PySMILI_include_paths: ${PySMILI_include_paths}")
-
-#~ target_include_directories(${PYTHON_BINDING_NAMESPACE} PUBLIC ${PySMILI_include_paths})
-
-# A list of paths where shiboken should look for typesystem
-#~ set(PySMILI_typesystem_paths
-#~     # PySide path, this variable was exposed by FindPySide2.cmake
-#~     ${PYSIDE_TYPESYSTEMS}
-#~ )
-
-# Include flags/path that will be set in 'target_include_directories'
-#~ set(PySMILI_target_include_directories ${CMAKE_SOURCE_DIR}/src/Qt)
 
 # Libraries that will be necessary to link the target, this will used in the command 'target_link_libraries'
 #~ set(PySMILI_target_link_libraries
@@ -133,35 +122,6 @@ message("PySMILI_include_paths: ${PySMILI_include_paths}")
 #~     ${PySMILI_pyside6_link_libraries}
 #~     # PySide2::pyside2
 #~     ${Python3_LIBRARIES}
-#~ )
-
-# changes on these files should trigger a new generation
-#~ set(PySMILI_DEPENDS
-#~     ${CMAKE_CURRENT_SOURCE_DIR}/smili_global.h
-#~     #${CMAKE_SOURCE_DIR}/include/milxMath.h
-#~     # ${CMAKE_SOURCE_DIR}/include/milxFile.h
-#~     # ${CMAKE_SOURCE_DIR}/include/milxModel.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtWindow.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtRenderWindow.h
-#~     #${CMAKE_SOURCE_DIR}/include/Qt/milxQtUnifiedWindow.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtModel.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtImage.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtFile.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtPlot.h
-#~     ${CMAKE_SOURCE_DIR}/include/Qt/milxQtMain.h
-#~ )
-
-#~ create_python_bindings(
-#~   "${PYTHON_BINDING_NAMESPACE}"
-#~   "${PySMILI_typesystem_paths}"
-#~   "${PySMILI_include_paths}"
-#~   "${PySMILI_SRC}"
-#~   "${PySMILI_target_include_directories}"
-#~   "${PySMILI_target_link_libraries}"
-#~   ${CMAKE_CURRENT_SOURCE_DIR}/smili_global.h
-#~   ${PySMILI_pyside_xml}
-#~   "${PySMILI_DEPENDS}"
-#~   ${CMAKE_CURRENT_BINARY_DIR}
 #~ )
 
 # Create Python bindings using Shiboken6Tools function
@@ -216,16 +176,25 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.cmake ${CMAKE_CURRENT_BIN
 #~ message("MILXQT FILENAMES: ${MILXQT_FILENAMES}")
 
 # install
-message("Install Bindings at ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}")
+if(NOT ${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX)
+    # cmake-lint: disable=C0103
+    set(${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX
+        ${CMAKE_INSTALL_PREFIX}
+        CACHE FILEPATH "Custom path to install python bindings."
+    )
+endif()
+message(STATUS "PYTHON INSTALL PREFIX ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}")
+
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+#~     $<TARGET_FILE:${PYTHON_BINDING_NAMESPACE}>
     $<TARGET_FILE:milx-SMILI>
     $<TARGET_FILE:milx-Qt>
 #~     $<TARGET_RUNTIME_DLLS:milx-Qt>
     $<TARGET_FILE:vtk-ext>
-    ${PYSIDE_LIBRARY}
-    ${SHIBOKEN_LIBRARY}
+#~     ${PYSIDE_LIBRARY}
+#~     ${SHIBOKEN_LIBRARY}
 #~     ${QT_CORE_LOCATION}
 #~     ${QT_GUI_LOCATION}
 #~     ${QT_WIDGETS_LOCATION}
@@ -248,8 +217,6 @@ if(NOT WIN32)
         $<TARGET_SONAME_FILE:milx-Qt>
         $<TARGET_LINKER_FILE:vtk-ext>
         $<TARGET_SONAME_FILE:vtk-ext>
-        ${PYSIDE_LIBRARY}
-        ${SHIBOKEN_LIBRARY}
     DESTINATION
         ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}
   )
@@ -259,7 +226,7 @@ endif()
 # Install the executable #
 ##########################
 install(TARGETS ${PYTHON_BINDING_NAMESPACE}
-        DESTINATION "python"
+        DESTINATION "${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX}"
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
 INCLUDE(InstallRequiredSystemLibraries)
@@ -272,7 +239,7 @@ INCLUDE(InstallRequiredSystemLibraries)
 #SET(LIBRARY_DIRS ${MILXQT_INSTALL_BINARY_DIR};${SMILI_BINARY_DIR}/lib;${VTK_LIBRARY_DIRS};${ITK_LIBRARY_DIRS})
 
 #run qt5 windeploy for Qt platform libs
-if(WIN32)
+if(MSVC)
     include(Windeployqt)
     #~ windeployqt(${PYTHON_BINDING_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR})
     windeployqt(${PYTHON_BINDING_NAMESPACE} ${${PROJECT_NAME}_PYTHON_BINDINGS_INSTALL_PREFIX})

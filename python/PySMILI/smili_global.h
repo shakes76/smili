@@ -14,15 +14,15 @@
 //#include <itkImage.h>
 
 //VTK
-#include <vtkSmartPointer.h>
-#include <vtkMatrix4x4.h>
-// #include <vtkDataObject.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkMatrix4x4.h>
+//#include <vtkDataObject.h>
 // #include <vtkObjectBase.h>s
 // #include <vtkObject.h>
 #include <vtkPoints.h>
 //#include <vtkDataObject.h> //base of vtkDataSet
 #include <vtkPointSet.h> //base of vtkPolyData
-//#include <vtkPolyData.h>
+#include <vtkPolyData.h>
 // #include <vtkDataSet.h> //base of vtkImageData
 #include <vtkImageData.h>
 #if VTK_MAJOR_VERSION <= 8

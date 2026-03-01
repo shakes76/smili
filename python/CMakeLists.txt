@@ -37,17 +37,24 @@ message("Using Python sitelib ${Python3_SITELIB}")
 #~     set(PYSIDE_CUSTOM_PREFIX "")
 #~ endif()
 
-#~ if(${PROJECT_NAME}_QT6)
-#~     set(PYSIDE_MAJOR_VERSION "6")
-#~     #set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
-#~     set(QtWidgets_VERSION ${Qt6Widgets_VERSION})
-#~ else()
-#~     set(PYSIDE_MAJOR_VERSION "2")
-#~     set(QtWidgets_VERSION ${Qt5Widgets_VERSION})
-#~ endif()
-#~ message("Using PySide ${PYSIDE_MAJOR_VERSION}")
+if(${PROJECT_NAME}_QT6)
+    set(PYSIDE_MAJOR_VERSION "6")
+    #set(PYTHON_BINDING_NAMESPACE "${PYTHON_BINDING_NAMESPACE}Qt${PYSIDE_MAJOR_VERSION}")
+    set(QtWidgets_VERSION ${Qt6Widgets_VERSION})
+else()
+    set(PYSIDE_MAJOR_VERSION "2")
+    set(QtWidgets_VERSION ${Qt5Widgets_VERSION})
+endif()
+message("Using PySide ${PYSIDE_MAJOR_VERSION}")
 
 #~ find_package(PySide${PYSIDE_MAJOR_VERSION} ${QtWidgets_VERSION} EXACT REQUIRED)
+
+#~ message("Python Bindings using Qt${Qt_VERSION_MAJOR}")
+#~ if(${Qt_VERSION_MAJOR} VERSION_GREATER "5")
+#~     set(PYSIDE_MAJOR_VERSION ${Qt_VERSION_MAJOR})
+#~ else()
+#~     message(FATAL_ERROR "Python bindings only support Qt version 6.10 or later.")
+#~ endif()
 
 list(APPEND CMAKE_PREFIX_PATH
     "${Python3_SITELIB}/shiboken6_generator/lib/cmake"

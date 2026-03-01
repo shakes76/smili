@@ -48,16 +48,16 @@
 
     <!-- Externals like VTK to detect QWidget properly -->
     <!-- <object-type name="vtkWeakPointerBase" generate="no"/>
-    <object-type name="vtkSmartPointerBase" generate="no"/> -->
+    <object-type name="vtkSmartPointerBase" generate="no"/>
     <object-type name="vtkSmartPointer" generate="no"/>
-    <object-type name="vtkMatrix4x4" generate="no"/>
+    <object-type name="vtkMatrix4x4" generate="no"/> -->
     <!-- <object-type name="QVTKWidget" generate="no"/> -->
     <object-type name="QVTKOpenGLNativeWidget" />
     <!-- <object-type name="vtkObjectBase"/> -->
     <!-- <object-type name="vtkObject"/> -->
     <object-type name="vtkPointSet" />
     <object-type name="vtkPoints" />
-	<!-- <object-type name="vtkPolyData" /> -->
+	<object-type name="vtkPolyData" />
 	<object-type name="vtkImageData" />
     <!-- <object-type name="vtkDataSet"/>
     <object-type name="vtkDataObject" generate="no"/> -->
