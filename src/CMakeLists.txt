@@ -5,8 +5,8 @@ PROJECT(milx-SMILI)
 
 #load modules
 #-----------------------------------------------------------------------------
-include(zlib)
 include(find)
+include(zlib)
 
 # Add module library
 set(SMILI_INC ${LIBRARY_INCLUDE_PATH})
@@ -70,10 +70,6 @@ endif (SMILI_64)
 
 set(BUILD_TYPE STATIC)
 if(BUILD_SHARED_LIBS)
-  ADD_DEFINITIONS(-DSMILI_DLL)
-  ADD_DEFINITIONS(-DSMILI_MAKEDLL)
-  #Win32 requirement for VTK classes in DLLs
-  add_definitions (-DvtkCommon_EXPORTS)
   set(BUILD_TYPE SHARED)
 endif(BUILD_SHARED_LIBS)
 
@@ -84,6 +80,12 @@ link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS})
 
 add_library(milx-SMILI ${BUILD_TYPE} ${SMILI_HEADERS} ${SMILI_SOURCES})
 
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(milx-SMILI PUBLIC SMILI_DLL PRIVATE SMILI_MAKEDLL)
+endif(BUILD_SHARED_LIBS)
+
+target_include_directories(milx-SMILI PUBLIC ${SMILI_INC} ${SMILI_INCLUDE_DIRS} ${ZLIB_INCLUDES})
+
 # Set the build version (VERSION) and the API version (SOVERSION)
 SET_TARGET_PROPERTIES(milx-SMILI
                       PROPERTIES
@@ -91,6 +93,10 @@ SET_TARGET_PROPERTIES(milx-SMILI
                       SOVERSION 1)
 
 TARGET_LINK_LIBRARIES(milx-SMILI vtk-ext ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${ZLIB_LIBRARIES})
+
+IF(USE_VTK AND "${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milx-SMILI MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 # Installation of the Library
 # Installs the header files

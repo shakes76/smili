@@ -8,6 +8,9 @@ link_directories(${VTK_LIBRARY_DIRS} ${SMILI_BINARY_DIR}/lib)
 
 ADD_EXECUTABLE(milxModelApp MACOSX_BUNDLE milxModelApp.cxx)
 TARGET_LINK_LIBRARIES(milxModelApp ${VTK_LIBRARIES} milx-SMILI)
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milxModelApp MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 IF(UNIX)
   configure_file(milxModelApp.in "milxModelApp" @ONLY)

@@ -1,16 +1,14 @@
-cmake_minimum_required(VERSION 3.12)
-
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(PythonPlugin CXX)
 
 #~ set(Python3_ROOT_DIR "D:/WPy64-310111-JAX/python-3.10.11.amd64")
-set(Python3_ROOT_DIR "$ENV{PYTHON_PATH}")
+set(Python3_ROOT_DIR "$ENV{PYTHON_PATH}" CACHE PATH "Python 3 Root Directory")
 MARK_AS_ADVANCED(Python3_ROOT_DIR)
 
 find_package(Python3 COMPONENTS Development)
-MESSAGE("Found Python 3 at", ${Python3_ROOT_DIR})
+MESSAGE("Found Python 3 at ${Python3_ROOT_DIR}")
 
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 
@@ -45,19 +43,23 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_PLUGIN)
 #ADD_DEFINITIONS(-DQT_NO_DEBUG)
 ADD_DEFINITIONS(-DQT_SHARED)
+ADD_DEFINITIONS(-DSMILI_DLL)
 ADD_DEFINITIONS(-DMILXQT_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export MILXQT
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export MILXQT
 
 # this moc's the above variable and appends to the cxx sources
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-    QT5_WRAP_CPP(SSM_MOCS milxQtPythonPlugin.h milxQtPythonConsole.h)
-ELSEIF(VTK_QT_VERSION VERSION_GREATER "4")
+    QT_WRAP_CPP(SSM_MOCS milxQtPythonPlugin.h milxQtPythonConsole.h)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     QT4_WRAP_CPP(SSM_MOCS milxQtPythonPlugin.h milxQtPythonConsole.h)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(PythonPlugin SHARED milxQtPythonConsole.cpp milxQtPythonPlugin.cpp ${SSM_MOCS} ${PYTHON_LIBRARIES})
-TARGET_LINK_LIBRARIES(PythonPlugin milx-Qt ${QT_LIBRARIES} ${Python3_LIBRARIES} ${PYTHONQT_LIBS})
+TARGET_LINK_LIBRARIES(PythonPlugin milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${Python3_LIBRARIES} ${PYTHONQT_LIBS})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS PythonPlugin MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 if(BUILD_PYTHON_PLUGIN)
   install(TARGETS PythonPlugin

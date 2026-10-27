@@ -628,7 +628,7 @@ bool milxQtDICOMPlugin::ExportDICOM_RT(const std::string directoryPath, const st
           }
 
   #if (ITK_VERSION_MAJOR > 4)
-          p.SetPositionInObjectSpace(pixelIndex[0], pixelIndex[1], pixelIndex[2]);
+          p.SetPositionInObjectSpace(pixelIndex[0], pixelIndex[1]);
   #else
           p.SetPosition(pixelIndex[0],pixelIndex[1],pixelIndex[2]);
   #endif

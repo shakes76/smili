@@ -35,7 +35,15 @@
   #define VTK_EXT_STYLE_EXPORT VTKINTERACTIONSTYLE_EXPORT
 #elif(VTK_MAJOR_VERSION > 8)
   #include <vtkRenderingCoreModule.h> // For export macro
-  #define VTK_EXT_STYLE_EXPORT VTKRENDERINGCORE_EXPORT
+#if defined(_WIN32) && !defined(VTK_EXT_STATIC)
+  #if defined(vtk_ext_EXPORTS)
+    #define VTK_EXT_STYLE_EXPORT __declspec(dllexport)
+  #else
+    #define VTK_EXT_STYLE_EXPORT __declspec(dllimport)
+  #endif
+#else
+  #define VTK_EXT_STYLE_EXPORT
+#endif
 #else
   #define VTK_EXT_STYLE_EXPORT VTK_RENDERING_EXPORT
 #endif

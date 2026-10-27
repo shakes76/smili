@@ -51,15 +51,14 @@ function(windeployqt target dest_path)
         COMMAND "${CMAKE_COMMAND}" -E
             env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}"
                 --verbose 1
-                --release
-                \"$<TARGET_FILE:${target}>\"
+                $<$<CONFIG:Debug>:--debug>$<$<NOT:$<CONFIG:Debug>>:--release>
+                "$<TARGET_FILE:${target}>"
+        VERBATIM
     )
 
-    if(${CMAKE_CONFIGURATION_TYPES} EQUAL "Release") #only run this for single build type
+    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE STREQUAL "Release")
         MESSAGE("Windows Qt${VTK_QT_VERSION} Deployment: ${CMAKE_CONFIGURATION_TYPES}")
-        # install(CODE ...) doesn't support generator expressions, but
-        # file(GENERATE ...) does - store the path in a file
-        file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${target}_path"
+        file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${target}_$<CONFIG>_path"
             CONTENT "$<TARGET_FILE:${target}>"
         )
 
@@ -67,14 +66,17 @@ function(windeployqt target dest_path)
         # runtime files to the appropriate directory for installation
         install(CODE
             "
-            file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_path\" _file)
+            if(NOT CMAKE_INSTALL_CONFIG_NAME)
+                set(CMAKE_INSTALL_CONFIG_NAME \"Release\")
+            endif()
+            file(READ \"${CMAKE_CURRENT_BINARY_DIR}/${target}_\${CMAKE_INSTALL_CONFIG_NAME}_path\" _file)
             execute_process(
                 COMMAND \"${CMAKE_COMMAND}\" -E
                     env PATH=\"${_qt_bin_dir}\" \"${WINDEPLOYQT_EXECUTABLE}\"
                         --dry-run
                         --release
                         --list mapping
-                        \${_file}
+                        \"\${_file}\"
                 OUTPUT_VARIABLE _output
                 OUTPUT_STRIP_TRAILING_WHITESPACE
             )
@@ -84,8 +86,7 @@ function(windeployqt target dest_path)
                 list(GET _files 1 _dest)
                 execute_process(
                     COMMAND \"${CMAKE_COMMAND}\" -E
-#~                         copy \${_src} \"\${CMAKE_INSTALL_PREFIX}/bin/\${_dest}\"
-                        copy \${_src} \"\${dest_path}/\${_dest}\"
+                        copy \"\${_src}\" \"${dest_path}/\${_dest}\"
                 )
                 list(REMOVE_AT _files 0 1)
             endwhile()

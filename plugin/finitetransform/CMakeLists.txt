@@ -1,12 +1,9 @@
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-cmake_minimum_required(VERSION 2.6)
-
 PROJECT(finitetransform CXX)
 
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-INCLUDE(${QT_USE_FILE})
+include(find)
 
 set(SMILI_DIR ${SMILI_SOURCE_DIR})
 
@@ -20,11 +17,10 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_PLUGIN)
 #ADD_DEFINITIONS(-DQT_NO_DEBUG)
 ADD_DEFINITIONS(-DQT_SHARED)
+ADD_DEFINITIONS(-DSMILI_DLL)
 ADD_DEFINITIONS(-DMILXQT_DLL) #DLL Export SMILI
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export SMILI
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
-#Win32 requirement for VTK classes in DLLs
-#~ ADD_DEFINITIONS (-DvtkFiltering_EXPORTS)
 
 #NTTW Options
 #Add compiler flags
@@ -32,7 +28,7 @@ ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
 IF(CMAKE_SIZEOF_VOID_P EQUAL 8) #64-bit environment
   set (NTTW_64 ON) #True
   message("Detected 64-bit system. Using appropriate 64-bit integers.")
-ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8) #64-bit environment
+ELSE(CMAKE_SIZEOF_VOID_P EQUAL 8) #64-bit environment
   set (NTTW_64 OFF) #False
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 8) #64-bit environment
 
@@ -58,10 +54,17 @@ include_directories (${NTTW_DIR}/include)
 link_directories(${NTTW_DIR}/lib)
 
 # this moc's the above variable and appends to the cxx sources
-QT4_WRAP_CPP(SSM_MOCS milxQtFiniteTransformPlugin.h)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  QT_WRAP_CPP(SSM_MOCS milxQtFiniteTransformPlugin.h)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+  QT4_WRAP_CPP(SSM_MOCS milxQtFiniteTransformPlugin.h)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(finitetransform SHARED milxQtFiniteTransformPlugin.cpp ${SSM_MOCS})
-TARGET_LINK_LIBRARIES(finitetransform nttw milx-SMILI milx-Qt ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(finitetransform nttw milx-SMILI milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS finitetransform MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 install(TARGETS finitetransform
         DESTINATION "plugins"

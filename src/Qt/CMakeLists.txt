@@ -4,13 +4,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 PROJECT(milx-Qt)
 
 # Add Sources
-set(MILXQT_SOURCES milxQtConsole milxQtManager milxQtWindow milxQtRenderWindow milxQtImage milxQtModel milxQtPlot milxQtFile milxQtUnifiedWindow milxQtMain)
+set(MILXQT_SOURCES milxQtConsole.cpp milxQtManager.cpp milxQtWindow.cpp milxQtRenderWindow.cpp milxQtImage.cpp milxQtModel.cpp milxQtPlot.cpp milxQtFile.cpp milxQtUnifiedWindow.cpp milxQtMain.cpp)
 set(MILXQT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(MILXQT_BINARY_DIR ${PROJECT_BINARY_DIR})
 # Add Headers into List
 file(GLOB MILXQT_HEADERS ${LIBRARY_INCLUDE_PATH}/Qt/*.h)
 file(GLOB MILXQT_HEADERS_TEMPLATES ${LIBRARY_INCLUDE_PATH}/Qt/*.txx)
 file(GLOB MILXQT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/Qt/*.h)
+list(REMOVE_ITEM MILXQT_HEADERS_MOC "${LIBRARY_INCLUDE_PATH}/Qt/milxQtAliases.h")
 file(GLOB MILXQT_SRC_UIS ${SMILI_SOURCE_DIR}/ui/*.ui)
 file(GLOB MILXQT_SRC_UI_HEADERS_MOC ${SMILI_SOURCE_DIR}/ui/*.h)
 file(GLOB MILXQT_SRC_UI_CPP ${SMILI_SOURCE_DIR}/ui/*.cpp)
@@ -21,11 +22,6 @@ file(GLOB MILXQT_SRC_RCCS ${SMILI_SOURCE_DIR}/*.qrc)
 #set (MILXQT_64 ON) #True
 set (MILXQT_64 OFF) #False
 
-#Win32 requirement for VTK classes in DLLs
-add_definitions (-DvtkRendering_EXPORTS)
-
-#Add compiler flags
-add_definitions (-DMILXQT_DLL -DMILXQT_MAKEDLL)
 if (MILXQT_64)
 	add_definitions (-DMILXQT_64)
 endif (MILXQT_64)
@@ -56,6 +52,9 @@ link_directories(${ITK_LIBRARY_DIRS} ${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
 
 add_library (milx-Qt SHARED ${MILXQT_HEADERS} ${MILXQT_SOURCES} ${MILXQT_MOCS} ${MILXQT_UI_MOCS} ${MILXQT_UIS} ${MILXQT_SRC_UI_CPP} ${MILXQT_RCCS})
 
+target_compile_definitions(milx-Qt PUBLIC MILXQT_DLL PRIVATE MILXQT_MAKEDLL)
+target_include_directories(milx-Qt PUBLIC ${MILXQT_INCLUDE_DIRS} ${ZLIB_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
+
 # Set the build version (VERSION) and the API version (SOVERSION)
 SET_TARGET_PROPERTIES(milx-Qt
                       PROPERTIES
@@ -85,10 +84,14 @@ ENDIF("${VTK_MAJOR_VERSION}" LESS 6)
 
 TARGET_LINK_LIBRARIES(milx-Qt milx-SMILI vtk-ext ${VTK_LIBRARIES} ${VTK_QT_LIBRARIES} ${QT_LIBRARIES} ${ITK_LIBRARIES} ${ITK_REVIEW_LIBRARIES} ${ZLIB_LIBRARIES})
 
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milx-Qt MODULES ${VTK_LIBRARIES})
+ENDIF()
+
 if(CMAKE_STRIP)
   if(APPLE)
     add_custom_command(TARGET milx-Qt POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-Qt>)
-    #add_custom_command(TARGET milx-SMILI POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-SMILI>)
+    #add_custom_command(TARGET milx-SMILI POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-Qt>)
   endif()
 endif()
 

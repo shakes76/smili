@@ -1,18 +1,15 @@
-cmake_minimum_required(VERSION 2.6)
- 
 PROJECT(milxHausdorffDistanceBetweenSurfaces)
- 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
 
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE(${ITK_USE_FILE})
+include(find)
 
 INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
 LINK_DIRECTORIES(${MILXQT_INSTALL_BINARY_DIR})
- 
+
 ADD_EXECUTABLE(milxHausdorffDistanceBetweenSurfaces milxHausdorffDistanceBetweenSurfaces.cxx)
 TARGET_LINK_LIBRARIES(milxHausdorffDistanceBetweenSurfaces milx-SMILI ${ITK_LIBRARIES} vtk-ext ${VTK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milxHausdorffDistanceBetweenSurfaces MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 # Installs the executable
 INSTALL(TARGETS milxHausdorffDistanceBetweenSurfaces 

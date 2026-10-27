@@ -5,7 +5,7 @@ PROJECT(milxLabelVisualisation)
 
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
 set(MILXQT_BINDIR ${SMILI_BINARY_DIR})
-ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
+ADD_DEFINITIONS(-DSMILI_DLL -DMILXQT_DLL -DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
 IF(WIN32)
 	SET(MILXQT_INSTALL_BINARY_DIR "C:/Program Files/MILX/lib")
@@ -18,6 +18,9 @@ link_directories(${MILXQT_INSTALL_BINARY_DIR})
 
 ADD_EXECUTABLE(milxLabelVisualisation MACOSX_BUNDLE milxLabelVisualisation.cpp)
 TARGET_LINK_LIBRARIES(milxLabelVisualisation milx-Qt milx-SMILI ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milxLabelVisualisation MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 IF(UNIX)
   configure_file(milxLabelVisualisation.in "milxLabelVisualisation" @ONLY)

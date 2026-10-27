@@ -28,6 +28,10 @@
 ///VTK
 #include <vtkFloatArray.h>
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 /**
  * Compute Hausdorff distances using distance maps and the surfaces.
  */

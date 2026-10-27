@@ -32,7 +32,7 @@ endif(ITK_USE_REVIEW OR "${ITK_VERSION_MAJOR}" GREATER 3)
 FIND_PACKAGE(VTK)
 IF("${VTK_MAJOR_VERSION}" LESS 9) #If not VTK 9 or above
     include(${VTK_USE_FILE})
-ELSE()
+ELSEIF(VTK_INCLUDE_DIRS)
     include_directories(${VTK_INCLUDE_DIRS})
 ENDIF()
 

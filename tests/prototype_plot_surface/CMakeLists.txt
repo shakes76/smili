@@ -1,14 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
- 
 PROJECT(prototype_plot_surface)
- 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
 
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE(${ITK_USE_FILE})
+include(find)
 
-INCLUDE_DIRECTORIES(${SMILI_SOURCE_DIR}/include ${SMILI_SOURCE_DIR}/include/Qt ${SMILI_SOURCE_DIR}/include/vtk-ext ${SMILI_SOURCE_DIR}/include/itkVTKGlue)
- 
+INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
+
 ADD_EXECUTABLE(prototype_plot_surface prototype_plot_surface.cxx)
 TARGET_LINK_LIBRARIES(prototype_plot_surface milx-SMILI ${ITK_LIBRARIES} vtk-ext ${VTK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS prototype_plot_surface MODULES ${VTK_LIBRARIES})
+ENDIF()

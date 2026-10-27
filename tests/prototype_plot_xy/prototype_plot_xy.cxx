@@ -29,6 +29,11 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
+#include <iostream>
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int main(int argc, char *argv[])
 {
@@ -56,7 +61,11 @@ int main(int argc, char *argv[])
         templateChart->SetShowLegend(true);
     
     vtkPlot *templatePoints = templateChart->AddPlot(vtkChart::POINTS);
+#if VTK_MAJOR_VERSION <= 5
         templatePoints->SetInput(csv_vert_source->GetOutput(), 0, 1);
+#else
+        templatePoints->SetInputData(csv_vert_source->GetOutput(), 0, 1);
+#endif
         templatePoints->SetColor(255, 0, 0, 255);
         templatePoints->SetWidth(1.0);
         vtkPlotPoints::SafeDownCast(templatePoints)->SetMarkerStyle(vtkPlotPoints::CROSS);

@@ -223,8 +223,10 @@ The export command is
 */
 #if defined(SMILI_MAKEDLL)     // create a SMILI DLL library
 #define SMILI_EXPORT  __declspec(dllexport)
+#define SMILI_TEMPLATEDLL  __declspec(dllexport)
 #else                        // use a SMILI DLL library
 #define SMILI_EXPORT  __declspec(dllimport)
+#define SMILI_TEMPLATEDLL
 #endif
 #endif // SMILI_DLL
 #endif // WIN32
@@ -235,6 +237,7 @@ The export command is
     \brief DLL Function Symbol for Windows. It is empty for other OSes.
 */
 #define SMILI_EXPORT
+#define SMILI_TEMPLATEDLL
 #endif
 //@}
 }

@@ -1,17 +1,12 @@
-cmake_minimum_required(VERSION 2.6)
- 
 PROJECT(prototype_image_slice)
- 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
 
-FIND_PACKAGE(ITK REQUIRED)
-INCLUDE(${ITK_USE_FILE})
+include(find)
 
-SET(SMILI_SOURCE_DIR ../../)
-
-INCLUDE_DIRECTORIES(${SMILI_SOURCE_DIR}/include ${SMILI_SOURCE_DIR}/include/Qt ${SMILI_SOURCE_DIR}/include/vtk-ext ${SMILI_SOURCE_DIR}/include/itkVTKGlue)
+INCLUDE_DIRECTORIES(${SMILI_INCLUDE_DIRS})
 link_directories(${SMILI_BINARY_DIR}/lib)
- 
+
 ADD_EXECUTABLE(prototype_image_slice prototype_image_slice.cxx)
 TARGET_LINK_LIBRARIES(prototype_image_slice milx-SMILI ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${ZLIB_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS prototype_image_slice MODULES ${VTK_LIBRARIES})
+ENDIF()

@@ -17,10 +17,13 @@
 =========================================================================*/
 ///Other Headers
 #include <string>
+#include <iostream>
 ///VTK
+#include <vtkVersion.h>
 #include <vtkSmartPointer.h>
 #include <vtkDelimitedTextReader.h>
 #include <vtkTable.h>
+#include <vtkVariant.h>
 #include <vtkPolyData.h>
 #include <vtkImageData.h>
 #include <vtkImageDataGeometryFilter.h>
@@ -30,6 +33,10 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int main(int argc, char *argv[])
 {
@@ -41,14 +48,12 @@ int main(int argc, char *argv[])
     }
 
     std::string inputSurfaceFilename = argv[1];
-    //~ std::string inputImageFilename1 = argv[2];
 
     //Load the vertex table from CSV file
     cout << "Reading file: " << inputSurfaceFilename << endl;
     vtkSmartPointer<vtkDelimitedTextReader> csv_vert_source = vtkSmartPointer<vtkDelimitedTextReader>::New();
         csv_vert_source->SetFieldDelimiterCharacters(",");
         csv_vert_source->DetectNumericColumnsOn();
-        //~ csv_vert_source->SetHaveHeaders(True);
         csv_vert_source->SetFileName(inputSurfaceFilename.c_str());
         csv_vert_source->Update();
 
@@ -56,21 +61,27 @@ int main(int argc, char *argv[])
     cout << "Has " << table->GetNumberOfColumns() << " columns" << endl;
 
     vtkSmartPointer<vtkImageData> samplingArray = vtkSmartPointer<vtkImageData>::New();
+        samplingArray->SetExtent(0, table->GetNumberOfRows()-1, 0, table->GetNumberOfColumns()-1, 0, 0);
+#if VTK_MAJOR_VERSION <= 5
         samplingArray->SetNumberOfScalarComponents(1);
         samplingArray->SetScalarTypeToDouble();
-        samplingArray->SetExtent(0, table->GetNumberOfRows()-1, 0, table->GetNumberOfColumns()-1, 0, 0);
-        samplingArray->Update();
+        samplingArray->AllocateScalars();
+#else
+        samplingArray->AllocateScalars(VTK_DOUBLE, 1);
+#endif
 
     //Copy data into imagedata
     for(int j = 0; j < table->GetNumberOfRows(); j ++)
         for(int k = 0; k < table->GetNumberOfColumns(); k ++)
             samplingArray->SetScalarComponentFromDouble(j, k, 0, 0, table->GetValue(j, k).ToDouble());
-    samplingArray->AllocateScalars();
-    samplingArray->Update();
 
     cout << "Warping Scalars" << endl;
     vtkSmartPointer<vtkImageDataGeometryFilter> geometry = vtkSmartPointer<vtkImageDataGeometryFilter>::New();
+#if VTK_MAJOR_VERSION <= 5
         geometry->SetInput(samplingArray);
+#else
+        geometry->SetInputData(samplingArray);
+#endif
         geometry->Update();
 
     double range[2], bounds[6];
@@ -80,9 +91,6 @@ int main(int argc, char *argv[])
 
     vtkSmartPointer<vtkWarpScalar> warpScalar = vtkSmartPointer<vtkWarpScalar>::New();
         warpScalar->SetInputConnection(geometry->GetOutputPort());
-//        warpScalar->SetInput(samplingArray);
-//        warpScalar->XYPlaneOn();
-//        warpScalar->UseNormalOff();
         warpScalar->SetNormal(0, 0, 1);
         warpScalar->UseNormalOn();
         warpScalar->SetScaleFactor(scaling);

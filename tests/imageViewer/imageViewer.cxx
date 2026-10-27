@@ -25,6 +25,10 @@
 
 #include <sstream>
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 int main(int argc, char *argv[])
 {
   if (argc < 2)
@@ -47,11 +51,16 @@ int main(int argc, char *argv[])
     
   ///Reorient
   vtkSmartPointer<vtkImageData> imageVTK = milx::Image<VisualizingImageType>::ConvertITKImageToVTKImage(image);
-  vtkSmartPointer<vtkImageData> imageVTKReoriented = milx::Image<VisualizingImageType>::ApplyOrientationToVTKImage(imageVTK, image);
+  vtkSmartPointer<vtkMatrix4x4> transformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkSmartPointer<vtkImageData> imageVTKReoriented = milx::Image<VisualizingImageType>::ApplyOrientationToVTKImage(imageVTK, image, transformMatrix, false, true);
   
   // Visualize
   vtkSmartPointer<vtkImageViewer3> imageViewer = vtkSmartPointer<vtkImageViewer3>::New();
+#if VTK_MAJOR_VERSION <= 5
   imageViewer->SetInput( imageVTKReoriented );
+#else
+  imageViewer->SetInputData( imageVTKReoriented );
+#endif
   imageViewer->GetRenderWindow()->SetSize( 500, 500 );
   //~ imageViewer->SetSlice(bounds[5]/2); //show middle of volume
   imageViewer->GetRenderer()->ResetCamera();

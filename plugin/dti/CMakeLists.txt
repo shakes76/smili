@@ -1,15 +1,9 @@
 # Include the directory itself as a path to include directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-cmake_minimum_required(VERSION 2.6)
-
 PROJECT(DTIPlugin CXX)
 
-FIND_PACKAGE(VTK REQUIRED)
-INCLUDE(${VTK_USE_FILE})
-
-FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
-INCLUDE(${QT_USE_FILE})
+include(find)
 
 #Find Boost Math libraries, used for sphereical harmonics
 set(Boost_USE_STATIC_LIBS ON)
@@ -33,17 +27,23 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_PLUGIN)
 #ADD_DEFINITIONS(-DQT_NO_DEBUG)
 ADD_DEFINITIONS(-DQT_SHARED)
+ADD_DEFINITIONS(-DSMILI_DLL)
 ADD_DEFINITIONS(-DMILXQT_DLL) #DLL Export SMILI
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export SMILI
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export SMILI
-#Win32 requirement for VTK classes in DLLs
-ADD_DEFINITIONS (-DvtkFiltering_EXPORTS)
 
 # this moc's the above variable and appends to the cxx sources
-QT4_WRAP_CPP(SSM_MOCS milxQtDiffusionTensorPlugin.h milxQtDiffusionTensorModel.h milxQtDiffusionTensorImage.h)
+IF(VTK_QT_VERSION VERSION_GREATER "4")
+  QT_WRAP_CPP(SSM_MOCS milxQtDiffusionTensorPlugin.h milxQtDiffusionTensorModel.h milxQtDiffusionTensorImage.h)
+ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+  QT4_WRAP_CPP(SSM_MOCS milxQtDiffusionTensorPlugin.h milxQtDiffusionTensorModel.h milxQtDiffusionTensorImage.h)
+ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
 ADD_LIBRARY(DTIPlugin SHARED vtkDiffusionTensorGlyphFilter.cxx milxQtDiffusionTensorPlugin.cpp milxQtDiffusionTensorModel.cpp milxQtDiffusionTensorImage.cpp ${SSM_MOCS})
-TARGET_LINK_LIBRARIES(DTIPlugin milx-SMILI milx-Qt ${QT_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(DTIPlugin milx-SMILI milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${Boost_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS DTIPlugin MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 install(TARGETS DTIPlugin
         DESTINATION "plugins"

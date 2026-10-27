@@ -15,7 +15,7 @@ include(find)
 
 #--------------------------------------------------------------------------------
 set(MILXQT_DIR ${SMILI_SOURCE_DIR})
-ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
+ADD_DEFINITIONS(-DSMILI_DLL -DMILXQT_DLL -DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
 
 #########################
@@ -61,6 +61,9 @@ ADD_EXECUTABLE(smilx WIN32 MACOSX_BUNDLE ${SMILX_ICON_FILE} smilx.cpp) #no MACOS
 #~   qt5_use_modules(smilx Core Gui Widgets WebEngineWidgets)
 #~ ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(smilx milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS smilx MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 ##############################################
 # Expand the command line wild-cards in MSVC #

@@ -22,6 +22,10 @@
 #include "milxFile.h"
 #include "milxQtPlot.h"
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc,argv);

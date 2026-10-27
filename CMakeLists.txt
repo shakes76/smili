@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 PROJECT(SMILI)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #Set output paths
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
@@ -12,8 +15,8 @@ set(CMAKE_MODULE_PATH "${SMILI_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 
 #load modules
 #-----------------------------------------------------------------------------
-include(zlib)
 include(find)
+include(zlib)
 include(macros)
 include(version)
 
@@ -52,12 +55,45 @@ IF(BUILD_MILXQT)
     #VTK_QT_VERSION is declared in VTKConfig.cmake in VTK 6.1, vtkQt.cmake only available in out-of-source builds and not installed
     MESSAGE("VTK-Qt Version: ${VTK_QT_VERSION}")
     IF(VTK_QT_VERSION GREATER "4")
-        find_package("Qt${VTK_QT_VERSION}" COMPONENTS Core Gui Widgets WebEngineWidgets REQUIRED)
-#~         qt_standard_project_setup()
-        include_directories(${Qt${QT_VERSION_MAJOR}Core_INCLUDE_DIRS} ${Qt${QT_VERSION_MAJOR}WebEngineWidgets_INCLUDE_DIRS})
+        set(QT_VERSION_MAJOR ${VTK_QT_VERSION})
+        set(Qt_VERSION_MAJOR ${VTK_QT_VERSION})
+        set(QT_DEFAULT_MAJOR_VERSION ${VTK_QT_VERSION})
+        IF(VTK_QT_VERSION GREATER "5")
+            find_package("Qt${VTK_QT_VERSION}" COMPONENTS Core Gui Widgets OpenGL OpenGLWidgets WebEngineWidgets REQUIRED)
+            include_directories(
+                ${Qt${QT_VERSION_MAJOR}Core_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}Widgets_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}OpenGL_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}OpenGLWidgets_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}WebEngineWidgets_INCLUDE_DIRS}
+            )
+            set(QT_LIBRARIES
+                Qt${QT_VERSION_MAJOR}::Core
+                Qt${QT_VERSION_MAJOR}::Gui
+                Qt${QT_VERSION_MAJOR}::Widgets
+                Qt${QT_VERSION_MAJOR}::OpenGL
+                Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+                Qt${QT_VERSION_MAJOR}::WebEngineWidgets
+            )
+        ELSE()
+            find_package("Qt${VTK_QT_VERSION}" COMPONENTS Core Gui Widgets OpenGL WebEngineWidgets REQUIRED)
+            include_directories(
+                ${Qt${QT_VERSION_MAJOR}Core_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}Gui_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}Widgets_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}OpenGL_INCLUDE_DIRS}
+                ${Qt${QT_VERSION_MAJOR}WebEngineWidgets_INCLUDE_DIRS}
+            )
+            set(QT_LIBRARIES
+                Qt${QT_VERSION_MAJOR}::Core
+                Qt${QT_VERSION_MAJOR}::Gui
+                Qt${QT_VERSION_MAJOR}::Widgets
+                Qt${QT_VERSION_MAJOR}::OpenGL
+                Qt${QT_VERSION_MAJOR}::WebEngineWidgets
+            )
+        ENDIF()
         add_definitions(${Qt${QT_VERSION_MAJOR}Core_DEFINITIONS})
-        qt_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
-        set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::WebEngineWidgets)
         set(${PROJECT_NAME}_QT${VTK_QT_VERSION} TRUE)
     ELSE(VTK_QT_VERSION GREATER "4")
         FIND_PACKAGE(Qt4 REQUIRED QtCore QtGui QtWebkit)
@@ -162,5 +198,6 @@ IF(PYTHON_BINDINGS)
 ENDIF(PYTHON_BINDINGS)
 
 IF(BUILD_TESTS)
+    enable_testing()
     add_subdirectory (tests)
 ENDIF(BUILD_TESTS)

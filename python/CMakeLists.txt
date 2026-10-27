@@ -3,7 +3,7 @@
 #
 set(PYTHON_BINDING_NAMESPACE "PySMILI")
 
-set(Python3_ROOT_DIR "D:/WPy64-31090/python-3.10.9.amd64") # Replace with the actual path, such as your venv
+set(Python3_ROOT_DIR "D:/WPy64-31090/python-3.10.9.amd64" CACHE PATH "Python 3 Root Directory") # Replace with the actual path, such as your venv
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 # Use provided python interpreter if given.
 if(NOT Python3_EXECUTABLE)
@@ -17,7 +17,7 @@ if(NOT Python3_EXECUTABLE)
         endif()
     else()
         find_program(Python3_EXECUTABLE "python")
-        if(NOT Python3_EXECUTABLEr)
+        if(NOT Python3_EXECUTABLE)
             message(FATAL_ERROR
                 "No Python interpreter could be found. Make sure python is in PATH.")
         endif()

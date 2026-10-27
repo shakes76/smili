@@ -41,13 +41,14 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_PLUGIN)
 #ADD_DEFINITIONS(-DQT_NO_DEBUG)
 ADD_DEFINITIONS(-DQT_SHARED)
+ADD_DEFINITIONS(-DSMILI_DLL)
 ADD_DEFINITIONS(-DMILXQT_DLL) #DLL Export milxQt
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_DLL) #DLL Export milxQt
 ADD_DEFINITIONS(-DMILXQT_PLUGIN_MAKEDLL) #DLL Plugin Export milxQt
 
 # this moc's the above variable and appends to the cxx sources
 IF(VTK_QT_VERSION VERSION_GREATER "4")
-    QT5_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
+    QT_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
 ELSE(VTK_QT_VERSION VERSION_GREATER "4")
     QT4_WRAP_CPP(SSM_MOCS milxQtSSMPlugin.h milxQtShapeModel.h milxQtRobustShapeModel.h)
 ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
@@ -55,7 +56,7 @@ ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 set(SSM_USE_LOCAL_FILE false CACHE BOOL "Use a local version of the vtkPCAAnalysisTimepointFilter*, vtkWeightedPCAAnalysisFilter* etc. files")
 IF (SSM_USE_LOCAL_FILE)
     set(SSM_LOCAL_FILES vtkPCAAnalysisTimepointFilter.cxx vtkWeightedPCAAnalysisFilter.cxx)
-ELSE (SSM_LOCAL_FILES)
+ELSE (SSM_USE_LOCAL_FILE)
     set(SSM_LOCAL_FILES "")
 ENDIF (SSM_USE_LOCAL_FILE)
 
@@ -66,6 +67,10 @@ IF (SSM_USE_LOCAL_FILE)
 ELSE (SSM_USE_LOCAL_FILE)
   TARGET_LINK_LIBRARIES(SSMPlugin milx-vtkHybrid vtk-ext milx-Qt ${QT_LIBRARIES} ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${ITK_REVIEW_LIBRARIES})
 ENDIF (SSM_USE_LOCAL_FILE)
+
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS SSMPlugin MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 if(BUILD_SSM_PLUGIN)
   install(TARGETS SSMPlugin

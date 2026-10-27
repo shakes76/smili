@@ -1,12 +1,12 @@
- 
-# Recurse into the "apps" subdirectory. This does not actually
-# cause another cmake executable to run.
+# Recurse into the test subdirectories
 add_subdirectory (milxHausdorffDistanceBetweenSurfaces)
 add_subdirectory (milxPlotXY)
+add_subdirectory (imageViewer)
 
 if(BUILD_PROTOTYPES)
     add_subdirectory (prototype_plot_xy)
     add_subdirectory (prototype_plot_surface)
+    add_subdirectory (prototype_image_planes)
     if(VTK_MAJOR_VERSION GREATER 5 OR VTK_MINOR_VERSION GREATER 10)
         add_subdirectory (prototype_image_slice)
     else(VTK_MAJOR_VERSION GREATER 5 OR VTK_MINOR_VERSION GREATER 10)
@@ -18,3 +18,17 @@ if(BUILD_PROTOTYPES)
         message("ITK 4 or greater not found. Skipping vector image test app.")
     endif(ITK_VERSION_MAJOR GREATER 3)
 endif(BUILD_PROTOTYPES)
+
+if(BUILD_APPLICATIONS)
+    if(USE_ITK)
+        add_test(NAME cli_milxImageApp_help COMMAND milxImageApp --help)
+        add_test(NAME cli_milxDICOMApp_help COMMAND milxDICOMApp --help)
+    endif()
+    if(USE_VTK)
+        add_test(NAME cli_milxModelApp_help COMMAND milxModelApp --help)
+    endif()
+    if(USE_ITK AND USE_VTK)
+        add_test(NAME cli_milxDeformableModelApp_help COMMAND milxDeformableModelApp --help)
+        add_test(NAME cli_milxHausdorffDistance_help COMMAND milxHausdorffDistance --help)
+    endif()
+endif()

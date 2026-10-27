@@ -127,7 +127,7 @@ public:
   	\fn Image::ImageBase()
   	\brief Standard constructor
   */
-  ImageBase();
+  ImageBase() {};
   /*!
   	\fn Image::~ImageBase()
   	\brief Standard Destructor
@@ -172,7 +172,7 @@ public:
   \endcode
 */
 template<class TImage>
-class SMILI_EXPORT Image : public ImageBase
+class SMILI_TEMPLATEDLL Image : public ImageBase
 {
 public:
   /*!

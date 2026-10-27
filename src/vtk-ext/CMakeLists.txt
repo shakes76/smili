@@ -6,9 +6,9 @@ PROJECT(vtk-ext)
 # Add Sources
 #set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3 vtkAreaSimplificationMetric)
 IF(VTK_MAJOR_VERSION VERSION_GREATER "6") #VTK 7+ deprecated vtkTensor
-  set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3 vtkTensor)
+  set(VTK_EXT_SOURCES vtkInteractorStyleImage2.cxx vtkImageViewer3.cxx vtkTensor.cxx)
 ELSE(VTK_MAJOR_VERSION VERSION_GREATER "6")
-  set(VTK_EXT_SOURCES vtkInteractorStyleImage2 vtkImageViewer3)
+  set(VTK_EXT_SOURCES vtkInteractorStyleImage2.cxx vtkImageViewer3.cxx)
 ENDIF(VTK_MAJOR_VERSION VERSION_GREATER "6")
 set(VTK_EXT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
 set(VTK_EXT_BINARY_DIR ${PROJECT_BINARY_DIR})
@@ -16,24 +16,12 @@ set(VTK_EXT_BINARY_DIR ${PROJECT_BINARY_DIR})
 file(GLOB VTK_EXT_HEADERS ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
 file(GLOB VTK_EXT_HEADERS_MOC ${LIBRARY_INCLUDE_PATH}/vtk-ext/*.h)
 
-#Win32 requirement for VTK classes in DLLs
-IF(VTK_MAJOR_VERSION VERSION_GREATER "8")
-  add_definitions (-DvtkCommonDataModel_EXPORTS)
-  add_definitions (-DRenderingCore_EXPORTS)
-  add_definitions (-DInteractionImage_EXPORTS)
-ENDIF()
-IF(VTK_MAJOR_VERSION VERSION_GREATER "5")
-  add_definitions (-DvtkInteractionStyle_EXPORTS)
-  add_definitions (-DvtkRenderingImage_EXPORTS)
-ELSE()
-  add_definitions (-DvtkRendering_EXPORTS)
-  add_definitions (-DvtkHybrid_EXPORTS)
-ENDIF()
-
 include_directories (${LIBRARY_INCLUDE_PATH}/vtk-ext)
 link_directories(${VTK_LIBRARY_DIRS} ${LIBRARY_OUTPUT_PATH})
 
 add_library (vtk-ext SHARED ${VTK_EXT_HEADERS} ${VTK_EXT_SOURCES})
+
+target_include_directories(vtk-ext PUBLIC ${LIBRARY_INCLUDE_PATH}/vtk-ext)
 
 # Set the build version (VERSION) and the API version (SOVERSION)
 SET_TARGET_PROPERTIES(vtk-ext
@@ -42,6 +30,10 @@ SET_TARGET_PROPERTIES(vtk-ext
                       SOVERSION 1)
 
 TARGET_LINK_LIBRARIES(vtk-ext ${VTK_LIBRARIES})
+
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS vtk-ext MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 # Installation of the Library
 # Installs the header files

@@ -3,7 +3,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 PROJECT(milxHausdorffDistance)
 
-ADD_DEFINITIONS(-DMILX_DLL) #DLL Export MILX
+ADD_DEFINITIONS(-DSMILI_DLL -DMILX_DLL) #DLL Export MILX
 ADD_DEFINITIONS(-DMILX_PLUGIN_DLL) #DLL Export MILX
 
 include_directories (${SMILI_INCLUDE_DIRS})
@@ -11,6 +11,9 @@ link_directories(${MILXQT_INSTALL_BINARY_DIR})
 
 ADD_EXECUTABLE(milxHausdorffDistance MACOSX_BUNDLE milxHausdorffDistance.cpp)
 TARGET_LINK_LIBRARIES(milxHausdorffDistance milx-SMILI ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
+  vtk_module_autoinit(TARGETS milxHausdorffDistance MODULES ${VTK_LIBRARIES})
+ENDIF()
 
 # expand the command line wild-cards in msvc
 IF(MSVC)

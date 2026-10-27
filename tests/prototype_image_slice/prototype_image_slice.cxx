@@ -31,6 +31,10 @@
 
 #include "milxFile.h"
 #include "milxImage.h"
+
+using std::cout;
+using std::cerr;
+using std::endl;
  
 int main(int argc, char *argv[])
 {
@@ -73,7 +77,8 @@ int main(int argc, char *argv[])
   
   ///Reorient
   vtkSmartPointer<vtkImageData> imageVTK = milx::Image<VisualizingImageType>::ConvertITKImageToVTKImage(image);
-  vtkSmartPointer<vtkImageData> imageVTKReoriented = milx::Image<VisualizingImageType>::ApplyOrientationToVTKImage(imageVTK, image, true);
+  vtkSmartPointer<vtkMatrix4x4> transformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkSmartPointer<vtkImageData> imageVTKReoriented = milx::Image<VisualizingImageType>::ApplyOrientationToVTKImage(imageVTK, image, transformMatrix, false, true);
  
   vtkSmartPointer<vtkImageResliceMapper> imageResliceMapper = vtkSmartPointer<vtkImageResliceMapper>::New();
 #if VTK_MAJOR_VERSION <= 5

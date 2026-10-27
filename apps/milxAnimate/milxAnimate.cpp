@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
     QScopedPointer<milxQtImage> imgIso(new milxQtImage);  //smart deletion
     if(isoArg.isSet())
     {
-        cout << ">> Animate: Applying Isosurface" << std::endl;
+        std::cout << ">> Animate: Applying Isosurface" << std::endl;
         success = reader->openImage(isoName.c_str(), imgIso.data());
             imgIso->setName(isoName.c_str());
             imgIso->generateImage();

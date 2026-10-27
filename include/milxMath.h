@@ -41,7 +41,7 @@ namespace milx
   \brief A general math object for computing common operations such a centroids etc.
 */
 template<class Type = double>
-class SMILI_EXPORT Math
+class SMILI_TEMPLATEDLL Math
 {
 public:
 #ifndef VTK_ONLY

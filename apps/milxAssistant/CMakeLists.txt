@@ -3,7 +3,6 @@
 ############################
 
 PROJECT(milxAssistant)
-cmake_policy(SET CMP0053 NEW)
 
 ### Include the directory itself as a path to include directories ###
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -32,9 +31,6 @@ QT_ADD_RESOURCES(MILXQT_RCCS ${MILXQT_SRC_RCCS})
 # Needs to be before ADD_EXECUTABLE for Windows #
 #################################################
 ADD_EXECUTABLE(milxAssistant WIN32 MACOSX_BUNDLE milxAssistant.cpp ${MILXQT_RCCS}) #no MACOSX_BUNDLE since custom one created
-#~ IF(VTK_QT_VERSION VERSION_GREATER "4")
-#~   qt5_use_modules(milxAssistant Core Gui Widgets WebEngineWidgets)
-#~ ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 TARGET_LINK_LIBRARIES(milxAssistant ${QT_LIBRARIES})
 
 # Installs the executable

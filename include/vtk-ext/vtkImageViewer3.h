@@ -45,7 +45,15 @@
   #define VTK_EXT_EXPORT VTKRENDERINGIMAGE_EXPORT
 #elif(VTK_MAJOR_VERSION > 8)
   #include <vtkInteractionImageModule.h> // For export macro
-  #define VTK_EXT_EXPORT VTKINTERACTIONIMAGE_EXPORT
+#if defined(_WIN32) && !defined(VTK_EXT_STATIC)
+  #if defined(vtk_ext_EXPORTS)
+    #define VTK_EXT_EXPORT __declspec(dllexport)
+  #else
+    #define VTK_EXT_EXPORT __declspec(dllimport)
+  #endif
+#else
+  #define VTK_EXT_EXPORT
+#endif
 #else
   #define VTK_EXT_EXPORT VTK_RENDERING_EXPORT
 #endif

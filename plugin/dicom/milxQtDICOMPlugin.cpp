@@ -68,7 +68,7 @@ milxQtDICOMPlugin::~milxQtDICOMPlugin()
 {
     if(isRunning() && threaded)
         quit();
-    cout << "DICOM Plugin Destroyed." << std::endl;
+    std::cout << "DICOM Plugin Destroyed." << std::endl;
 }
 
 QString milxQtDICOMPlugin::name()
@@ -347,7 +347,7 @@ void milxQtDICOMPlugin::openSeries()
 
 void milxQtDICOMPlugin::openStructureSet()
 {
-    cout << "Opening DICOM-RT" << std::endl;
+    std::cout << "Opening DICOM-RT" << std::endl;
     //use wizaed to ask
     wizardRT.restart();
 
@@ -395,7 +395,7 @@ void milxQtDICOMPlugin::openStructureSet()
 
 void milxQtDICOMPlugin::convert()
 {
-    cout << "Converting DICOMs" << std::endl;
+    std::cout << "Converting DICOMs" << std::endl;
     //use wizaed to ask
     wizard.restart();
 
@@ -598,7 +598,7 @@ void milxQtDICOMPlugin::convert()
 
 void milxQtDICOMPlugin::anonymize()
 {
-  cout << "Anonymizing DICOMs" << std::endl;
+  std::cout << "Anonymizing DICOMs" << std::endl;
   typedef itk::GDCMSeriesFileNames      NamesGeneratorType;
   typedef std::vector< std::string >    FileNamesContainer;
   typedef std::vector< std::string >    SeriesIdContainer;

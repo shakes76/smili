@@ -32,7 +32,16 @@
 #endif
 //VTK
 #include <vtkWindowToImageFilter.h>
-#include <vtkFFMPEGWriter.h>
+#if __has_include(<vtkFFMPEGWriter.h>)
+  #include <vtkFFMPEGWriter.h>
+  #define SMILI_USE_FFMPEG_WRITER 1
+#elif defined(_WIN32) && defined(VTK_USE_VIDEO_FOR_WINDOWS) && __has_include(<vtkAVIWriter.h>)
+  #include <vtkAVIWriter.h>
+  #define SMILI_USE_AVI_WRITER 1
+#else
+  #include <vtkOggTheoraWriter.h>
+  #define SMILI_USE_OGG_WRITER 1
+#endif
 #include <vtkCamera.h>
 
 milxQtAnimateModel::milxQtAnimateModel(QWidget *theParent, bool contextSystem) : milxQtModel(theParent, contextSystem)
@@ -334,15 +343,33 @@ void milxQtAnimateModel::movie(QString filename, int frames, int compress)
             windowToImage->SetInput(milxQtRenderWindow::GetRenderWindow());
             linkProgressEventOf(windowToImage);
 
+#if defined(SMILI_USE_FFMPEG_WRITER)
         vtkSmartPointer<vtkFFMPEGWriter> writer = vtkSmartPointer<vtkFFMPEGWriter>::New();
+#elif defined(SMILI_USE_AVI_WRITER)
+        vtkSmartPointer<vtkAVIWriter> writer = vtkSmartPointer<vtkAVIWriter>::New();
+#else
+        vtkSmartPointer<vtkOggTheoraWriter> writer = vtkSmartPointer<vtkOggTheoraWriter>::New();
+#endif
             writer->SetFileName(filename.toStdString().c_str());
             writer->SetInputConnection(windowToImage->GetOutputPort());
             writer->SetQuality(quality);
             writer->SetRate(frameRate);
         if (compressRet == QMessageBox::Yes) //3D
+#if defined(SMILI_USE_FFMPEG_WRITER)
             writer->CompressionOn();
+#elif defined(SMILI_USE_AVI_WRITER)
+            writer->SetCompressorFourCC("MSVC");
+#else
+            (void)0;
+#endif
         else
+#if defined(SMILI_USE_FFMPEG_WRITER)
             writer->CompressionOff();
+#elif defined(SMILI_USE_AVI_WRITER)
+            writer->SetCompressorFourCC("DIB");
+#else
+            (void)0;
+#endif
             linkProgressEventOf(writer);
             writer->Start();
 

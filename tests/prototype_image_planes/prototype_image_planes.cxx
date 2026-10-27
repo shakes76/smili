@@ -18,6 +18,7 @@
 ///Other Headers
 #include <string>
 ///VTK
+#include <vtkVersion.h>
 #include <vtkSmartPointer.h>
 #include <vtkCommand.h>
 #include <vtkImageData.h>
@@ -28,15 +29,19 @@
 #include <vtkProperty.h>
 #include <vtkImageActor.h>
 #include <vtkImageMapToColors.h>
+#include <vtkLookupTable.h>
 #include <vtkImageOrthoPlanes.h>
 #include <vtkImagePlaneWidget.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 //milx
 #include "milxFile.h"
 #include "milxImage.h"
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 //----------------------------------------------------------------------------
 class vtkOrthoPlanesCallback : public vtkCommand
@@ -97,7 +102,11 @@ int main(int argc, char *argv[])
     vtkSmartPointer<vtkImageData> imageData = milx::Image<ImageType>::ConvertITKImageToVTKImage(image);
 
     vtkSmartPointer<vtkOutlineFilter> outline = vtkSmartPointer<vtkOutlineFilter>::New();
+#if VTK_MAJOR_VERSION <= 5
       outline->SetInputConnection(imageData->GetProducerPort());
+#else
+      outline->SetInputData(imageData);
+#endif
 
     vtkSmartPointer<vtkPolyDataMapper> outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
       outlineMapper->SetInputConnection(outline->GetOutputPort());
@@ -134,7 +143,11 @@ int main(int argc, char *argv[])
       planeWidgetX->SetTexturePlaneProperty(ipwProp);
       planeWidgetX->TextureInterpolateOff();
       planeWidgetX->SetResliceInterpolateToNearestNeighbour();
+#if VTK_MAJOR_VERSION <= 5
       planeWidgetX->SetInput(imageData);
+#else
+      planeWidgetX->SetInputData(imageData);
+#endif
       planeWidgetX->SetPlaneOrientationToXAxes();
       planeWidgetX->SetSliceIndex(32);
       planeWidgetX->DisplayTextOn();
@@ -150,7 +163,11 @@ int main(int argc, char *argv[])
       planeWidgetY->SetTexturePlaneProperty(ipwProp);
       planeWidgetY->TextureInterpolateOn();
       planeWidgetY->SetResliceInterpolateToLinear();
+#if VTK_MAJOR_VERSION <= 5
       planeWidgetY->SetInput(imageData);
+#else
+      planeWidgetY->SetInputData(imageData);
+#endif
       planeWidgetY->SetPlaneOrientationToYAxes();
       planeWidgetY->SetSlicePosition(102.4);
       planeWidgetY->SetLookupTable( planeWidgetX->GetLookupTable());
@@ -166,7 +183,11 @@ int main(int argc, char *argv[])
       planeWidgetZ->SetTexturePlaneProperty(ipwProp);
       planeWidgetZ->TextureInterpolateOn();
       planeWidgetZ->SetResliceInterpolateToCubic();
+#if VTK_MAJOR_VERSION <= 5
       planeWidgetZ->SetInput(imageData);
+#else
+      planeWidgetZ->SetInputData(imageData);
+#endif
       planeWidgetZ->SetPlaneOrientationToZAxes();
       planeWidgetZ->SetSliceIndex(25);
       planeWidgetZ->SetLookupTable( planeWidgetX->GetLookupTable());
@@ -195,12 +216,21 @@ int main(int argc, char *argv[])
       colorMap->PassAlphaToOutputOff();
       colorMap->SetActiveComponent(0);
       colorMap->SetOutputFormatToLuminance();
+#if VTK_MAJOR_VERSION <= 5
       colorMap->SetInput(planeWidgetZ->GetResliceOutput());
+#else
+      colorMap->SetInputData(planeWidgetZ->GetResliceOutput());
+#endif
       colorMap->SetLookupTable(planeWidgetX->GetLookupTable());
+      colorMap->Update();
 
     vtkSmartPointer<vtkImageActor> imageActor = vtkSmartPointer<vtkImageActor>::New();
       imageActor->PickableOff();
+#if VTK_MAJOR_VERSION <= 5
       imageActor->SetInput(colorMap->GetOutput());
+#else
+      imageActor->SetInputData(colorMap->GetOutput());
+#endif
 
     // Visualize
     vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
