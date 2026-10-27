@@ -38,6 +38,16 @@ IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
   vtk_module_autoinit(TARGETS animatePlugin MODULES ${VTK_LIBRARIES})
 ENDIF()
 
+IF(WIN32 AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+  add_custom_command(TARGET animatePlugin POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      $<TARGET_FILE:animatePlugin>
+      $<TARGET_RUNTIME_DLLS:animatePlugin>
+      ${SMILI_BINARY_DIR}/bin/$<CONFIG>
+    COMMAND_EXPAND_LISTS
+  )
+ENDIF()
+
 IF(BUILD_ANIMATE_PLUGIN)
   install(TARGETS animatePlugin
           DESTINATION "plugins"

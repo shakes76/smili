@@ -712,6 +712,8 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
 bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
 {
     bool legacy = false, wavefront = false, stanford = false, stereoLith = false;
+    if (!QFileInfo::exists(filename))
+        return false;
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
 
@@ -816,6 +818,8 @@ bool milxQtFile::openModel(const QString filename, vtkPolyData* data)
 bool milxQtFile::openModel(const QString filename, milxQtModel* data)
 {
     bool legacy = false, wavefront = false, stanford = false, stereoLith = false;
+    if (!QFileInfo::exists(filename))
+        return false;
     QFileInfo fileInfo(filename);
     QString extension = fileInfo.suffix().toLower();
 

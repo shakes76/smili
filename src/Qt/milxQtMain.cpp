@@ -3338,7 +3338,8 @@ bool milxQtMain::loadPlugins()
     QDir pluginsDir(qApp->applicationDirPath());
     QString sharedObjectSuffix = "";
 #if defined(Q_OS_WIN)
-    if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
+    QString configDirName = pluginsDir.dirName();
+    if (configDirName.toLower() == "debug" || configDirName.toLower() == "release")
         pluginsDir.cdUp();
     sharedObjectSuffix = "dll"; //!<\todo use better cross-platform method here
 #elif defined(Q_OS_MAC)
@@ -3354,6 +3355,10 @@ bool milxQtMain::loadPlugins()
 #endif
     pluginsDir.cdUp();
     pluginsDir.cd("plugins");
+#if defined(Q_OS_WIN)
+    if ((configDirName.toLower() == "debug" || configDirName.toLower() == "release") && pluginsDir.exists(configDirName))
+        pluginsDir.cd(configDirName);
+#endif
     printInfo("Plugin Path to be searched: " + pluginsDir.path());
     
     QStringList pluginFileNames = pluginsDir.entryList(QDir::Files);

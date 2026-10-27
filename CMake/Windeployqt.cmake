@@ -53,6 +53,7 @@ function(windeployqt target dest_path)
                 --verbose 1
                 $<$<CONFIG:Debug>:--debug>$<$<NOT:$<CONFIG:Debug>>:--release>
                 "$<TARGET_FILE:${target}>"
+                "$<TARGET_FILE:milx-Qt>"
         VERBATIM
     )
 

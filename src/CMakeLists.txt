@@ -98,6 +98,15 @@ IF(USE_VTK AND "${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
   vtk_module_autoinit(TARGETS milx-SMILI MODULES ${VTK_LIBRARIES})
 ENDIF()
 
+IF(WIN32 AND BUILD_SHARED_LIBS AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+  add_custom_command(TARGET milx-SMILI POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      $<TARGET_RUNTIME_DLLS:milx-SMILI>
+      $<TARGET_FILE_DIR:milx-SMILI>
+    COMMAND_EXPAND_LISTS
+  )
+ENDIF()
+
 # Installation of the Library
 # Installs the header files
 install(FILES ${SMILI_HEADERS} DESTINATION "include")

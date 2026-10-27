@@ -88,6 +88,15 @@ IF("${VTK_MAJOR_VERSION}" VERSION_GREATER_EQUAL "9")
   vtk_module_autoinit(TARGETS milx-Qt MODULES ${VTK_LIBRARIES})
 ENDIF()
 
+IF(WIN32 AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+  add_custom_command(TARGET milx-Qt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      $<TARGET_RUNTIME_DLLS:milx-Qt>
+      $<TARGET_FILE_DIR:milx-Qt>
+    COMMAND_EXPAND_LISTS
+  )
+ENDIF()
+
 if(CMAKE_STRIP)
   if(APPLE)
     add_custom_command(TARGET milx-Qt POST_BUILD COMMAND ${CMAKE_STRIP} -x $<TARGET_FILE:milx-Qt>)

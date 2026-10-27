@@ -24,6 +24,7 @@ Phase 1 audited and modernized the CMake build system across the root project, `
 | **CM-12** | `plugin/animate/milxQtAnimateModel.cpp` | Unconditionally included `<vtkFFMPEGWriter.h>` which is not built by default on Windows VTK 9 builds; lacked fallback to `<vtkOggTheoraWriter.h>` (`VTK::IOOggTheora`). | **High** |
 | **CM-13** | `plugin/dicom/milxQtDICOMPlugin.h`, `milxQtDICOMPlugin.cpp`, `apps/milxAnimate/milxAnimate.cpp` | `ExportDICOM_RT` passed 3 coordinates to `itk::SpatialObjectPoint<2>::SetPositionInObjectSpace(x, y, z)`, triggering an ITK 5 `static_assert` failure (`sizeof...(coords) == TDimension - 1`). Unqualified `cout` calls failed under ITK 5. | **High** |
 | **CM-14** | `tests/*/CMakeLists.txt` and `tests/**/*.cxx` | All test subdirectories used `LINK_LIBRARIES(milx)` instead of `milx-SMILI`, lacked `add_test()` registration for CTest, omitted `std::` on `cout`/`cerr`/`endl`, and used legacy VTK 5/7 `SetInput()` calls or outdated `ApplyOrientationToVTKImage` signatures. | **High** |
+| **CM-15** | `CMakeLists.txt`, `src/CMakeLists.txt`, `src/Qt/CMakeLists.txt`, `plugin/CMakeLists.txt`, `CMake/Windeployqt.cmake`, `src/Qt/milxQtMain.cpp` | Legacy `LIBRARY_OUTPUT_PATH` placed Windows runtime DLLs (`vtk-ext.dll`, `milx-SMILI.dll`, `milx-Qt.dll`) in `lib/Release` instead of `bin/Release`, preventing `windeployqt` from scanning `milx-Qt.dll` (`Qt6OpenGL.dll`, `Qt6OpenGLWidgets.dll`, `Qt6WebEngineWidgets.dll`) and causing `0xC0000135` (`STATUS_DLL_NOT_FOUND`) when launching apps directly from `bin/Release` without custom `PATH` entries. Also `milxQtMain::loadPlugins()` did not descend into `plugins/Release` on multi-config Visual Studio builds. | **Critical** |
 
 ---
 
@@ -34,6 +35,7 @@ Phase 1 audited and modernized the CMake build system across the root project, `
    - Reordered `include(find)` before `include(zlib)` so ITK/VTK ZLIB targets are detected.
    - Explicitly set `QT_VERSION_MAJOR` and populated `QT_LIBRARIES` with `Qt6::Core`, `Qt6::Gui`, `Qt6::Widgets`, `Qt6::OpenGL`, `Qt6::OpenGLWidgets`, and optional `Qt6::WebEngineWidgets`.
    - Enabled `enable_testing()` when `BUILD_TESTS=ON`.
+   - Set `CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin`, `CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib`, and `CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib` so Windows `.dll` targets (`vtk-ext.dll`, `milx-SMILI.dll`, `milx-Qt.dll`) output directly alongside `.exe` targets in `bin/<Config>`, added `POST_BUILD` `$<TARGET_RUNTIME_DLLS:...>` deployment on `milx-SMILI`, `milx-Qt`, and `animatePlugin`, updated `windeployqt` to scan both `smilx.exe` and `milx-Qt.dll`, and updated `milxQtMain::loadPlugins()` to resolve `plugins/<Config>` in multi-config builds.
 2. **CMake Helper Modules**:
    - [`CMake/find.cmake`](../../CMake/find.cmake): Changed `IF(VTK_INCLUDE_DIRS)` to `ELSEIF(VTK_INCLUDE_DIRS)`.
    - [`CMake/zlib.cmake`](../../CMake/zlib.cmake): Added support for ITK 5's `ITKZLIB_LIBRARIES` and VTK 9's `VTK::zlib`, and fixed the `ADD_DEFINITIONS(-DZLIB_DLL)` syntax error.
