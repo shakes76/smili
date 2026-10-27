@@ -3,6 +3,7 @@ add_subdirectory (milxHausdorffDistanceBetweenSurfaces)
 add_subdirectory (milxPlotXY)
 add_subdirectory (imageViewer)
 add_subdirectory (test_vtk9_itk5_pipeline)
+add_subdirectory (test_qt6_smilx_gui)
 
 if(BUILD_PROTOTYPES)
     add_subdirectory (prototype_plot_xy)

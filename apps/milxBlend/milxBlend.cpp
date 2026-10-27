@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     cmd.add( outputArg );
     cmd.add( imageArg );
     cmd.add( maskArg );
-#ifdef ITK_REVIEW //Review only members
+#if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
     cmd.add( labelArg );
 #endif
     //cmd.add( transformArg );
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
             img->setName(imageName.c_str());
             img->generateImage();
 
-#ifdef ITK_REVIEW //Review only members
+#if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
             if(labelArg.isSet())
             {
                 img->overlayContour(labelName.c_str()); //Generates an RGB image, from VTK class
@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
             blendImage->viewToCoronal();
         if (saggitalArg.isSet())
             blendImage->viewToSagittal();
-        blendImage->SetSize(windowHeight, windowWidth);
+        blendImage->SetSize(windowWidth, windowHeight);
         mainWindow.resize(windowWidth, windowHeight);
         blendImage->show();
         mainWindow.show();

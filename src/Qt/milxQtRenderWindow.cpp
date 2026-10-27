@@ -63,11 +63,13 @@ milxQtRenderWindow::milxQtRenderWindow(QWidget *theParent, bool contextSystem) :
     defaultView = AXIAL; //axial
     currentView = AXIAL; //axial
     orientationView = RADIOLOGICAL;
+    updateBar = NULL;
 
     ///Allocate critical aspects
     renderer = vtkSmartPointer<vtkRenderer>::New();
     lookupTable = vtkSmartPointer<vtkLookupTable>::New();
     camera = vtkSmartPointer<vtkCamera>::New();
+    dataPicker = vtkSmartPointer<vtkPointPicker>::New();
 
     renderer->SetActiveCamera(camera);
     renderer->ResetCamera();
@@ -1615,6 +1617,7 @@ void milxQtRenderWindow::updateCoords(vtkObject *obj)
 {
     ///Get interactor
     vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+    if(!iren || !dataPicker) return;
 
     QString message = "";
 
@@ -1638,7 +1641,8 @@ void milxQtRenderWindow::updateCoords(vtkObject *obj)
     }
 
     ///Write message to status bar
-    updateBar->showMessage(message);
+    if(updateBar)
+        updateBar->showMessage(message);
 }
 
 void milxQtRenderWindow::createActions()
@@ -1885,6 +1889,8 @@ void milxQtRenderWindow::createActions()
     mapGroup->addAction(actionBone);
     mapGroup->addAction(actionSpectral);
     mapGroup->addAction(actionGNUPlot);
+    mapGroup->addAction(actionCubeHelix);
+    mapGroup->addAction(actionHSV);
     colourMapsMenu();
 
     refreshAct = new QAction(this);

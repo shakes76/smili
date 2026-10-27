@@ -65,6 +65,8 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
     orientationImages = true;
     interpolationModels = false;
     scalarBarModels = false;
+    enableColourMaps = true;
+    appTheme = "Light";
 	resettingInterface = false;
 
     progressCallCount = 0;
@@ -166,7 +168,7 @@ milxQtMain::milxQtMain(QWidget *theParent) : QMainWindow(theParent)
 		}
 	}
 	QFile qss(themeFile);
-	qss.open(QFile::ReadOnly);
+	if (!qss.open(QFile::ReadOnly)) return;
 	qApp->setStyleSheet(qss.readAll());
 	qss.close();
 }
@@ -186,6 +188,8 @@ milxQtMain::~milxQtMain()
 
     modelWindows.clear();
     imageWindows.clear();
+    if (Connector) Connector->Disconnect();
+    if (currentUnifiedWindow && !currentUnifiedWindow->parentWidget()) delete currentUnifiedWindow;
     printDebug("Main Destroyed.");
 }
 
@@ -193,7 +197,7 @@ QString milxQtMain::activeName()
 {
     if(qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow() == 0)
     {
-        ///\todo Possible Bug: Handling when no window active.
+        return QString(); ///\todo Possible Bug: Handling when no window active.
         return 0;
     }
     else
@@ -222,7 +226,7 @@ QString milxQtMain::activeNamePrefix()
 {
     if(qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow() == 0)
     {
-        ///\todo Possible Bug: Handling when no window active.
+        return QString(); ///\todo Possible Bug: Handling when no window active.
         return 0;
     }
     else
@@ -272,6 +276,7 @@ void milxQtMain::addRender(milxQtRenderWindow *rnd)
 	subWindow->resize(rnd->size());
 	subWindow->setAttribute(Qt::WA_DeleteOnClose);
 	qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
+	subWindow->show();
 	
 	commonChildProperties(rnd);
 	rnd->enableUpdates(statusBar());
@@ -477,7 +482,7 @@ QWebEngineView* milxQtMain::activeWebView()
         return NULL;
 
     QWidget *activeWin = win->widget();
-	if (activeWin->layout()->count() == 2) {
+	if (activeWin && activeWin->layout() && activeWin->layout()->count() == 2) {
 		return qobject_cast<QWebEngineView *>(activeWin->layout()->itemAt(1)->widget());
 	}
     return NULL;
@@ -489,9 +494,9 @@ void milxQtMain::setActiveWindow(QWidget *currentWindow)
         return;
     else
     {
-        QMdiSubWindow *subWindow = new QMdiSubWindow;
-        subWindow->setWidget(currentWindow);
-        qobject_cast<QMdiArea *>(workspaces->currentWidget())->setActiveSubWindow(subWindow);
+        QMdiSubWindow *subWindow = qobject_cast<QMdiSubWindow *>(currentWindow);
+        if (!subWindow) subWindow = qobject_cast<QMdiSubWindow *>(currentWindow->parentWidget());
+        if (subWindow) { if (!subWindow->isVisible()) subWindow->show(); qobject_cast<QMdiArea *>(workspaces->currentWidget())->setActiveSubWindow(subWindow); }
     }
 }
 
@@ -809,7 +814,8 @@ void milxQtMain::save(QString filename)
 {
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
-    QWidget *activeWindow = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow()->widget();
+    QMdiSubWindow *activeSubWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QWidget *activeWindow = activeSubWin ? activeSubWin->widget() : NULL;
     milxQtWindow *currentWindowOpen = qobject_cast<milxQtWindow *>(activeWindow);
     bool pluginSave = false, success = false;
 
@@ -925,7 +931,8 @@ void milxQtMain::saveScreen(QString filename)
 {
     QSettings settings("Shekhar Chandra", "milxQt");
     QString path = settings.value("recentPath").toString();
-    QWidget *activeWindow = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow()->widget();
+    QMdiSubWindow *activeSubWin = qobject_cast<QMdiArea *>(workspaces->currentWidget())->activeSubWindow();
+    QWidget *activeWindow = activeSubWin ? activeSubWin->widget() : NULL;
 
     if(!activeWindow)
         return;
@@ -1053,8 +1060,8 @@ void milxQtMain::tileTabVertically()
     int y = 0;
     foreach(QMdiSubWindow *widget, windows)
     {
-        widget->widget()->parentWidget()->resize(wrkSpc->width(), wHeight);
-        widget->widget()->parentWidget()->move(0, y);
+        widget->resize(wrkSpc->width(), wHeight);
+        widget->move(0, y);
         y += wHeight;
     }
 }
@@ -1071,8 +1078,8 @@ void milxQtMain::tileTabHorizontally()
     int x = 0;
     foreach(QMdiSubWindow *widget, windows)
     {
-        widget->widget()->parentWidget()->resize(wWidth, wrkSpc->height());
-        widget->widget()->parentWidget()->move(x, 0);
+        widget->resize(wWidth, wrkSpc->height());
+        widget->move(x, 0);
         x += wWidth;
     }
 }
@@ -1112,6 +1119,7 @@ void milxQtMain::helpContents()
 		subWindow->resize(800, 600);
 		subWindow->setAttribute(Qt::WA_DeleteOnClose);
 		qobject_cast<QMdiArea *>(workspaces->currentWidget())->addSubWindow(subWindow);
+	subWindow->show();
 		subWindow->show();
 		file.close();
 	}
@@ -1758,7 +1766,7 @@ void milxQtMain::updateWindowsWithRefresh()
             img->refresh();
         }
         else
-            win->refresh();
+            if (win) win->refresh();
     }
 }
 
@@ -1787,7 +1795,7 @@ void milxQtMain::updateWindowsWithView(int value)
     {
         milxQtWindow *win = currentWindow();
         milxQtRenderWindow *rndWin = qobject_cast<milxQtRenderWindow *>(win);
-        rndWin->setView(value);
+        if (rndWin) rndWin->setView(value);
         nextWindow();
     }
 }
@@ -1859,7 +1867,7 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
 
         if(applyMapper)
         {
-            connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
+            connect(action, &QAction::triggered, this, [this, currentWindow]() { setActiveWindow(currentWindow); });
             windowMapper->setMapping(action, currentWindow);
         }
     }
@@ -3161,7 +3169,7 @@ void milxQtMain::createConnections()
     qRegisterMetaType< milxQtImage* >("milxQtImage*");
 
     QObject::connect(workspaces, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-    QObject::connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveWindow(QWidget *)));
+    // windowMapper connection handled directly via QAction::triggered lambda in windowActionList
     ///Actions
     ///File
     QObject::connect(actionNewTab, SIGNAL(triggered()), this, SLOT(newTab()));
@@ -3297,7 +3305,7 @@ void milxQtMain::dropEvent(QDropEvent *currentEvent)
         if(urlsList[j].isValid())
         {
 #ifdef Q_OS_WIN
-            tmp = urlsList[j].path().remove(0,1); //!< Remove leading forward slash
+            tmp = urlsList[j].toLocalFile();
 #else
             tmp = urlsList[j].path();
 #endif
@@ -3534,8 +3542,8 @@ void milxQtMain::readSettings()
     settings.beginGroup("milxQtMain");
     resize( settings.value("size", QSize(newWidth, newHeight)).toSize() );
     move( settings.value("pos", QPoint(xOffset, yOffset)).toPoint() );
-    restoreGeometry(settings.value("geometry").toByteArray());
-    restoreState(settings.value("windowState").toByteArray());
+    if (settings.contains("geometry")) restoreGeometry(settings.value("geometry").toByteArray());
+    if (settings.contains("windowState")) restoreState(settings.value("windowState").toByteArray());
     defaultViewBox->setCurrentIndex( settings.value("defaultView", defaultViewMode).toInt() );
     defaultViewTypeBox->setCurrentIndex( settings.value("defaultViewType", defaultViewTypeMode).toInt() );
     defaultOrientationTypeBox->setCurrentIndex( settings.value("defaultOrientationType", defaultOrientationTypeMode).toInt() );
@@ -3554,7 +3562,7 @@ void milxQtMain::readSettings()
 	enableColourMaps = settings.value("enableColourMaps", enableColourMaps).toBool();
 
     ///Handle saving dock positions/areas etc.
-    restoreDockWidget(console->dockWidget());
+    // console->dockWidget() is already registered via addDockWidget() before restoreState()
     console->setTimestamps(timestamping);
 	resettingInterface = false;
 

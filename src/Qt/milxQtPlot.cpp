@@ -900,7 +900,8 @@ void milxQtPlot::updateCoords(vtkObject *obj)
     }*/
 
     ///Write message to status bar
-    updateBar->showMessage(message);
+    if(updateBar)
+        updateBar->showMessage(message);
 }
 
 void milxQtPlot::updateVolumePlot(int value)
@@ -961,7 +962,7 @@ void milxQtPlot::createConnections()
 void milxQtPlot::contextMenuEvent(QContextMenuEvent *currentEvent)
 {
     contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(tr("MainWindow", "Plotting", 0));
+    contextMenu->setTitle(tr("Plotting"));
 
     createMenu(contextMenu);
 

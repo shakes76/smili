@@ -695,6 +695,7 @@ void milxQtModel::generateStreamLines(vtkSmartPointer<vtkImageData> vectorFieldD
     }
 
     bool ok = false;
+    ok = true;
     if(timestep == 0.0)
     {
       timestep = QInputDialog::getDouble(this, tr("Please Provide the timestep"),
@@ -2002,6 +2003,7 @@ void milxQtModel::changeOpacity(float opacity)
 {
     bool ok = false;
 
+    ok = true;
     if(opacity < 0)
         opacity = QInputDialog::getDouble(this, tr("Please enter the new opacity"),
                                           tr("Opacity:"), opacity, 0.0, 1.0, 3, &ok);
@@ -2623,6 +2625,7 @@ void milxQtModel::updateCoords(vtkObject *obj)
 {
     ///Get interactor
     vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+    if(!iren || !dataPicker) return;
 
     QString message = "";
 
@@ -2664,7 +2667,8 @@ void milxQtModel::updateCoords(vtkObject *obj)
     }
 
     ///Write message to status bar
-    updateBar->showMessage(message);
+    if(updateBar)
+        updateBar->showMessage(message);
 }
 
 void milxQtModel::copyToContextMenu(QMenu *copyMenu)
@@ -3039,8 +3043,8 @@ void milxQtModel::contextMenuEvent(QContextMenuEvent *currentEvent)
 
 QMenu* milxQtModel::basicContextMenu()
 {
-    contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(tr("MainWindow", "Modelling", 0));
+    QMenu *contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
+    contextMenu->setTitle(tr("Modelling"));
 
     foreach(QAction *currAct, milxQtWindow::actionsToAdd)
     {

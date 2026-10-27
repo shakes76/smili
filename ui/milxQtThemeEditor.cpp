@@ -32,8 +32,8 @@ milxQtThemeEditorForm::milxQtThemeEditorForm(milxQtPreferencesForm *theParent, m
 
 	MainWindow = mainWindow;
 	prefForm = theParent;
-	this->themeName = themeName;
 	if (!themeName) themeName = new QString("New Theme");
+	this->themeName = themeName;
 	this->isEdit = isEdit;
 	setupEditor(themeName);
 	createConnections();
@@ -461,7 +461,7 @@ void milxQtThemeEditorForm::loadColourSettings(QString *theme)
 		themeFile = QString(QDir::currentPath() + "/" + *theme + ".qss");
 	}
 	QFile qss(themeFile);
-	qss.open(QFile::ReadOnly);
+	if (!qss.open(QFile::ReadOnly)) return;
 	QTextStream *in = new QTextStream(&qss); // Text Stream
 	QString colour;
 
@@ -570,7 +570,7 @@ void milxQtThemeEditorForm::saveColourSettings()
 	/** Copy the layout for the "Light" theme **/
 	QString themeFile = QString(":/resources/styles/Light.qss");
 	QFile tmp(themeFile);
-	tmp.open(QFile::ReadOnly);
+	if (!tmp.open(QFile::ReadOnly)) return;
 
 	// Copy the layout, but use the colours in the new theme instead
 	QTextStream *in = new QTextStream(&tmp); // Text Stream

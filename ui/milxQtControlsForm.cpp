@@ -32,6 +32,5 @@ milxQtControlsForm::~milxQtControlsForm()
 
 void milxQtControlsForm::closeEvent(QCloseEvent * event)
 {
-	this->setParent(NULL);
 	event->accept();
 }

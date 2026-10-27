@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     cmd.add( imageArg );
     cmd.add( vectorsArg );
     cmd.add( maskArg );
-#ifdef ITK_REVIEW //Review only members
+#if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
     cmd.add( labelArg );
 #endif
     cmd.add( transformArg );
@@ -448,7 +448,7 @@ int main(int argc, char* argv[])
     //        if(indexAAL > 0)
     //            img->colourMapToAAL();
 
-#ifdef ITK_REVIEW //Review only members
+#if (ITK_REVIEW || ITK_VERSION_MAJOR > 3) //Review only members
             if(labelArg.isSet())
             {
                 img->overlayContour(labelName.c_str()); //Generates an RGB image, from VTK class
@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
 
     ///Display
     model->setWindowTitle("MILX-Overlay");
-    model->SetSize(windowHeight, windowWidth);
+    model->SetSize(windowWidth, windowHeight);
     mainWindow.resize(windowWidth, windowHeight);
     //Add models
     foreach(QSharedPointer<milxQtModel> mdl, models)
@@ -630,6 +630,7 @@ int main(int argc, char* argv[])
     std::cout << ">> Complete" << std::endl;
 
     model->OffScreenRenderingOff(); //Required to prevent double-free
+    mainWindow.takeCentralWidget();
     if(!onscreenArg.isSet())
         return EXIT_SUCCESS;
     else

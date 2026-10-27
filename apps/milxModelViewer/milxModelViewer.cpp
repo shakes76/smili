@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     QMenu *menuFile = menuBar->addMenu("File");
     model->createMenu(menuFile);
     QAction *actionExit = menuFile->addAction("Exit");
-    QObject::connect(actionExit, SIGNAL(activated()), &mainWindow, SLOT(close()));
+    QObject::connect(actionExit, SIGNAL(triggered()), &mainWindow, SLOT(close()));
     mainWindow.setMenuBar(menuBar);
 
     model->colourMapToJet();

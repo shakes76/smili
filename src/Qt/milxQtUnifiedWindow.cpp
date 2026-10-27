@@ -94,8 +94,13 @@ void milxQtUnifiedWindow::removeFromWindow(QWidget *passedWindow)
 
     ///Up cast
     milxQtModel *model = qobject_cast<milxQtModel *>(passedWindow);
-//    if(model == 0)
-//        milxQtImage *image = qobject_cast<milxQtImage *>(passedWindow);
+    if(model == 0)
+    {
+        milxQtImage *image = qobject_cast<milxQtImage *>(passedWindow);
+        if(image)
+            unifyImages.removeAll(image);
+        if(image) removeImageActor(image->GetImageActor());
+    }
 
     if(!unifyModels.isEmpty())
         present = unifyModels.contains(model);

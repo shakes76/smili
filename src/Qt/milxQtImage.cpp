@@ -805,7 +805,7 @@ void milxQtImage::updateCoords(vtkObject *obj)
     ///Get interactor
     vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
 
-    if(!iren)
+    if(!iren || !dataPicker)
         return;
 
     QString message = "";
@@ -820,6 +820,7 @@ void milxQtImage::updateCoords(vtkObject *obj)
         && pImageData->GetScalarType() == VTK_UNSIGNED_CHAR ) ///\todo Why is update of coordinates for RGB images become really slow?
     {
         message = "RGB Image Pixel Cooridinates Diabled for Performance";
+        if(updateBar)
         updateBar->showMessage(message);
         return;
     }
@@ -936,7 +937,8 @@ void milxQtImage::updateCoords(vtkObject *obj)
     }
 
     ///Write message to status bar
-    updateBar->showMessage(message);
+    if(updateBar)
+        updateBar->showMessage(message);
 }
 
 void milxQtImage::updateSlice(vtkObject *obj)
@@ -2278,6 +2280,7 @@ void milxQtImage::subsample(size_t xSampleFactor, size_t ySampleFactor, size_t z
     }
 
     bool ok1 = false, ok2 = false, ok3 = false;
+    ok1 = ok2 = ok3 = true;
     if(xSampleFactor == 0 && ySampleFactor == 0 && zSampleFactor == 0)
     {
         xSampleFactor = QInputDialog::getInt(this, tr("Please Provide the downsample factors"),
@@ -2588,6 +2591,7 @@ void milxQtImage::checkerBoard(milxQtImage *img, int numberOfSquares)
     }
 
     bool ok = false;
+    ok = true;
     if(numberOfSquares == 0)
     {
         numberOfSquares = QInputDialog::getInt(this, tr("Please Provide the number of squares"),
@@ -2862,6 +2866,7 @@ void milxQtImage::otsu(int bins)
     histogram(256, 0, 255, false);
 
     bool ok = false;
+    ok = true;
     if(bins == 0)
     {
       bins = QInputDialog::getInt(this, tr("Please Provide the histogram bins to use"),
@@ -2899,6 +2904,7 @@ void milxQtImage::otsuMultiple(int bins, int labels)
     histogram(256, 0, 255, false);
 
     bool ok = false;
+    ok = true;
     if(bins == 0)
     {
       bins = QInputDialog::getInt(this, tr("Please Provide the histogram bins to use"),
@@ -3093,6 +3099,7 @@ void milxQtImage::component(int index)
     updateData(orientAct->isChecked());
 
     bool ok1 = false;
+    ok1 = true;
     if(index < 0)
     {
         index = QInputDialog::getInt(this, tr("Please Provide the component index to display"),
@@ -4664,8 +4671,8 @@ void milxQtImage::contextMenuEvent(QContextMenuEvent *currentEvent)
 
 QMenu* milxQtImage::basicContextMenu()
 {
-    contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
-    contextMenu->setTitle(tr("MainWindow", "Imaging", 0));
+    QMenu *contextMenu = new QMenu(this); //!< Only exists for the duration of the context selection
+    contextMenu->setTitle(tr("Imaging"));
 
     foreach(QAction *currAct, milxQtWindow::actionsToAdd)
     {

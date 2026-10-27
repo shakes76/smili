@@ -275,9 +275,10 @@ void milxQtPreferencesForm::changeTheme(int themeIndex)
 		this->editThemeButton->setEnabled(true);
 	}
 	QFile qss(themeFile);
-	qss.open(QFile::ReadOnly);
-	qApp->setStyleSheet(qss.readAll());
-	qss.close();
+	if (qss.open(QFile::ReadOnly)) {
+		qApp->setStyleSheet(qss.readAll());
+		qss.close();
+	}
 }
 
 void milxQtPreferencesForm::editTheme()
@@ -312,7 +313,7 @@ void milxQtPreferencesForm::addTheme(QString themeName)
 void milxQtPreferencesForm::removeTheme(QString themeName)
 {
 	// Remove the given item from the list - return to the default "Light" theme
-	if (themeName.compare("Light") || themeName.compare("Dark")) {
+	if (themeName.compare("Light") && themeName.compare("Dark")) {
 		themeList->removeItem(themeList->findText(themeName));
 		themeList->setCurrentText("Light");
 	}
