@@ -292,7 +292,7 @@ public:
     Assumes the vector is not empty and that if the image is provided, it is setup correctly (spacing, origin etc.)
   */
   template<typename TVector>
-  static itk::SmartPointer<TImage> ImportVectorToImage(vnl_vector<TVector> &vec, typename TImage::SizeType size, itk::SmartPointer<TImage> image = NULL);
+  static itk::SmartPointer<TImage> ImportVectorToImage(vnl_vector<TVector> &vec, typename TImage::SizeType size, itk::SmartPointer<TImage> image = nullptr);
   /*!
     \fn Image::ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image)
     \brief Imports a VNL matrix to an ITK image object.
@@ -300,7 +300,7 @@ public:
     Assumes the vector is not empty and that if the image is provided, it is setup correctly (spacing, origin etc.).
   */
   template<typename TMatrix>
-  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image);
+  static itk::SmartPointer<TImage> ImportMatrixToImage(vnl_matrix<TMatrix> &matrix, itk::SmartPointer<TImage> image = nullptr);
 
   /*!
     \fn Image::BlankImage(const TImage::PixelType value, const TImage::SizeType imgSize)
@@ -930,7 +930,7 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ConvertITKVectorImageToVTKImage(itk
     field->SetScalarTypeToFloat();
     field->AllocateScalars();
   #else
-    field->AllocateScalars(VTK_FLOAT, 3);
+    field->AllocateScalars(VTK_FLOAT, img->GetNumberOfComponentsPerPixel());
   #endif
   /*vtkSmartPointer<vtkImageAppendComponents> appendImage = vtkSmartPointer<vtkImageAppendComponents>::New(); //doesnt work!
     appendImage->DebugOn();
@@ -981,8 +981,8 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
 
   vtkSmartPointer<vtkMatrix4x4> matrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
   matrix->Identity();
-  for (int i = 0; i < 3; i ++)
-    for (int k = 0; k < 3; k ++)
+  for (int i = 0; i < 3 && i < static_cast<int>(TImage::ImageDimension); i ++)
+    for (int k = 0; k < 3 && k < static_cast<int>(TImage::ImageDimension); k ++)
       matrix->SetElement(i,k, direction(i,k));
   matrix->Transpose(); //img volume to correct space, comment to go from space to img volume
 
@@ -995,20 +995,21 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
     transform->Identity();
     transform->PostMultiply();
-    transform->Concatenate(transformMatrix); //flip
-    transform->Translate(-origin[0], -origin[1], -origin[2]); //remove origin
+    transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
+  transform->Concatenate(transformMatrix); //flip
+    // origin already translated before flip
     transform->Concatenate(matrix); //direction
-    transform->Translate(origin.GetDataPointer()); //add origin displacement
+    transform->Translate(origin[0], origin[1], (TImage::ImageDimension > 2) ? origin[2] : 0.0); //add origin displacement
     transform->Update();
   vtkSmartPointer<vtkMatrix4x4> matrix2 = transform->GetMatrix();
 
   typename TImage::DirectionType orientMatrix;
-  for (int i = 0; i < 3; i ++)
-    for (int k = 0; k < 3; k ++)
+  for (int i = 0; i < 3 && i < static_cast<int>(TImage::ImageDimension); i ++)
+    for (int k = 0; k < 3 && k < static_cast<int>(TImage::ImageDimension); k ++)
       orientMatrix(i,k) = matrix2->GetElement(i,k);
   typename itk::Vector<TPrecision, milx::imgDimension> offset;
 //  typename TImage::PointType new_origin;
-  for (int i = 0; i < 3; i ++)
+  for (int i = 0; i < 3 && i < static_cast<int>(TImage::ImageDimension); i ++)
   {
 //    new_origin[i] = matrix2->GetElement(i,3);
     offset[i] = matrix2->GetElement(i,3);
@@ -1124,8 +1125,8 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmart
 
   vtkSmartPointer<vtkMatrix4x4> matrix = vtkSmartPointer<vtkMatrix4x4>::New(); //start with identity matrix
   matrix->Identity();
-  for (int i = 0; i < 3; i ++)
-    for (int k = 0; k < 3; k ++)
+  for (int i = 0; i < 3 && i < static_cast<int>(TImage::ImageDimension); i ++)
+    for (int k = 0; k < 3 && k < static_cast<int>(TImage::ImageDimension); k ++)
       matrix->SetElement(i,k, direction(i,k));
   matrix->Transpose(); //img volume to correct space, comment to go from space to img volume
 
@@ -1139,10 +1140,11 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmart
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
   transform->Identity();
   transform->PostMultiply();
+  transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
   transform->Concatenate(transformMatrix); //flip
-  transform->Translate(-origin[0], -origin[1], -origin[2]); //remove origin
+  // origin already translated before flip
   transform->Concatenate(matrix); //direction
-  transform->Translate(origin.GetDataPointer()); //add origin displacement
+  transform->Translate(origin[0], origin[1], (TImage::ImageDimension > 2) ? origin[2] : 0.0); //add origin displacement
 
   vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
 #if VTK_MAJOR_VERSION <= 5
@@ -1312,7 +1314,7 @@ itk::SmartPointer<TImage> Image<TImage>::ImportVectorToImage(vnl_vector<TVector>
     PrintError(ex.GetDescription());
   }
 
-  return importFilter->GetOutput();
+  return DuplicateImage(importFilter->GetOutput());
 }
 
 template<class TImage>
@@ -1326,7 +1328,7 @@ itk::SmartPointer<TImage> Image<TImage>::ImportMatrixToImage(vnl_matrix<TMatrix>
   typename ImportFilterType::SizeType  size;
   size[0]  = matrix.rows();  // size along X
   size[1]  = matrix.cols();  // size along Y
-  size[2]  = 1;  // size along Z
+  if (TImage::ImageDimension > 2) size[2] = 1;  // size along Z
 
   typename ImportFilterType::IndexType start;
   start.Fill( 0 );
@@ -1356,7 +1358,7 @@ itk::SmartPointer<TImage> Image<TImage>::ImportMatrixToImage(vnl_matrix<TMatrix>
     PrintError(ex.GetDescription());
   }
 
-  return importFilter->GetOutput();
+  return DuplicateImage(importFilter->GetOutput());
 }
 
 template<class TImage>
@@ -1464,12 +1466,14 @@ itk::SmartPointer<TImageComponent> Image<TImage>::ExtractComponent(itk::SmartPoi
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::ResizeImage(itk::SmartPointer<TImage> img, typename TImage::SizeType imgSize)
 {
-  typedef itk::IdentityTransform<double, imgDimension> TransformType;
+  typedef itk::IdentityTransform<double, TImage::ImageDimension> TransformType;
   typedef itk::ResampleImageFilter<TImage, TImage> ResampleImageFilterType;
   typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
   resample->SetInput(img);
   resample->SetSize(imgSize);
   resample->SetOutputSpacing(img->GetSpacing());
+  resample->SetOutputOrigin(img->GetOrigin());
+  resample->SetOutputDirection(img->GetDirection());
   resample->SetTransform(TransformType::New());
   resample->UpdateLargestPossibleRegion();
   resample->AddObserver(itk::ProgressEvent(), ProgressUpdates);
@@ -1490,12 +1494,14 @@ itk::SmartPointer<TImage> Image<TImage>::ResizeImage(itk::SmartPointer<TImage> i
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::ResizeImage(itk::SmartPointer<TImage> img, typename TImage::SizeType imgSize, typename TImage::SpacingType outputSpacing)
 {
-  typedef itk::IdentityTransform<double, imgDimension> TransformType;
+  typedef itk::IdentityTransform<double, TImage::ImageDimension> TransformType;
   typedef itk::ResampleImageFilter<TImage, TImage> ResampleImageFilterType;
   typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
   resample->SetInput(img);
   resample->SetSize(imgSize);
   resample->SetOutputSpacing(outputSpacing);
+  resample->SetOutputOrigin(img->GetOrigin());
+  resample->SetOutputDirection(img->GetDirection());
   resample->SetTransform(TransformType::New());
   resample->UpdateLargestPossibleRegion();
   resample->AddObserver(itk::ProgressEvent(), ProgressUpdates);
@@ -1516,12 +1522,14 @@ itk::SmartPointer<TImage> Image<TImage>::ResizeImage(itk::SmartPointer<TImage> i
 template<class TImage>
 itk::SmartPointer<TImage> Image<TImage>::ResizeImage(itk::SmartPointer<TImage> img, typename TImage::SizeType imgSize, typename TImage::SpacingType outputSpacing, typename TImage::PointType outputOrigin, typename TImage::DirectionType outputDirection)
 {
-  typedef itk::IdentityTransform<double, imgDimension> TransformType;
+  typedef itk::IdentityTransform<double, TImage::ImageDimension> TransformType;
   typedef itk::ResampleImageFilter<TImage, TImage> ResampleImageFilterType;
   typename ResampleImageFilterType::Pointer resample = ResampleImageFilterType::New();
   resample->SetInput(img);
   resample->SetSize(imgSize);
   resample->SetOutputSpacing(outputSpacing);
+  resample->SetOutputOrigin(img->GetOrigin());
+  resample->SetOutputDirection(img->GetDirection());
   resample->SetOutputOrigin(outputOrigin);
   resample->SetOutputDirection(outputDirection);
   resample->SetTransform(TransformType::New());

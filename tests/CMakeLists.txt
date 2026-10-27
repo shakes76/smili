@@ -4,6 +4,7 @@ add_subdirectory (milxPlotXY)
 add_subdirectory (imageViewer)
 add_subdirectory (test_vtk9_itk5_pipeline)
 add_subdirectory (test_qt6_smilx_gui)
+add_subdirectory (test_smili_imaging_workflows)
 
 if(BUILD_PROTOTYPES)
     add_subdirectory (prototype_plot_xy)

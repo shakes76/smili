@@ -282,11 +282,14 @@ void DeformableModel::ApplyOrientation(itk::SmartPointer<TImage> image, const bo
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
     transform->Identity();
     transform->PostMultiply();
+    if (applyOrigin) transform->Translate(-origin[0], -origin[1], -origin[2]); else transform->Translate(-centroid[0], -centroid[1], -centroid[2]);
     transform->Concatenate(flipMatrix); //flip
-    transform->Translate(-centroid[0], -centroid[1], -centroid[2]); //remove centroid of mesh
+    // pivot translation applied before flipMatrix
     transform->Concatenate(matrix); //direction
   if(applyOrigin)
     transform->Translate(origin.GetDataPointer()); //add image origin displacement
+  else
+    transform->Translate(centroid[0], centroid[1], centroid[2]);
 
   Model::SetTransform(transform);
 }

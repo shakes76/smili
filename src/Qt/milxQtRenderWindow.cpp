@@ -1432,7 +1432,9 @@ void milxQtRenderWindow::createCustomConnections(QMenu *fromMenu)
 
 void milxQtRenderWindow::customOperation()
 {
-    milxQtRenderWindow *currentWindow = qobject_cast<milxQtRenderWindow *>( windowActionGroup->checkedAction()->parent() );
+    QObject *actParent = windowActionGroup->checkedAction() ? windowActionGroup->checkedAction()->parent() : NULL;
+    if (QWidget *parentWid = qobject_cast<QWidget *>(actParent)) { if (!qobject_cast<milxQtWindow *>(parentWid) && parentWid->findChild<milxQtWindow *>()) actParent = parentWid->findChild<milxQtWindow *>(); }
+    milxQtRenderWindow *currentWindow = qobject_cast<milxQtRenderWindow *>( actParent );
 
     if(currentWindow == 0)
     {

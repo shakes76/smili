@@ -644,7 +644,7 @@ public:
     */
     inline bool isFloatingPointImage()
     {
-        return (!eightbit && !rgb && !vectorised);
+        return (!eightbit && !integer && !rgb && !vectorised);
     }
     /*!
         \fn milxQtImage::setVectorImage()
@@ -1141,9 +1141,9 @@ public slots:
     */
     void interpolateDisplay(const bool quietly = false);
     inline void disableInterpolateDisplay()
-    {   viewer->GetImageActor()->InterpolateOn();   interpolateDisplay();   }
+    {   interpolateAct->setChecked(false); if (viewerSetup) { viewer->GetImageActor()->InterpolateOn(); interpolateDisplay(); } else { viewer->GetImageActor()->InterpolateOff(); }   }
     inline void enableInterpolateDisplay()
-    {   viewer->GetImageActor()->InterpolateOff();   interpolateDisplay();   }
+    {   interpolateAct->setChecked(true); if (viewerSetup) { viewer->GetImageActor()->InterpolateOff(); interpolateDisplay(); } else { viewer->GetImageActor()->InterpolateOn(); }   }
     /*!
         \fn milxQtImage::applyOrientDisplay(const bool quietly = false)
         \brief Toggles applying the orientation matrix of the image.

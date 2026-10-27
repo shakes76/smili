@@ -610,7 +610,7 @@ public:
       mesh->GetPointData()->SetActiveScalars(NULL);
   #else
     ///Strip existing scalars/vectors
-    for(int j = 0; j < mesh->GetPointData()->GetNumberOfArrays(); j ++)
+    while(mesh->GetPointData()->GetNumberOfArrays() > 0)
       mesh->GetPointData()->RemoveArray(0);
   #endif
   }

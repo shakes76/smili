@@ -547,15 +547,17 @@ bool milxQtFile::saveImage(const QString filename, vtkImageData* data)
             itk::ObjectFactoryBase::RegisterFactory( itk::BMPImageIOFactory::New() );
 //
             ///Export to ITK
-            typedef itk::Image<rgbPixelType, 2> rgbImageSliceType;
+            if (data->GetNumberOfScalarComponents() >= 3) { typedef itk::Image<rgbPixelType, 2> rgbImageSliceType; rgbImageSliceType::Pointer charImg = milx::Image<rgbImageSliceType>::ConvertVTKImageToITKImage(imageReorient->GetOutput()); success = milx::File::WriteImageUsingITK<rgbImageSliceType>(filename.toStdString(), charImg); } else { typedef itk::Image<unsigned char, 2> ucharImageSliceType; ucharImageSliceType::Pointer charImg = milx::Image<ucharImageSliceType>::ConvertVTKImageToITKImage(imageReorient->GetOutput()); success = milx::File::WriteImageUsingITK<ucharImageSliceType>(filename.toStdString(), charImg); }
+            if (false) { typedef itk::Image<rgbPixelType, 2> rgbImageSliceType;
             rgbImageSliceType::Pointer charImg = milx::Image<rgbImageSliceType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
-            success = milx::File::WriteImageUsingITK<rgbImageSliceType>(filename.toStdString(), charImg);
+            success = milx::File::WriteImageUsingITK<rgbImageSliceType>(filename.toStdString(), charImg); }
         }
         else
         {
             ///Export to ITK
-            rgbImageType::Pointer charImg = milx::Image<rgbImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
-            success = milx::File::WriteImageUsingITK<rgbImageType>(filename.toStdString(), charImg);
+            if (data->GetNumberOfScalarComponents() >= 3) { rgbImageType::Pointer charImg = milx::Image<rgbImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput()); success = milx::File::WriteImageUsingITK<rgbImageType>(filename.toStdString(), charImg); } else { charImageType::Pointer charImg = milx::Image<charImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput()); success = milx::File::WriteImageUsingITK<charImageType>(filename.toStdString(), charImg); }
+            if (false) { rgbImageType::Pointer charImg = milx::Image<rgbImageType>::ConvertVTKImageToITKImage(imageReorient->GetOutput());
+            success = milx::File::WriteImageUsingITK<rgbImageType>(filename.toStdString(), charImg); }
         }
     }
     else if(vtkFormat)
@@ -694,6 +696,10 @@ bool milxQtFile::saveImage(const QString filename, milxQtImage* data)
     else if(data->isVectorImage())
     {
         success = milx::File::WriteImageUsingITK<vectorImageType>(filename.toStdString(), data->GetVectorImage());
+    }
+    else if(data->is32BitImage())
+    {
+        success = milx::File::WriteImageUsingITK<intImageType>(filename.toStdString(), data->GetIntImage());
     }
     else
     {

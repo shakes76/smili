@@ -1596,7 +1596,7 @@ void milxQtMain::display(vtkPolyDataCollection *modelCollection, QStringList &fi
         alignedModel->setDefaultView(defaultViewBox->currentIndex());
         alignedModel->setView(defaultViewBox->currentIndex());
         alignedModel->SetInput(modelCollection->GetNextItem());
-        alignedModel->generatePoints(colour[0], colour[2], colour[1]);
+        alignedModel->generatePoints(colour[0], colour[1], colour[2]);
         alignedModel->SetOpacity(0.2);
 
         alignedModels.append(alignedModel);
@@ -1855,7 +1855,7 @@ QActionGroup* milxQtMain::windowActionList(QMenu *menuForList, bool groupTogethe
 //        text = tr("%1 %2").arg(j + 1).arg(childVPlt->strippedNamePrefix());
 
 //        QAction *action  = menuForList->addAction(text);
-        QAction *action  = new QAction(currentWindow); //parent to be used later
+        QAction *action  = new QAction(win); //parent to be used later
         action->setText(text);
         menuForList->addAction(action);
         if(groupTogether)
@@ -3501,7 +3501,7 @@ void milxQtMain::resetSettings()
 	int newHeight = 4.0*desktopSize.height() / 5.0 + 0.5;
 	int xOffset = (desktopSize.width() - newWidth) / 2.0;
 	int yOffset = (desktopSize.height() - newHeight) / 2.0;
-	int defaultViewMode = 2; //axial
+	int defaultViewMode = 0; //axial
 	int defaultViewTypeMode = 0; //1-multi-view
 	int defaultOrientationTypeMode = 0; //radiological
 
@@ -3535,7 +3535,7 @@ void milxQtMain::readSettings()
     int newHeight = 4.0*desktopSize.height()/5.0 + 0.5;
     int xOffset = (desktopSize.width()-newWidth)/2.0;
     int yOffset = (desktopSize.height()-newHeight)/2.0;
-    int defaultViewMode = 2; //axial
+    int defaultViewMode = 0; //axial
     int defaultViewTypeMode = 0; //1-multi-view
     int defaultOrientationTypeMode = 0; //radiological
 

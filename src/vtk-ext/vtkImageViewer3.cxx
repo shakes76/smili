@@ -404,7 +404,7 @@ void vtkImageViewer3::EnableCursor()
       /*double bounds[6];
       this->GetInput()->GetBounds(bounds);
       cursor->SetCenter( (bounds[1]-bounds[0])/2, (bounds[3]-bounds[2])/2, (bounds[5]-bounds[4])/2);*/
-      cursor->SetCenter(this->GetInput()->GetOrigin());
+      cursor->SetCenter(this->GetInput()->GetCenter());
     }
 
   if (!cursorActor)

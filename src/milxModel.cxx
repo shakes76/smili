@@ -1629,7 +1629,7 @@ void Model::BinaryThresholdScalars(vtkSmartPointer<vtkPolyData> model, const coo
 
 void Model::MaskScalars(vtkSmartPointer<vtkPolyData> model1, vtkSmartPointer<vtkPolyData> model2)
 {
-  if(!model1->GetPointData()->GetScalars() || !model1->GetPointData()->GetScalars())
+  if(!model1->GetPointData()->GetScalars() || !model2->GetPointData()->GetScalars())
     return;
 
   vtkSmartPointer<vtkDataArray> scalars1 = model1->GetPointData()->GetScalars();
@@ -1833,7 +1833,7 @@ void Model::ScalarThresholdCollection(vtkSmartPointer<vtkPolyDataCollection> col
   {
     vtkSmartPointer<vtkPolyData> surface = collection->GetNextItem();
 
-    ThresholdScalars(surface, aboveVal, belowVal, 0.0); //!< threshold the model inplace
+    while (surface) { ThresholdScalars(surface, aboveVal, belowVal, 0.0); surface = collection->GetNextItem(); } break; //!< threshold all models in collection inplace
   }
 }
 
@@ -1846,7 +1846,7 @@ void Model::ClipCollection(vtkSmartPointer<vtkPolyDataCollection> collection, co
   {
     vtkSmartPointer<vtkPolyData> mesh = collection->GetNextItem();
     SetInput(mesh);
-    Clip(aboveVal, belowVal); //!< clip the model inplace
+    Clip(belowVal, aboveVal); //!< clip the model inplace
     mesh->DeepCopy(Result());
   }
 
@@ -2017,7 +2017,7 @@ double Model::MeanSquaredErrorCollection(vtkSmartPointer<vtkPolyDataCollection> 
     vtkSmartPointer<vtkPolyData> surface2 = collection->GetNextItem();
     count ++;
 
-    error += milx::Math<coordinateType>::MeanSquaredError(surface1->GetPoints(), surface2->GetPoints());
+    while (surface2) { error += milx::Math<coordinateType>::MeanSquaredError(surface1->GetPoints(), surface2->GetPoints()); surface2 = collection->GetNextItem(); count++; }
   }
 
   return error;
@@ -2058,6 +2058,7 @@ vtkSmartPointer<vtkPolyDataCollection> Model::ProcrustesAlignCollection(vtkSmart
   procrustes->SetInputConnection(group->GetOutputPort());
 #endif
 
+  procrustes->Update();
   int numberOfPoints = 0;
   if(n > 0)
   {
@@ -2114,6 +2115,7 @@ vtkSmartPointer<vtkPolyDataCollection> Model::ProcrustesAlignCollection(vtkSmart
   CurrentModel->SetPoints(procrustes->GetMeanPoints());
   CurrentModel->GetPointData()->SetScalars(meanScalars);
 
+  // return aligned collection
   return alignedCollection;
 }
 
@@ -2143,10 +2145,13 @@ vtkSmartPointer<vtkPolyDataCollection> Model::IterativeClosestPointsAlignCollect
       vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
       transform->DeepCopy(this->CurrentTransform);
       tCollection->AddItem(transform);
-      //tCollection->AddItem(vtkSmartPointer<vtkTransform>::NewInstance(this->CurrentTransform));
+      if (false) tCollection->AddItem(transform);
+    }
+    if (j == n - 2 && last) { alignedCollection->AddItem(last);
     }
   }
 
+  // return aligned collection
   return alignedCollection;
 }
 

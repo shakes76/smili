@@ -273,12 +273,13 @@ void milxQtImage::setData(const std::vector<float>& inputImage, const int width,
 
     // Allocate the vector data to the VTK Array
     const int save = 1; //1 is to keep the class from deleting the array when it cleans up or reallocates memory
-    scalars->SetVoidArray(const_cast<float*>(dataPtr), numElements, save);
+    for (size_t idx = 0; idx < numElements; ++idx) scalars->SetValue(static_cast<vtkIdType>(idx), dataPtr[idx]);
 
     // Set the scalars of the vtkImageData
     image->GetPointData()->SetScalars(scalars);
 
     setData(image);
+    imageFloat = milx::Image<floatImageType>::ConvertVTKImageToITKImage(image);
 }
 
 void milxQtImage::setDisplayData(QPointer<milxQtImage> newImg)
@@ -426,6 +427,7 @@ std::vector<floatPixelType> milxQtImage::getFloatData()
     }
 
     //Get the image buffer's pointer and size
+    if (!GetFloatImage() && usingVTKImage) return getData();
     const floatPixelType* bufferPointer = GetFloatImage()->GetBufferPointer();
     size_t bufferSize = is8BitImage() ? GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels() : GetFloatImage()->GetLargestPossibleRegion().GetNumberOfPixels();
 
@@ -677,6 +679,7 @@ void milxQtImage::generateVoxelisedSurface(vtkSmartPointer<vtkPolyData> surfaceT
         origin[1] = bounds[2];// + spacing[1] / 2;
         origin[2] = bounds[4];// + spacing[2] / 2;
         whiteImage->SetOrigin(origin);
+        bounds[0] += spacing[0]; bounds[1] -= spacing[0]; bounds[2] += spacing[1]; bounds[3] -= spacing[1]; bounds[4] += spacing[2]; bounds[5] -= spacing[2];
     #if VTK_MAJOR_VERSION <= 5
         whiteImage->SetScalarTypeToUnsignedChar();
         whiteImage->SetNumberOfScalarComponents(1);
@@ -3103,7 +3106,7 @@ void milxQtImage::component(int index)
     if(index < 0)
     {
         index = QInputDialog::getInt(this, tr("Please Provide the component index to display"),
-                                          tr("Component:"), 0, 0, imageVector->GetNumberOfComponentsPerPixel(), 1, &ok1);
+                                          tr("Component:"), 0, 0, static_cast<int>(imageVector->GetNumberOfComponentsPerPixel()) - 1, 1, &ok1);
     }
 
     if(!ok1)
@@ -4287,11 +4290,13 @@ void milxQtImage::createMenu(QMenu *menu)
 
 void milxQtImage::customOperation()
 {
-    milxQtImage *currentImgWindow = qobject_cast<milxQtImage *>( windowActionGroup->checkedAction()->parent() );
+    QObject *actParent = windowActionGroup->checkedAction() ? windowActionGroup->checkedAction()->parent() : NULL;
+    if (QWidget *parentWid = qobject_cast<QWidget *>(actParent)) { if (!qobject_cast<milxQtWindow *>(parentWid) && parentWid->findChild<milxQtWindow *>()) actParent = parentWid->findChild<milxQtWindow *>(); }
+    milxQtImage *currentImgWindow = qobject_cast<milxQtImage *>( actParent );
 
     if(currentImgWindow == 0) //Not image so...
     {
-        milxQtRenderWindow *currentWindow = qobject_cast<milxQtRenderWindow *>( windowActionGroup->checkedAction()->parent() );
+        milxQtRenderWindow *currentWindow = qobject_cast<milxQtRenderWindow *>( actParent );
 
         if(currentWindow == 0)
         {
@@ -4835,8 +4840,8 @@ void milxQtImage::SetupWidgets(vtkRenderWindowInteractor *interactor)
 
     double imageBounds[6], imgCenter[3];
     imageData->GetBounds(imageBounds);
-    imageData->GetOrigin(imgCenter);
-    double length = imageBounds[1]-imageBounds[0]/10;
+    imageData->GetCenter(imgCenter);
+    double length = (imageBounds[1]-imageBounds[0])/10.0;
 
     //line widget setup
     lineWidget = vtkSmartPointer<vtkLineWidget2>::New();

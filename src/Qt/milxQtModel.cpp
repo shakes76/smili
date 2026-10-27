@@ -203,11 +203,11 @@ void milxQtModel::SetInput(const std::vector<double>& inputPoints)
     pointsArray->SetNumberOfComponents(numComponents);
 
     // Set the total number of values.
-    pointsArray->SetNumberOfTuples(numElements);
+    pointsArray->SetNumberOfTuples(numElements / numComponents);
 
     // Use SetVoidArray to link to the NumPy data.
     const int save = 1; //1 is to keep the class from deleting the array when it cleans up or reallocates memory
-    pointsArray->SetVoidArray(const_cast<double*>(dataPtr), numElements * numComponents, save);
+    for (size_t idx = 0; idx < (numElements / numComponents) * numComponents; ++idx) pointsArray->SetValue(static_cast<vtkIdType>(idx), dataPtr[idx]);
 
     // Create vtkPoints object and set array as its data
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -292,6 +292,11 @@ void milxQtModel::SetGraph(vtkSmartPointer<vtkMutableUndirectedGraph> graph)
 std::vector<double> milxQtModel::getData()
 {
     //Get the vtkDataArray from the points
+    if (!GetPoints()) return std::vector<double>();
+    vtkIdType numPts = GetPoints()->GetNumberOfPoints();
+    std::vector<double> dataView(static_cast<size_t>(numPts) * 3);
+    for (vtkIdType ptIdx = 0; ptIdx < numPts; ++ptIdx) GetPoints()->GetPoint(ptIdx, &dataView[static_cast<size_t>(ptIdx) * 3]);
+    return dataView;
     vtkDataArray* dataArray = GetPoints()->GetData();
 
     //Cast the vtkDataArray to the concrete type vtkDoubleArray
@@ -307,7 +312,7 @@ std::vector<double> milxQtModel::getData()
     vtkIdType numElements = doubleArray->GetNumberOfTuples() * doubleArray->GetNumberOfComponents();
 
     //Construct a std::vector from the raw pointer as a shallow copy
-    std::vector<double> dataView(dataPtr, dataPtr + numElements);
+    //Remove unused legacy cast
 
     return dataView;
 }
@@ -664,7 +669,7 @@ void milxQtModel::generateTensorField(double newScale, float red, float green, f
         printDebug("Mean Vector L2 Norm: " + QString::number(meanDirection.frobenius_norm()));
 
         bool ok1 = false;
-        double newScaling = 1.0/meanDirection.frobenius_norm();
+        double newScaling = (meanDirection.frobenius_norm() > 0.0) ? (1.0 / meanDirection.frobenius_norm()) : 1.0;
         newScaling = QInputDialog::getDouble(this, tr("Please enter scaling for the vector field"),
                             tr("Scaling:"), newScaling, -DBL_MAX, DBL_MAX, 7, &ok1);
 
@@ -2463,12 +2468,12 @@ void milxQtModel::viewToXYPlane()
             cam->SetFocalPoint(modelCentroid.data_block());
             if(orientationView == RADIOLOGICAL)
             {
-                cam->SetPosition(0,0,centroidSize());
+                cam->SetPosition(modelCentroid[0], modelCentroid[1], modelCentroid[2] + centroidSize());
                 cam->SetViewUp(0,-centroidSize(),0);
             }
             else //Neurological
             {
-                cam->SetPosition(0,0,-centroidSize());
+                cam->SetPosition(modelCentroid[0], modelCentroid[1], modelCentroid[2] - centroidSize());
                 cam->SetViewUp(0,centroidSize(),0);
             }
             milxQtRenderWindow::GetRenderer()->ResetCamera();
@@ -2492,12 +2497,12 @@ void milxQtModel::viewToZXPlane()
             cam->SetFocalPoint(modelCentroid.data_block());
             if(orientationView == RADIOLOGICAL)
             {
-                cam->SetPosition(0,-centroidSize(),0);
+                cam->SetPosition(modelCentroid[0], modelCentroid[1] - centroidSize(), modelCentroid[2]);
                 cam->SetViewUp(0,0,centroidSize());
             }
             else //Neurological
             {
-                cam->SetPosition(0,centroidSize(),0);
+                cam->SetPosition(modelCentroid[0], modelCentroid[1] + centroidSize(), modelCentroid[2]);
                 cam->SetViewUp(0,0,centroidSize());
             }
             milxQtRenderWindow::GetRenderer()->ResetCamera();
@@ -2519,7 +2524,7 @@ void milxQtModel::viewToZYPlane()
         if(!milxQtRenderWindow::GetRenderer()->IsActiveCameraCreated())
             milxQtRenderWindow::GetRenderer()->ResetCamera(); //just in case if new camera
             cam->SetFocalPoint(modelCentroid.data_block());
-            cam->SetPosition(-centroidSize(),0,0);
+            cam->SetPosition(modelCentroid[0] - centroidSize(), modelCentroid[1], modelCentroid[2]);
             cam->SetViewUp(0,0,centroidSize());
             milxQtRenderWindow::GetRenderer()->ResetCamera();
             milxQtRenderWindow::Render();

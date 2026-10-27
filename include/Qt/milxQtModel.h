@@ -815,7 +815,7 @@ public slots:
     */
     inline void generateEdges(float red = defaultColour, float green = defaultColour, float blue = defaultColour)
     {
-        generateTubes(red, blue, green);
+        generateTubes(red, green, blue);
     }
     /*!
         \fn milxQtModel::generatePointModel(double newScale = 0.0, float red = defaultColour, float green = defaultColour, float blue = defaultColour)
