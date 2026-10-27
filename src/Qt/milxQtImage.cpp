@@ -408,7 +408,7 @@ std::vector<charPixelType> milxQtImage::get8BitData()
 
     //Get the image buffer's pointer and size
     const charPixelType* bufferPointer = GetCharImage()->GetBufferPointer();
-    size_t bufferSize = GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels();
+    size_t bufferSize = is8BitImage() ? GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels() : GetFloatImage()->GetLargestPossibleRegion().GetNumberOfPixels();
 
     // Create a std::vector from the buffer pointer and size
     std::vector<charPixelType> imageVector(bufferPointer, bufferPointer + bufferSize);
@@ -427,7 +427,7 @@ std::vector<floatPixelType> milxQtImage::getFloatData()
 
     //Get the image buffer's pointer and size
     const floatPixelType* bufferPointer = GetFloatImage()->GetBufferPointer();
-    size_t bufferSize = GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels();
+    size_t bufferSize = is8BitImage() ? GetCharImage()->GetLargestPossibleRegion().GetNumberOfPixels() : GetFloatImage()->GetLargestPossibleRegion().GetNumberOfPixels();
 
     // Create a std::vector from the buffer pointer and size
     std::vector<floatPixelType> imageVector(bufferPointer, bufferPointer + bufferSize);
@@ -516,7 +516,7 @@ void milxQtImage::generateImage(const bool quietly)
                 printDebug("Resized to minimum size");
             }
             else
-                milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+                milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().width(), QVTKWidget::size().height());
 
             int *winSize = milxQtWindow::renderWindow()->GetSize();
             QVTKWidget::resize(winSize[0], winSize[1]);
@@ -621,7 +621,7 @@ void milxQtImage::generateImage(const bool quietly)
 
 void milxQtImage::generateVoxelisedSurface(vtkSmartPointer<vtkPolyData> surfaceToVoxelise, double *bounds, double *spacing)
 {
-    bool ok1, ok2, ok3;
+    bool ok1 = true, ok2 = true, ok3 = true;
     double xSpacing = 1.0, ySpacing = 1.0, zSpacing = 1.0;
 
     if(spacing == NULL)
@@ -1032,6 +1032,7 @@ void milxQtImage::contour()
     if(!milxQtRenderWindow::contourWidget)
     {
         milxQtRenderWindow::contourWidget = vtkSmartPointer<vtkContourWidget>::New();
+        milxQtRenderWindow::contourWidget->CreateDefaultRepresentation();
         milxQtRenderWindow::contourWidget->SetInteractor(milxQtWindow::renderWindow()->GetInteractor());
         milxQtRenderWindow::contourWidget->FollowCursorOn();
 
@@ -1783,7 +1784,7 @@ void milxQtImage::histogramEqualisation()
         return;
     }
 
-    bool ok1, ok2, ok3;
+    bool ok1 = true, ok2 = true, ok3 = true;
     float alphaValue = QInputDialog::getDouble(this, tr("Please Provide the alpha value (towards 1 produces unsharp mask)"),
                      tr("Alpha:"), 0.3, 0, 1.0, 5, &ok1);
     float betaValue = QInputDialog::getDouble(this, tr("Please Provide the beta value (towards 0 produces unsharp mask)"),
@@ -1869,7 +1870,7 @@ void milxQtImage::cannyEdges()
         return;
     }
 
-    bool ok1, ok2, ok3;
+    bool ok1 = true, ok2 = true, ok3 = true;
     float variance = QInputDialog::getDouble(this, tr("Please Provide the variance"),
                      tr("Variance:"), 2.0, -DBL_MAX, DBL_MAX, 5, &ok1);
     float upper = QInputDialog::getDouble(this, tr("Please Provide the upper threshold"),
@@ -2637,7 +2638,7 @@ void milxQtImage::checkerBoard(milxQtImage *img, int numberOfSquares)
 		else if (integer)
 		{
 			typedef itk::Image<intPixelType, 2> intImage2DType;
-			intImage2DType::Pointer imageInt2D = milx::Image<charImageType>::ExtractSlice<intImage2DType>(imageChar, extent);
+			intImage2DType::Pointer imageInt2D = milx::Image<intImageType>::ExtractSlice<intImage2DType>(imageInt, extent);
 			intImage2DType::Pointer imageInt2DToChecker = milx::Image<intImageType>::ExtractSlice<intImage2DType>(img->GetIntImage(), extent);
 			imageInt2D = milx::Image<intImage2DType>::CheckerBoard(imageInt2D, imageInt2DToChecker, numberOfSquares);
 			imageInt = milx::Image<intImage2DType>::CastImage<intImageType>(imageInt2D);
@@ -3528,7 +3529,7 @@ void milxQtImage::resize(const unsigned long xSize, const unsigned long ySize, c
           blankSize[2]  = zSize;  // size along Z
 
         if(refImage)
-            imageFloat = milx::Image<floatImageType>::ResizeImage(imageFloat, blankSize, refImage->GetFloatImage()->GetSpacing(), refImage->GetCharImage()->GetOrigin(), refImage->GetCharImage()->GetDirection());
+            imageFloat = milx::Image<floatImageType>::ResizeImage(imageFloat, blankSize, refImage->GetFloatImage()->GetSpacing(), refImage->GetFloatImage()->GetOrigin(), refImage->GetFloatImage()->GetDirection());
         else
             imageFloat = milx::Image<floatImageType>::ResizeImage(imageFloat, blankSize, imageFloat->GetSpacing(), imageFloat->GetOrigin(), imageFloat->GetDirection());
     }

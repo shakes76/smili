@@ -32,6 +32,7 @@
 //Checkboarding
 #include <vtkImageMapToWindowLevelColors.h>
 #include <vtkCheckerboardRepresentation.h>
+#include <vtkImageMapper3D.h>
 
 milxQtUnifiedWindow::milxQtUnifiedWindow(QWidget *theParent) : milxQtRenderWindow(theParent)
 {
@@ -166,7 +167,7 @@ void milxQtUnifiedWindow::generateDifference(double pseudoInfinityFactor)
     printInfo("Original Bounds: " + QString::number(bounds[0]) + ", " + QString::number(bounds[1]) + ", " + QString::number(bounds[2]) + ", " + QString::number(bounds[3]) + ", " + QString::number(bounds[4]) + ", " + QString::number(bounds[5]));
 
     ///Find max bounds
-    double bigBounds[6];
+    double bigBounds[6] = { bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5] };
     foreach(QPointer<milxQtModel> mdl, unifyModels)
     {
         if(mdl == unifyModels.first()) ///Compute first model to every other
@@ -177,12 +178,12 @@ void milxQtUnifiedWindow::generateDifference(double pseudoInfinityFactor)
         printInfo("Bounds: " + QString::number(mdlBounds[0]) + ", " + QString::number(mdlBounds[1]) + ", " + QString::number(mdlBounds[2]) + ", " + QString::number(mdlBounds[3]) + ", " + QString::number(mdlBounds[4]) + ", " + QString::number(mdlBounds[5]));
 
         //Get largest bounds
-        bigBounds[0] = milx::Minimum<double>(mdlBounds[0], bounds[0]);
-        bigBounds[1] = milx::Maximum<double>(mdlBounds[1], bounds[1]);
-        bigBounds[2] = milx::Minimum<double>(mdlBounds[2], bounds[2]);
-        bigBounds[3] = milx::Maximum<double>(mdlBounds[3], bounds[3]);
-        bigBounds[4] = milx::Minimum<double>(mdlBounds[4], bounds[4]);
-        bigBounds[5] = milx::Maximum<double>(mdlBounds[5], bounds[5]);
+        bigBounds[0] = milx::Minimum<double>(mdlBounds[0], bigBounds[0]);
+        bigBounds[1] = milx::Maximum<double>(mdlBounds[1], bigBounds[1]);
+        bigBounds[2] = milx::Minimum<double>(mdlBounds[2], bigBounds[2]);
+        bigBounds[3] = milx::Maximum<double>(mdlBounds[3], bigBounds[3]);
+        bigBounds[4] = milx::Minimum<double>(mdlBounds[4], bigBounds[4]);
+        bigBounds[5] = milx::Maximum<double>(mdlBounds[5], bigBounds[5]);
     }
 
     //pad bounds by 5% more
@@ -281,7 +282,7 @@ void milxQtUnifiedWindow::generateScalarDifference()
 
 void milxQtUnifiedWindow::generateCheckerBoard()
 {
-    if(unifyImages.isEmpty() && unifyImages.size() < 2)
+    if(unifyImages.size() < 2)
     {
         printError("Not enough images being compared. Add more.");
         return;
@@ -324,7 +325,8 @@ void milxQtUnifiedWindow::generateCheckerBoard()
     #if VTK_MAJOR_VERSION <=5
         windowLevel->SetInput(checker->GetOutput());
     #else
-        windowLevel->SetInputData(checker->GetOutput());
+        windowLevel->SetInputConnection(checker->GetOutputPort());
+        windowLevel->Update();
     #endif
 
     vtkSmartPointer<vtkImageActor> checkerActor = vtkSmartPointer<vtkImageActor>::New();
@@ -332,7 +334,7 @@ void milxQtUnifiedWindow::generateCheckerBoard()
     #if VTK_MAJOR_VERSION <=5
         checkerActor->SetInput(windowLevel->GetOutput());
     #else
-        checkerActor->SetInputData(windowLevel->GetOutput());
+        checkerActor->GetMapper()->SetInputConnection(windowLevel->GetOutputPort());
     #endif
 
     // VTK widgets consist of two parts: the widget part that handles
@@ -341,6 +343,7 @@ void milxQtUnifiedWindow::generateCheckerBoard()
     // (i.e., matters pertaining to geometry).
     printDebug("Setting up checkerboard widget");
     checkerWidget = vtkSmartPointer<vtkCheckerboardWidget>::New();
+        checkerWidget->CreateDefaultRepresentation();
         checkerWidget->SetInteractor(milxQtRenderWindow::GetRenderWindow()->GetInteractor());
 
     vtkCheckerboardRepresentation *checkerWidgetRep = static_cast<vtkCheckerboardRepresentation *>(checkerWidget->GetRepresentation());

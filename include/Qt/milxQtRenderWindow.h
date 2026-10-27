@@ -651,7 +651,7 @@ public slots:
     {
         if(rendered)
         {
-            renderWindow->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
+            GetRenderWindow()->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
             crosshairAct->setChecked(true);
         }
     }
@@ -661,7 +661,7 @@ public slots:
     */
     virtual inline void disableCrosshair()
     {
-        renderWindow->SetCurrentCursor(0);
+        GetRenderWindow()->SetCurrentCursor(0);
         crosshairAct->setChecked(false);
     }
 
@@ -932,7 +932,7 @@ protected:
 
     //VTK Rendering Internals
     vtkSmartPointer<vtkRenderer> renderer; //!< Renderer for the data
-    vtkSmartPointer<vtkRenderWindow> renderWindow; //!< Render Window used if no other set, only for deletion, access through QVTKWidget members
+    // Access renderWindow through milxQtWindow::renderWindow() / GetRenderWindow()
     vtkSmartPointer<vtkLookupTable> lookupTable; //!< Lookup table for the shapes/images, base class is used to allow references to different look up table types
     vtkSmartPointer<vtkCamera> camera; //!< camera for the view
 

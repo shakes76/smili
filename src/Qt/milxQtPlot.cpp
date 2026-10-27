@@ -39,7 +39,10 @@
 #include <vtkSmartVolumeMapper.h>
 
 #include <vtkAutoInit.h>
+#if VTK_MAJOR_VERSION < 9
+#include <vtkAutoInit.h>
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
+#endif
 
 milxQtPlot::milxQtPlot(QWidget *theParent, bool contextSystem) : milxQtModel(theParent, contextSystem)
 {
@@ -203,7 +206,12 @@ void milxQtPlot::generatePlot()
 void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn, const int yColumn)
 {
     printDebug("Plotting... ");
-    vtkSmartPointer<vtkContextView> view = vtkSmartPointer<vtkContextView>::New();
+    if (!contextView)
+        contextView = vtkSmartPointer<vtkContextView>::New();
+    vtkSmartPointer<vtkContextView> view = contextView;
+    view->SetRenderWindow(GetRenderWindow());
+    view->SetInteractor(GetRenderWindow()->GetInteractor());
+    view->GetScene()->ClearItems();
 
     templateChart = vtkSmartPointer<vtkChartXY>::New();
 //        templateChart->SetRenderEmpty(true);
@@ -232,7 +240,7 @@ void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn,
         //vtkPlotPoints::SafeDownCast(templatePoints)->SetMarkerStyle(vtkPlotPoints::PLUS);
         templatePoints->Update();
 
-    view->SetInteractor(GetRenderWindow()->GetInteractor()); //order important, also do not move up
+    // RenderWindow and Interactor already bound to QVTKOpenGLNativeWidget above
     //SetRenderWindow(view->GetRenderWindow());
     milxQtRenderWindow::SetRenderer(view->GetRenderer());
     milxQtRenderWindow::backgroundAct->setChecked(true);
@@ -246,7 +254,8 @@ void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn,
     QString yAxisTitle(table->GetColumnName(yColumn));
     if(!xAxisTitle.isEmpty() && !yAxisTitle.isEmpty())
         renameAxes(xAxisTitle, yAxisTitle);
-    renameTitle(this->name);
+    if(!this->name.isEmpty())
+        renameTitle(this->name);
     legend(legendAct->isChecked());
 
     emit resultAvailable( qobject_cast<milxQtRenderWindow *>(this) ); //only using render class
@@ -293,6 +302,8 @@ void milxQtPlot::scatterPlot(vtkSmartPointer<vtkTable> table, const int xColumn,
 void milxQtPlot::surfacePlot(vtkSmartPointer<vtkImageData> img, const int zDirection)
 {
     if(!imageData)
+      imageData = vtkSmartPointer<vtkImageData>::New();
+    if(imageData != img)
       imageData->DeepCopy(img);
 
     printDebug("Creating surface geometry");

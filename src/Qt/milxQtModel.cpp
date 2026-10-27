@@ -883,7 +883,7 @@ void milxQtModel::generateModel(float red, float green, float blue)
         }
     #if VTK_MAJOR_VERSION <=7
         else
-            milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().height(), QVTKWidget::size().width());
+            milxQtWindow::renderWindow()->SetSize(QVTKWidget::size().width(), QVTKWidget::size().height());
     #endif // VTK_MAJOR_VERSION
 
         int *winSize = milxQtWindow::renderWindow()->GetSize();
@@ -1877,6 +1877,7 @@ void milxQtModel::contour()
         model.GenerateNormals(2); //for polygonal line placer (needs point norms) and interp (needs cell norms)
 
         milxQtRenderWindow::contourWidget = vtkSmartPointer<vtkContourWidget>::New();
+        milxQtRenderWindow::contourWidget->CreateDefaultRepresentation();
         milxQtRenderWindow::contourWidget->SetInteractor(GetRenderWindow()->GetInteractor());
 
         printInfo("Contour Surface Mode enabled.\nLeft Click to place points, Right click to place end point.");
@@ -2699,7 +2700,7 @@ void milxQtModel::createActions()
     generateMenu = new QMenu(this);
     generateMenu->setTitle(tr("Generate", 0));
     genModelAct = new QAction(this);
-    genModelAct->setText(tr(0));
+    genModelAct->setText(QString());
     genModelAct->setShortcut(tr("Shift+Alt+m"));
     genVerticesAct = new QAction(this);
     genVerticesAct->setText(tr("Vertices (Vertex Glyphs)", 0));

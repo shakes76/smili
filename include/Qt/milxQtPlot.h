@@ -24,6 +24,7 @@
 
 //VTK
 #include <vtkChartXY.h>
+#include <vtkContextView.h>
 #include <vtkVolume.h>
 
 #include "milxQtModel.h"
@@ -160,7 +161,7 @@ public:
     */
     inline virtual vtkDataSet* GetDataSet()
     {
-        if(plotTypeSurface)
+        if(plotTypeSurface || plotType3D)
             return model.Result();
 
         return imageData;
@@ -304,6 +305,7 @@ protected:
     vtkSmartPointer<vtkTable> table; //!< data presented as a table
     vtkSmartPointer<vtkImageData> imageData; //!< data presented as a image
     vtkSmartPointer<vtkChartXY> templateChart; //!< chart (used only for xy scatter plot)
+    vtkSmartPointer<vtkContextView> contextView; //!< context view for 2D charts
     vtkSmartPointer<vtkVolume> volume; //! Maintains volume rendering when needed
 
     //------------------

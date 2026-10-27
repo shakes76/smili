@@ -1016,8 +1016,13 @@ void Model::GenerateVertexScalars()
     vertices->SetPointIdsArrayName("Point IDs");
   #endif
     vertices->PointIdsOn();
+    vertices->FieldDataOff();
     vertices->Update();
 
+  #if VTK_MAJOR_VERSION > 8 && VTK_MINOR_VERSION > 4
+  if(vertices->GetPolyDataOutput() && vertices->GetPolyDataOutput()->GetPointData())
+    vertices->GetPolyDataOutput()->GetPointData()->SetActiveScalars("Point IDs");
+  #endif
   UpdateModelStateFromModel(vertices->GetPolyDataOutput());
 }
 
@@ -1171,7 +1176,7 @@ void Model::GenerateTensorField(const double newScale)
     ellipsoids->SetSource(sphere->GetOutput());
   #else
     ellipsoids->SetInputData(CurrentModel);
-    ellipsoids->SetSourceData(sphere->GetOutput());
+    ellipsoids->SetSourceConnection(sphere->GetOutputPort());
   #endif
     ellipsoids->ScalingOn();
     ellipsoids->ClampScalingOn();

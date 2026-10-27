@@ -197,6 +197,7 @@ void milxQtRenderWindow::contour()
 {
     if(!contourWidget)
         contourWidget = vtkSmartPointer<vtkContourWidget>::New();
+        contourWidget->CreateDefaultRepresentation();
         contourWidget->SetInteractor(GetRenderWindow()->GetInteractor());
 
     if(contourAct->isChecked())
@@ -911,7 +912,7 @@ void milxQtRenderWindow::colourMapToRainbow(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -935,7 +936,7 @@ void milxQtRenderWindow::colourMapToVTK(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -959,7 +960,7 @@ void milxQtRenderWindow::colourMapToJet(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -983,7 +984,7 @@ void milxQtRenderWindow::colourMapToGray(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1007,7 +1008,7 @@ void milxQtRenderWindow::colourMapToSeismic(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1031,7 +1032,7 @@ void milxQtRenderWindow::colourMapToLogGray(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1055,7 +1056,7 @@ void milxQtRenderWindow::colourMapToNIH(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1079,7 +1080,7 @@ void milxQtRenderWindow::colourMapToNIH_Fire(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1103,7 +1104,7 @@ void milxQtRenderWindow::colourMapToAAL(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1127,7 +1128,7 @@ void milxQtRenderWindow::colourMapToFS(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1151,7 +1152,7 @@ void milxQtRenderWindow::colourMapToHOT(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1175,7 +1176,7 @@ void milxQtRenderWindow::colourMapToCOOL(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1199,7 +1200,7 @@ void milxQtRenderWindow::colourMapToCOOLWARM(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1223,7 +1224,7 @@ void milxQtRenderWindow::colourMapToKnee(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1247,7 +1248,7 @@ void milxQtRenderWindow::colourMapToBone(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1271,7 +1272,7 @@ void milxQtRenderWindow::colourMapToSpectral(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1295,7 +1296,7 @@ void milxQtRenderWindow::colourMapToGNUPlot(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1319,7 +1320,7 @@ void milxQtRenderWindow::colourMapToCubeHelix(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;
@@ -1343,7 +1344,7 @@ void milxQtRenderWindow::colourMapToHSV(double minRange, double maxRange)
 {
     double range[2];
     if(minRange == 0.0 && maxRange == 0.0)
-        GetDataSet()->GetScalarRange(range); //This will propagate upwards to get the range for images or meshes
+        { if(GetDataSet()) GetDataSet()->GetScalarRange(range); else { range[0] = 0.0; range[1] = 255.0; } } //This will propagate upwards to get the range for images or meshes
     else
     {
         range[0] = minRange;

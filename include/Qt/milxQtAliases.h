@@ -118,16 +118,19 @@ static const int maxAASamples = 2; //Anti-Aliasing
   // needed to ensure appropriate OpenGL context is created for VTK rendering.
   struct milxQtVTKInit {
         milxQtVTKInit() {
+            static bool initialized = false;
+            if (initialized) return;
+            initialized = true;
             // This code runs when the library is loaded, usually before main()
             QSurfaceFormat fmt = QVTKOpenGLNativeWidget::defaultFormat();
 
             // Optional: Customize needed depth/samples if SMILI has specific needs
-            fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+            // Use VTK 9 QVTKOpenGLNativeWidget::defaultFormat() (OpenGL 3.2 CoreProfile)
             // fmt.setSamples(4);
 
             QSurfaceFormat::setDefaultFormat(fmt);
 
-            vtkOutputWindow::GetInstance()->GlobalWarningDisplayOff();
+            vtkObject::GlobalWarningDisplayOff();
         }
     };
 

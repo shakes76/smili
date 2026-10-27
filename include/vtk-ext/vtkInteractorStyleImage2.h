@@ -69,7 +69,7 @@ public:
   { viewer = view;  }
 
 protected:
-  vtkInteractorStyleImage2() {}
+  vtkInteractorStyleImage2() : viewer(NULL) {}
   ~vtkInteractorStyleImage2() {}
     
   vtkImageViewer2 * viewer;

@@ -84,7 +84,8 @@ public:
     if(cursor)
       cursor->Delete();
     cursor = newCursor;
-    cursorActor->GetCursorAlgorithm()->SetResliceCursor(cursor);
+    if(cursorActor)
+      cursorActor->GetCursorAlgorithm()->SetResliceCursor(cursor);
   }
   inline vtkResliceCursor* GetCursor()
   {

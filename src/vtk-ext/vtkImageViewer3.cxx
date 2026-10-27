@@ -59,7 +59,7 @@ public:
         this->IV->GetInputAlgorithm()->UpdateInformation();
 		vtkInformation *requests = this->IV->GetInputAlgorithm()->GetOutputInformation(0);
 		int *updateExtent = vtkStreamingDemandDrivenPipeline::GetWholeExtent(this->IV->GetInputInformation());
-		requests->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), updateExtent, 6);
+        this->IV->GetInputAlgorithm()->UpdateWholeExtent();
 		//vtkInformation* outInfo = this->IV->GetInputAlgorithm()->GetOutputInformation(0);
 		//outInfo->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), updateExtent);
         this->IV->GetInputAlgorithm()->Update();
@@ -352,6 +352,7 @@ void vtkImageViewer3::InstallPipeline()
       cbk2->IV = this;
       this->InteractorStyle->AddObserver(
         vtkCommand::MiddleButtonPressEvent, cbk2); //Cursor
+      cbk2->Delete();
       }
 
     this->Interactor->SetInteractorStyle(this->InteractorStyle);

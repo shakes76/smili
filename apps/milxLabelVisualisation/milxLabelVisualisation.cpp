@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
     std::vector< QSharedPointer<milxQtModel> > isoSurfaces;
     QSharedPointer<milxQtRenderWindow> model(new milxQtRenderWindow);
         model->setName("Label Surface Rendering");
-        model->SetSize(windowHeight, windowWidth);
+        model->SetSize(windowWidth, windowHeight);
         model->generateRender();
 
 if(volumeArg.isSet())

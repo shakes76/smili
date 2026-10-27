@@ -342,6 +342,8 @@ namespace milx
       {
           std::cerr << "Cannot read " << filename << endl;
           delete [] buffer;
+          matrix->Delete();
+          return NULL;
       }
       buffer = ::gzgets (fin, buffer, 512);
       if(buffer[0] != '(')
