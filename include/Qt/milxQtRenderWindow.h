@@ -177,7 +177,11 @@ public:
     */
     inline void AddActor2D(vtkSmartPointer<vtkProp> actor)
     {
+    #if VTK_MAJOR_VERSION <= 8
+        renderer->AddActor2D(actor);
+    #else
         renderer->AddViewProp(actor);
+    #endif
     }
 
     /*!
@@ -194,7 +198,11 @@ public:
     */
     inline void SetActor2D(vtkSmartPointer<vtkProp> actor)
     {
+    #if VTK_MAJOR_VERSION <= 8
+        renderer->AddActor2D(actor);
+    #else
         renderer->AddViewProp(actor);
+    #endif
     }
     /*!
         \fn milxQtRenderWindow::SetBackground(double red, double green, double blue)

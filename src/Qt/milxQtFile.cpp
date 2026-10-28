@@ -1095,7 +1095,11 @@ bool milxQtFile::saveModel(const QString filename, milxQtModel* data, const bool
             std::cout << "Exporting with prefix " << namePrefix.toStdString().c_str() << std::endl;
             writer->SetFilePrefix(namePrefix.toStdString().c_str());
             data->disableOrient();
+        #if VTK_MAJOR_VERSION <= 5
+            writer->SetInput(data->GetRenderWindow());
+        #else
             writer->SetRenderWindow(data->GetRenderWindow());
+        #endif
             writer->AddObserver(vtkCommand::ErrorEvent, errorObserver);
             linkProgressEventOf(writer);
             writer->Write();
