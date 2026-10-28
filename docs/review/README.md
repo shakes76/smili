@@ -19,9 +19,9 @@ This directory contains the phase-by-phase technical audit, root-cause analysis,
 
 ## Phase Documentation Index
 
-- **[Phase 1: CMake & Build System Audit, Fixes & Verification](phase1-cmake-audit.md)** *(Completed — `b971431`)*
+- **[Phase 1: CMake & Build System Audit, Fixes & Verification](phase1-cmake-audit.md)** *(Completed — `b971431`, `31da423`)*
 - **[Phase 2: VTK 9.6 & ITK 5.4 Core & Rendering Pipeline Review, Fixes & Verification](phase2-vtk9-itk5-pipeline.md)** *(Completed — `b6e1191`)*
 - **[Phase 3: Qt 6 GUI Architecture & `sMILX` Stability Review, Fixes & Verification](phase3-qt6-gui-stability.md)** *(Completed — `a8f1753`)*
-- **[Phase 4: Biomedical Imaging & Scientific Visualization Assessment, Fixes & Verification](phase4-medical-imaging-workflows.md)** *(Completed — `74b9f85`)*
-- **[Phase 5: Final End-to-End Verification, Consolidated Report & Future Roadmap](phase5-remediation-roadmap.md)** *(Completed)*
+- **[Phase 4: Biomedical Imaging & Scientific Visualization Assessment, Fixes & Verification](phase4-medical-imaging-workflows.md)** *(Completed — `74b9f85`, `d3c7f39`)*
+- **[Phase 5: Final End-to-End Verification, Consolidated Report & Future Roadmap](phase5-remediation-roadmap.md)** *(Completed — `43f1cab`)*
 - **Phase 6 (Next / Deferred): QtPython (`PythonQt`) & Shiboken6 (`PySMILI`) Cross-Platform Bindings** (See [Phase 5 Section 4](phase5-remediation-roadmap.md#4-roadmap-for-phase-6-cross-platform-python-bindings-pythonqt--shiboken6))
