@@ -930,7 +930,12 @@ StatisticalShapeModelBase<TProfileSamplingPrecisionType>
 #else
   thresholdSurface->SetInputData(surface);
 #endif
+#if VTK_MAJOR_VERSION <= 8
   thresholdSurface->ThresholdByUpper(thresholdValue);
+#else
+  thresholdSurface->SetUpperThreshold(thresholdValue);
+  thresholdSurface->SetThresholdFunction(vtkThreshold::THRESHOLD_UPPER);
+#endif
   //Mark member marked outside parts as 0.0
 
   //connect raw threshold output

@@ -177,7 +177,7 @@ public:
     */
     inline void AddActor2D(vtkSmartPointer<vtkProp> actor)
     {
-        renderer->AddActor2D(actor);
+        renderer->AddViewProp(actor);
     }
 
     /*!
@@ -194,7 +194,7 @@ public:
     */
     inline void SetActor2D(vtkSmartPointer<vtkProp> actor)
     {
-        renderer->AddActor2D(actor);
+        renderer->AddViewProp(actor);
     }
     /*!
         \fn milxQtRenderWindow::SetBackground(double red, double green, double blue)
