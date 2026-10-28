@@ -2468,12 +2468,12 @@ void milxQtModel::viewToXYPlane()
             cam->SetFocalPoint(modelCentroid.data_block());
             if(orientationView == RADIOLOGICAL)
             {
-                cam->SetPosition(modelCentroid[0], modelCentroid[1], modelCentroid[2] + centroidSize());
+                cam->SetPosition(0,0,centroidSize());
                 cam->SetViewUp(0,-centroidSize(),0);
             }
             else //Neurological
             {
-                cam->SetPosition(modelCentroid[0], modelCentroid[1], modelCentroid[2] - centroidSize());
+                cam->SetPosition(0,0,-centroidSize());
                 cam->SetViewUp(0,centroidSize(),0);
             }
             milxQtRenderWindow::GetRenderer()->ResetCamera();
@@ -2497,12 +2497,12 @@ void milxQtModel::viewToZXPlane()
             cam->SetFocalPoint(modelCentroid.data_block());
             if(orientationView == RADIOLOGICAL)
             {
-                cam->SetPosition(modelCentroid[0], modelCentroid[1] - centroidSize(), modelCentroid[2]);
+                cam->SetPosition(0,-centroidSize(),0);
                 cam->SetViewUp(0,0,centroidSize());
             }
             else //Neurological
             {
-                cam->SetPosition(modelCentroid[0], modelCentroid[1] + centroidSize(), modelCentroid[2]);
+                cam->SetPosition(0,centroidSize(),0);
                 cam->SetViewUp(0,0,centroidSize());
             }
             milxQtRenderWindow::GetRenderer()->ResetCamera();
@@ -2524,7 +2524,7 @@ void milxQtModel::viewToZYPlane()
         if(!milxQtRenderWindow::GetRenderer()->IsActiveCameraCreated())
             milxQtRenderWindow::GetRenderer()->ResetCamera(); //just in case if new camera
             cam->SetFocalPoint(modelCentroid.data_block());
-            cam->SetPosition(modelCentroid[0] - centroidSize(), modelCentroid[1], modelCentroid[2]);
+            cam->SetPosition(-centroidSize(),0,0);
             cam->SetViewUp(0,0,centroidSize());
             milxQtRenderWindow::GetRenderer()->ResetCamera();
             milxQtRenderWindow::Render();

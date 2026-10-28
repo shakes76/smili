@@ -3506,7 +3506,7 @@ void milxQtMain::resetSettings()
 	int newHeight = 4.0*desktopSize.height() / 5.0 + 0.5;
 	int xOffset = (desktopSize.width() - newWidth) / 2.0;
 	int yOffset = (desktopSize.height() - newHeight) / 2.0;
-	int defaultViewMode = 0; //axial
+	int defaultViewMode = 2; //axial
 	int defaultViewTypeMode = 0; //1-multi-view
 	int defaultOrientationTypeMode = 0; //radiological
 
@@ -3540,7 +3540,7 @@ void milxQtMain::readSettings()
     int newHeight = 4.0*desktopSize.height()/5.0 + 0.5;
     int xOffset = (desktopSize.width()-newWidth)/2.0;
     int yOffset = (desktopSize.height()-newHeight)/2.0;
-    int defaultViewMode = 0; //axial
+    int defaultViewMode = 2; //axial
     int defaultViewTypeMode = 0; //1-multi-view
     int defaultOrientationTypeMode = 0; //radiological
 

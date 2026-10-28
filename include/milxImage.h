@@ -995,9 +995,9 @@ itk::SmartPointer<TImage> Image<TImage>::ApplyOrientationToITKImage(itk::SmartPo
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
     transform->Identity();
     transform->PostMultiply();
-    transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
+    // flip before origin translation
   transform->Concatenate(transformMatrix); //flip
-    // origin already translated before flip
+    transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
     transform->Concatenate(matrix); //direction
     transform->Translate(origin[0], origin[1], (TImage::ImageDimension > 2) ? origin[2] : 0.0); //add origin displacement
     transform->Update();
@@ -1140,9 +1140,9 @@ vtkSmartPointer<vtkImageData> Image<TImage>::ApplyOrientationToVTKImage(vtkSmart
   vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
   transform->Identity();
   transform->PostMultiply();
-  transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
+  // flip before origin translation
   transform->Concatenate(transformMatrix); //flip
-  // origin already translated before flip
+  transform->Translate(-origin[0], -origin[1], (TImage::ImageDimension > 2) ? -origin[2] : 0.0); //remove origin
   transform->Concatenate(matrix); //direction
   transform->Translate(origin[0], origin[1], (TImage::ImageDimension > 2) ? origin[2] : 0.0); //add origin displacement
 

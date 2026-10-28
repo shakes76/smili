@@ -1436,7 +1436,7 @@ void milxQtRenderWindow::customOperation()
     if (QWidget *parentWid = qobject_cast<QWidget *>(actParent)) { if (!qobject_cast<milxQtWindow *>(parentWid) && parentWid->findChild<milxQtWindow *>()) actParent = parentWid->findChild<milxQtWindow *>(); }
     milxQtRenderWindow *currentWindow = qobject_cast<milxQtRenderWindow *>( actParent );
 
-    if(currentWindow == 0)
+    if(currentWindow == 0 || currentWindow == this)
     {
         printError("Error in determining parent of action");
         return;

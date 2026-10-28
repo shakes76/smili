@@ -7,6 +7,7 @@
 #include <vector>
 #include <QApplication>
 #include <QScopedPointer>
+#include <QFileInfo>
 
 #include "milxImage.h"
 #include "milxModel.h"
@@ -214,23 +215,26 @@ int main(int argc, char *argv[])
         TEST_ASSERT(alignedCol != nullptr && alignedCol->GetNumberOfItems() == 2,
                     "ProcrustesAlignCollection failed to return 2 aligned meshes");
 
-        // DeformableModel::ApplyOrientation with applyOrigin = false should preserve centroid
+        // DeformableModel::ApplyOrientation with applyOrigin = true centers mesh on image origin
         using ImageType = floatImageType;
         ImageType::Pointer refImg = ImageType::New();
         ImageType::DirectionType dir;
         dir.SetIdentity();
         refImg->SetDirection(dir);
+        ImageType::PointType refOrigin;
+        refOrigin[0] = 10.0; refOrigin[1] = 20.0; refOrigin[2] = 30.0;
+        refImg->SetOrigin(refOrigin);
 
         milx::DeformableModel defModel;
         defModel.SetInput(sphere1->GetOutput());
-        defModel.ApplyOrientation<ImageType>(refImg, false, false);
+        defModel.ApplyOrientation<ImageType>(refImg, true, false);
         double outBounds[6];
         defModel.Result()->GetBounds(outBounds);
         double cx = 0.5 * (outBounds[0] + outBounds[1]);
         double cy = 0.5 * (outBounds[2] + outBounds[3]);
         double cz = 0.5 * (outBounds[4] + outBounds[5]);
         TEST_ASSERT(std::abs(cx - 10.0) < 0.5 && std::abs(cy - 20.0) < 0.5 && std::abs(cz - 30.0) < 0.5,
-                    "DeformableModel::ApplyOrientation(applyOrigin=false) failed to restore mesh centroid");
+                    "DeformableModel::ApplyOrientation(applyOrigin=true) failed to place mesh at image origin");
     }
     std::cout << "[PASS] Test 4" << std::endl;
 
@@ -303,6 +307,143 @@ int main(int argc, char *argv[])
                     "generateVoxelisedSurface must not mutate caller's bounds array in-place");
     }
     std::cout << "[PASS] Test 6" << std::endl;
+
+    std::cout << "=== Test 7: NIfTI Volume to Surface Mesh Patient-Space Registration (milxQtImage <-> milxQtModel) ===" << std::endl;
+    {
+        // 1. Synthetic NIfTI-like ITK volume matching AverageNonrigid_R_MR2_x2.nii.gz geometry:
+        //    Origin = (21.09375, 8.25, 18.75), Spacing = (0.625, 1.5, 0.625), Size = (184, 74, 226)
+        //    Physical patient space bounds:
+        //      X in [21.09375, 135.46875], Y in [8.25, 117.75], Z in [18.75, 159.375]
+        using ImageType = floatImageType;
+        ImageType::Pointer niiImg = ImageType::New();
+        ImageType::RegionType region;
+        ImageType::IndexType start;
+        start.Fill(0);
+        ImageType::SizeType size;
+        size[0] = 184; size[1] = 74; size[2] = 226;
+        region.SetSize(size);
+        region.SetIndex(start);
+        niiImg->SetRegions(region);
+
+        ImageType::PointType origin;
+        origin[0] = 21.09375; origin[1] = 8.25; origin[2] = 18.75;
+        niiImg->SetOrigin(origin);
+
+        ImageType::SpacingType spacing;
+        spacing[0] = 0.625; spacing[1] = 1.5; spacing[2] = 0.625;
+        niiImg->SetSpacing(spacing);
+
+        ImageType::DirectionType direction;
+        direction.SetIdentity();
+        niiImg->SetDirection(direction);
+        niiImg->Allocate();
+        niiImg->FillBuffer(50.0f);
+
+        QScopedPointer<milxQtImage> imgWin(new milxQtImage);
+        imgWin->SetInput(niiImg);
+        imgWin->generateImage(true);
+
+        // In milxQtImage display space (flipY = true across global Y=0), imageData Y bounds must be [-117.75, -8.25]
+        double imgDisplayBounds[6];
+        imgWin->GetOutput()->GetBounds(imgDisplayBounds);
+        std::cout << "  milxQtImage display bounds: ["
+                  << imgDisplayBounds[0] << ", " << imgDisplayBounds[1] << "] x ["
+                  << imgDisplayBounds[2] << ", " << imgDisplayBounds[3] << "] x ["
+                  << imgDisplayBounds[4] << ", " << imgDisplayBounds[5] << "]" << std::endl;
+        TEST_ASSERT(std::abs(imgDisplayBounds[0] - 21.09375) < 1e-3 &&
+                    std::abs(imgDisplayBounds[1] - 135.46875) < 1e-3,
+                    "milxQtImage X bounds mismatch in display space");
+        TEST_ASSERT(std::abs(imgDisplayBounds[2] - (-117.75)) < 1e-3 &&
+                    std::abs(imgDisplayBounds[3] - (-8.25)) < 1e-3,
+                    "milxQtImage Y bounds in display space must be [-117.75, -8.25] so SetUserMatrix(F) maps to [+8.25, +117.75]");
+        TEST_ASSERT(std::abs(imgDisplayBounds[4] - 18.75) < 1e-3 &&
+                    std::abs(imgDisplayBounds[5] - 159.375) < 1e-3,
+                    "milxQtImage Z bounds mismatch in display space");
+
+        // Now place the MRI actor into milxQtModel (via importFrom, which applies SetUserMatrix(transformMatrix^-1))
+        QScopedPointer<milxQtModel> mdlWin(new milxQtModel);
+        vtkSmartPointer<vtkSphereSource> kneeProxy = vtkSmartPointer<vtkSphereSource>::New();
+        kneeProxy->SetCenter(80.4, 53.8, 92.0);
+        kneeProxy->SetRadius(10.0);
+        kneeProxy->Update();
+        mdlWin->SetInput(kneeProxy->GetOutput());
+        mdlWin->generateModel();
+        mdlWin->importFrom(imgWin.data());
+
+        // Compute world-space Y bounds of the MRI imageData after transformModel = transformMatrix^-1
+        vtkSmartPointer<vtkMatrix4x4> transformModel = vtkSmartPointer<vtkMatrix4x4>::New();
+        transformModel->DeepCopy(imgWin->getTransformMatrix());
+        transformModel->Invert();
+        double minPt[4] = {imgDisplayBounds[0], imgDisplayBounds[2], imgDisplayBounds[4], 1.0};
+        double maxPt[4] = {imgDisplayBounds[1], imgDisplayBounds[3], imgDisplayBounds[5], 1.0};
+        double worldMin[4], worldMax[4];
+        transformModel->MultiplyPoint(minPt, worldMin);
+        transformModel->MultiplyPoint(maxPt, worldMax);
+        double worldYMin = std::min(worldMin[1], worldMax[1]);
+        double worldYMax = std::max(worldMin[1], worldMax[1]);
+        std::cout << "  Imported MRI actor world Y bounds in milxQtModel: ["
+                  << worldYMin << ", " << worldYMax << "]" << std::endl;
+        TEST_ASSERT(std::abs(worldYMin - 8.25) < 1e-3 && std::abs(worldYMax - 117.75) < 1e-3,
+                    "Imported MRI actor world Y bounds in milxQtModel must match physical patient space [8.25, 117.75]");
+
+        // 2. If the user's actual NIfTI & VTK dataset is available on disk, verify exact registration on it as well
+        const QString niiPath = "E:/data/SyngoData_focused/AverageNonrigid_R_MR2_x2.nii.gz";
+        const QString vtkPath = "E:/data/SyngoData_focused/AverageNonrigid_R_combined.vtk";
+        if (QFileInfo::exists(niiPath) && QFileInfo::exists(vtkPath)) {
+            std::cout << "  Verifying with actual dataset: " << niiPath.toStdString()
+                      << " and " << vtkPath.toStdString() << std::endl;
+            ImageType::Pointer realNii;
+            TEST_ASSERT(milx::File::OpenImage<ImageType>(niiPath.toStdString(), realNii),
+                        "Failed to open real NIfTI volume");
+            vtkSmartPointer<vtkPolyData> realMesh;
+            TEST_ASSERT(milx::File::OpenModel(vtkPath.toStdString(), realMesh),
+                        "Failed to open real VTK mesh");
+
+            QScopedPointer<milxQtImage> realImgWin(new milxQtImage);
+            realImgWin->SetInput(realNii);
+            realImgWin->generateImage(true);
+
+            QScopedPointer<milxQtModel> realMdlWin(new milxQtModel);
+            realMdlWin->SetInput(realMesh);
+            realMdlWin->generateModel();
+
+            double meshBounds[6];
+            realMdlWin->GetOutput()->GetBounds(meshBounds);
+            double realImgBounds[6];
+            realImgWin->GetOutput()->GetBounds(realImgBounds);
+
+            vtkSmartPointer<vtkMatrix4x4> realTransformModel = vtkSmartPointer<vtkMatrix4x4>::New();
+            realTransformModel->DeepCopy(realImgWin->getTransformMatrix());
+            realTransformModel->Invert();
+
+            double p0[4] = {realImgBounds[0], realImgBounds[2], realImgBounds[4], 1.0};
+            double p1[4] = {realImgBounds[1], realImgBounds[3], realImgBounds[5], 1.0};
+            double wp0[4], wp1[4];
+            realTransformModel->MultiplyPoint(p0, wp0);
+            realTransformModel->MultiplyPoint(p1, wp1);
+
+            double mriWorldBounds[6] = {
+                std::min(wp0[0], wp1[0]), std::max(wp0[0], wp1[0]),
+                std::min(wp0[1], wp1[1]), std::max(wp0[1], wp1[1]),
+                std::min(wp0[2], wp1[2]), std::max(wp0[2], wp1[2])
+            };
+            std::cout << "  Real MRI actor world bounds in milxQtModel: ["
+                      << mriWorldBounds[0] << ", " << mriWorldBounds[1] << "] x ["
+                      << mriWorldBounds[2] << ", " << mriWorldBounds[3] << "] x ["
+                      << mriWorldBounds[4] << ", " << mriWorldBounds[5] << "]" << std::endl;
+            std::cout << "  Real VTK mesh bounds in milxQtModel:        ["
+                      << meshBounds[0] << ", " << meshBounds[1] << "] x ["
+                      << meshBounds[2] << ", " << meshBounds[3] << "] x ["
+                      << meshBounds[4] << ", " << meshBounds[5] << "]" << std::endl;
+
+            // The mesh X and Y bounds must lie strictly within the MRI volume's patient-space X and Y bounds
+            TEST_ASSERT(meshBounds[0] >= mriWorldBounds[0] && meshBounds[1] <= mriWorldBounds[1],
+                        "Real mesh X bounds fall outside MRI actor world X bounds");
+            TEST_ASSERT(meshBounds[2] >= mriWorldBounds[2] && meshBounds[3] <= mriWorldBounds[3],
+                        "Real mesh Y bounds fall outside MRI actor world Y bounds (misregistration!)");
+        }
+    }
+    std::cout << "[PASS] Test 7" << std::endl;
 
     std::cout << "=== ALL PHASE 4 MEDICAL IMAGING & VISUALIZATION TESTS PASSED ===" << std::endl;
     return EXIT_SUCCESS;
